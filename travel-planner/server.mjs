@@ -6,6 +6,7 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
+import { tourPhoto } from "./scripts/photo-sources.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(here, "public");
@@ -36,7 +37,7 @@ const SCHEMA = {
   additionalProperties: false,
 };
 
-const SYSTEM = `강릉 여행 일정 서비스의 요청 해석기다. 사용자가 일정에 대해 한 말을 조건으로 바꾼다.
+const SYSTEM = `강원 여행 일정 서비스의 요청 해석기다. 사용자가 일정에 대해 한 말을 조건으로 바꾼다.
 카테고리: sea(바다·해변), cafe(카페), food(식사·시장), culture(역사·문화·전시), nature(자연·산책).
 - prefer: 더 원하는 카테고리. avoid: 빼고 싶은 카테고리.
 - indoor: 비·눈·추위·더위·미세먼지 등으로 실내 위주가 나을 때 true.
@@ -45,6 +46,7 @@ const SYSTEM = `강릉 여행 일정 서비스의 요청 해석기다. 사용자
 - summary: 바뀐 점을 15자 안팎 한국어 한 문장으로.
 현재 조건을 기준으로, 사용자가 언급하지 않은 항목은 현재 값을 유지한다.`;
 
+const photoCache = new Map();
 let client = null;
 function getClient() {
   if (!client) client = new Anthropic();
@@ -97,6 +99,22 @@ const server = http.createServer(async (req, res) => {
       else if (err instanceof Anthropic.APIError) console.error(`API 오류 ${err.status}: ${err.message}`);
       else console.error(err.message);
       res.writeHead(503).end();
+    }
+    return;
+  }
+
+  // 장소 사진: 한국관광공사 TourAPI (TOUR_API_KEY가 있을 때만)
+  if (req.method === "GET" && url.pathname === "/api/photo") {
+    const id = url.searchParams.get("id") || "";
+    const place = { name: url.searchParams.get("name") || "", lat: Number(url.searchParams.get("lat")), lng: Number(url.searchParams.get("lng")) };
+    if (!process.env.TOUR_API_KEY || !place.name || !Number.isFinite(place.lat)) { res.writeHead(404).end(); return; }
+    try {
+      if (!photoCache.has(id)) photoCache.set(id, await tourPhoto(place, process.env.TOUR_API_KEY));
+      const photo = photoCache.get(id);
+      if (!photo) { res.writeHead(404).end(); return; }
+      res.writeHead(200, { "content-type": MIME[".json"], "cache-control": "public, max-age=86400" }).end(JSON.stringify({ url: photo }));
+    } catch {
+      res.writeHead(502).end();
     }
     return;
   }

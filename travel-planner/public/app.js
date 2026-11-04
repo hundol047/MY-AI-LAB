@@ -1,5 +1,5 @@
-import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize } from "./planner.js";
-import { PLACES, BASE } from "./data.js";
+import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf } from "./planner.js";
+import { PLACES, REGIONS } from "./data.js";
 
 const $ = (s) => document.querySelector(s);
 const CAT = {
@@ -8,6 +8,7 @@ const CAT = {
   food: { label: "식사", color: "#ea580c" },
   culture: { label: "문화", color: "#7c3aed" },
   nature: { label: "자연", color: "#15803d" },
+  festival: { label: "축제", color: "#db2777" },
 };
 const KIND = { lunch: "점심", dinner: "저녁" };
 const MODE = { walk: "도보", car: "차", bus: "버스", same: "바로 옆" };
@@ -57,6 +58,7 @@ const segValue = (name) => document.querySelector(`.seg[data-name="${name}"] .on
 $("#form").addEventListener("submit", (e) => {
   e.preventDefault();
   const input = {
+    region: segValue("region"),
     date: $("#date").value || tomorrow(),
     days: Number(segValue("days")),
     who: segValue("who"),
@@ -73,7 +75,7 @@ $("#form").addEventListener("submit", (e) => {
 
 function fillForm(input) {
   $("#date").value = input.date;
-  for (const name of ["days", "who", "move"]) {
+  for (const name of ["region", "days", "who", "move"]) {
     document.querySelectorAll(`.seg[data-name="${name}"] button`).forEach((b) => b.classList.toggle("on", b.dataset.v === String(input[name])));
   }
   document.querySelectorAll('.chips[data-name="likes"] button').forEach((b) => b.classList.toggle("on", input.likes.includes(b.dataset.v)));
@@ -105,7 +107,7 @@ function rebuild(keepLayout = false) {
 async function loadWeather() {
   const { date, days } = state.input;
   const end = addDays(date, days - 1);
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=37.75&longitude=128.9&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&start_date=${date}&end_date=${end}`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${baseOf(state.input).lat}&longitude=${baseOf(state.input).lng}&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&start_date=${date}&end_date=${end}`;
   try {
     const res = await fetch(url);
     if (!res.ok) return;
@@ -154,21 +156,22 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = day.items.length ? day.items.map((it, i) => itemHTML(it, i)).join("") : `<li class="empty">조건에 맞는 장소가 없어요. 조건을 바꿔보세요.</li>`;
+  $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">조건에 맞는 장소가 없어요. 조건을 바꿔보세요.</li>`) + lodgingHTML(day);
+  renderFestivals();
   loadImages();
   drawMap(day);
 }
 
-function itemHTML(it, i) {
+function itemHTML(it, i, day) {
   const p = it.place, c = CAT[p.cat];
-  const leg = i === 0 ? `강릉역에서 ${MODE[it.travelMode]} ${it.travelMin}분` : it.travelMode === "same" ? "바로 옆" : `${MODE[it.travelMode]} ${it.travelMin}분`;
+  const leg = i === 0 ? `${day.start.name}에서 ${MODE[it.travelMode]} ${it.travelMin}분` : it.travelMode === "same" ? "바로 옆" : `${MODE[it.travelMode]} ${it.travelMin}분`;
   const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>
   <li class="item" data-i="${i}">
     <div class="time"><b>${fmt(it.start)}</b><span>${fmt(it.end)}</span></div>
     <article class="card place">
-      <div class="thumb" data-wiki="${p.wiki}" style="--c:${c.color}"><span>${i + 1}</span></div>
+      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${c.label}</em></div>
       <div class="info">
         <div class="meta"><span class="tag" style="--c:${c.color}">${KIND[it.kind] || c.label}</span>${p.indoor ? `<span class="tag soft">실내</span>` : ""}</div>
         <h3>${p.name}</h3>
@@ -184,6 +187,7 @@ function itemHTML(it, i) {
 }
 
 function hoursLabel(p, date) {
+  if (p.cat === "festival") return `축제 기간 ${p.start.slice(5).replace("-", ".")}–${p.end.slice(5).replace("-", ".")}`;
   const h = hoursFor(p, date);
   if (h.open === 0 && h.close >= 1439) return "상시 개방";
   if (p.multi) return `가게별 상이 · 대체로 ${fmt(h.open)}–${fmt(h.close)}`;
@@ -196,7 +200,7 @@ function hoursLabel(p, date) {
 /* ---------- 실제 도로 경로 (OSRM) ---------- */
 const OSRM = "https://router.project-osrm.org";
 const routeCache = new Map();
-const routeKey = (day) => [BASE, ...day.items.map((i) => i.place)].map((p) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`).join(";");
+const routeKey = (day) => [day.start, ...day.items.map((i) => i.place)].map((p) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`).join(";");
 
 async function roadRoute(day) {
   const key = routeKey(day);
@@ -238,28 +242,93 @@ async function applyRoad(i) {
 }
 function renderStatsOnly() { if (trip.days.every((d) => d.road)) render(); }
 
-/* ---------- 사진 ---------- */
-const imgCache = store.get("img") || {};
-async function wikiImage(title) {
-  if (title in imgCache) return imgCache[title];
-  try {
-    const res = await fetch(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(title)}`);
-    const j = res.ok ? await res.json() : {};
-    imgCache[title] = j.thumbnail?.source || j.originalimage?.source || "";
-  } catch { return ""; }
-  store.set("img", imgCache);
-  return imgCache[title];
+/* ---------- 사진 ----------
+   1) photos.json: 미리 모아 둔 장소별 사진 (scripts/bake-photos.mjs)
+   2) /api/photo: 서버에 한국관광공사 TourAPI 키가 있으면 공식 사진
+   3) 위키백과 대표 사진 → 위키미디어 공용 검색 */
+const imgCache = store.get("img2") || {};
+let baked = null;
+const bakedReady = fetch("photos.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (baked = j));
+const placeById = (id) => PLACES.find((p) => p.id === id) || trip?.days.flatMap((d) => d.items).find((i) => i.id === id)?.place;
+
+async function getJSON(url) {
+  try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; }
+}
+async function photoFor(p) {
+  if (!p) return "";
+  if (imgCache[p.id]) return imgCache[p.id];
+  await bakedReady;
+  let src = baked?.[p.id] || "";
+  if (!src) src = (await getJSON(`api/photo?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.name)}&lat=${p.lat}&lng=${p.lng}`))?.url || "";
+  if (!src && p.wiki) {
+    const j = await getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.wiki)}`);
+    src = j?.thumbnail?.source || "";
+  }
+  if (!src) {
+    const q = encodeURIComponent(p.name.replace(/[·()]/g, " "));
+    const j = await getJSON(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=1&gsrsearch=${q}&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json&origin=*`);
+    const page = j?.query?.pages && Object.values(j.query.pages)[0];
+    src = page?.imageinfo?.[0]?.thumburl || "";
+  }
+  if (src) { imgCache[p.id] = src; store.set("img2", imgCache); }
+  return src;
+}
+function setPhoto(el, src) {
+  const img = new Image();
+  img.onload = () => { el.style.backgroundImage = `url("${src}")`; el.classList.add("has-img"); };
+  img.src = src;
 }
 function loadImages() {
-  document.querySelectorAll(".thumb[data-wiki]").forEach(async (el) => {
-    const src = await wikiImage(el.dataset.wiki);
-    if (src) { el.style.backgroundImage = `url("${src}")`; el.classList.add("has-img"); }
+  document.querySelectorAll(".thumb[data-photo]").forEach(async (el) => {
+    const src = await photoFor(placeById(el.dataset.photo));
+    if (src) setPhoto(el, src);
   });
 }
 (async () => {
-  const src = await wikiImage("경포해수욕장");
+  const src = await photoFor(PLACES.find((p) => p.id === "gyeongpo-beach"));
   if (src) $("#hero").style.setProperty("--hero", `url("${src.replace(/\/\d+px-/, "/1280px-")}")`);
 })();
+
+/* ---------- 축제 ---------- */
+function renderFestivals() {
+  const list = festivalsDuring(state.input);
+  const box = $("#festivals");
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const fmtRange = (f) => f.confirmed ? `${f.start.slice(5).replace("-", ".")}–${f.end.slice(5).replace("-", ".")}` : `매년 ${f.months.join("·")}월 · 날짜 발표 전`;
+  list.sort((a, b) => (b.here - a.here) || (b.confirmed - a.confirmed));
+  const row = (f) => `
+    <li class="${f.here && f.confirmed ? "in" : ""}">
+      <b>${f.name}</b><span>${REGIONS[f.region].label} · ${fmtRange(f)}</span>
+      ${f.here && f.confirmed && trip.days.some((d) => d.items.some((i) => i.id === f.id)) ? `<em>일정에 넣었어요</em>` : ""}
+    </li>`;
+  const top = list.slice(0, 3), rest = list.slice(3);
+  box.innerHTML = `<h3>여행 기간의 강원 축제</h3><ul>${top.map(row).join("")}</ul>${rest.length ? `<details><summary>${rest.length}개 더 보기</summary><ul>${rest.map(row).join("")}</ul></details>` : ""}`;
+}
+
+/* ---------- 숙소 ---------- */
+function lodgingHTML(day) {
+  const l = day.lodging;
+  if (!l) return "";
+  const q = encodeURIComponent(l.query);
+  return `
+  <li class="leg">숙소까지 약 ${l.km}km</li>
+  <li class="item">
+    <div class="time"><b>밤</b><span>숙박</span></div>
+    <article class="card lodging">
+      <div class="info">
+        <div class="meta"><span class="tag" style="--c:#0b5e6b">추천 숙소</span></div>
+        <h3>${l.name} · ${l.typeLabel}</h3>
+        <p>${l.desc}</p>
+        <div class="why">${l.reason}${l.others.length ? ` · 다른 선택: ${l.others.join(", ")}` : ""}</div>
+        <div class="acts">
+          <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버에서 찾기</a>
+          <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">카카오맵</a>
+        </div>
+      </div>
+    </article>
+  </li>`;
+}
 
 /* ---------- 지도 ---------- */
 function drawMap(day) {
@@ -280,16 +349,19 @@ function drawMap(day) {
   if (known) {
     L.polyline(known.line, { color: "#0b5e6b", weight: 5, opacity: 0.85 }).addTo(layer);
   } else {
-    L.polyline([[BASE.lat, BASE.lng], ...pts], { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
+    L.polyline([[day.start.lat, day.start.lng], ...pts], { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
     applyRoad(dayIdx);
   }
-  L.marker([BASE.lat, BASE.lng], { icon: L.divIcon({ className: "pin base", html: "<span>역</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(BASE.name);
+  const startLabel = day.start.name.startsWith("숙소") ? "숙" : "출";
+  L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(day.start.name);
+  if (day.lodging) L.marker([day.lodging.lat, day.lodging.lng], { icon: L.divIcon({ className: "pin base", html: "<span>숙</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(`숙소 · ${day.lodging.name}`);
   day.items.forEach((it, i) => {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
     L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${it.place.name}`);
   });
   map.invalidateSize();
-  map.fitBounds(known ? known.line : [[BASE.lat, BASE.lng], ...pts], { padding: [36, 36], maxZoom: 14 });
+  const extra = day.lodging ? [[day.lodging.lat, day.lodging.lng]] : [];
+  map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14 });
 }
 
 let meMarker = null;

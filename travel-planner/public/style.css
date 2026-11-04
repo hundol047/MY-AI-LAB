@@ -190,3 +190,33 @@ html, body { overflow-x: clip; }
   .leg { margin-left: 54px; }
   .seg button { font-size: 13px; }
 }
+
+/* 권역 선택: 좁은 화면에서 줄바꿈 */
+.seg.wrap { flex-wrap: wrap; }
+.seg.wrap button { flex: 1 1 30%; }
+
+/* 사진 없는 동안 카테고리 표시 */
+.thumb em {
+  position: absolute; left: 8px; bottom: 6px; font-style: normal; font-size: 11px; font-weight: 700;
+  color: #fff; opacity: .9; text-shadow: 0 1px 2px rgba(0,0,0,.25);
+}
+.thumb.has-img em { display: none; }
+.thumb { transition: background-image .2s; }
+
+/* 축제 */
+.festivals { margin: 16px 0 0; padding: 14px 16px; border-radius: var(--radius); background: var(--surface); border: 1px solid var(--line); }
+.festivals h3 { margin: 0 0 8px; font-size: 14px; }
+.festivals ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.festivals li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; font-size: 13px; }
+.festivals li span { color: var(--sub); }
+.festivals li em { font-style: normal; font-weight: 700; font-size: 12px; color: #db2777; }
+.festivals li.in b { color: #db2777; }
+
+/* 숙소 */
+.lodging { padding: 14px 16px; border-style: dashed; }
+.lodging h3 { margin: 0; font-size: 16px; }
+.lodging p { margin: 2px 0 6px; color: var(--sub); font-size: 13px; }
+.why { font-size: 12px; font-weight: 600; color: var(--brand); }
+.festivals details { margin-top: 6px; font-size: 13px; }
+.festivals summary { cursor: pointer; color: var(--sub); font-weight: 600; }
+.festivals details ul { margin-top: 6px; }

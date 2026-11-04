@@ -1,5 +1,5 @@
 // 오프라인에서도 저장된 일정을 볼 수 있도록 앱 화면을 캐시
-const CACHE = "ohneul-gangneung-v2";
+const CACHE = "ohneul-gangwon-v3";
 const SHELL = ["./", "index.html", "style.css", "app.js", "planner.js", "data.js", "icon.svg", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
 
 self.addEventListener("install", (e) => {

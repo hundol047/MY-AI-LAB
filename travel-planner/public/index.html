@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>오늘강릉</title>
+  <title>오늘강원</title>
   <meta name="theme-color" content="#0b5e6b">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -13,7 +13,7 @@
 </head>
 <body>
   <header class="top">
-    <button class="brand" id="home" type="button"><span class="dot"></span>오늘강릉</button>
+    <button class="brand" id="home" type="button"><span class="dot"></span>오늘강원</button>
     <div class="top-actions" id="topActions" hidden>
       <button class="ghost" id="shareBtn" type="button">링크 공유</button>
       <button class="ghost" id="icsBtn" type="button">캘린더 저장</button>
@@ -24,11 +24,22 @@
   <main id="setup" class="setup">
     <section class="hero" id="hero">
       <div class="hero-text">
-        <h1>강릉 일정,<br>고르기만 하세요</h1>
+        <h1>강원 여행 일정,<br>고르기만 하세요</h1>
       </div>
     </section>
 
     <form class="card form" id="form">
+      <div class="field">
+        <span class="label">어디로</span>
+        <div class="seg wrap" data-name="region">
+          <button type="button" data-v="gangneung" class="on">강릉·동해</button>
+          <button type="button" data-v="seorak">속초·양양</button>
+          <button type="button" data-v="chuncheon">춘천·철원</button>
+          <button type="button" data-v="pyeongchang">평창·정선</button>
+          <button type="button" data-v="wonju">원주</button>
+        </div>
+      </div>
+
       <div class="field">
         <label class="label" for="date">언제</label>
         <div class="row">
@@ -83,6 +94,8 @@
       </div>
       <button class="ghost small" id="editBtn" type="button">조건 변경</button>
     </div>
+
+    <section class="festivals" id="festivals" hidden></section>
 
     <nav class="tabs" id="tabs"></nav>
 
