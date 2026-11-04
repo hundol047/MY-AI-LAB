@@ -18,15 +18,18 @@ const NEIGHBORS = {
 let client = null;
 const getClient = () => (client ??= new Anthropic());
 
+// user: 문자열 또는 [{ text, cache }] (cache=true인 블록까지 프롬프트 캐시 → 같은 일정에 대한 다음 질문이 빨라짐)
 async function askJSON({ system, user, schema, effort }) {
+  const content = typeof user === "string" ? user
+    : user.map((b) => ({ type: "text", text: b.text, ...(b.cache ? { cache_control: { type: "ephemeral" } } : {}) }));
   const response = await getClient().beta.messages.create({
     model: MODEL,
     max_tokens: 4000,
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
-    system,
+    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
     output_config: { effort, format: { type: "json_schema", schema } },
-    messages: [{ role: "user", content: user }],
+    messages: [{ role: "user", content }],
   });
   if (response.stop_reason === "refusal") throw new Error("refused");
   if (response.stop_reason === "max_tokens") throw new Error("truncated");
@@ -121,17 +124,19 @@ export async function guide({ question, history, trip }) {
   const planLines = trip.days.map((d, i) => `${i + 1}일차 ${d.date} (${d.areaName}): ${d.items.map((it) => `${it.start} ${it.name}[${it.id}]`).join(" → ")}`).join("\n");
   const hist = (history || []).slice(-4).map((h) => `사용자: ${h.q}\n가이드: ${h.a}`).join("\n");
 
-  const user = `여행 조건: ${JSON.stringify({ region: REGIONS[trip.input.region].label, who: trip.input.who, likes: trip.input.likes, move: trip.input.move, ...trip.opts })}
+  // 장소 데이터는 같은 여행이면 매번 같으므로 앞쪽에 두고 캐시한다
+  const user = [
+    { text: `장소 데이터 (id | 이름 | 분류 | 실내/야외 | 걷는 양 | 설명 | 날짜별 운영):\n${placeLines}`, cache: true },
+    { text: `여행 조건: ${JSON.stringify({ region: REGIONS[trip.input.region].label, who: trip.input.who, likes: trip.input.likes, move: trip.input.move, ...trip.opts })}
 숙소: ${trip.lodging ? `${trip.lodging.name} ${trip.lodging.typeLabel} (여행 내내 같은 숙소)` : "없음(당일)"}
 현재 일정:
 ${planLines}
-
-장소 데이터 (id | 이름 | 분류 | 실내/야외 | 걷는 양 | 설명 | 날짜별 운영):
-${placeLines}
 ${hist ? `\n이전 대화:\n${hist}\n` : ""}
-사용자: ${question}`;
+사용자: ${question}` },
+  ];
 
-  const r = await askJSON({ system, user, schema, effort: "medium" });
+  // 짧은 답과 정해진 형식이라 effort low로 응답 시간을 줄인다
+  const r = await askJSON({ system, user, schema, effort: "low" });
   r.remove = r.remove.filter((id) => tripIds.includes(id));
   return r;
 }

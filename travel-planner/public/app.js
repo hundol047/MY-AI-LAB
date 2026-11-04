@@ -3,6 +3,12 @@ import { PLACES, REGIONS } from "./data.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
+// 응답이 늦으면 기다리지 않고 포기 (화면이 멈춰 보이지 않게)
+function fetchT(url, opts = {}, ms = 5000) {
+  const c = new AbortController();
+  const timer = setTimeout(() => c.abort(), ms);
+  return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(timer));
+}
 const CAT = {
   sea: { label: "바다", color: "#0284c7" },
   cafe: { label: "카페", color: "#a16207" },
@@ -111,7 +117,7 @@ async function loadWeather() {
   const end = addDays(date, days - 1);
   const url = `https://api.open-meteo.com/v1/forecast?latitude=${baseOf(state.input).lat}&longitude=${baseOf(state.input).lng}&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&start_date=${date}&end_date=${end}`;
   try {
-    const res = await fetch(url);
+    const res = await fetchT(url, {}, 4000);
     if (!res.ok) return;
     const j = await res.json();
     weather = {};
@@ -181,13 +187,16 @@ function itemHTML(it, i, day) {
         <p>${p.desc}</p>
         <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
-        <a class="ghost small" href="https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lng}" target="_blank" rel="noopener">길찾기</a>
+        <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">길찾기</a>
         <button class="ghost small" type="button" data-swap="${i}">바꾸기</button>
       </div>
       </div>
     </article>
   </li>`;
 }
+
+// 길찾기는 카카오맵 장소 검색으로: 지도 서비스의 정확한 위치로 안내된다
+const searchName = (p) => p.name;
 
 function hoursLabel(p, date) {
   if (p.cat === "festival") return `축제 기간 ${p.start.slice(5).replace("-", ".")}–${p.end.slice(5).replace("-", ".")}`;
@@ -210,7 +219,7 @@ async function roadRoute(day) {
   if (routeCache.has(key)) return routeCache.get(key);
   const pending = (async () => {
     try {
-      const res = await fetch(`${OSRM}/route/v1/driving/${key}?overview=full&geometries=geojson`);
+      const res = await fetchT(`${OSRM}/route/v1/driving/${key}?overview=full&geometries=geojson`, {}, 5000);
       if (!res.ok) return null;
       const j = await res.json();
       const r = j.code === "Ok" && j.routes?.[0];
@@ -248,43 +257,74 @@ function renderStatsOnly() { if (trip.days.every((d) => d.road)) render(); }
 /* ---------- 사진 ----------
    1) photos.json: 미리 모아 둔 장소별 사진 (scripts/bake-photos.mjs)
    2) /api/photo: 서버에 한국관광공사 TourAPI 키가 있으면 공식 사진
-   3) 위키백과 대표 사진 → 위키미디어 공용 검색 */
-const imgCache = store.get("img2") || {};
-let baked = null;
-const bakedReady = fetch("photos.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (baked = j));
+   3) 위키백과 대표 사진 / 위키미디어 공용 검색 (동시에 요청해 먼저 온 것)
+   속도: 화면에 보이는 카드만, 동시에 4개까지, 요청마다 3.5초 제한, 못 찾은 곳은 하루 동안 다시 찾지 않음 */
+const DAY_MS = 864e5;
+const imgCache = store.get("img3") || {};
+let baked = {};
+const bakedReady = fetchT("photos.json", {}, 3000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (baked = j));
+let photoApi = true; // 서버에 사진 키가 없으면 첫 요청 뒤로 건너뜀
 const placeById = (id) => PLACES.find((p) => p.id === id) || trip?.days.flatMap((d) => d.items).find((i) => i.id === id)?.place;
 
-async function getJSON(url) {
-  try { const r = await fetch(url); return r.ok ? await r.json() : null; } catch { return null; }
+async function getJSON(url, ms = 3500) {
+  try { const r = await fetchT(url, {}, ms); return r.ok ? await r.json() : null; } catch { return null; }
 }
+const firstHit = (tasks) => new Promise((resolve) => {
+  let left = tasks.length;
+  if (!left) resolve("");
+  tasks.forEach((t) => t.then((v) => { if (v) resolve(v); else if (--left === 0) resolve(""); }, () => { if (--left === 0) resolve(""); }));
+});
 async function photoFor(p) {
   if (!p) return "";
-  if (imgCache[p.id]) return imgCache[p.id];
+  const hit = imgCache[p.id];
+  if (hit && (hit.url || Date.now() - hit.t < DAY_MS)) return hit.url || "";
   await bakedReady;
-  let src = baked?.[p.id] || "";
-  if (!src) src = (await getJSON(`api/photo?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.name)}&lat=${p.lat}&lng=${p.lng}`))?.url || "";
-  if (!src && p.wiki) {
-    const j = await getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.wiki)}`);
-    src = j?.thumbnail?.source || "";
+  let src = baked[p.id] || "";
+  if (!src && photoApi) {
+    try {
+      const r = await fetchT(`api/photo?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.name)}&lat=${p.lat}&lng=${p.lng}`, {}, 3500);
+      if (r.ok) src = (await r.json()).url || ""; else if (r.status === 404 || r.status === 405) photoApi = false;
+    } catch { photoApi = false; }
   }
   if (!src) {
     const q = encodeURIComponent(p.name.replace(/[·()]/g, " "));
-    const j = await getJSON(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=1&gsrsearch=${q}&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json&origin=*`);
-    const page = j?.query?.pages && Object.values(j.query.pages)[0];
-    src = page?.imageinfo?.[0]?.thumburl || "";
+    src = await firstHit([
+      p.wiki ? getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.wiki)}`).then((j) => j?.thumbnail?.source || "") : Promise.resolve(""),
+      getJSON(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=1&gsrsearch=${q}&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json&origin=*`)
+        .then((j) => { const pg = j?.query?.pages && Object.values(j.query.pages)[0]; return pg?.imageinfo?.[0]?.thumburl || ""; }),
+    ]);
   }
-  if (src) { imgCache[p.id] = src; store.set("img2", imgCache); }
+  imgCache[p.id] = { url: src, t: Date.now() };
+  store.set("img3", imgCache);
   return src;
 }
 function setPhoto(el, src) {
   const img = new Image();
+  img.decoding = "async";
   img.onload = () => { el.style.backgroundImage = `url("${src}")`; el.classList.add("has-img"); };
   img.src = src;
 }
+// 동시에 4개까지만 찾기
+const photoQueue = [];
+let photoActive = 0;
+function pumpPhotos() {
+  while (photoActive < 4 && photoQueue.length) {
+    const el = photoQueue.shift();
+    photoActive++;
+    photoFor(placeById(el.dataset.photo)).then((src) => { if (src && el.isConnected) setPhoto(el, src); })
+      .finally(() => { photoActive--; pumpPhotos(); });
+  }
+}
+const photoObserver = "IntersectionObserver" in window
+  ? new IntersectionObserver((entries) => entries.forEach((e) => {
+      if (e.isIntersecting) { photoObserver.unobserve(e.target); photoQueue.push(e.target); pumpPhotos(); }
+    }), { rootMargin: "300px" })
+  : null;
 function loadImages() {
-  document.querySelectorAll(".thumb[data-photo]").forEach(async (el) => {
-    const src = await photoFor(placeById(el.dataset.photo));
-    if (src) setPhoto(el, src);
+  document.querySelectorAll(".thumb[data-photo]").forEach((el) => {
+    const cached = imgCache[el.dataset.photo]?.url;
+    if (cached) return setPhoto(el, cached); // 이미 찾은 사진은 바로
+    if (photoObserver) photoObserver.observe(el); else { photoQueue.push(el); pumpPhotos(); }
   });
 }
 (async () => {
@@ -443,10 +483,10 @@ function compactTrip() {
 }
 async function askGuide(question) {
   bubble("me", question);
-  const wait = bubble("ai pending", "…");
+  const wait = bubble("ai pending", "생각 중");
   let r = null;
   try {
-    const res = await fetch("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip() }) });
+    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) r = guideLocal(question, trip, dayIdx);
@@ -488,7 +528,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
   const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
   let r = null;
   try {
-    const res = await fetch("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr() }) });
+    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr() }) }, 12000);
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) r = startLocal(text, todayStr());
