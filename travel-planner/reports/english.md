@@ -4,8 +4,8 @@
 
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
-- 대상 129곳 (장소 107 + 축제 22)
-- 영문 이름 찾음 68곳 (소개 포함 58곳) · 못 찾음 61곳
+- 대상 178곳 (장소 107 + 축제 71)
+- 영문 이름 찾음 69곳 (소개 포함 58곳) · 못 찾음 109곳
 
 ## 찾은 곳
 
@@ -79,6 +79,7 @@
 | ganhyeon-park | 간현유원지 | Ganhyeon Tourist Area (간현관광지) | 0.01 | 이름 같음 | - |
 | f-hwacheon | 화천 산천어축제 | Hwacheon Sancheoneo Ice Festival (얼음나라화천 산천어축제) | 0.00 | 이름 같음 | - |
 | f-trout | 평창송어축제 | Pyeongchang Trout Festival (평창송어축제) | 0.80 | 이름 같음 | 있음 |
+| f-cw-ice | 철원 한탄강 얼음트레킹 축제 | Cheorwon Hantangang River Ice Trekking Festival (철원 한탄강 얼음트레킹 축제) | 0.01 | 이름 같음 | - |
 
 ## 관광공사 영문이 없는 곳 (앱 번역으로 채움: 이름은 로마자 표기, 소개는 data.js 한국어 설명을 옮김)
 
@@ -145,6 +146,54 @@
 | t-hanwoo | 횡성한우축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Hoengseong Hanwoo Festival — Hanwoo (Korean beef) food |
 | t-salmon | 양양 연어축제 | 영문 결과 없음 | Yangyang Salmon Festival — Catch salmon by hand in Namdaecheon Stream |
 | t-seorak | 속초 설악문화제 | 영문 결과 없음 | Sokcho Seorak Cultural Festival — Sokcho's signature cultural festival |
+| k-gn-cherry | 강릉 경포벚꽃축제 | 영문 결과 없음 | Gangneung Gyeongpo Cherry Blossom Festival — Gyeongpo Wetland Square |
+| k-gn-heritage-night | 강릉 국가유산야행 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung National Heritage Night — Gangneung Daedohobu Government Office, Seobu Market and Myeongju-dong |
+| k-gn-noodle | 강릉 국수 축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Noodle Festival — Wolhwa Street |
+| k-gn-ojuk-bread | 강릉 빵굽는 마을, 오죽 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Bread Village Ojuk — Ojuk Hanok Village |
+| k-gn-beer | 강릉비치비어페스티벌 | 영문 결과 없음 | Gangneung Beach Beer Festival — Gyeongpo Beach Central Square |
+| k-gn-pork | 강원한돈페스타 | 영문 결과 없음 | Gangwon Korean Pork Festa — Wolhwa Street |
+| k-gn-summer | 경포 썸머 페스티벌 | 영문 결과 없음 | Gyeongpo Summer Festival — Gyeongpo Beach special stage and Central Square |
+| k-gn-puppet | 명주인형극제 | 영문 결과 없음 | Myeongju Puppet Festival — Myeongju Art Madang |
+| k-dh-lavender | 무릉별유천지 라벤더축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Mureung Byeolyucheonji Lavender Festival — Mureung Byeolyucheonji, Donghae |
+| k-gn-bread | 빵터지는 강릉 빵 페스타 | 영문 결과 없음 | Gangneung Bread Festa — Gangneung Daedohobu Government Office |
+| f-gn-dandandan | 강릉 단단단페스티벌 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Dandandan Festival — Gangneung Danoje Training Center |
+| k-sc-summer | 속초 썸머페스티벌 | 영문 결과 없음 | Sokcho Summer Festival — Sokcho Beach |
+| k-sc-displaced | 실향민문화축제 | 영문 결과 없음 | Displaced People's Culture Festival — Sokcho Expo Lawn Square |
+| k-yy-bonfire | 양양 낙산해변 달빛 모닥불축제 | 영문 결과 없음 | Yangyang Naksan Beach Moonlight Bonfire Festival — Naksan Beach Zone B · advance booking |
+| k-yy-cherry | 양양 남대천 벚꽃축제 | 영문 결과 없음 | Yangyang Namdaecheon Cherry Blossom Festival — Yangyang Songi Sculpture Park |
+| k-sc-yeongnang-cherry | 영랑호 벚꽃축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Yeongnangho Lake Cherry Blossom Festival — Yeongnangho Lake lawn |
+| k-ij-flower | 인제가을꽃축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Inje Autumn Flower Festival — Yongdae Tourist Site, Buk-myeon, Inje |
+| k-gs-octopus | 고성 저도 대문어축제 | 영문 결과 없음 | Goseong Jeodo Giant Octopus Festival — Daejin Port |
+| k-cw-mediaart | 국가유산 미디어아트 철원 노동당사 | 2km 안에 이름이 맞는 영문 결과 없음 | National Heritage Media Art: Cheorwon Labor Party HQ — Cheorwon Labor Party HQ and Cheorwon History & Culture Park |
+| k-yg-belly | 국토정중앙 청춘양구 배꼽축제 | 영문 결과 없음 | Yanggu Navel Festival (Center of Korea) — Yanggu Seocheon Leisure Sports Park |
+| k-cw-yeogijeogi | 여기저기 페스티벌 in 철원 | 영문 결과 없음 | Yeogijeogi Festival in Cheorwon — Gimhwa Eco Sports Park, Cheorwon |
+| k-cc-puppet | 춘천인형극제 | 영문 결과 없음 | Chuncheon Puppet Festival — Chuncheon Puppet Theater |
+| k-cc-military | K-밀리터리 페스티벌 춘천대첩 | 영문 결과 없음 | K-Military Festival: Battle of Chuncheon — Chuncheon Waterfront Park |
+| k-yg-gomchi | 청춘양구 곰취축제 | 영문 결과 없음 | Yanggu Gomchi Festival — Yanggu Leisure Sports Park |
+| k-cc-sul | 춘천 술 페스타 | 영문 결과 없음 | Chuncheon Sul (Liquor) Festa — KT&G Sangsang Madang Chuncheon · mini edition in June |
+| k-cc-water | 춘천 썸머워터 페스티벌 | 영문 결과 없음 | Chuncheon Summer Water Festival — Chuncheon Waterfront Park · paid entry |
+| k-hc-sannamul | 홍천 산나물축제 | 영문 결과 없음 | Hongcheon Wild Greens Festival — Tori Forest, Urban Forest Park |
+| k-hc-beer | 홍천강 별빛음악 맥주축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Hongcheon River Starlight Music & Beer Festival — Tori Forest, Urban Forest Park |
+| k-js-duwibong | 두위봉 철쭉축제&산맥페스티벌 | 2km 안에 이름이 맞는 영문 결과 없음 | Duwibong Azalea & Mountain Range Festival — Daebak Market and Dangok Valley, Sindong-eup |
+| k-js-heritage-night | 정선 국가유산야행 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongseon National Heritage Night — Jeongseon-eup |
+| k-js-jeonbyeong | 정선메밀전병축제 | 영문 결과 없음 | Jeongseon Buckwheat Crepe Festival — Jeongseon Arirang Market |
+| k-js-skytrail | 하늘숲길 걷기축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Sky Forest Trail Walking Festival — Jeongseon Sky Forest Trail · entry fee |
+| k-yw-photo | 동강국제사진제 | 영문 결과 없음 | Donggang International Photo Festival — Donggang Museum of Photography · closed Mondays |
+| k-js-coal | 탄광문화축제 | 영문 결과 없음 | Coal Mining Culture Festival — Sabuk-eup (M650 Museum and 650 Street) |
+| k-tb-sannamul | 태백 천상의 산나물 축제 | 영문 결과 없음 | Taebaek Heavenly Wild Greens Festival — Jangseong Tantan Madang |
+| k-tb-sunflower | 태백 해바라기축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Sunflower Festival — Taebaek Sunflower Festival grounds · paid entry |
+| k-tb-festival | 태백제 | 영문 결과 없음 | Taebaek Festival — Around Taebaek City Hall |
+| k-pc-heat | 평창더위사냥축제 | 영문 결과 없음 | Pyeongchang Heat-Hunting Festival — Daehwa-myeon festival grounds · paid entry |
+| k-pc-music | 평창대관령음악제 | 2km 안에 이름이 맞는 영문 결과 없음 | Music in PyeongChang — Alpensia Concert Hall and Daegwallyeong Music Tent |
+| k-wj-naora | 나오라쇼 | 2km 안에 이름이 맞는 영문 결과 없음 | Naora Show — Naora Show Plaza in Sogeumsan Grand Valley · evenings |
+| k-hs-tomato | 둔내고랭지토마토축제 | 영문 결과 없음 | Dunnae Highland Tomato Festival — Dunnae Sports Park · tomato pool ₩15,000 |
+| k-wj-samto | 삼토 페스티벌 | 영문 결과 없음 | Samto Festival — Wonju Sports Complex |
+| k-wj-heritage-night | 원주 국가유산야행 | 2km 안에 이름이 맞는 영문 결과 없음 | Wonju National Heritage Night — Gangwon Gamyeong (provincial office) |
+| k-wj-sweetpotato | 치악산 고구마축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Chiaksan Sweet Potato Festival — Ganhyeon Tourist Area parking lot 3 |
+| k-wj-poppy | 원주 용수골 꽃양귀비축제 | 영문 결과 없음 | Wonju Yongsugol Poppy Festival — Poppy festival grounds · paid entry |
+| k-hs-summernight | 횡성썸머나잇페스타 | 영문 결과 없음 | Hoengseong Summer Night Festa — Seomgang riverside, Hoengseong |
+| k-hs-lake | 횡성호수길축제 | 영문 결과 없음 | Hoengseong Lake Trail Festival — Manghyang Hill and Hoengseong Lake Trail section 5 · paid entry |
+| k-wj-rooftop | 원주옥상영화제 | 영문 결과 없음 | Wonju Rooftop Film Festival — Rooftop of the Korea Tourism Organization HQ |
 
 ## 관광공사 영문 이름은 있고 소개만 앱 번역
 
@@ -160,6 +209,7 @@
 | cheongnyeongpo | Cheongnyeongpo Meandering Stream | King Danjong's place of exile, reached by ferry |
 | ganhyeon-park | Ganhyeon Tourist Area | Riverside walk along the Seomgang River |
 | f-hwacheon | Hwacheon Sancheoneo Ice Festival | Ice fishing and bare-hand trout catching |
+| f-cw-ice | Cheorwon Hantangang River Ice Trekking Festival | Ice trekking on the Hantangang River water trail · ₩10,000 entry (₩5,000 back in Cheorwon gift vouchers) |
 
 ## 버린 후보
 
@@ -206,3 +256,15 @@
 | t-arirang | 정선아리랑제 | Jeongseon Arirang Festival (정선아리랑제) | NaN | 더 맞는 결과 있음 |
 | t-hanwoo | 횡성한우축제 | Hoengseong Hanu Festival (횡성한우축제) | NaN | 더 맞는 결과 있음 |
 | t-hanwoo | 횡성한우축제 | Namhae Garlic & Korean Beef Festival (남해 마늘한우축제) | NaN | 더 맞는 결과 있음 |
+| k-gn-heritage-night | 강릉 국가유산야행 | Jeonju Cultural Heritage Night Tour (전주 국가유산야행) | NaN | 더 맞는 결과 있음 |
+| k-dh-lavender | 무릉별유천지 라벤더축제 | Murung Byeolyucheonji (무릉별유천지) | NaN | 더 맞는 결과 있음 |
+| k-sc-yeongnang-cherry | 영랑호 벚꽃축제 | Yeongnangho Lake (영랑호) | NaN | 더 맞는 결과 있음 |
+| k-ij-flower | 인제가을꽃축제 | Goyang Autumn Flower Festival (고양가을꽃축제) | NaN | 더 맞는 결과 있음 |
+| k-hc-beer | 홍천강 별빛음악 맥주축제 | Hongcheon Beer Festival (홍천강 별빛음악 맥주축제) | NaN | 더 맞는 결과 있음 |
+| k-js-duwibong | 두위봉 철쭉축제&산맥페스티벌 | Duwibong Azalea Festival & Mountain Range Festival (두위봉 철쭉축제&산맥페스티벌) | NaN | 더 맞는 결과 있음 |
+| k-js-heritage-night | 정선 국가유산야행 | Jeonju Cultural Heritage Night Tour (전주 국가유산야행) | NaN | 더 맞는 결과 있음 |
+| k-js-skytrail | 하늘숲길 걷기축제 | Sky Forest Trail Walking Festival (하늘숲길 걷기축제) | NaN | 더 맞는 결과 있음 |
+| k-tb-sunflower | 태백 해바라기축제 | Taebaek Sunflower Festival (태백 해바라기축제) | NaN | 더 맞는 결과 있음 |
+| k-pc-music | 평창대관령음악제 | Music in PyeongChang (평창대관령음악제) | NaN | 더 맞는 결과 있음 |
+| k-wj-naora | 나오라쇼 | Night of Light Show (나오라쇼) | NaN | 더 맞는 결과 있음 |
+| k-wj-heritage-night | 원주 국가유산야행 | Jeonju Cultural Heritage Night Tour (전주 국가유산야행) | NaN | 더 맞는 결과 있음 |

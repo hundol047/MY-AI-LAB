@@ -646,5 +646,298 @@
     "nameSrc": "app",
     "desc": "Sokcho's signature cultural festival",
     "descSrc": "app"
+  },
+  "k-gn-cherry": {
+    "name": "Gangneung Gyeongpo Cherry Blossom Festival",
+    "nameSrc": "app",
+    "desc": "Gyeongpo Wetland Square",
+    "descSrc": "app"
+  },
+  "k-gn-heritage-night": {
+    "name": "Gangneung National Heritage Night",
+    "nameSrc": "app",
+    "desc": "Gangneung Daedohobu Government Office, Seobu Market and Myeongju-dong",
+    "descSrc": "app"
+  },
+  "k-gn-noodle": {
+    "name": "Gangneung Noodle Festival",
+    "nameSrc": "app",
+    "desc": "Wolhwa Street",
+    "descSrc": "app"
+  },
+  "k-gn-ojuk-bread": {
+    "name": "Gangneung Bread Village Ojuk",
+    "nameSrc": "app",
+    "desc": "Ojuk Hanok Village",
+    "descSrc": "app"
+  },
+  "k-gn-beer": {
+    "name": "Gangneung Beach Beer Festival",
+    "nameSrc": "app",
+    "desc": "Gyeongpo Beach Central Square",
+    "descSrc": "app"
+  },
+  "k-gn-pork": {
+    "name": "Gangwon Korean Pork Festa",
+    "nameSrc": "app",
+    "desc": "Wolhwa Street",
+    "descSrc": "app"
+  },
+  "k-gn-summer": {
+    "name": "Gyeongpo Summer Festival",
+    "nameSrc": "app",
+    "desc": "Gyeongpo Beach special stage and Central Square",
+    "descSrc": "app"
+  },
+  "k-gn-puppet": {
+    "name": "Myeongju Puppet Festival",
+    "nameSrc": "app",
+    "desc": "Myeongju Art Madang",
+    "descSrc": "app"
+  },
+  "k-dh-lavender": {
+    "name": "Mureung Byeolyucheonji Lavender Festival",
+    "nameSrc": "app",
+    "desc": "Mureung Byeolyucheonji, Donghae",
+    "descSrc": "app"
+  },
+  "k-gn-bread": {
+    "name": "Gangneung Bread Festa",
+    "nameSrc": "app",
+    "desc": "Gangneung Daedohobu Government Office",
+    "descSrc": "app"
+  },
+  "f-gn-dandandan": {
+    "name": "Gangneung Dandandan Festival",
+    "nameSrc": "app",
+    "desc": "Gangneung Danoje Training Center",
+    "descSrc": "app"
+  },
+  "k-sc-summer": {
+    "name": "Sokcho Summer Festival",
+    "nameSrc": "app",
+    "desc": "Sokcho Beach",
+    "descSrc": "app"
+  },
+  "k-sc-displaced": {
+    "name": "Displaced People's Culture Festival",
+    "nameSrc": "app",
+    "desc": "Sokcho Expo Lawn Square",
+    "descSrc": "app"
+  },
+  "k-yy-bonfire": {
+    "name": "Yangyang Naksan Beach Moonlight Bonfire Festival",
+    "nameSrc": "app",
+    "desc": "Naksan Beach Zone B · advance booking",
+    "descSrc": "app"
+  },
+  "k-yy-cherry": {
+    "name": "Yangyang Namdaecheon Cherry Blossom Festival",
+    "nameSrc": "app",
+    "desc": "Yangyang Songi Sculpture Park",
+    "descSrc": "app"
+  },
+  "k-sc-yeongnang-cherry": {
+    "name": "Yeongnangho Lake Cherry Blossom Festival",
+    "nameSrc": "app",
+    "desc": "Yeongnangho Lake lawn",
+    "descSrc": "app"
+  },
+  "k-ij-flower": {
+    "name": "Inje Autumn Flower Festival",
+    "nameSrc": "app",
+    "desc": "Yongdae Tourist Site, Buk-myeon, Inje",
+    "descSrc": "app"
+  },
+  "k-gs-octopus": {
+    "name": "Goseong Jeodo Giant Octopus Festival",
+    "nameSrc": "app",
+    "desc": "Daejin Port",
+    "descSrc": "app"
+  },
+  "k-cw-mediaart": {
+    "name": "National Heritage Media Art: Cheorwon Labor Party HQ",
+    "nameSrc": "app",
+    "desc": "Cheorwon Labor Party HQ and Cheorwon History & Culture Park",
+    "descSrc": "app"
+  },
+  "k-yg-belly": {
+    "name": "Yanggu Navel Festival (Center of Korea)",
+    "nameSrc": "app",
+    "desc": "Yanggu Seocheon Leisure Sports Park",
+    "descSrc": "app"
+  },
+  "k-cw-yeogijeogi": {
+    "name": "Yeogijeogi Festival in Cheorwon",
+    "nameSrc": "app",
+    "desc": "Gimhwa Eco Sports Park, Cheorwon",
+    "descSrc": "app"
+  },
+  "k-cc-puppet": {
+    "name": "Chuncheon Puppet Festival",
+    "nameSrc": "app",
+    "desc": "Chuncheon Puppet Theater",
+    "descSrc": "app"
+  },
+  "k-cc-military": {
+    "name": "K-Military Festival: Battle of Chuncheon",
+    "nameSrc": "app",
+    "desc": "Chuncheon Waterfront Park",
+    "descSrc": "app"
+  },
+  "f-cw-ice": {
+    "name": "Cheorwon Hantangang River Ice Trekking Festival",
+    "desc": "Ice trekking on the Hantangang River water trail · ₩10,000 entry (₩5,000 back in Cheorwon gift vouchers)",
+    "descSrc": "app"
+  },
+  "k-yg-gomchi": {
+    "name": "Yanggu Gomchi Festival",
+    "nameSrc": "app",
+    "desc": "Yanggu Leisure Sports Park",
+    "descSrc": "app"
+  },
+  "k-cc-sul": {
+    "name": "Chuncheon Sul (Liquor) Festa",
+    "nameSrc": "app",
+    "desc": "KT&G Sangsang Madang Chuncheon · mini edition in June",
+    "descSrc": "app"
+  },
+  "k-cc-water": {
+    "name": "Chuncheon Summer Water Festival",
+    "nameSrc": "app",
+    "desc": "Chuncheon Waterfront Park · paid entry",
+    "descSrc": "app"
+  },
+  "k-hc-sannamul": {
+    "name": "Hongcheon Wild Greens Festival",
+    "nameSrc": "app",
+    "desc": "Tori Forest, Urban Forest Park",
+    "descSrc": "app"
+  },
+  "k-hc-beer": {
+    "name": "Hongcheon River Starlight Music & Beer Festival",
+    "nameSrc": "app",
+    "desc": "Tori Forest, Urban Forest Park",
+    "descSrc": "app"
+  },
+  "k-js-duwibong": {
+    "name": "Duwibong Azalea & Mountain Range Festival",
+    "nameSrc": "app",
+    "desc": "Daebak Market and Dangok Valley, Sindong-eup",
+    "descSrc": "app"
+  },
+  "k-js-heritage-night": {
+    "name": "Jeongseon National Heritage Night",
+    "nameSrc": "app",
+    "desc": "Jeongseon-eup",
+    "descSrc": "app"
+  },
+  "k-js-jeonbyeong": {
+    "name": "Jeongseon Buckwheat Crepe Festival",
+    "nameSrc": "app",
+    "desc": "Jeongseon Arirang Market",
+    "descSrc": "app"
+  },
+  "k-js-skytrail": {
+    "name": "Sky Forest Trail Walking Festival",
+    "nameSrc": "app",
+    "desc": "Jeongseon Sky Forest Trail · entry fee",
+    "descSrc": "app"
+  },
+  "k-yw-photo": {
+    "name": "Donggang International Photo Festival",
+    "nameSrc": "app",
+    "desc": "Donggang Museum of Photography · closed Mondays",
+    "descSrc": "app"
+  },
+  "k-js-coal": {
+    "name": "Coal Mining Culture Festival",
+    "nameSrc": "app",
+    "desc": "Sabuk-eup (M650 Museum and 650 Street)",
+    "descSrc": "app"
+  },
+  "k-tb-sannamul": {
+    "name": "Taebaek Heavenly Wild Greens Festival",
+    "nameSrc": "app",
+    "desc": "Jangseong Tantan Madang",
+    "descSrc": "app"
+  },
+  "k-tb-sunflower": {
+    "name": "Taebaek Sunflower Festival",
+    "nameSrc": "app",
+    "desc": "Taebaek Sunflower Festival grounds · paid entry",
+    "descSrc": "app"
+  },
+  "k-tb-festival": {
+    "name": "Taebaek Festival",
+    "nameSrc": "app",
+    "desc": "Around Taebaek City Hall",
+    "descSrc": "app"
+  },
+  "k-pc-heat": {
+    "name": "Pyeongchang Heat-Hunting Festival",
+    "nameSrc": "app",
+    "desc": "Daehwa-myeon festival grounds · paid entry",
+    "descSrc": "app"
+  },
+  "k-pc-music": {
+    "name": "Music in PyeongChang",
+    "nameSrc": "app",
+    "desc": "Alpensia Concert Hall and Daegwallyeong Music Tent",
+    "descSrc": "app"
+  },
+  "k-wj-naora": {
+    "name": "Naora Show",
+    "nameSrc": "app",
+    "desc": "Naora Show Plaza in Sogeumsan Grand Valley · evenings",
+    "descSrc": "app"
+  },
+  "k-hs-tomato": {
+    "name": "Dunnae Highland Tomato Festival",
+    "nameSrc": "app",
+    "desc": "Dunnae Sports Park · tomato pool ₩15,000",
+    "descSrc": "app"
+  },
+  "k-wj-samto": {
+    "name": "Samto Festival",
+    "nameSrc": "app",
+    "desc": "Wonju Sports Complex",
+    "descSrc": "app"
+  },
+  "k-wj-heritage-night": {
+    "name": "Wonju National Heritage Night",
+    "nameSrc": "app",
+    "desc": "Gangwon Gamyeong (provincial office)",
+    "descSrc": "app"
+  },
+  "k-wj-sweetpotato": {
+    "name": "Chiaksan Sweet Potato Festival",
+    "nameSrc": "app",
+    "desc": "Ganhyeon Tourist Area parking lot 3",
+    "descSrc": "app"
+  },
+  "k-wj-poppy": {
+    "name": "Wonju Yongsugol Poppy Festival",
+    "nameSrc": "app",
+    "desc": "Poppy festival grounds · paid entry",
+    "descSrc": "app"
+  },
+  "k-hs-summernight": {
+    "name": "Hoengseong Summer Night Festa",
+    "nameSrc": "app",
+    "desc": "Seomgang riverside, Hoengseong",
+    "descSrc": "app"
+  },
+  "k-hs-lake": {
+    "name": "Hoengseong Lake Trail Festival",
+    "nameSrc": "app",
+    "desc": "Manghyang Hill and Hoengseong Lake Trail section 5 · paid entry",
+    "descSrc": "app"
+  },
+  "k-wj-rooftop": {
+    "name": "Wonju Rooftop Film Festival",
+    "nameSrc": "app",
+    "desc": "Rooftop of the Korea Tourism Organization HQ",
+    "descSrc": "app"
   }
 }

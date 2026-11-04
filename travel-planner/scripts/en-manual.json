@@ -1,75 +1,477 @@
 {
   "_note": "관광공사 영문 관광정보(EngService2)에 없는 곳의 영문 이름·소개. 이름은 표준 로마자 표기 + 영어 일반명, 소개는 data.js의 한국어 설명을 옮긴 것(새 내용 없음). 관광공사 영문이 있으면 그쪽이 우선한다.",
-  "namhangjin-beach": { "name": "Namhangjin Beach", "desc": "Quiet beach with the Solbaram Bridge" },
-  "sea-trail": { "name": "Jeongdong-Simgok Badabuchae-gil Trail", "desc": "2.9 km clifftop coastal trail · closed during high-wave warnings" },
-  "terarosa": { "name": "Terarosa Coffee Factory (Gangneung Main Store)", "desc": "Roastery and coffee museum" },
-  "bohemian": { "name": "Bohemian Roasters Park Yi-chu Coffee Factory", "desc": "Hand-drip coffee from a first-generation Korean barista" },
-  "toetmaru": { "name": "Cafe Toetmaru", "desc": "Chodang cafe famous for its black sesame latte" },
-  "central-market": { "name": "Gangneung Jungang Market", "desc": "Dakgangjeong fried chicken, jang-kalguksu noodles and potato pancakes" },
-  "jumunjin-market": { "name": "Jumunjin Fish Market", "desc": "Seasonal raw fish and seafood" },
-  "sacheon-mulhoe": { "name": "Sacheonjin Port Mulhoe Street", "desc": "Alley of cold raw-fish soup (mulhoe) restaurants by the port" },
-  "jeongdongjin-food": { "name": "Jeongdongjin Station Restaurant Street", "desc": "Restaurants in front of the station" },
-  "anmok-hoe": { "name": "Namhangjin Raw Fish Street", "desc": "Raw fish with a sea view" },
-  "chamsori": { "name": "Chamsori Gramophone & Edison Museum", "desc": "Gramophones and Edison's inventions on display" },
-  "gwana": { "name": "Gangneung Daedohobu Government Office", "desc": "Government office buildings from the Goryeo to Joseon eras" },
-  "wolhwa": { "name": "Wolhwa Street", "desc": "Walking path and night market on a former railway line" },
-  "gasiyeon": { "name": "Gasiyeon Wetland", "desc": "Wetland walk along a boardwalk" },
-  "jumunjin-lighthouse": { "name": "Jumunjin Lighthouse", "desc": "Gangwon's first lighthouse · free" },
-  "songjeong": { "name": "Songjeong Pine Forest", "desc": "Pine forest path along the beach" },
-  "mukho-port": { "name": "Mukho Port Fish Market", "desc": "Seasonal raw fish and mulhoe" },
-  "samcheok-cable": { "name": "Samcheok Sea Cable Car", "desc": "874 m cable car over the sea at Jangho Port" },
-  "jangho": { "name": "Jangho Port", "desc": "Small port with clear water" },
-  "sokcho-market": { "name": "Sokcho Tourist & Fishery Market", "desc": "Dakgangjeong fried chicken, squid sundae and raw fish" },
-  "ayajin": { "name": "Ayajin Beach", "desc": "Rocks and emerald water" },
-  "jukdo": { "name": "Jukdo Beach", "desc": "Surf village with a street of cafes" },
-  "dongmyeong": { "name": "Dongmyeong Port Live Fish Center", "desc": "Raw fish center next to Yeonggeumjeong" },
-  "geojin": { "name": "Geojin Port Restaurant Street", "desc": "Gomchi-guk (snailfish soup) and braised fish" },
-  "chilsung": { "name": "Chilsung Shipyard", "desc": "Lakeside cafe in a converted old shipyard" },
-  "goseokjeong": { "name": "Goseokjeong Pavilion", "desc": "Rock pavilion in the Hantangang River gorge" },
-  "dongsong": { "name": "Cheorwon Dongsong Restaurant Street", "desc": "Restaurants serving Cheorwon Odae rice" },
-  "hwacheon-food": { "name": "Hwacheon-eup Restaurant Street", "desc": "Fish porridge (eojuk) and makguksu noodles" },
-  "gangchon": { "name": "Gangchon Dakgalbi Street", "desc": "Dakgalbi and makguksu on the way to Nami Island" },
-  "gamjabat": { "name": "Cafe Gamjabat", "desc": "Garden cafe famous for its potato bread" },
-  "ohsam": { "name": "Hoenggye Osam Bulgogi Street", "desc": "Squid and pork belly bulgogi (osam bulgogi)" },
-  "arirang-market": { "name": "Jeongseon Arirang Market", "desc": "Gondeure rice and kotdeungchigi noodles · 5-day market on dates ending in 2 and 7" },
-  "yw-market": { "name": "Yeongwol Seobu Market", "desc": "Buckwheat crepes (memil jeonbyeong) and olchaengi noodles" },
-  "windhill": { "name": "Maebongsan Wind Hill", "desc": "Wind turbines and highland cabbage fields" },
-  "bongpyeong": { "name": "Bongpyeong Buckwheat Food Village", "desc": "Buckwheat makguksu and buckwheat crepes" },
-  "jinbu-food": { "name": "Jinbu Downtown Restaurants", "desc": "Mountain-vegetable set meals" },
-  "taebaek-hanwoo": { "name": "Taebaek Hanwoo Silbi Street", "desc": "Korean beef grilled over coal briquettes" },
-  "museum-san": { "name": "Museum SAN", "desc": "Art museum designed by Tadao Ando · the James Turrell wing requires a reservation" },
-  "hanwoo": { "name": "Hoengseong Hanwoo Restaurants", "desc": "Korean beef (hanwoo) restaurants in Hoengseong-eup" },
-  "guryong-food": { "name": "Guryongsa Entrance Restaurants", "desc": "Mountain-vegetable bibimbap and acorn jelly" },
-  "ganhyeon-food": { "name": "Ganhyeon Tourist Area Restaurants", "desc": "Restaurants below Sogeumsan" },
-  "hoengseong-lake": { "name": "Hoengseong Lake Trail", "desc": "Forest trail around the lake" },
-  "f-ginkgo": { "name": "Wonju Bangye-ri Ginkgo Festival", "desc": "Autumn colors of an 800-year-old ginkgo tree" },
-  "t-christmas": { "name": "Gangneung Christmas Winter Festival", "desc": "Light festival on Wolhwa Street and Anmok Beach" },
-  "t-sunrise": { "name": "Jeongdongjin & Gyeongpo New Year Sunrise", "desc": "Sunrise on January 1" },
-  "t-hongcheon": { "name": "Hongcheon River Kkongkkong Festival", "desc": "Ice fishing on the Hongcheon River" },
-  "t-daegwallyeong": { "name": "Daegwallyeong Snow Festival", "desc": "Snow sculptures and snow sledding" },
-  "t-taebaek": { "name": "Taebaeksan Snow Festival", "desc": "Snow sculptures in Taebaeksan National Park" },
-  "t-yeongwol": { "name": "Yeongwol Danjong Cultural Festival", "desc": "Reenactment of King Danjong's state funeral" },
-  "t-mime": { "name": "Chuncheon Mime Festival", "desc": "Street performance festival" },
-  "t-rose": { "name": "Samcheok Rose Festival", "desc": "Osipcheon Rose Park" },
-  "t-dano": { "name": "Gangneung Danoje Festival", "desc": "UNESCO Intangible Cultural Heritage of Humanity" },
-  "t-corn": { "name": "Hongcheon Waxy Corn Festival", "desc": "Corn activities and food" },
-  "t-tomato": { "name": "Hwacheon Tomato Festival", "desc": "Tomato pool" },
-  "t-dakgalbi": { "name": "Chuncheon Dakgalbi & Makguksu Festival", "desc": "Dakgalbi and makguksu food" },
-  "t-hyoseok": { "name": "Pyeongchang Hyoseok Cultural Festival", "desc": "Bongpyeong buckwheat flower fields" },
-  "t-dancing": { "name": "Wonju Dynamic Dancing Carnival", "desc": "Street parade dance festival" },
-  "t-coffee": { "name": "Gangneung Coffee Festival", "desc": "Coffee street and hand-drip coffee experiences" },
-  "t-arirang": { "name": "Jeongseon Arirang Festival", "desc": "Arirang performances" },
-  "t-hanwoo": { "name": "Hoengseong Hanwoo Festival", "desc": "Hanwoo (Korean beef) food" },
-  "t-salmon": { "name": "Yangyang Salmon Festival", "desc": "Catch salmon by hand in Namdaecheon Stream" },
-  "t-seorak": { "name": "Sokcho Seorak Cultural Festival", "desc": "Sokcho's signature cultural festival" },
-  "anmok-coffee": { "desc": "About 30 ocean-view cafes" },
-  "chodang-tofu": { "desc": "Chodang tofu set with seawater" },
-  "heo-park": { "desc": "Birthplace site and memorial hall in a pine forest" },
-  "haerang": { "desc": "Free observatory walkway over the sea · closed when waves are high" },
-  "nami": { "desc": "Metasequoia island reached by ferry" },
-  "kimyoujeong": { "desc": "Village of the short story \"Spring, Spring\" (Bombom)" },
-  "samyang": { "desc": "Grassland with the East Sea observatory and wind turbines" },
-  "cheongnyeongpo": { "desc": "King Danjong's place of exile, reached by ferry" },
-  "ganhyeon-park": { "desc": "Riverside walk along the Seomgang River" },
-  "f-hwacheon": { "desc": "Ice fishing and bare-hand trout catching" }
+  "namhangjin-beach": {
+    "name": "Namhangjin Beach",
+    "desc": "Quiet beach with the Solbaram Bridge"
+  },
+  "sea-trail": {
+    "name": "Jeongdong-Simgok Badabuchae-gil Trail",
+    "desc": "2.9 km clifftop coastal trail · closed during high-wave warnings"
+  },
+  "terarosa": {
+    "name": "Terarosa Coffee Factory (Gangneung Main Store)",
+    "desc": "Roastery and coffee museum"
+  },
+  "bohemian": {
+    "name": "Bohemian Roasters Park Yi-chu Coffee Factory",
+    "desc": "Hand-drip coffee from a first-generation Korean barista"
+  },
+  "toetmaru": {
+    "name": "Cafe Toetmaru",
+    "desc": "Chodang cafe famous for its black sesame latte"
+  },
+  "central-market": {
+    "name": "Gangneung Jungang Market",
+    "desc": "Dakgangjeong fried chicken, jang-kalguksu noodles and potato pancakes"
+  },
+  "jumunjin-market": {
+    "name": "Jumunjin Fish Market",
+    "desc": "Seasonal raw fish and seafood"
+  },
+  "sacheon-mulhoe": {
+    "name": "Sacheonjin Port Mulhoe Street",
+    "desc": "Alley of cold raw-fish soup (mulhoe) restaurants by the port"
+  },
+  "jeongdongjin-food": {
+    "name": "Jeongdongjin Station Restaurant Street",
+    "desc": "Restaurants in front of the station"
+  },
+  "anmok-hoe": {
+    "name": "Namhangjin Raw Fish Street",
+    "desc": "Raw fish with a sea view"
+  },
+  "chamsori": {
+    "name": "Chamsori Gramophone & Edison Museum",
+    "desc": "Gramophones and Edison's inventions on display"
+  },
+  "gwana": {
+    "name": "Gangneung Daedohobu Government Office",
+    "desc": "Government office buildings from the Goryeo to Joseon eras"
+  },
+  "wolhwa": {
+    "name": "Wolhwa Street",
+    "desc": "Walking path and night market on a former railway line"
+  },
+  "gasiyeon": {
+    "name": "Gasiyeon Wetland",
+    "desc": "Wetland walk along a boardwalk"
+  },
+  "jumunjin-lighthouse": {
+    "name": "Jumunjin Lighthouse",
+    "desc": "Gangwon's first lighthouse · free"
+  },
+  "songjeong": {
+    "name": "Songjeong Pine Forest",
+    "desc": "Pine forest path along the beach"
+  },
+  "mukho-port": {
+    "name": "Mukho Port Fish Market",
+    "desc": "Seasonal raw fish and mulhoe"
+  },
+  "samcheok-cable": {
+    "name": "Samcheok Sea Cable Car",
+    "desc": "874 m cable car over the sea at Jangho Port"
+  },
+  "jangho": {
+    "name": "Jangho Port",
+    "desc": "Small port with clear water"
+  },
+  "sokcho-market": {
+    "name": "Sokcho Tourist & Fishery Market",
+    "desc": "Dakgangjeong fried chicken, squid sundae and raw fish"
+  },
+  "ayajin": {
+    "name": "Ayajin Beach",
+    "desc": "Rocks and emerald water"
+  },
+  "jukdo": {
+    "name": "Jukdo Beach",
+    "desc": "Surf village with a street of cafes"
+  },
+  "dongmyeong": {
+    "name": "Dongmyeong Port Live Fish Center",
+    "desc": "Raw fish center next to Yeonggeumjeong"
+  },
+  "geojin": {
+    "name": "Geojin Port Restaurant Street",
+    "desc": "Gomchi-guk (snailfish soup) and braised fish"
+  },
+  "chilsung": {
+    "name": "Chilsung Shipyard",
+    "desc": "Lakeside cafe in a converted old shipyard"
+  },
+  "goseokjeong": {
+    "name": "Goseokjeong Pavilion",
+    "desc": "Rock pavilion in the Hantangang River gorge"
+  },
+  "dongsong": {
+    "name": "Cheorwon Dongsong Restaurant Street",
+    "desc": "Restaurants serving Cheorwon Odae rice"
+  },
+  "hwacheon-food": {
+    "name": "Hwacheon-eup Restaurant Street",
+    "desc": "Fish porridge (eojuk) and makguksu noodles"
+  },
+  "gangchon": {
+    "name": "Gangchon Dakgalbi Street",
+    "desc": "Dakgalbi and makguksu on the way to Nami Island"
+  },
+  "gamjabat": {
+    "name": "Cafe Gamjabat",
+    "desc": "Garden cafe famous for its potato bread"
+  },
+  "ohsam": {
+    "name": "Hoenggye Osam Bulgogi Street",
+    "desc": "Squid and pork belly bulgogi (osam bulgogi)"
+  },
+  "arirang-market": {
+    "name": "Jeongseon Arirang Market",
+    "desc": "Gondeure rice and kotdeungchigi noodles · 5-day market on dates ending in 2 and 7"
+  },
+  "yw-market": {
+    "name": "Yeongwol Seobu Market",
+    "desc": "Buckwheat crepes (memil jeonbyeong) and olchaengi noodles"
+  },
+  "windhill": {
+    "name": "Maebongsan Wind Hill",
+    "desc": "Wind turbines and highland cabbage fields"
+  },
+  "bongpyeong": {
+    "name": "Bongpyeong Buckwheat Food Village",
+    "desc": "Buckwheat makguksu and buckwheat crepes"
+  },
+  "jinbu-food": {
+    "name": "Jinbu Downtown Restaurants",
+    "desc": "Mountain-vegetable set meals"
+  },
+  "taebaek-hanwoo": {
+    "name": "Taebaek Hanwoo Silbi Street",
+    "desc": "Korean beef grilled over coal briquettes"
+  },
+  "museum-san": {
+    "name": "Museum SAN",
+    "desc": "Art museum designed by Tadao Ando · the James Turrell wing requires a reservation"
+  },
+  "hanwoo": {
+    "name": "Hoengseong Hanwoo Restaurants",
+    "desc": "Korean beef (hanwoo) restaurants in Hoengseong-eup"
+  },
+  "guryong-food": {
+    "name": "Guryongsa Entrance Restaurants",
+    "desc": "Mountain-vegetable bibimbap and acorn jelly"
+  },
+  "ganhyeon-food": {
+    "name": "Ganhyeon Tourist Area Restaurants",
+    "desc": "Restaurants below Sogeumsan"
+  },
+  "hoengseong-lake": {
+    "name": "Hoengseong Lake Trail",
+    "desc": "Forest trail around the lake"
+  },
+  "f-ginkgo": {
+    "name": "Wonju Bangye-ri Ginkgo Festival",
+    "desc": "Autumn colors of an 800-year-old ginkgo tree"
+  },
+  "t-christmas": {
+    "name": "Gangneung Christmas Winter Festival",
+    "desc": "Light festival on Wolhwa Street and Anmok Beach"
+  },
+  "t-sunrise": {
+    "name": "Jeongdongjin & Gyeongpo New Year Sunrise",
+    "desc": "Sunrise on January 1"
+  },
+  "t-hongcheon": {
+    "name": "Hongcheon River Kkongkkong Festival",
+    "desc": "Ice fishing on the Hongcheon River"
+  },
+  "t-daegwallyeong": {
+    "name": "Daegwallyeong Snow Festival",
+    "desc": "Snow sculptures and snow sledding"
+  },
+  "t-taebaek": {
+    "name": "Taebaeksan Snow Festival",
+    "desc": "Snow sculptures in Taebaeksan National Park"
+  },
+  "t-yeongwol": {
+    "name": "Yeongwol Danjong Cultural Festival",
+    "desc": "Reenactment of King Danjong's state funeral"
+  },
+  "t-mime": {
+    "name": "Chuncheon Mime Festival",
+    "desc": "Street performance festival"
+  },
+  "t-rose": {
+    "name": "Samcheok Rose Festival",
+    "desc": "Osipcheon Rose Park"
+  },
+  "t-dano": {
+    "name": "Gangneung Danoje Festival",
+    "desc": "UNESCO Intangible Cultural Heritage of Humanity"
+  },
+  "t-corn": {
+    "name": "Hongcheon Waxy Corn Festival",
+    "desc": "Corn activities and food"
+  },
+  "t-tomato": {
+    "name": "Hwacheon Tomato Festival",
+    "desc": "Tomato pool"
+  },
+  "t-dakgalbi": {
+    "name": "Chuncheon Dakgalbi & Makguksu Festival",
+    "desc": "Dakgalbi and makguksu food"
+  },
+  "t-hyoseok": {
+    "name": "Pyeongchang Hyoseok Cultural Festival",
+    "desc": "Bongpyeong buckwheat flower fields"
+  },
+  "t-dancing": {
+    "name": "Wonju Dynamic Dancing Carnival",
+    "desc": "Street parade dance festival"
+  },
+  "t-coffee": {
+    "name": "Gangneung Coffee Festival",
+    "desc": "Coffee street and hand-drip coffee experiences"
+  },
+  "t-arirang": {
+    "name": "Jeongseon Arirang Festival",
+    "desc": "Arirang performances"
+  },
+  "t-hanwoo": {
+    "name": "Hoengseong Hanwoo Festival",
+    "desc": "Hanwoo (Korean beef) food"
+  },
+  "t-salmon": {
+    "name": "Yangyang Salmon Festival",
+    "desc": "Catch salmon by hand in Namdaecheon Stream"
+  },
+  "t-seorak": {
+    "name": "Sokcho Seorak Cultural Festival",
+    "desc": "Sokcho's signature cultural festival"
+  },
+  "anmok-coffee": {
+    "desc": "About 30 ocean-view cafes"
+  },
+  "chodang-tofu": {
+    "desc": "Chodang tofu set with seawater"
+  },
+  "heo-park": {
+    "desc": "Birthplace site and memorial hall in a pine forest"
+  },
+  "haerang": {
+    "desc": "Free observatory walkway over the sea · closed when waves are high"
+  },
+  "nami": {
+    "desc": "Metasequoia island reached by ferry"
+  },
+  "kimyoujeong": {
+    "desc": "Village of the short story \"Spring, Spring\" (Bombom)"
+  },
+  "samyang": {
+    "desc": "Grassland with the East Sea observatory and wind turbines"
+  },
+  "cheongnyeongpo": {
+    "desc": "King Danjong's place of exile, reached by ferry"
+  },
+  "ganhyeon-park": {
+    "desc": "Riverside walk along the Seomgang River"
+  },
+  "f-hwacheon": {
+    "desc": "Ice fishing and bare-hand trout catching"
+  },
+  "k-gn-cherry": {
+    "name": "Gangneung Gyeongpo Cherry Blossom Festival",
+    "desc": "Gyeongpo Wetland Square"
+  },
+  "k-gn-heritage-night": {
+    "name": "Gangneung National Heritage Night",
+    "desc": "Gangneung Daedohobu Government Office, Seobu Market and Myeongju-dong"
+  },
+  "k-gn-noodle": {
+    "name": "Gangneung Noodle Festival",
+    "desc": "Wolhwa Street"
+  },
+  "k-gn-ojuk-bread": {
+    "name": "Gangneung Bread Village Ojuk",
+    "desc": "Ojuk Hanok Village"
+  },
+  "k-gn-beer": {
+    "name": "Gangneung Beach Beer Festival",
+    "desc": "Gyeongpo Beach Central Square"
+  },
+  "k-gn-pork": {
+    "name": "Gangwon Korean Pork Festa",
+    "desc": "Wolhwa Street"
+  },
+  "k-gn-summer": {
+    "name": "Gyeongpo Summer Festival",
+    "desc": "Gyeongpo Beach special stage and Central Square"
+  },
+  "k-gn-puppet": {
+    "name": "Myeongju Puppet Festival",
+    "desc": "Myeongju Art Madang"
+  },
+  "k-dh-lavender": {
+    "name": "Mureung Byeolyucheonji Lavender Festival",
+    "desc": "Mureung Byeolyucheonji, Donghae"
+  },
+  "k-gn-bread": {
+    "name": "Gangneung Bread Festa",
+    "desc": "Gangneung Daedohobu Government Office"
+  },
+  "f-gn-dandandan": {
+    "name": "Gangneung Dandandan Festival",
+    "desc": "Gangneung Danoje Training Center"
+  },
+  "k-sc-summer": {
+    "name": "Sokcho Summer Festival",
+    "desc": "Sokcho Beach"
+  },
+  "k-sc-displaced": {
+    "name": "Displaced People's Culture Festival",
+    "desc": "Sokcho Expo Lawn Square"
+  },
+  "k-yy-bonfire": {
+    "name": "Yangyang Naksan Beach Moonlight Bonfire Festival",
+    "desc": "Naksan Beach Zone B · advance booking"
+  },
+  "k-yy-cherry": {
+    "name": "Yangyang Namdaecheon Cherry Blossom Festival",
+    "desc": "Yangyang Songi Sculpture Park"
+  },
+  "k-sc-yeongnang-cherry": {
+    "name": "Yeongnangho Lake Cherry Blossom Festival",
+    "desc": "Yeongnangho Lake lawn"
+  },
+  "k-ij-flower": {
+    "name": "Inje Autumn Flower Festival",
+    "desc": "Yongdae Tourist Site, Buk-myeon, Inje"
+  },
+  "k-gs-octopus": {
+    "name": "Goseong Jeodo Giant Octopus Festival",
+    "desc": "Daejin Port"
+  },
+  "k-cw-mediaart": {
+    "name": "National Heritage Media Art: Cheorwon Labor Party HQ",
+    "desc": "Cheorwon Labor Party HQ and Cheorwon History & Culture Park"
+  },
+  "k-yg-belly": {
+    "name": "Yanggu Navel Festival (Center of Korea)",
+    "desc": "Yanggu Seocheon Leisure Sports Park"
+  },
+  "k-cw-yeogijeogi": {
+    "name": "Yeogijeogi Festival in Cheorwon",
+    "desc": "Gimhwa Eco Sports Park, Cheorwon"
+  },
+  "k-cc-puppet": {
+    "name": "Chuncheon Puppet Festival",
+    "desc": "Chuncheon Puppet Theater"
+  },
+  "k-cc-military": {
+    "name": "K-Military Festival: Battle of Chuncheon",
+    "desc": "Chuncheon Waterfront Park"
+  },
+  "f-cw-ice": {
+    "name": "Cheorwon Hantangang River Ice Trekking Festival",
+    "desc": "Ice trekking on the Hantangang River water trail · ₩10,000 entry (₩5,000 back in Cheorwon gift vouchers)"
+  },
+  "k-yg-gomchi": {
+    "name": "Yanggu Gomchi Festival",
+    "desc": "Yanggu Leisure Sports Park"
+  },
+  "k-cc-sul": {
+    "name": "Chuncheon Sul (Liquor) Festa",
+    "desc": "KT&G Sangsang Madang Chuncheon · mini edition in June"
+  },
+  "k-cc-water": {
+    "name": "Chuncheon Summer Water Festival",
+    "desc": "Chuncheon Waterfront Park · paid entry"
+  },
+  "k-hc-sannamul": {
+    "name": "Hongcheon Wild Greens Festival",
+    "desc": "Tori Forest, Urban Forest Park"
+  },
+  "k-hc-beer": {
+    "name": "Hongcheon River Starlight Music & Beer Festival",
+    "desc": "Tori Forest, Urban Forest Park"
+  },
+  "k-js-duwibong": {
+    "name": "Duwibong Azalea & Mountain Range Festival",
+    "desc": "Daebak Market and Dangok Valley, Sindong-eup"
+  },
+  "k-js-heritage-night": {
+    "name": "Jeongseon National Heritage Night",
+    "desc": "Jeongseon-eup"
+  },
+  "k-js-jeonbyeong": {
+    "name": "Jeongseon Buckwheat Crepe Festival",
+    "desc": "Jeongseon Arirang Market"
+  },
+  "k-js-skytrail": {
+    "name": "Sky Forest Trail Walking Festival",
+    "desc": "Jeongseon Sky Forest Trail · entry fee"
+  },
+  "k-yw-photo": {
+    "name": "Donggang International Photo Festival",
+    "desc": "Donggang Museum of Photography · closed Mondays"
+  },
+  "k-js-coal": {
+    "name": "Coal Mining Culture Festival",
+    "desc": "Sabuk-eup (M650 Museum and 650 Street)"
+  },
+  "k-tb-sannamul": {
+    "name": "Taebaek Heavenly Wild Greens Festival",
+    "desc": "Jangseong Tantan Madang"
+  },
+  "k-tb-sunflower": {
+    "name": "Taebaek Sunflower Festival",
+    "desc": "Taebaek Sunflower Festival grounds · paid entry"
+  },
+  "k-tb-festival": {
+    "name": "Taebaek Festival",
+    "desc": "Around Taebaek City Hall"
+  },
+  "k-pc-heat": {
+    "name": "Pyeongchang Heat-Hunting Festival",
+    "desc": "Daehwa-myeon festival grounds · paid entry"
+  },
+  "k-pc-music": {
+    "name": "Music in PyeongChang",
+    "desc": "Alpensia Concert Hall and Daegwallyeong Music Tent"
+  },
+  "k-wj-naora": {
+    "name": "Naora Show",
+    "desc": "Naora Show Plaza in Sogeumsan Grand Valley · evenings"
+  },
+  "k-hs-tomato": {
+    "name": "Dunnae Highland Tomato Festival",
+    "desc": "Dunnae Sports Park · tomato pool ₩15,000"
+  },
+  "k-wj-samto": {
+    "name": "Samto Festival",
+    "desc": "Wonju Sports Complex"
+  },
+  "k-wj-heritage-night": {
+    "name": "Wonju National Heritage Night",
+    "desc": "Gangwon Gamyeong (provincial office)"
+  },
+  "k-wj-sweetpotato": {
+    "name": "Chiaksan Sweet Potato Festival",
+    "desc": "Ganhyeon Tourist Area parking lot 3"
+  },
+  "k-wj-poppy": {
+    "name": "Wonju Yongsugol Poppy Festival",
+    "desc": "Poppy festival grounds · paid entry"
+  },
+  "k-hs-summernight": {
+    "name": "Hoengseong Summer Night Festa",
+    "desc": "Seomgang riverside, Hoengseong"
+  },
+  "k-hs-lake": {
+    "name": "Hoengseong Lake Trail Festival",
+    "desc": "Manghyang Hill and Hoengseong Lake Trail section 5 · paid entry"
+  },
+  "k-wj-rooftop": {
+    "name": "Wonju Rooftop Film Festival",
+    "desc": "Rooftop of the Korea Tourism Organization HQ"
+  }
 }
