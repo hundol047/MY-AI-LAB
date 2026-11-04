@@ -321,10 +321,49 @@ function loadImages() {
     if (photoObserver) photoObserver.observe(el); else { photoQueue.push(el); pumpPhotos(); }
   });
 }
-// 첫 화면 히어로: photos.json의 경포해변 사진
+/* ---------- 첫 화면 히어로: 오늘의 강원 ----------
+   검증된 사진(photos.json) 중 풍경으로 보기 좋은 곳만 골라 하루에 한 장씩 (한국 시간 자정에 바뀜).
+   큰 간판·조형물·실내·저화질 사진은 뺐다. 같은 날엔 누구에게나 같은 사진이고, 비슷한 바다가
+   이어지지 않게 고정된 순서로 섞어 돌린다. 사진은 다 받은 뒤 서서히 나타난다. */
+const HERO_IDS = [
+  "sacheon-beach", "jeongdongjin", "seongyojang", "gyeongpodae", "heo-park", "gwana", "haslla", "time-museum",
+  "gyeongpo-lake", "gasiyeon", "jumunjin-lighthouse", "chuam", "dojjaebi", "haerang", "samcheok-cable", "jangho",
+  "sokcho-beach", "yeonggeumjeong", "cheongcho", "seorak-cable", "hwajinpo", "ayajin", "hajodae", "birch",
+  "nami", "soyang-skywalk", "cc-museum", "gongjicheon", "hantan-trail", "goseokjeong", "hwacheon-river", "samak-cable",
+  "labor-party", "jiktang", "woljeongsa", "cheongnyeongpo", "hanbando", "hwangji", "windhill", "bangyeri", "hoengseong-lake",
+];
+function heroOrder() {
+  // 고정 씨앗으로 섞기 (mulberry32): 배포할 때마다 순서가 바뀌지 않게
+  let a = 20261104;
+  const rnd = () => { a |= 0; a = (a + 0x6d2b79f5) | 0; let x = Math.imul(a ^ (a >>> 15), 1 | a); x = (x + Math.imul(x ^ (x >>> 7), 61 | x)) ^ x; return ((x ^ (x >>> 14)) >>> 0) / 4294967296; };
+  const list = [...HERO_IDS];
+  for (let i = list.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+  return list;
+}
+const kstDay = () => Math.floor((Date.now() + 9 * 3600e3) / 864e5); // 한국 시간 기준 날짜 번호
+let heroPlace = null;
+function heroCaption() {
+  const el = $("#heroCaption");
+  if (!heroPlace) { el.hidden = true; return; }
+  el.hidden = false;
+  el.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M12 2a7 7 0 0 0-7 7c0 5.2 7 13 7 13s7-7.8 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6.5a2.5 2.5 0 0 1 0 5z"/></svg>${t("오늘의 강원")} · ${esc(placeName(heroPlace))}`;
+}
 (async () => {
-  const src = await photoFor(PLACES.find((p) => p.id === "gyeongpo-beach"));
-  if (src) $("#hero").style.setProperty("--hero", `url("${src.replace(/\/\d+px-/, "/1280px-")}")`);
+  await bakedReady;
+  const order = heroOrder().filter((id) => baked[id]);
+  if (!order.length) return;
+  const place = PLACES.find((p) => p.id === order[kstDay() % order.length]);
+  const src = baked[place.id];
+  const img = new Image();
+  img.decoding = "async";
+  img.onload = () => {
+    const layer = $("#heroPhoto");
+    layer.style.backgroundImage = `url("${src}")`;
+    layer.classList.add("on");
+    heroPlace = place;
+    heroCaption();
+  };
+  img.src = src;
 })();
 
 /* ---------- 축제 ---------- */
@@ -784,6 +823,7 @@ async function switchLang(l) {
   setLang(l);
   if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000));
   applyStatic();
+  heroCaption();
   if (trip && !$("#result").hidden) render();
   renderPast();
 }

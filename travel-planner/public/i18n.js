@@ -26,6 +26,7 @@ const EN = {
   "링크 공유": "Share",
   "캘린더 저장": "Calendar",
   "강원 여행 일정,<br>고르기만 하세요": "Your Gangwon trip,<br>just pick and go",
+  "오늘의 강원": "Today in Gangwon",
   "예) 주말에 부모님이랑 속초 1박": "e.g. Sokcho with my parents this weekend, 1 night",
   "만들기": "Create",
   "어디로": "Where",

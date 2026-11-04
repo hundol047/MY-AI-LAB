@@ -65,9 +65,20 @@ button { cursor: pointer; }
   position: relative; height: 220px; margin: 16px 0 -40px; border-radius: 22px; overflow: hidden;
   background: var(--hero, none) center/cover, linear-gradient(135deg, #0b5e6b 0%, #2a8fa0 55%, #f2c27b 100%);
 }
-.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.05) 30%, rgba(0,0,0,.45)); }
+.hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,.05) 45%, rgba(0,0,0,.5)); }
+/* 오늘의 강원: 사진을 다 받은 뒤 서서히 (색 그라데이션 위로) */
+.hero-photo { position: absolute; inset: 0; background: center/cover no-repeat; opacity: 0; transform: scale(1.04); transition: opacity .9s ease, transform 6s ease-out; }
+.hero-photo.on { opacity: 1; transform: scale(1); }
+.hero-caption {
+  position: absolute; top: 12px; right: 12px; z-index: 1; margin: 0; max-width: calc(100% - 24px);
+  display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 999px;
+  background: rgba(0, 0, 0, .32); backdrop-filter: blur(6px); color: #fff; font-size: 12px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; animation: heroCap .6s .4s ease both;
+}
+@keyframes heroCap { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .hero-photo, .hero-photo.on { transition: none; transform: none; } .hero-caption { animation: none; } }
 .hero-text { position: absolute; left: 22px; bottom: 56px; z-index: 1; color: #fff; }
-.hero h1 { margin: 0; font-size: 28px; line-height: 1.25; letter-spacing: -.03em; font-weight: 800; }
+.hero h1 { margin: 0; font-size: 28px; line-height: 1.25; letter-spacing: -.03em; font-weight: 800; text-shadow: 0 1px 14px rgba(0, 0, 0, .35), 0 0 2px rgba(0, 0, 0, .2); }
 
 .form { position: relative; padding: 22px 20px; display: grid; gap: 22px; }
 .field { display: grid; gap: 10px; }
