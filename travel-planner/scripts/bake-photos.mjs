@@ -3,7 +3,7 @@
 // 실행: TOUR_API_KEY=Decoding키 node scripts/bake-photos.mjs
 //  - 응답은 .cache/tour/에 저장되어 다시 돌려도 호출하지 않는다 (새로 받으려면 폴더 삭제)
 //  - 수동 검토로 틀린 매칭을 발견하면 아래 REJECT에 contentid를 넣고 다시 돌린다
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { PLACES, FESTIVALS } from "../public/data.js";
 import { tourPhotoMatch, MAX_KM } from "./photo-sources.mjs";
 
@@ -41,6 +41,17 @@ for (const p of ordered) {
   } else missing.push({ p, why: r.match ? "사진이 열리지 않거나 다른 카드와 겹침" : r.registered ? "관광공사에 등록은 있으나 사진이 없음" : r.rejected.length ? "2km 안에 이름이 맞는 사진 없음 (아래 버린 후보 참고)" : "2km 안에 이름이 맞는 결과 없음" });
   for (const x of r.rejected) dropped.push({ p, ...x });
   process.stdout.write(url ? "." : "x");
+}
+// 관광공사 사진이 없는 곳: 직접 찍었거나 사용 허락을 받은 사진(scripts/photos-manual.json, 파일은 public/img/)
+const manual = JSON.parse(await readFile(new URL("./photos-manual.json", import.meta.url), "utf8").catch(() => "{}"));
+for (const p of targets) {
+  const m = manual[p.id];
+  if (photos[p.id] || !m?.src) continue;
+  const ok = await readFile(new URL(`../public/${m.src}`, import.meta.url)).then(() => true).catch(() => false);
+  if (!ok) { console.log(`\n!  ${p.id}: ${m.src} 파일이 없음`); continue; }
+  photos[p.id] = m.src;
+  rows.push({ p, m: { title: m.credit || "직접 넣은 사진", km: 0, why: "사람이 넣은 사진" }, how: `직접 넣은 사진(${m.credit || "출처 미기재"})` });
+  const i = missing.findIndex((x) => x.p === p); if (i >= 0) missing.splice(i, 1);
 }
 // photos.json은 data.js 순서로
 const sorted = Object.fromEntries(targets.filter((p) => photos[p.id]).map((p) => [p.id, photos[p.id]]));
