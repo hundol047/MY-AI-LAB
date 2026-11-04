@@ -1,0 +1,49 @@
+# 매주 월요일 아침(한국 시간 09:17) 한국관광공사 행사정보에서 강원 축제 날짜를 확인하고,
+# 바뀐 게 있으면 검토용 PR을 만든다 (바로 반영하지 않음).
+# 준비: 저장소 Settings → Secrets and variables → Actions → New repository secret
+#       이름 TOUR_API_KEY, 값은 공공데이터포털 한국관광공사 국문 관광정보 서비스 Decoding 키
+# 예약 실행은 기본 브랜치(main)에 이 파일이 있어야 동작한다. Actions 탭에서 "Run workflow"로 바로 돌릴 수도 있다.
+name: 축제 날짜 갱신
+
+on:
+  schedule:
+    - cron: "17 0 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: travel-planner
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: 키 확인
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: |
+          if [ -z "$TOUR_API_KEY" ]; then echo "::error::저장소 Secrets에 TOUR_API_KEY를 넣어 주세요"; exit 1; fi
+      - name: 축제 날짜 갱신
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/update-festivals.mjs --write
+      - name: 일정 엔진 테스트 (바뀐 데이터로)
+        run: npm test
+      - name: 검토용 PR 만들기 (바뀐 게 있을 때만)
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/update-festivals
+          commit-message: "Update festival dates from KTO event data"
+          title: "축제 날짜 자동 갱신"
+          body-path: travel-planner/reports/festivals.md
+          add-paths: |
+            travel-planner/public/data.js
+            travel-planner/reports/festivals.md
+          delete-branch: true

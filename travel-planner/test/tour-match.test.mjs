@@ -22,6 +22,10 @@ assert.ok(!ok(P("안목 커피거리", true), "하슬라가배", "39"), "거리 
 
 assert.ok(!ok(P("보헤미안 박이추커피 사천점"), "보헤미안박이추커피 본점"), "다른 지점");
 assert.ok(ok(P("테라로사 커피공장 강릉본점"), "테라로사 커피공장"), "지점명 없는 등록");
+// 축제 날짜 갱신은 이름 같음·앞 지역명만 인정 (유사도 매칭은 다른 축제를 붙인다)
+const fj = judge({ name: "양양 연어축제" }, "평창송어축제", "15");
+assert.ok(!(fj.ok && fj.score >= 2 && !/유사/.test(fj.why)), "연어축제 ≠ 송어축제");
+assert.ok(judge({ name: "철원 한탄강 얼음트레킹 축제" }, "철원 한탄강 얼음트레킹 축제", "15").score >= 2);
 assert.equal(koreanInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "환선굴 (대이리 동굴지대)");
 assert.equal(englishInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "Hwanseongul Cave (Daei-ri Cave System)");
 assert.equal(englishInTitle("CU Gangneung Gyeongpo Hana Branch[Tax Refund Shop](CU 경포하나점)"), "CU Gangneung Gyeongpo Hana Branch");
