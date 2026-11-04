@@ -46,6 +46,30 @@ function isOpenDay(p, dateStr) {
   return !p.closed.includes(weekdayOf(dateStr));
 }
 
+// 그날의 실제 운영시간 (계절·요일별 차이 반영)
+export function hoursFor(p, dateStr) {
+  const month = Number(dateStr.split("-")[1]);
+  const wd = weekdayOf(dateStr);
+  const season = (p.seasons || []).find((s) => s.months.includes(month));
+  let [open, close] = season ? season.hours : p.hours;
+  if (p.byDay && p.byDay[wd]) [open, close] = p.byDay[wd];
+  const lastEntry = season ? season.lastEntry : p.lastEntry;
+  return {
+    closedToday: p.closed.includes(wd),
+    open: toMin(open), close: toMin(close),
+    lastEntry: lastEntry ? toMin(lastEntry) : null,
+    breaks: (p.breaks || []).map(([a, b]) => [toMin(a), toMin(b)]),
+  };
+}
+
+// start~finish 방문이 운영시간 안에 들어가는지
+export function fitsHours(h, start, finish) {
+  if (h.closedToday) return false;
+  if (start < h.open || finish > h.close) return false;
+  if (h.lastEntry !== null && start > h.lastEntry) return false;
+  return !h.breaks.some(([a, b]) => start < b && finish > a);
+}
+
 // 사용자 조건에 따른 장소 점수
 function baseScore(p, input, opts, rain) {
   let s = p.pop;
@@ -97,15 +121,22 @@ function slotKind(t, hasLunch, hasDinner, end) {
   return "visit";
 }
 
-function tryPlace(p, from, t, input, opts, end) {
+function stayOf(p, opts) {
+  return Math.round(p.stay * (opts.pace === "relaxed" ? 1.15 : opts.pace === "packed" ? 0.9 : 1));
+}
+
+function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
   const tr = travel(from, p, input.move);
+  if (legMin !== null) tr.min = legMin;
   const arrive = t + tr.min;
-  const open = toMin(p.hours[0]), close = toMin(p.hours[1]);
-  const start = Math.max(arrive, open);
+  const h = hoursFor(p, dateStr);
+  const stay = stayOf(p, opts);
+  let start = Math.max(arrive, h.open);
+  // 브레이크타임에 걸리면 끝난 뒤로
+  for (const [a, b] of h.breaks) if (start < b && start + stay > a) start = Math.max(start, b);
   const wait = start - arrive;
-  const stay = Math.round(p.stay * (opts.pace === "relaxed" ? 1.15 : opts.pace === "packed" ? 0.9 : 1));
   const finish = start + stay;
-  if (wait > MAX_WAIT || finish > close || finish > end + 15) return null;
+  if (wait > MAX_WAIT || finish > end + 15 || !fitsHours(h, start, finish)) return null;
   return { tr, start, finish, wait };
 }
 
@@ -143,7 +174,7 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
   // 확정된 장소 먼저 배치 (시간 재계산)
   for (const id of keep) {
     const p = PLACES.find((x) => x.id === id);
-    const r = tryPlace(p, from, t, input, opts, end);
+    const r = tryPlace(p, from, t, input, opts, end, dateStr);
     if (!r) break;
     const kind = p.cat !== "food" ? "visit" : !hasLunch && r.start < toMin("15:00") ? "lunch" : "dinner";
     commit(p, r, kind);
@@ -174,15 +205,15 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
       if (p.cat === "sea" && seas >= (rain ? 1 : 2)) continue;
       // 점심 시간 직전이면 너무 긴 방문은 점심을 밀어내지 않도록 제한
       if (kind === "visit" && !hasLunch && t < LUNCH[0] && t + 30 + p.stay > LUNCH[1]) continue;
-      const r = tryPlace(p, from, t, input, opts, end);
+      const r = tryPlace(p, from, t, input, opts, end, dateStr);
       if (!r) continue;
       let v = baseScore(p, input, opts, rain);
       v -= r.tr.min * (input.move === "car" ? 0.08 : 0.12);
       v -= r.wait * 0.05;
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);
-      const radius = input.move === "car" ? 7 : 4;
-      if (fromAnchor > radius) v -= (fromAnchor - radius) * (input.move === "car" ? 0.5 : 1);
+      const radius = input.move === "car" ? 6 : 4;
+      if (fromAnchor > radius) v -= (fromAnchor - radius) * (input.move === "car" ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
       if (items.length && items[items.length - 1].place.cat === p.cat) v -= 1.5;
@@ -199,7 +230,7 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
     commit(best.p, best.r, kind);
   }
 
-  return { date: dateStr, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
+  return { date: dateStr, dayIdx, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
 }
 
 export function planTrip(input, opts = {}) {
@@ -241,17 +272,36 @@ function finalize(days) {
   return { days, totals: { places, moveMin, walkKm: Math.round(walkKm * 10) / 10, conflicts: verify(days) } };
 }
 
-// 영업시간·휴무 충돌 검사 (항상 0이어야 함)
+// 영업시간·휴무·입장마감·브레이크타임 충돌 검사 (항상 0이어야 함)
 export function verify(days) {
   let bad = 0;
   for (const d of days) {
     for (const it of d.items) {
-      const p = it.place;
-      if (p.closed.includes(d.weekday)) bad++;
-      if (it.start < toMin(p.hours[0]) || it.end > toMin(p.hours[1])) bad++;
+      if (!fitsHours(hoursFor(it.place, d.date), it.start, it.end)) bad++;
     }
   }
   return bad;
+}
+
+// 실제 도로 이동시간(분)으로 하루 일정 시간을 다시 계산. 운영시간을 지킬 수 없으면 null
+export function retimeDay(day, input, opts, legMins) {
+  const { end } = dayWindow(day.dayIdx ?? 0, input.days);
+  let from = BASE, t = day.items.length ? day.items[0].start - day.items[0].travelMin : 0;
+  const items = [];
+  for (let i = 0; i < day.items.length; i++) {
+    const it = day.items[i];
+    const leg = it.travelMode === "walk" || it.travelMode === "same" ? it.travelMin : legMins[i];
+    // 계획보다 앞당기지는 않고, 도로 사정으로 늦어질 때만 뒤로 민다
+    const r = tryPlace(it.place, from, Math.max(t, it.start - leg), input, opts, end + 60, day.date, leg);
+    if (!r) return null;
+    items.push({ ...it, start: r.start, end: r.finish, travelMin: leg, road: it.travelMode === "car" });
+    from = it.place; t = r.finish;
+  }
+  return { ...day, items, road: true };
+}
+
+export function summarize(days) {
+  return finalize(days);
 }
 
 // 자연어 요청 → 조건 (AI 서버가 없을 때 쓰는 규칙 기반 해석)

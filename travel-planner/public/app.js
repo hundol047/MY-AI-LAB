@@ -1,5 +1,5 @@
-import { planTrip, swapItem, fmt, addDays, parseRequestLocally } from "./planner.js";
-import { PLACES } from "./data.js";
+import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize } from "./planner.js";
+import { PLACES, BASE } from "./data.js";
 
 const $ = (s) => document.querySelector(s);
 const CAT = {
@@ -98,6 +98,7 @@ function rebuild(keepLayout = false) {
   trip = planTrip(state.input, opts);
   render();
   persist();
+  trip.days.forEach((_, i) => applyRoad(i));
 }
 
 /* ---------- 날씨 (예보 범위 안일 때만) ---------- */
@@ -138,7 +139,8 @@ function render() {
   $("#stats").innerHTML = `
     <span>${t.places}곳</span>
     <span>이동 ${minutesLabel(t.moveMin)}</span>
-    <span class="${t.conflicts ? "warn" : "ok"}">${t.conflicts ? `영업시간 충돌 ${t.conflicts}건` : "영업시간·휴무 확인 완료"}</span>`;
+    <span class="${t.conflicts ? "warn" : "ok"}">${t.conflicts ? `영업시간 충돌 ${t.conflicts}건` : "영업시간·휴무 확인 완료"}</span>
+    ${trip.days.every((d) => d.road) && state.input.move === "car" ? `<span>실제 도로 기준</span>` : ""}`;
 
   $("#tabs").innerHTML = trip.days.map((d, i) => {
     const w = weather[d.date];
@@ -160,7 +162,7 @@ function render() {
 function itemHTML(it, i) {
   const p = it.place, c = CAT[p.cat];
   const leg = i === 0 ? `강릉역에서 ${MODE[it.travelMode]} ${it.travelMin}분` : it.travelMode === "same" ? "바로 옆" : `${MODE[it.travelMode]} ${it.travelMin}분`;
-  const hours = p.hours[0] === "00:00" ? "상시 개방" : `운영 ${p.hours[0]}–${p.hours[1]}`;
+  const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>
   <li class="item" data-i="${i}">
@@ -171,7 +173,7 @@ function itemHTML(it, i) {
         <div class="meta"><span class="tag" style="--c:${c.color}">${KIND[it.kind] || c.label}</span>${p.indoor ? `<span class="tag soft">실내</span>` : ""}</div>
         <h3>${p.name}</h3>
         <p>${p.desc}</p>
-        <div class="check">✓ ${hours}</div>
+        <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/to/${encodeURIComponent(p.name)},${p.lat},${p.lng}" target="_blank" rel="noopener">길찾기</a>
         <button class="ghost small" type="button" data-swap="${i}">바꾸기</button>
@@ -180,6 +182,61 @@ function itemHTML(it, i) {
     </article>
   </li>`;
 }
+
+function hoursLabel(p, date) {
+  const h = hoursFor(p, date);
+  if (h.open === 0 && h.close >= 1439) return "상시 개방";
+  if (p.multi) return `가게별 상이 · 대체로 ${fmt(h.open)}–${fmt(h.close)}`;
+  let s = `운영 ${fmt(h.open)}–${fmt(h.close)}`;
+  if (h.lastEntry !== null) s += ` · ${p.cat === "food" || p.cat === "cafe" ? "주문" : "입장"} ${fmt(h.lastEntry)}까지`;
+  if (h.breaks.length) s += ` · 휴식 ${h.breaks.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(", ")}`;
+  return s;
+}
+
+/* ---------- 실제 도로 경로 (OSRM) ---------- */
+const OSRM = "https://router.project-osrm.org";
+const routeCache = new Map();
+const routeKey = (day) => [BASE, ...day.items.map((i) => i.place)].map((p) => `${p.lng.toFixed(5)},${p.lat.toFixed(5)}`).join(";");
+
+async function roadRoute(day) {
+  const key = routeKey(day);
+  if (routeCache.has(key)) return routeCache.get(key);
+  const pending = (async () => {
+    try {
+      const res = await fetch(`${OSRM}/route/v1/driving/${key}?overview=full&geometries=geojson`);
+      if (!res.ok) return null;
+      const j = await res.json();
+      const r = j.code === "Ok" && j.routes?.[0];
+      if (!r) return null;
+      return { line: r.geometry.coordinates.map(([lng, lat]) => [lat, lng]), legs: r.legs.map((l) => l.duration) };
+    } catch { return null; }
+  })();
+  routeCache.set(key, pending);
+  const out = await pending;
+  if (out) routeCache.set(key, out); else routeCache.delete(key);
+  return out;
+}
+
+// 실제 도로 이동시간(+주차 5분)으로 그날 시간을 다시 계산
+async function applyRoad(i) {
+  const day = trip.days[i];
+  if (!day || !day.items.length) return;
+  const route = await roadRoute(day);
+  if (!route || trip.days[i] !== day) return;
+  if (state.input.move === "car" && !day.road) {
+    const legMins = route.legs.map((sec) => Math.max(5, Math.round((sec / 60 + 5) / 5) * 5));
+    const re = retimeDay(day, state.input, state.opts, legMins);
+    if (re) {
+      const days = trip.days.slice(); days[i] = re;
+      trip = summarize(days);
+      if (i === dayIdx) render(); else renderStatsOnly();
+      persist();
+      return;
+    }
+  }
+  if (i === dayIdx) drawMap(day);
+}
+function renderStatsOnly() { if (trip.days.every((d) => d.road)) render(); }
 
 /* ---------- 사진 ---------- */
 const imgCache = store.get("img") || {};
@@ -208,21 +265,54 @@ function loadImages() {
 function drawMap(day) {
   if (!window.L) return;
   if (!map) {
-    map = L.map("map", { zoomControl: false, attributionControl: false });
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 18 }).addTo(map);
+    map = L.map("map", { zoomControl: false });
+    map.attributionControl.setPrefix(false);
+    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
+    addLocateControl();
   }
   if (layer) layer.remove();
   layer = L.layerGroup().addTo(map);
   const pts = day.items.map((it) => [it.place.lat, it.place.lng]);
   if (!pts.length) return;
-  L.polyline(pts, { color: "#0b5e6b", weight: 3, opacity: 0.7, dashArray: "6 6" }).addTo(layer);
+  const cached = routeCache.get(routeKey(day));
+  const known = cached && !(cached instanceof Promise) ? cached : null;
+  if (known) {
+    L.polyline(known.line, { color: "#0b5e6b", weight: 5, opacity: 0.85 }).addTo(layer);
+  } else {
+    L.polyline([[BASE.lat, BASE.lng], ...pts], { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
+    applyRoad(dayIdx);
+  }
+  L.marker([BASE.lat, BASE.lng], { icon: L.divIcon({ className: "pin base", html: "<span>역</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(BASE.name);
   day.items.forEach((it, i) => {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
     L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${it.place.name}`);
   });
   map.invalidateSize();
-  map.fitBounds(pts, { padding: [36, 36], maxZoom: 14 });
+  map.fitBounds(known ? known.line : [[BASE.lat, BASE.lng], ...pts], { padding: [36, 36], maxZoom: 14 });
+}
+
+let meMarker = null;
+function addLocateControl() {
+  const Ctl = L.Control.extend({
+    onAdd() {
+      const b = L.DomUtil.create("button", "locate");
+      b.type = "button"; b.title = "내 위치"; b.setAttribute("aria-label", "내 위치");
+      b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+      L.DomEvent.on(b, "click", (e) => {
+        L.DomEvent.stop(e);
+        if (!navigator.geolocation) return toast("위치를 사용할 수 없어요");
+        navigator.geolocation.getCurrentPosition((pos) => {
+          const ll = [pos.coords.latitude, pos.coords.longitude];
+          if (meMarker) meMarker.remove();
+          meMarker = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }).addTo(map);
+          map.setView(ll, 14);
+        }, () => toast("위치 권한을 허용해 주세요"), { enableHighAccuracy: true, timeout: 8000 });
+      });
+      return b;
+    },
+  });
+  new Ctl({ position: "bottomright" }).addTo(map);
 }
 
 /* ---------- 조작 ---------- */
@@ -238,6 +328,7 @@ $("#timeline").addEventListener("click", (e) => {
   state.opts.exclude = [...new Set([...(state.opts.exclude || []), old])];
   trip = swapItem(trip, state.input, state.opts, dayIdx, i);
   render(); persist();
+  applyRoad(dayIdx);
   const now = trip.days[dayIdx].items[i];
   toast(now ? `${now.place.name}(으)로 바꿨어요` : "대신 갈 수 있는 곳이 없어 뺐어요");
 });
@@ -322,6 +413,7 @@ function toast(msg) {
     state = { input: saved.input, opts: { rainDays: [], exclude: [], prefer: [], avoid: [], ...saved.opts } };
     trip = planTrip(state.input, state.opts);
     show("result"); render();
+    trip.days.forEach((_, i) => applyRoad(i));
     loadWeather();
   } else {
     const last = store.get("lastTrip");
