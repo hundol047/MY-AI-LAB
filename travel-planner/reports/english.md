@@ -2,10 +2,10 @@
 
 출처: 한국관광공사 영문 관광정보(EngService2) searchKeyword2·locationBasedList2 제목, detailCommon2 overview 첫 문장. 생성: node scripts/bake-english.mjs
 
-규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안. 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
+규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
 - 대상 129곳 (장소 107 + 축제 22)
-- 영문 이름 찾음 51곳 (소개 포함 45곳) · 못 찾음 78곳
+- 영문 이름 찾음 57곳 (소개 포함 51곳) · 못 찾음 72곳
 
 ## 찾은 곳
 
@@ -28,6 +28,7 @@
 | haslla | 하슬라아트월드 | Haslla Art World (하슬라아트월드) | 0.54 | 이름 같음 | 있음 |
 | time-museum | 정동진 시간박물관 | Jeongdongjin Time Museum (정동진시간박물관) | 0.31 | 이름 같음 | 있음 |
 | gyeongpo-lake | 경포호 둘레길 | Gyeongpoho Lake (경포호(철새도래지)) | 0.57 | 앞 이름 같음 | 있음 |
+| solhyang | 강릉솔향수목원 | Gangneung Solhyang Arboretum (강릉 솔향수목원) | 0.00 | 이름 같음 | 있음 |
 | chuam | 추암 촛대바위 | Chuam Chotdaebawi Rock (추암 촛대바위) | 0.34 | 이름 같음 | 있음 |
 | nongoldam | 묵호 논골담길 | Donghae Nongoldam-gil Street (Deungdae Damhwa Village) (동해 논골담길 (등대 담화마을)) | 0.09 | 앞에 지역명 추가 | 있음 |
 | dojjaebi | 도째비골 스카이밸리 | Dojjaebigol Sky Valley (도째비골스카이밸리) | 0.53 | 이름 같음 | 있음 |
@@ -53,12 +54,17 @@
 | hantan-trail | 한탄강 주상절리길 | Hantangang River Jusangjeolli-gil (철원 한탄강 주상절리길(잔도)) | 1.89 | 이름 같음 | 있음 |
 | hwacheon-river | 화천 붕어섬 | Bungeoseom Island (붕어섬) | 1.58 | 이름 같음 | 있음 |
 | samak-cable | 삼악산 호수케이블카 | Chuncheon Samaksan Mountain Lake Cable Car (춘천 삼악산 호수케이블카) | 0.08 | 이름 같음 | 있음 |
+| labor-party | 철원 노동당사 | Cheorwon Korean Workers' Party Headquarters (철원 노동당사) | 0.01 | 이름 같음 | 있음 |
+| jiktang | 직탕폭포 | Jiktangpokpo Falls [National Geopark] (직탕폭포 (한탄강 국가지질공원)) | 0.00 | 이름 같음 | 있음 |
 | sheep | 대관령 양떼목장 | Daegwallyeong Yangtte Ranch (대관령양떼목장) | 0.14 | 이름 같음 | 있음 |
 | balwang | 발왕산 관광케이블카 | Balwangsan Cable Car (발왕산 관광케이블카) | 1.58 | 이름 같음 | 있음 |
 | woljeongsa | 월정사 전나무숲길 | Woljeongsa Temple & Needle Fir Forest (월정사.월정사전나무숲) | 0.06 | 앞 이름 같음 | 있음 |
+| samtan | 삼탄아트마인 | Samtan Art Mine (삼탄아트마인) | 0.01 | 이름 같음 | 있음 |
 | cheongnyeongpo | 청령포 | Cheongnyeongpo Meandering Stream (영월 청령포) | 0.29 | 이름 같음 | - |
+| hanbando | 한반도지형 전망대 | Korean Peninsula Terrain [National Geopark] (한반도지형 (강원고생대 국가지질공원)) | 0.25 | 앞 이름 같음 | 있음 |
 | hwangji | 황지연못 | Hwangji Pond (황지연못) | 1.07 | 이름 같음 | 있음 |
 | sogeumsan | 소금산 그랜드밸리 | Sogeumsan Mountain Grand Valley (소금산그랜드밸리) | 1.91 | 이름 같음 | 있음 |
+| bangyeri | 반계리 은행나무 | Wonju Bangye-ri Ginkgo Tree (원주 반계리 은행나무) | 0.00 | 이름 같음 | 있음 |
 | guryongsa | 치악산 구룡사 | Guryongsa Temple (구룡사) | 0.53 | 앞에 지역명 추가 | 있음 |
 | wj-market | 원주 중앙시장·자유시장 | Wonju Jungang Market (원주 중앙시장) | 0.23 | 이름 같음 | 있음 |
 | f-trout | 평창송어축제 | Pyeongchang Trout Festival (평창송어축제) | 0.80 | 이름 같음 | 있음 |
@@ -82,7 +88,6 @@
 | gwana | 강릉대도호부 관아 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | wolhwa | 월화거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | gasiyeon | 가시연습지 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| solhyang | 강릉솔향수목원 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | jumunjin-lighthouse | 주문진등대 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | songjeong | 송정 해송숲 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | mukho-port | 묵호항 회센터 | 2km 안에 이름이 맞는 영문 결과 없음 |
@@ -103,22 +108,17 @@
 | nangman | 춘천 낭만시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | dongsong | 철원 동송 식당가 | 영문 결과 없음 |
 | hwacheon-food | 화천읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| labor-party | 철원 노동당사 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jiktang | 직탕폭포 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | gangchon | 강촌 닭갈비 식당가 | 영문 결과 없음 |
 | gamjabat | 카페 감자밭 | 영문 결과 없음 |
 | samyang | 대관령 삼양목장 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | ohsam | 횡계 오삼불고기 거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | arirang-market | 정선아리랑시장 | 영문 결과 없음 |
-| samtan | 삼탄아트마인 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| hanbando | 한반도지형 전망대 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | yw-market | 영월 서부시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | windhill | 매봉산 바람의 언덕 | 영문 결과 없음 |
 | bongpyeong | 봉평 메밀 음식촌 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | jinbu-food | 진부 시내 식당가 | 영문 결과 없음 |
 | taebaek-hanwoo | 태백 한우 실비 거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | museum-san | 뮤지엄 산 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| bangyeri | 반계리 은행나무 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | hanwoo | 횡성 한우 먹거리 | 영문 결과 없음 |
 | guryong-food | 구룡사 입구 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | ganhyeon-food | 간현관광지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
@@ -162,7 +162,6 @@
 | anmok-hoe | 남항진 횟집거리 | Aranaby Zipline (아라나비(스카이 어촌체험)) | 0.25 | 이름 다름 |
 | chamsori | 참소리축음기·에디슨과학박물관 | Gyeongpodae Pavilion (강릉 경포대) | 0.14 | 이름 다름 |
 | chamsori | 참소리축음기·에디슨과학박물관 | Gyeongpoho Lake (경포호(철새도래지)) | 0.17 | 이름 다름 |
-| solhyang | 강릉솔향수목원 | Gangneung Solhyang Arboretum (강릉 솔향수목원) | 4.33 | 이름 같지만 2km 밖 |
 | songjeong | 송정 해송숲 | Songjeonghaebyeon Beach (송정해변(송정해수욕장)) | 0.20 | 이름 다름 |
 | nongoldam | 묵호 논골담길 | Mukho Lighthouse (묵호 등대) | 0.10 | 이름 다름 |
 | nongoldam | 묵호 논골담길 | Dojjaebigol Sky Valley (도째비골스카이밸리) | 0.28 | 이름 다름 |
@@ -183,12 +182,7 @@
 | dakgalbi | 명동 닭갈비골목 | Wonjo Sutbul Dakbulgogijip (원조숯불닭불고기집) | 0.26 | 이름 다름 |
 | nangman | 춘천 낭만시장 | Chuncheon Myeongdong Street (춘천명동거리) | 0.12 | 이름 다름 |
 | nangman | 춘천 낭만시장 | Wonjo Sutbul Dakbulgogijip (원조숯불닭불고기집) | 0.28 | 이름 다름 |
-| labor-party | 철원 노동당사 | Cheorwon Korean Workers' Party Headquarters (철원 노동당사) | 5.76 | 이름 같지만 2km 밖 |
-| jiktang | 직탕폭포 | Jiktangpokpo Falls [National Geopark] (직탕폭포 (한탄강 국가지질공원)) | 2.79 | 이름 같지만 2km 밖 |
-| samtan | 삼탄아트마인 | Samtan Art Mine (삼탄아트마인) | 3.43 | 이름 같지만 2km 밖 |
-| hanbando | 한반도지형 전망대 | Korean Peninsula Terrain [National Geopark] (한반도지형 (강원고생대 국가지질공원)) | 3.64 | 이름 같지만 2km 밖 |
 | museum-san | 뮤지엄 산 | Museum 1 (뮤지엄 원) | 275.69 | 이름 같지만 2km 밖 |
-| bangyeri | 반계리 은행나무 | Wonju Bangye-ri Ginkgo Tree (원주 반계리 은행나무) | 4.83 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Chuncheon Jungang Market (춘천 중앙시장) | 62.17 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Maze Art Wonju Jungang Market (미로예술 원주중앙시장) | 0.24 | 이름 다름 |
 | t-daegwallyeong | 대관령 눈꽃축제 | Daegwallyeong Snow Festival (대관령 눈꽃축제) | NaN | 더 맞는 결과 있음 |

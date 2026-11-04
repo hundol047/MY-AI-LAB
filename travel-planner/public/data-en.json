@@ -65,6 +65,10 @@
     "name": "Gyeongpoho Lake",
     "desc": "Gyeongpoho Lake is a popular attraction, with beautiful natural scenery and many cultural relics nearby."
   },
+  "solhyang": {
+    "name": "Gangneung Solhyang Arboretum",
+    "desc": "Gangneung Solhyang Arboretum was built in 2008 and opened on October 30, 2013 in Gujeong-ri, Gujeong-myeon."
+  },
   "chuam": {
     "name": "Chuam Chotdaebawi Rock",
     "desc": "Chuam Chotdaebawi Rock in Donghae-si, Gangwon-do is one of Korea’s most famous tourist attractions."
@@ -162,6 +166,14 @@
     "name": "Chuncheon Samaksan Mountain Lake Cable Car",
     "desc": "Samaksan Mountain Lake Cable Car is the longest cable car in Korea, which connects Samcheon-dong and Samaksan Mountain across Uiamho Lake."
   },
+  "labor-party": {
+    "name": "Cheorwon Korean Workers' Party Headquarters",
+    "desc": "This three-story building located in Cheorwon-eup was constructed in 1946."
+  },
+  "jiktang": {
+    "name": "Jiktangpokpo Falls [National Geopark]",
+    "desc": "Jiktangpokpo Falls is location in the middle of Hantangang River."
+  },
   "sheep": {
     "name": "Daegwallyeong Yangtte Ranch",
     "desc": "Daegwallyeong Yangtte Ranch is situated at an elevation of 920 meters, sprawling across 205,000 square meters of open grassland."
@@ -174,8 +186,16 @@
     "name": "Woljeongsa Temple & Needle Fir Forest",
     "desc": "Woljeongsa Temple, established in 643 during the Silla dynasty, is located on Odaesan Mountain."
   },
+  "samtan": {
+    "name": "Samtan Art Mine",
+    "desc": "Samtan Art Mine is an art complex transformed from an abandoned mine."
+  },
   "cheongnyeongpo": {
     "name": "Cheongnyeongpo Meandering Stream"
+  },
+  "hanbando": {
+    "name": "Korean Peninsula Terrain [National Geopark]",
+    "desc": "Korean Peninsula Terrain was formed by soil transported from upstream to the curvature of the confluence of two rivers."
   },
   "hwangji": {
     "name": "Hwangji Pond",
@@ -184,6 +204,10 @@
   "sogeumsan": {
     "name": "Sogeumsan Mountain Grand Valley",
     "desc": "Home to beautiful rivers, majestic cliffs, and stunning old trees, Sogeum Mountain Grand Valley offers an impressive view."
+  },
+  "bangyeri": {
+    "name": "Wonju Bangye-ri Ginkgo Tree",
+    "desc": "Although the exact age of the Bankye-ri Ginkgo Tree is unknown, it is estimated to be over 800 years old."
   },
   "guryongsa": {
     "name": "Guryongsa Temple",

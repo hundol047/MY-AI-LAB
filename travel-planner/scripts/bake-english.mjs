@@ -5,7 +5,7 @@
 //  - 소개는 detailCommon2의 overview 첫 문장만 그대로 쓴다 (요약·창작 없음). 너무 길면 소개는 비워 두고 한국어 설명을 쓴다.
 import { writeFile, mkdir } from "node:fs/promises";
 import { PLACES, FESTIVALS } from "../public/data.js";
-import { candidates, tour, englishInTitle, firstSentence } from "./tour-api.mjs";
+import { candidates, tour, englishInTitle, firstSentence, maxKmFor } from "./tour-api.mjs";
 
 const MAX_KM = 2, MAX_DESC = 200;
 export const REJECT = {}; // 장소 id → 쓰면 안 되는 영문 contentid (사람이 리포트를 보고 판단)
@@ -19,9 +19,10 @@ for (const p of targets) {
   let list;
   try { list = await candidates("EngService2", p, { key, cache: true }); }
   catch (e) { missing.push({ p, why: e.message }); process.stdout.write("!"); continue; }
-  const m = list.find((c) => c.ok && c.km <= MAX_KM && !(REJECT[p.id] || []).includes(String(c.contentid)));
+  const limit = maxKmFor(p, MAX_KM);
+  const m = list.find((c) => c.ok && c.km <= limit && !(REJECT[p.id] || []).includes(String(c.contentid)));
   for (const c of list.filter((c) => c !== m && (c.ok || (c.km < 0.3 && c.koTitle))).slice(0, 3))
-    dropped.push({ p, title: c.title, km: c.km, why: c.ok ? (c.km > MAX_KM ? `이름 같지만 ${MAX_KM}km 밖` : "더 맞는 결과 있음") : c.why });
+    dropped.push({ p, title: c.title, km: c.km, why: c.ok ? (c.km > limit ? `이름 같지만 ${limit}km 밖` : "더 맞는 결과 있음") : c.why });
   if (!m) { missing.push({ p, why: list.length ? "2km 안에 이름이 맞는 영문 결과 없음" : "영문 결과 없음" }); process.stdout.write("x"); continue; }
   const name = englishInTitle(m.title);
   let desc = "";
@@ -42,7 +43,7 @@ const esc = (s) => String(s).replace(/\|/g, "\\|");
 const md = [
   "# 영문 이름·소개 매칭 리포트", "",
   "출처: 한국관광공사 영문 관광정보(EngService2) searchKeyword2·locationBasedList2 제목, detailCommon2 overview 첫 문장. 생성: node scripts/bake-english.mjs", "",
-  `규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 ${MAX_KM}km 안. 소개는 원문 첫 문장 그대로(${MAX_DESC}자 넘으면 생략).`, "",
+  `규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 ${MAX_KM}km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(${MAX_DESC}자 넘으면 생략).`, "",
   `- 대상 ${targets.length}곳 (장소 ${PLACES.length} + 축제 ${FESTIVALS.length})`,
   `- 영문 이름 찾음 ${rows.length}곳 (소개 포함 ${rows.filter((r) => r.desc).length}곳) · 못 찾음 ${missing.length}곳`, "",
   "## 찾은 곳", "", "| id | 우리 이름 | 관광공사 영문 제목 | 거리(km) | 판정 | 소개 |", "|---|---|---|---|---|---|",

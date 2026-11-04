@@ -173,4 +173,7 @@ export function firstSentence(text) {
   return ok[0] || "";
 }
 
+// 같은 곳으로 볼 거리: 기본 2km, 길게 이어진 탐방로(trailKm)는 그 길이까지 (좌표는 한쪽 입구, 관광공사는 다른 끝일 수 있음)
+export const maxKmFor = (place, base = 2) => Math.max(base, place.trailKm || 0);
+
 export const https = (u) => String(u || "").replace(/^http:\/\//, "https://");

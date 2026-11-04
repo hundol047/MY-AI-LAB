@@ -41,7 +41,7 @@ const esc = (s) => String(s).replace(/\|/g, "\\|");
 const md = [
   "# 장소 사진 매칭 리포트", "",
   `출처: 한국관광공사 TourAPI 국문 관광정보(KorService2) searchKeyword2·locationBasedList2의 firstimage. 생성: node scripts/bake-photos.mjs`, "",
-  `규칙: 좌표 ${MAX_KM}km 안 + 이름 대응(지역명·띄어쓰기 제외, 해변=해수욕장). 여러 가게가 모인 곳(multi)은 거리·시장 자체 결과만. 이미지는 https 열림 확인.`, "",
+  `규칙: 좌표 ${MAX_KM}km 안(탐방로는 길이까지) + 이름 대응(지역명·띄어쓰기 제외, 해변=해수욕장). 여러 가게가 모인 곳(multi)은 거리·시장 자체 결과만. 이미지는 https 열림 확인.`, "",
   `- 대상 ${targets.length}곳 (장소 ${PLACES.length} + 날짜 확정 축제 ${targets.length - PLACES.length})`,
   `- 사진 찾음 ${rows.length}곳 · 못 찾음 ${missing.length}곳 · 버린 후보 ${dropped.length}건`, "",
   "## 찾은 곳", "", "| id | 우리 이름 | 관광공사 제목 | 거리(km) | 판정 |", "|---|---|---|---|---|",
