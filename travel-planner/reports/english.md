@@ -5,7 +5,7 @@
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
 - 대상 129곳 (장소 107 + 축제 22)
-- 영문 이름 찾음 67곳 (소개 포함 57곳) · 못 찾음 62곳
+- 영문 이름 찾음 68곳 (소개 포함 58곳) · 못 찾음 61곳
 
 ## 찾은 곳
 
@@ -70,6 +70,7 @@
 | samtan | 삼탄아트마인 | Samtan Art Mine (삼탄아트마인) | 0.01 | 이름 같음 | 있음 |
 | cheongnyeongpo | 청령포 | Cheongnyeongpo Meandering Stream (영월 청령포) | 0.29 | 이름 같음 | - |
 | hanbando | 한반도지형 전망대 | Korean Peninsula Terrain [National Geopark] (한반도지형 (강원고생대 국가지질공원)) | 0.25 | 앞 이름 같음 | 있음 |
+| yw-market | 영월 서부시장 | Yeongwol Seobu Morning Market (영월 서부아침시장) | 0.51 | 이름 같음 | 있음 |
 | hwangji | 황지연못 | Hwangji Pond (황지연못) | 0.01 | 이름 같음 | 있음 |
 | sogeumsan | 소금산 그랜드밸리 | Sogeumsan Mountain Grand Valley (소금산그랜드밸리) | 0.26 | 이름 같음 | 있음 |
 | bangyeri | 반계리 은행나무 | Wonju Bangye-ri Ginkgo Tree (원주 반계리 은행나무) | 0.00 | 이름 같음 | 있음 |
@@ -79,72 +80,86 @@
 | f-hwacheon | 화천 산천어축제 | Hwacheon Sancheoneo Ice Festival (얼음나라화천 산천어축제) | 0.00 | 이름 같음 | - |
 | f-trout | 평창송어축제 | Pyeongchang Trout Festival (평창송어축제) | 0.80 | 이름 같음 | 있음 |
 
-## 못 찾은 곳 (화면에서 한국어 이름 그대로)
+## 관광공사 영문이 없는 곳 (앱 번역으로 채움: 이름은 로마자 표기, 소개는 data.js 한국어 설명을 옮김)
 
-| id | 우리 이름 | 이유 |
+| id | 우리 이름 | 이유 | 앱 번역 |
+|---|---|---|---|
+| namhangjin-beach | 남항진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Namhangjin Beach — Quiet beach with the Solbaram Bridge |
+| sea-trail | 정동심곡 바다부채길 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdong-Simgok Badabuchae-gil Trail — 2.9 km clifftop coastal trail · closed during high-wave warnings |
+| terarosa | 테라로사 커피공장 강릉본점 | 영문 결과 없음 | Terarosa Coffee Factory (Gangneung Main Store) — Roastery and coffee museum |
+| bohemian | 보헤미안로스터즈 박이추커피공장 | 2km 안에 이름이 맞는 영문 결과 없음 | Bohemian Roasters Park Yi-chu Coffee Factory — Hand-drip coffee from a first-generation Korean barista |
+| toetmaru | 카페 툇마루 | 2km 안에 이름이 맞는 영문 결과 없음 | Cafe Toetmaru — Chodang cafe famous for its black sesame latte |
+| central-market | 강릉중앙시장 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Jungang Market — Dakgangjeong fried chicken, jang-kalguksu noodles and potato pancakes |
+| jumunjin-market | 주문진수산시장 | 2km 안에 이름이 맞는 영문 결과 없음 | Jumunjin Fish Market — Seasonal raw fish and seafood |
+| sacheon-mulhoe | 사천진항 물회거리 | 2km 안에 이름이 맞는 영문 결과 없음 | Sacheonjin Port Mulhoe Street — Alley of cold raw-fish soup (mulhoe) restaurants by the port |
+| jeongdongjin-food | 정동진역 앞 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdongjin Station Restaurant Street — Restaurants in front of the station |
+| anmok-hoe | 남항진 횟집거리 | 2km 안에 이름이 맞는 영문 결과 없음 | Namhangjin Raw Fish Street — Raw fish with a sea view |
+| chamsori | 참소리축음기·에디슨과학박물관 | 2km 안에 이름이 맞는 영문 결과 없음 | Chamsori Gramophone & Edison Museum — Gramophones and Edison's inventions on display |
+| gwana | 강릉대도호부 관아 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Daedohobu Government Office — Government office buildings from the Goryeo to Joseon eras |
+| wolhwa | 월화거리 | 2km 안에 이름이 맞는 영문 결과 없음 | Wolhwa Street — Walking path and night market on a former railway line |
+| gasiyeon | 가시연습지 | 2km 안에 이름이 맞는 영문 결과 없음 | Gasiyeon Wetland — Wetland walk along a boardwalk |
+| jumunjin-lighthouse | 주문진등대 | 2km 안에 이름이 맞는 영문 결과 없음 | Jumunjin Lighthouse — Gangwon's first lighthouse · free |
+| songjeong | 송정 해송숲 | 2km 안에 이름이 맞는 영문 결과 없음 | Songjeong Pine Forest — Pine forest path along the beach |
+| mukho-port | 묵호항 회센터 | 2km 안에 이름이 맞는 영문 결과 없음 | Mukho Port Fish Market — Seasonal raw fish and mulhoe |
+| samcheok-cable | 삼척해상케이블카 | 2km 안에 이름이 맞는 영문 결과 없음 | Samcheok Sea Cable Car — 874 m cable car over the sea at Jangho Port |
+| jangho | 장호항 | 2km 안에 이름이 맞는 영문 결과 없음 | Jangho Port — Small port with clear water |
+| sokcho-market | 속초관광수산시장 | 2km 안에 이름이 맞는 영문 결과 없음 | Sokcho Tourist & Fishery Market — Dakgangjeong fried chicken, squid sundae and raw fish |
+| ayajin | 아야진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Ayajin Beach — Rocks and emerald water |
+| jukdo | 죽도해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Jukdo Beach — Surf village with a street of cafes |
+| dongmyeong | 동명항 활어센터 | 2km 안에 이름이 맞는 영문 결과 없음 | Dongmyeong Port Live Fish Center — Raw fish center next to Yeonggeumjeong |
+| geojin | 거진항 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Geojin Port Restaurant Street — Gomchi-guk (snailfish soup) and braised fish |
+| chilsung | 칠성조선소 | 2km 안에 이름이 맞는 영문 결과 없음 | Chilsung Shipyard — Lakeside cafe in a converted old shipyard |
+| goseokjeong | 고석정 | 2km 안에 이름이 맞는 영문 결과 없음 | Goseokjeong Pavilion — Rock pavilion in the Hantangang River gorge |
+| dongsong | 철원 동송 식당가 | 영문 결과 없음 | Cheorwon Dongsong Restaurant Street — Restaurants serving Cheorwon Odae rice |
+| hwacheon-food | 화천읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Hwacheon-eup Restaurant Street — Fish porridge (eojuk) and makguksu noodles |
+| gangchon | 강촌 닭갈비 식당가 | 영문 결과 없음 | Gangchon Dakgalbi Street — Dakgalbi and makguksu on the way to Nami Island |
+| gamjabat | 카페 감자밭 | 영문 결과 없음 | Cafe Gamjabat — Garden cafe famous for its potato bread |
+| ohsam | 횡계 오삼불고기 거리 | 2km 안에 이름이 맞는 영문 결과 없음 | Hoenggye Osam Bulgogi Street — Squid and pork belly bulgogi (osam bulgogi) |
+| arirang-market | 정선아리랑시장 | 영문 결과 없음 | Jeongseon Arirang Market — Gondeure rice and kotdeungchigi noodles · 5-day market on dates ending in 2 and 7 |
+| windhill | 매봉산 바람의 언덕 | 영문 결과 없음 | Maebongsan Wind Hill — Wind turbines and highland cabbage fields |
+| bongpyeong | 봉평 메밀 음식촌 | 2km 안에 이름이 맞는 영문 결과 없음 | Bongpyeong Buckwheat Food Village — Buckwheat makguksu and buckwheat crepes |
+| jinbu-food | 진부 시내 식당가 | 영문 결과 없음 | Jinbu Downtown Restaurants — Mountain-vegetable set meals |
+| taebaek-hanwoo | 태백 한우 실비 거리 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Hanwoo Silbi Street — Korean beef grilled over coal briquettes |
+| museum-san | 뮤지엄 산 | 2km 안에 이름이 맞는 영문 결과 없음 | Museum SAN — Art museum designed by Tadao Ando · the James Turrell wing requires a reservation |
+| hanwoo | 횡성 한우 먹거리 | 영문 결과 없음 | Hoengseong Hanwoo Restaurants — Korean beef (hanwoo) restaurants in Hoengseong-eup |
+| guryong-food | 구룡사 입구 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Guryongsa Entrance Restaurants — Mountain-vegetable bibimbap and acorn jelly |
+| ganhyeon-food | 간현관광지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Ganhyeon Tourist Area Restaurants — Restaurants below Sogeumsan |
+| hoengseong-lake | 횡성호수길 | 영문 결과 없음 | Hoengseong Lake Trail — Forest trail around the lake |
+| f-ginkgo | 원주 반계리 은행나무축제 | 영문 결과 없음 | Wonju Bangye-ri Ginkgo Festival — Autumn colors of an 800-year-old ginkgo tree |
+| t-christmas | 강릉 크리스마스 겨울축제 | 영문 결과 없음 | Gangneung Christmas Winter Festival — Light festival on Wolhwa Street and Anmok Beach |
+| t-sunrise | 정동진·경포 해맞이 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdongjin & Gyeongpo New Year Sunrise — Sunrise on January 1 |
+| t-hongcheon | 홍천강 꽁꽁축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Hongcheon River Kkongkkong Festival — Ice fishing on the Hongcheon River |
+| t-daegwallyeong | 대관령 눈꽃축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Daegwallyeong Snow Festival — Snow sculptures and snow sledding |
+| t-taebaek | 태백산 눈축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaeksan Snow Festival — Snow sculptures in Taebaeksan National Park |
+| t-yeongwol | 영월 단종문화제 | 2km 안에 이름이 맞는 영문 결과 없음 | Yeongwol Danjong Cultural Festival — Reenactment of King Danjong's state funeral |
+| t-mime | 춘천 마임축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Chuncheon Mime Festival — Street performance festival |
+| t-rose | 삼척 장미축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Samcheok Rose Festival — Osipcheon Rose Park |
+| t-dano | 강릉단오제 | 영문 결과 없음 | Gangneung Danoje Festival — UNESCO Intangible Cultural Heritage of Humanity |
+| t-corn | 홍천 찰옥수수축제 | 영문 결과 없음 | Hongcheon Waxy Corn Festival — Corn activities and food |
+| t-tomato | 화천 토마토축제 | 영문 결과 없음 | Hwacheon Tomato Festival — Tomato pool |
+| t-dakgalbi | 춘천 닭갈비막국수축제 | 영문 결과 없음 | Chuncheon Dakgalbi & Makguksu Festival — Dakgalbi and makguksu food |
+| t-hyoseok | 평창 효석문화제 | 2km 안에 이름이 맞는 영문 결과 없음 | Pyeongchang Hyoseok Cultural Festival — Bongpyeong buckwheat flower fields |
+| t-dancing | 원주 다이내믹댄싱카니발 | 영문 결과 없음 | Wonju Dynamic Dancing Carnival — Street parade dance festival |
+| t-coffee | 강릉커피축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangneung Coffee Festival — Coffee street and hand-drip coffee experiences |
+| t-arirang | 정선아리랑제 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongseon Arirang Festival — Arirang performances |
+| t-hanwoo | 횡성한우축제 | 2km 안에 이름이 맞는 영문 결과 없음 | Hoengseong Hanwoo Festival — Hanwoo (Korean beef) food |
+| t-salmon | 양양 연어축제 | 영문 결과 없음 | Yangyang Salmon Festival — Catch salmon by hand in Namdaecheon Stream |
+| t-seorak | 속초 설악문화제 | 영문 결과 없음 | Sokcho Seorak Cultural Festival — Sokcho's signature cultural festival |
+
+## 관광공사 영문 이름은 있고 소개만 앱 번역
+
+| id | 영문 이름 | 앱 번역 소개 |
 |---|---|---|
-| namhangjin-beach | 남항진해변 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| sea-trail | 정동심곡 바다부채길 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| terarosa | 테라로사 커피공장 강릉본점 | 영문 결과 없음 |
-| bohemian | 보헤미안 박이추커피 사천점 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| toetmaru | 카페 툇마루 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| central-market | 강릉중앙시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jumunjin-market | 주문진수산시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| sacheon-mulhoe | 사천진항 물회거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jeongdongjin-food | 정동진역 앞 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| anmok-hoe | 남항진 횟집거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| chamsori | 참소리축음기·에디슨과학박물관 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| gwana | 강릉대도호부 관아 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| wolhwa | 월화거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| gasiyeon | 가시연습지 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jumunjin-lighthouse | 주문진등대 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| songjeong | 송정 해송숲 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| mukho-port | 묵호항 회센터 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| samcheok-cable | 삼척해상케이블카 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jangho | 장호항 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| sokcho-market | 속초관광수산시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| ayajin | 아야진해변 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jukdo | 죽도해변 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| dongmyeong | 동명항 활어센터 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| geojin | 거진항 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| chilsung | 칠성조선소 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| goseokjeong | 고석정 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| dongsong | 철원 동송 식당가 | 영문 결과 없음 |
-| hwacheon-food | 화천읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| gangchon | 강촌 닭갈비 식당가 | 영문 결과 없음 |
-| gamjabat | 카페 감자밭 | 영문 결과 없음 |
-| ohsam | 횡계 오삼불고기 거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| arirang-market | 정선아리랑시장 | 영문 결과 없음 |
-| yw-market | 영월 서부시장 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| windhill | 매봉산 바람의 언덕 | 영문 결과 없음 |
-| bongpyeong | 봉평 메밀 음식촌 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| jinbu-food | 진부 시내 식당가 | 영문 결과 없음 |
-| taebaek-hanwoo | 태백 한우 실비 거리 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| museum-san | 뮤지엄 산 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| hanwoo | 횡성 한우 먹거리 | 영문 결과 없음 |
-| guryong-food | 구룡사 입구 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| ganhyeon-food | 간현관광지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| hoengseong-lake | 횡성호수길 | 영문 결과 없음 |
-| f-ginkgo | 원주 반계리 은행나무축제 | 영문 결과 없음 |
-| t-christmas | 강릉 크리스마스 겨울축제 | 영문 결과 없음 |
-| t-sunrise | 정동진·경포 해맞이 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-hongcheon | 홍천강 꽁꽁축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-daegwallyeong | 대관령 눈꽃축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-taebaek | 태백산 눈축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-yeongwol | 영월 단종문화제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-mime | 춘천 마임축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-rose | 삼척 장미축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-dano | 강릉단오제 | 영문 결과 없음 |
-| t-corn | 홍천 찰옥수수축제 | 영문 결과 없음 |
-| t-tomato | 화천 토마토축제 | 영문 결과 없음 |
-| t-dakgalbi | 춘천 닭갈비막국수축제 | 영문 결과 없음 |
-| t-hyoseok | 평창 효석문화제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-dancing | 원주 다이내믹댄싱카니발 | 영문 결과 없음 |
-| t-coffee | 강릉커피축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-arirang | 정선아리랑제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-hanwoo | 횡성한우축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| t-salmon | 양양 연어축제 | 영문 결과 없음 |
-| t-seorak | 속초 설악문화제 | 영문 결과 없음 |
+| anmok-coffee | Gangneung Coffee Street | About 30 ocean-view cafes |
+| chodang-tofu | Chodang Halmeoni Sundubu | Chodang tofu set with seawater |
+| heo-park | Heo Gyun and Heo Nanseolheon Memorial Park | Birthplace site and memorial hall in a pine forest |
+| haerang | Dojjaebigol Haerang Observatory | Free observatory walkway over the sea · closed when waves are high |
+| nami | Nami Island | Metasequoia island reached by ferry |
+| kimyoujeong | The Literary Village of Kim You Jeong | Village of the short story "Spring, Spring" (Bombom) |
+| samyang | Samyang Round Hill | Grassland with the East Sea observatory and wind turbines |
+| cheongnyeongpo | Cheongnyeongpo Meandering Stream | King Danjong's place of exile, reached by ferry |
+| ganhyeon-park | Ganhyeon Tourist Area | Riverside walk along the Seomgang River |
+| f-hwacheon | Hwacheon Sancheoneo Ice Festival | Ice fishing and bare-hand trout catching |
 
 ## 버린 후보
 
