@@ -1,5 +1,6 @@
-import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf } from "./planner.js";
-import { PLACES, REGIONS } from "./data.js";
+import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
+import { PLACES, REGIONS, SHOP_MALL } from "./data.js";
+import { checkLodgingLocal } from "./ai-local.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
@@ -30,7 +31,7 @@ let map = null, layer = null;
 /* ---------- 저장 / 공유 ---------- */
 const store = {
   get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch { return null; } },
-  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } },
 };
 function encodeState(s) { return btoa(unescape(encodeURIComponent(JSON.stringify(s)))); }
 function decodeState(h) { try { return JSON.parse(decodeURIComponent(escape(atob(h)))); } catch { return null; } }
@@ -167,6 +168,10 @@ function render() {
   $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">조건에 맞는 장소가 없어요. 조건을 바꿔보세요.</li>`) + lodgingHTML(day);
   renderFestivals();
   renderLodging();
+  renderBenefits();
+  renderOvernight();
+  renderSouvenirs();
+  renderShops();
   loadImages();
   drawMap(day);
 }
@@ -365,11 +370,185 @@ function renderLodging() {
     <div class="acts">
       <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버에서 찾기</a>
       <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">카카오맵</a>
-    </div>`;
+      <button class="ghost small" type="button" id="safeOpen">예약 전 안심 체크</button>
+    </div>
+    <form class="safe" id="safeForm" hidden>
+      <textarea id="safeText" rows="5" maxlength="6000" placeholder="예약하려는 숙소 페이지의 가격, 취소·환불 규정, 후기를 그대로 붙여넣으세요"></textarea>
+      <button type="submit" class="primary">확인</button>
+      <div class="safe-result" id="safeResult"></div>
+    </form>`;
 }
+
+/* ---------- 숙소 안심 체크 ---------- */
+document.addEventListener("click", (e) => {
+  if (e.target.id === "safeOpen") { $("#safeForm").hidden = !$("#safeForm").hidden; if (!$("#safeForm").hidden) $("#safeText").focus(); }
+});
+document.addEventListener("submit", async (e) => {
+  if (e.target.id !== "safeForm") return;
+  e.preventDefault();
+  const text = $("#safeText").value.trim(); if (text.length < 20) return toast("숙소 페이지 내용을 조금 더 붙여넣어 주세요");
+  const btn = e.target.querySelector("button"); btn.disabled = true; btn.textContent = "확인 중…";
+  let r = null;
+  try {
+    const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date }) }, 20000);
+    if (res.ok) r = await res.json();
+  } catch {}
+  if (!r) r = checkLodgingLocal(text);
+  btn.disabled = false; btn.textContent = "확인";
+  const level = { low: "안심", mid: "주의", high: "위험" };
+  $("#safeResult").innerHTML = `
+    <p class="safe-sum">${esc(r.summary)}</p>
+    <ul>
+      <li><b class="lv ${r.cancel.risk}">${level[r.cancel.risk]}</b> 취소·환불: ${esc(r.cancel.plain)}</li>
+      <li><b class="lv ${r.price.risk}">${level[r.price.risk]}</b> 가격: ${esc(r.price.plain)}</li>
+      ${r.reviews.map((v) => `<li><b class="lv ${v.risk}">${level[v.risk]}</b> 후기: ${esc(v.plain)}</li>`).join("")}
+    </ul>
+    ${r.ask.length ? `<p class="safe-ask">예약 전에 물어볼 것: ${r.ask.map(esc).join(" · ")}</p>` : ""}`;
+});
 function lodgingHTML(day) {
   if (!trip.lodging || day.dayIdx >= state.input.days - 1) return "";
   return `<li class="leg home">숙소(${trip.lodging.name})로 · 약 ${day.toLodgingKm ?? "-"}km</li>`;
+}
+
+/* ---------- 혜택 내비 + 증빙 보관함 ---------- */
+const proofKey = () => `proofs:${state.input.region}:${state.input.date}`;
+const loadProofs = () => store.get(proofKey()) || {};
+function renderBenefits() {
+  const list = benefitsFor(trip, state.input).filter((b) => b.status !== "closed");
+  const box = $("#benefits");
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const proofs = loadProofs();
+  const total = list.filter((b) => b.kind === "place").reduce((a, b) => a + b.amount, 0);
+  const badge = { auto: "일정에 포함 · 현장에서 받기", open: `신청 가능 · ${list.find((b) => b.status === "open")?.end?.slice(5).replace("-", ".")} 마감`, check: "하반기 공고 확인 필요" };
+  box.innerHTML = `
+    <h3>이 일정으로 받는 혜택${total ? ` <span class="sum">현장 환급 ${total.toLocaleString()}원</span>` : ""}</h3>
+    <ul class="benefit-list">${list.map((b) => {
+      const need = b.proofs || [];
+      const have = need.filter((p) => (proofs[b.id + ":" + p] || []).length).length;
+      return `<li>
+        <div class="b-head"><b>${b.title}</b><span class="b-badge ${b.status}">${b.status === "open" ? `신청 가능 · ${b.end.slice(5).replace("-", ".")} 마감` : badge[b.status]}</span></div>
+        <p>${b.how}</p>
+        ${b.steps ? `<p class="b-steps">${b.steps.map((t, i) => `${i + 1}. ${t}`).join("  ")}</p>` : ""}
+        ${b.note ? `<p class="b-note">${b.note}</p>` : ""}
+        ${need.length ? `<div class="proofs"><span>증빙 ${have}/${need.length}</span>${need.map((p) => {
+          const n = (proofs[b.id + ":" + p] || []).length;
+          return `<label class="proof ${n ? "ok" : ""}">${n ? "✓ " : "+ "}${p}${n > 1 ? ` ${n}장` : ""}<input type="file" accept="image/*" capture="environment" data-proof="${b.id}:${p}" hidden></label>`;
+        }).join("")}</div>` : ""}
+      </li>`;
+    }).join("")}</ul>
+    ${Object.values(proofs).some((a) => a.length) ? `<details class="proof-box"><summary>증빙 보관함 보기</summary><div class="proof-grid">${Object.entries(proofs).flatMap(([k, arr]) => arr.map((src, i) => `<figure><img src="${src}" alt=""><figcaption>${k.split(":").slice(1).join(":")}</figcaption><button type="button" data-del="${k}|${i}">삭제</button></figure>`)).join("")}</div></details>` : ""}`;
+}
+// 영수증 사진은 줄여서 이 기기에만 저장
+function shrink(file, max = 1200) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const k = Math.min(1, max / Math.max(img.width, img.height));
+      const c = document.createElement("canvas");
+      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
+      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(img.src);
+      resolve(c.toDataURL("image/jpeg", 0.7));
+    };
+    img.onerror = reject;
+    img.src = URL.createObjectURL(file);
+  });
+}
+$("#benefits").addEventListener("change", async (e) => {
+  const key = e.target.dataset.proof; if (!key || !e.target.files[0]) return;
+  try {
+    const src = await shrink(e.target.files[0], 900);
+    const all = loadProofs();
+    (all[key] ||= []).push(src);
+    toast(store.set(proofKey(), all) ? "증빙을 보관함에 넣었어요" : "저장 공간이 부족해요. 사진을 몇 장 지워주세요");
+  } catch { toast("사진을 읽지 못했어요"); }
+  renderBenefits();
+});
+$("#benefits").addEventListener("click", (e) => {
+  const d = e.target.dataset.del; if (!d) return;
+  const [key, i] = d.split("|");
+  const all = loadProofs(); all[key].splice(Number(i), 1); store.set(proofKey(), all);
+  renderBenefits();
+});
+
+/* ---------- 1박 전환 · 밤 코스 ---------- */
+let overnightCache = null;
+function renderOvernight() {
+  const box = $("#overnight");
+  if (state.input.days !== 1) { box.hidden = true; return; }
+  const key = JSON.stringify([state.input, state.opts.pace, state.opts.lessWalk, state.opts.indoor, state.opts.exclude]);
+  if (overnightCache?.key !== key) overnightCache = { key, c: overnightCompare(state.input, state.opts) };
+  const c = overnightCache.c;
+  if (!c || !c.added.length) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `
+    <h3>하룻밤 더하면</h3>
+    <div class="cmp">
+      <div><span>볼 수 있는 곳</span><b>+${c.added.length}곳</b></div>
+      <div><span>밤 코스</span><b>${c.endAfter > c.endBefore ? `${fmt(c.endAfter)}까지` : "없음"}</b></div>
+      <div><span>숙소</span><b>${c.lodging.name}</b></div>
+    </div>
+    ${c.evening.length ? `<p class="night">밤 코스: ${c.evening.map((e) => `${fmt(e.start)} ${e.name}`).join(" → ")}</p>` : ""}
+    <p class="more">둘째 날: ${c.trip.days[1].items.map((i) => i.place.name).join(", ")}</p>
+    ${c.festivals.length ? `<p class="night">다음 날 축제: ${c.festivals.map((f) => f.name).join(", ")}</p>` : ""}
+    ${c.benefits.length ? `<p class="more">받을 수 있는 혜택: ${c.benefits.map((b) => b.title).join(", ")}</p>` : ""}
+    <p class="more">추가 비용: 숙박비(${c.lodging.typeLabel})와 식사 2끼 · 숙박비는 날짜마다 달라 검색으로 확인하세요</p>
+    <button type="button" class="primary" id="toOvernight">1박 2일로 바꾸기</button>`;
+}
+document.addEventListener("click", (e) => {
+  if (e.target.id !== "toOvernight") return;
+  state.input = { ...state.input, days: 2 };
+  delete state.opts.lodgingId;
+  dayIdx = 0;
+  rebuild();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  toast("1박 2일로 바꿨어요");
+});
+
+/* ---------- 사장님이 등록한 가게 (다국어 메뉴) ---------- */
+let shopsCache = {};
+async function renderShops() {
+  const region = state.input.region, box = $("#shops");
+  if (!(region in shopsCache)) {
+    try { const r = await fetchT(`api/shops?region=${region}`, {}, 3000); shopsCache[region] = r.ok ? await r.json() : []; }
+    catch { shopsCache[region] = []; }
+  }
+  const list = shopsCache[region];
+  if (!list.length || state.input.region !== region) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `<h3>사장님이 직접 등록한 가게</h3><ul>${list.slice(0, 6).map((x) => `
+    <li><b>${esc(x.name)}</b><span>${esc(x.hours || x.address || "")}</span><a class="ghost small" href="menu.html?id=${x.id}" target="_blank" rel="noopener">메뉴 ${x.count}개 · 4개 언어</a></li>`).join("")}</ul>`;
+}
+
+/* ---------- 특산물 재주문 ---------- */
+function renderSouvenirs() {
+  const list = souvenirsFor(trip);
+  const box = $("#souvenirs");
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  // 다음에 앱을 열었을 때 보여주려고 기억
+  const past = store.get("pastTrips") || [];
+  const id = `${state.input.region}:${state.input.date}`;
+  const entry = { id, date: state.input.date, region: REGIONS[state.input.region].label, items: list };
+  store.set("pastTrips", [entry, ...past.filter((p) => p.id !== id)].slice(0, 5));
+  box.innerHTML = `
+    <h3>집에서 다시 맛보기</h3>
+    <ul>${list.map((s) => `<li><b>${s.item}</b><span>${s.from}에서</span><button type="button" class="ghost small" data-copy="${s.item}">검색어 복사</button></li>`).join("")}</ul>
+    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${SHOP_MALL.name}(강원도 공식 쇼핑몰)에서 주문하기</a>`;
+}
+document.addEventListener("click", async (e) => {
+  const t = e.target.dataset.copy; if (!t) return;
+  try { await navigator.clipboard.writeText(t); toast(`"${t}" 복사했어요`); } catch { toast(t); }
+});
+function renderPast() {
+  const past = (store.get("pastTrips") || []).filter((p) => p.date < todayStr());
+  const box = $("#past");
+  if (!past.length) { box.hidden = true; return; }
+  const p = past[0];
+  box.hidden = false;
+  box.innerHTML = `<b>지난 ${p.region} 여행에서 먹은 ${p.items.slice(0, 2).map((i) => i.item).join(", ")}</b>
+    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">집에서 다시 주문</a>`;
 }
 
 /* ---------- 지도 ---------- */
@@ -591,5 +770,7 @@ function toast(msg) {
     if (last?.input) fillForm({ ...last.input, date: last.input.date < $("#date").min ? tomorrow() : last.input.date });
   }
 })();
+
+renderPast();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});

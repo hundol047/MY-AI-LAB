@@ -1,5 +1,5 @@
 // 일정 생성 엔진: 검증된 장소 데이터 + 영업시간/휴무/이동시간 제약을 모두 지키는 일정만 만든다.
-import { PLACES, AREAS, REGIONS, FESTIVALS, LODGING, LODGING_TYPES } from "./data.js";
+import { PLACES, AREAS, REGIONS, FESTIVALS, LODGING, LODGING_TYPES, BENEFITS } from "./data.js";
 
 const LUNCH = [toMin("11:30"), toMin("14:20")];
 const DINNER = [toMin("17:30"), toMin("19:30")];
@@ -119,7 +119,7 @@ export function fitsHours(h, start, finish) {
 function baseScore(p, input, opts, rain) {
   let s = p.pop;
   if (p.cat === "festival") s += 10; // 여행 날짜에 열리는 축제는 최우선
-  if (p.region !== regionOf(input)) s -= 3; // 고른 권역 우선
+  if (p.region !== regionOf(input)) s -= 5; // 고른 권역 우선
   if ((opts.must || []).includes(p.id)) s += 8; // AI 가이드에게 넣어 달라고 한 곳
   const likes = input.likes || [];
   if (likes.includes(p.cat)) s += 3;
@@ -139,9 +139,12 @@ function baseScore(p, input, opts, rain) {
   return s;
 }
 
+// 당일치기는 귀가를 생각해 19:30까지, 숙박하는 날은 밤 코스까지 21:00, 마지막 날은 18:00까지
 function dayWindow(dayIdx, totalDays) {
-  const start = totalDays > 1 && dayIdx === 0 ? toMin("11:00") : toMin("10:00");
-  const end = totalDays > 1 && dayIdx === totalDays - 1 ? toMin("18:00") : toMin("20:30");
+  const start = toMin("10:00");
+  let end = toMin("21:00");
+  if (totalDays === 1) end = toMin("19:30");
+  else if (dayIdx === totalDays - 1) end = toMin("18:00");
   return { start, end };
 }
 
@@ -229,7 +232,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
 
   const items = [];
   const startPt = start || BASE;
-  let from = startPt, t = dayStart, hasLunch = false, hasDinner = false, nightDone = false, visits = 0, cafes = 0, seas = 0;
+  let from = startPt, t = dayStart, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0;
   const groups = new Set();
   const cafeMax = (input.likes || []).includes("cafe") ? 2 : 1;
 
@@ -243,7 +246,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
     if (p.cat === "cafe") cafes++;
     if (p.cat === "sea") seas++;
     if (p.group) groups.add(p.group);
-    if (hasDinner && kind === "visit") nightDone = true;
+    if (hasDinner && kind === "visit") nightCount++;
   };
 
   // 확정된 장소 먼저 배치 (시간 재계산)
@@ -264,7 +267,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 방문 한도를 채워도 저녁 식사는 챙긴다
       if (!hasDinner && end >= DINNER[1] && t < DINNER[1]) { t = Math.max(t, DINNER[0] - 20); continue; }
       // 저녁 식사 후 야경 한 곳
-      if (hasDinner && !nightDone && t < end - 40) nightOnly = true;
+      // 숙박하는 날(21시까지)은 밤 코스 2곳, 당일치기는 1곳
+      if (hasDinner && nightCount < (end >= toMin("21:00") ? 2 : 1) && t < end - 40) nightOnly = true;
       else break;
     }
     let best = null;
@@ -395,6 +399,7 @@ export function chooseLodging(input, days) {
     if (match) v += 6 - wanted.indexOf(match) * 1.5;
     if ((input.likes || []).includes("sea") && l.types.includes("ocean")) v += 2;
     if (input.move !== "car" && l.types.includes("business")) v += 2;
+    if (l.region === regionOf(input)) v += 3; // 고른 권역 안의 숙소 우선
     if (!best || v > best.v) best = { l, v };
   }
   return lodgingInfo(input, best.l);
@@ -476,4 +481,58 @@ export function parseRequestLocally(text) {
     }
   }
   return out;
+}
+
+// 이 일정으로 받을 수 있는 혜택
+export function benefitsFor(trip, input) {
+  const ids = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
+  const areas = new Set(trip.days.flatMap((d) => d.items.map((i) => i.place.area)));
+  const first = input.date, last = addDays(input.date, input.days - 1);
+  const out = [];
+  for (const b of BENEFITS) {
+    if (b.kind === "place") {
+      if (ids.has(b.place)) out.push({ ...b, status: "auto" });
+      continue;
+    }
+    const inPeriod = (!b.start || last >= b.start) && (!b.end || first <= b.end);
+    const where = b.areas || b.placeIds
+      ? (b.areas || []).some((a) => areas.has(a)) || (b.placeIds || []).some((id) => ids.has(id))
+      : b.regions.includes(input.region || "gangneung");
+    if (!where) continue;
+    if (!inPeriod) { out.push({ ...b, status: "closed" }); continue; }
+    out.push({ ...b, status: b.unconfirmed ? "check" : "open" });
+  }
+  return out;
+}
+
+// 당일치기를 1박으로 바꾸면 무엇이 달라지는지
+export function overnightCompare(input, opts = {}) {
+  if (input.days !== 1) return null;
+  const clean = { ...opts }; delete clean.keep; delete clean.lodgingId;
+  const day = planTrip(input, clean);
+  const two = planTrip({ ...input, days: 2 }, clean);
+  const before = new Set(day.days[0].items.map((i) => i.id));
+  const all = two.days.flatMap((d) => d.items);
+  const added = all.filter((i) => !before.has(i.id));
+  const evening = two.days[0].items.filter((i) => i.start >= toMin("18:00"));
+  return {
+    trip: two,
+    added: added.map((i) => i.place),
+    evening: evening.map((i) => ({ name: i.place.name, start: i.start, kind: i.kind })),
+    endBefore: day.days[0].items.at(-1)?.end ?? null,
+    endAfter: two.days[0].items.at(-1)?.end ?? null,
+    lodging: two.lodging,
+    festivals: festivalsDuring({ ...input, days: 2 }).filter((f) => f.confirmed && f.here && f.start > input.date),
+    benefits: benefitsFor(two, { ...input, days: 2 }).filter((b) => b.status !== "closed"),
+  };
+}
+
+// 다녀온 곳에서 먹은 것 → 집에서 다시 주문할 특산물
+export function souvenirsFor(trip) {
+  const seen = new Map();
+  for (const d of trip.days) for (const i of d.items) {
+    const s = i.place.souvenir;
+    if (s && !seen.has(s)) seen.set(s, i.place.name);
+  }
+  return [...seen].map(([item, from]) => ({ item, from }));
 }

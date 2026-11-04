@@ -140,3 +140,86 @@ ${hist ? `\n이전 대화:\n${hist}\n` : ""}
   r.remove = r.remove.filter((id) => tripIds.includes(id));
   return r;
 }
+
+/* ---------- 3) 숙소 안심 체크 ---------- */
+const RISK = { type: "string", enum: ["low", "mid", "high"] };
+const CHECK_SCHEMA = {
+  type: "object",
+  properties: {
+    summary: { type: "string" },
+    cancel: { type: "object", properties: { risk: RISK, plain: { type: "string" } }, required: ["risk", "plain"], additionalProperties: false },
+    price: { type: "object", properties: { risk: RISK, plain: { type: "string" } }, required: ["risk", "plain"], additionalProperties: false },
+    reviews: { type: "array", items: { type: "object", properties: { risk: RISK, plain: { type: "string" } }, required: ["risk", "plain"], additionalProperties: false } },
+    ask: { type: "array", items: { type: "string" } },
+  },
+  required: ["summary", "cancel", "price", "reviews", "ask"],
+  additionalProperties: false,
+};
+const CHECK_SYSTEM = `여행자가 숙소를 예약하기 전에 붙여넣은 숙소 페이지 내용(가격, 취소·환불 규정, 후기)을 쉬운 말로 점검한다.
+- 붙여넣은 글에 있는 내용만 근거로 한다. 없는 정보는 "글에 없어요"라고 쓰고 추측하지 않는다.
+- cancel: 언제까지 무료 취소인지, 환불 불가·수수료 조건을 한두 문장으로. 환불 불가면 high.
+- price: 총액에 안 들어간 추가 요금(인원, 바비큐, 청소비, 현장 결제)을 찾는다. 평소 가격 데이터는 없으므로 비교했다고 말하지 않는다.
+- reviews: 후기에서 반복되는 위험(청결, 벌레, 소음, 사진과 다름, 안전, 주차 등)만 최대 4개. 좋은 점은 넣지 않는다.
+- ask: 예약 전에 숙소에 물어볼 것 최대 3개.
+- summary: 전체 판단 한 문장. 쉬운 말, 존댓말.`;
+
+export async function lodgingCheck({ text, nights, date }) {
+  return askJSON({
+    system: CHECK_SYSTEM,
+    user: `여행 날짜: ${date || "미정"}, ${nights || 1}박\n\n숙소 페이지 내용:\n${String(text).slice(0, 6000)}`,
+    schema: CHECK_SCHEMA, effort: "low",
+  });
+}
+
+/* ---------- 4) 메뉴판 사진 → 다국어 메뉴 ---------- */
+const MENU_SCHEMA = {
+  type: "object",
+  properties: {
+    shopName: { type: "string" },
+    items: {
+      type: "array",
+      items: {
+        type: "object",
+        properties: {
+          ko: { type: "string" }, price: { type: "string" },
+          en: { type: "string" }, ja: { type: "string" }, zh: { type: "string" },
+          note: { type: "string" },
+        },
+        required: ["ko", "price", "en", "ja", "zh", "note"],
+        additionalProperties: false,
+      },
+    },
+    unclear: { type: "array", items: { type: "string" } },
+  },
+  required: ["shopName", "items", "unclear"],
+  additionalProperties: false,
+};
+const MENU_SYSTEM = `가게 사장님이 찍은 메뉴판 사진을 읽어 외국인 손님용 메뉴로 만든다.
+- 사진에 보이는 메뉴와 가격만 옮긴다. 안 보이거나 흐린 것은 지어내지 말고 unclear에 적는다.
+- price: 사진에 적힌 그대로(예: "12,000원"). 없으면 빈 문자열.
+- en/ja/zh: 음식 이름을 외국인이 이해하게 번역(필요하면 짧은 설명 포함). zh는 간체.
+- note: 맵기·주재료 등 사진에 있는 정보만. 없으면 빈 문자열.
+- shopName: 사진에 가게 이름이 있으면, 없으면 빈 문자열.`;
+
+export async function menuScan({ image, mediaType }) {
+  const response = await getClient().beta.messages.create({
+    model: MODEL,
+    max_tokens: 8000,
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system: MENU_SYSTEM,
+    output_config: { effort: "low", format: { type: "json_schema", schema: MENU_SCHEMA } },
+    messages: [{
+      role: "user",
+      content: [
+        { type: "image", source: { type: "base64", media_type: mediaType, data: image } },
+        { type: "text", text: "이 메뉴판을 읽어 주세요." },
+      ],
+    }],
+  });
+  if (response.stop_reason === "refusal") throw new Error("refused");
+  if (response.stop_reason === "max_tokens") throw new Error("truncated");
+  const block = response.content.find((b) => b.type === "text");
+  if (!block) throw new Error("empty");
+  return JSON.parse(block.text);
+}

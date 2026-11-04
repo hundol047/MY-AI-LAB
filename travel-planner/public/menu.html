@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Menu · 오늘강원</title>
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/pretendard/pretendardvariable-dynamic-subset.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="menu-page">
+    <h1 id="shop"></h1>
+    <p class="menu-meta" id="meta"></p>
+    <div class="seg" id="langs">
+      <button type="button" data-l="ko" class="on">한국어</button>
+      <button type="button" data-l="en">English</button>
+      <button type="button" data-l="ja">日本語</button>
+      <button type="button" data-l="zh">中文</button>
+    </div>
+    <ul class="menu-list" id="list"></ul>
+  </main>
+  <script type="module">
+    const $ = (s) => document.querySelector(s);
+    const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+    const id = new URLSearchParams(location.search).get("id");
+    const nav = (navigator.language || "ko").slice(0, 2);
+    let lang = ["en", "ja", "zh"].includes(nav) ? nav : "ko";
+    const card = { ko: "해외 카드 결제 가능", en: "International cards accepted", ja: "海外カード利用可", zh: "可使用境外银行卡" };
+    const res = await fetch(`api/shops?id=${encodeURIComponent(id)}`).catch(() => null);
+    const shop = res && res.ok ? await res.json() : null;
+    function draw() {
+      document.querySelectorAll("#langs button").forEach((b) => b.classList.toggle("on", b.dataset.l === lang));
+      if (!shop) { $("#shop").textContent = "Menu not found"; return; }
+      $("#shop").textContent = shop.name;
+      $("#meta").innerHTML = [shop.hours, shop.address, shop.card ? card[lang] : ""].filter(Boolean).map(esc).join(" · ");
+      $("#list").innerHTML = shop.items.map((i) => `<li><div><b>${esc(lang === "ko" ? i.ko : i[lang] || i.ko)}</b>${lang !== "ko" ? `<small>${esc(i.ko)}</small>` : ""}${i.note ? `<p>${esc(i.note)}</p>` : ""}</div><span>${esc(i.price)}</span></li>`).join("");
+    }
+    $("#langs").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { lang = b.dataset.l; draw(); } });
+    draw();
+  </script>
+</body>
+</html>

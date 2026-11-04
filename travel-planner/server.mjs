@@ -1,14 +1,17 @@
-// 정적 파일 + AI(/api/start, /api/guide) + 사진(/api/photo)
+// 정적 파일 + AI(/api/start, /api/guide, /api/lodging-check, /api/menu-scan) + 사진(/api/photo) + 가게 등록(/api/shops, /api/qr)
 // AI는 말을 이해하고 설명만 하고, 장소 선택·시간 계산은 검증된 데이터 기반 엔진이 한다.
 // 그래서 존재하지 않는 장소나 문 닫은 곳이 일정에 들어갈 수 없다.
 import http from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, writeFile } from "node:fs/promises";
+import { randomBytes } from "node:crypto";
+import QRCode from "qrcode";
 import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import Anthropic from "@anthropic-ai/sdk";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
-import { startFromText, guide } from "./ai.mjs";
+import { startFromText, guide, lodgingCheck, menuScan } from "./ai.mjs";
+import { REGIONS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(here, "public");
@@ -28,10 +31,22 @@ const MIME = {
 const photoCache = new Map();
 const gzipCache = new Map();
 
-function readBody(req) {
+const SHOPS_FILE = path.join(here, "data", "shops.json");
+async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
+
+function logAIError(err) {
+  if (err instanceof Anthropic.AuthenticationError) console.error("Anthropic 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
+  else if (err instanceof Anthropic.RateLimitError) console.error("요청 한도 초과");
+  else if (err instanceof Anthropic.APIError) console.error(`API 오류 ${err.status}: ${err.message}`);
+  else console.error(err.message);
+}
+const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
+const clean = (v, max) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
+
+function readBody(req, limit = 60_000) {
   return new Promise((resolve, reject) => {
     let data = "";
-    req.on("data", (c) => { data += c; if (data.length > 60_000) req.destroy(); });
+    req.on("data", (c) => { data += c; if (data.length > limit) req.destroy(); });
     req.on("end", () => resolve(data));
     req.on("error", reject);
   });
@@ -49,13 +64,66 @@ const server = http.createServer(async (req, res) => {
         ? await startFromText(text.trim(), body.today)
         : await guide({ question: text.trim(), history: body.history, trip: body.trip });
       res.writeHead(200, { "content-type": MIME[".json"] }).end(JSON.stringify(result));
-    } catch (err) {
-      if (err instanceof Anthropic.AuthenticationError) console.error("Anthropic 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
-      else if (err instanceof Anthropic.RateLimitError) console.error("요청 한도 초과");
-      else if (err instanceof Anthropic.APIError) console.error(`API 오류 ${err.status}: ${err.message}`);
-      else console.error(err.message);
-      res.writeHead(503).end();
+    } catch (err) { logAIError(err); res.writeHead(503).end(); }
+    return;
+  }
+
+  // 숙소 안심 체크 (붙여넣은 숙소 페이지 글 분석)
+  if (req.method === "POST" && url.pathname === "/api/lodging-check") {
+    try {
+      const body = JSON.parse(await readBody(req, 20_000));
+      if (typeof body.text !== "string" || body.text.trim().length < 20) return json(res, 400, {});
+      json(res, 200, await lodgingCheck(body));
+    } catch (err) { logAIError(err); res.writeHead(503).end(); }
+    return;
+  }
+
+  // 메뉴판 사진 → 다국어 메뉴 (사진은 저장하지 않음)
+  if (req.method === "POST" && url.pathname === "/api/menu-scan") {
+    try {
+      const body = JSON.parse(await readBody(req, 6_000_000));
+      if (!/^image\/(jpeg|png|webp)$/.test(body.mediaType || "") || typeof body.image !== "string") return json(res, 400, {});
+      json(res, 200, await menuScan(body));
+    } catch (err) { logAIError(err); res.writeHead(503).end(); }
+    return;
+  }
+
+  // 가게 등록·조회
+  if (url.pathname === "/api/shops") {
+    if (req.method === "GET") {
+      const shops = await loadShops();
+      const id = url.searchParams.get("id"), region = url.searchParams.get("region");
+      if (id) { const shop = shops.find((x) => x.id === id); return shop ? json(res, 200, shop) : json(res, 404, {}); }
+      return json(res, 200, shops.filter((x) => !region || x.region === region).map(({ id, name, region, address, hours, items }) => ({ id, name, region, address, hours, count: items.length })));
     }
+    if (req.method === "POST") {
+      try {
+        const b = JSON.parse(await readBody(req, 200_000));
+        const items = (Array.isArray(b.items) ? b.items : []).slice(0, 80)
+          .map((i) => ({ ko: clean(i.ko, 60), price: clean(i.price, 30), en: clean(i.en, 120), ja: clean(i.ja, 120), zh: clean(i.zh, 120), note: clean(i.note, 120) }))
+          .filter((i) => i.ko);
+        const shop = {
+          id: randomBytes(5).toString("hex"),
+          name: clean(b.name, 40), region: REGIONS[b.region] ? b.region : null,
+          address: clean(b.address, 100), phone: clean(b.phone, 20), hours: clean(b.hours, 60),
+          card: !!b.card, items, createdAt: new Date().toISOString(),
+        };
+        if (!shop.name || !shop.region || !items.length) return json(res, 400, { error: "가게 이름, 권역, 메뉴 1개 이상이 필요해요" });
+        const shops = await loadShops();
+        shops.push(shop);
+        await writeFile(SHOPS_FILE, JSON.stringify(shops, null, 2));
+        return json(res, 200, { id: shop.id });
+      } catch { return json(res, 400, {}); }
+    }
+  }
+
+  // 다국어 메뉴 QR 코드
+  if (req.method === "GET" && url.pathname === "/api/qr") {
+    const id = (url.searchParams.get("id") || "").replace(/[^a-f0-9]/g, "");
+    const proto = String(req.headers["x-forwarded-proto"] || "http").split(",")[0];
+    const origin = `${proto}://${req.headers.host}`;
+    const svg = await QRCode.toString(`${origin}/menu.html?id=${id}`, { type: "svg", margin: 1, color: { dark: "#111111", light: "#ffffff" } });
+    res.writeHead(200, { "content-type": MIME[".svg"] }).end(svg);
     return;
   }
 

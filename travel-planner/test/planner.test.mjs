@@ -1,6 +1,7 @@
 // 모든 조건 조합에서 영업시간·휴무 충돌이 없는지, 하루 일정이 성립하는지 검사
 import assert from "node:assert/strict";
-import { planTrip, swapItem, verify, retimeDay, hoursFor, parseRequestLocally } from "../public/planner.js";
+import { planTrip, swapItem, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor } from "../public/planner.js";
+import { checkLodgingLocal, startLocal } from "../public/ai-local.js";
 import { PLACES } from "../public/data.js";
 
 let runs = 0, carDays = 0, carItems = 0, lunchDays = 0, allDays = 0;
@@ -61,6 +62,45 @@ assert.equal(hoursFor(P("solhyang"), "2026-12-01").close, 17 * 60);
   assert.ok(re);
   assert.equal(verify([re]), 0);
   assert.ok(re.items[0].start >= day.items[0].start);
+}
+
+// 혜택 내비: 일정에 있는 장소의 환급 혜택은 자동, 기간이 끝난 사업은 종료로
+{
+  const input = { region: "chuncheon", date: "2026-11-14", days: 2, who: "couple", likes: ["nature"], move: "car" };
+  const trip = planTrip(input, { must: ["soyang-skywalk"] });
+  const b = benefitsFor(trip, input);
+  assert.ok(b.some((x) => x.id === "b-soyang" && x.status === "auto"));
+  assert.equal(b.find((x) => x.id === "b-incentive")?.status, "closed", "9/30 마감 사업은 종료");
+  const pc = planTrip({ ...input, region: "pyeongchang" }, { must: ["sheep"] });
+  assert.equal(benefitsFor(pc, { ...input, region: "pyeongchang" }).find((x) => x.id === "b-halfprice")?.status, "check");
+}
+// 1박 전환: 당일치기보다 볼 곳이 늘고, 첫날 밤 코스가 생긴다
+{
+  const input = { region: "gangneung", date: "2026-11-14", days: 1, who: "couple", likes: ["sea", "food"], move: "car" };
+  const c = overnightCompare(input, {});
+  assert.ok(c.added.length >= 3, "1박이면 더 많은 곳");
+  assert.ok(c.endAfter > c.endBefore, "첫날 일정이 더 늦게까지");
+  assert.ok(c.lodging, "숙소 추천");
+  assert.equal(overnightCompare({ ...input, days: 2 }, {}), null);
+}
+// 특산물: 먹은 곳에서 중복 없이
+{
+  const trip = planTrip({ region: "chuncheon", date: "2026-11-14", days: 2, who: "couple", likes: ["food"], move: "car" }, {});
+  const s = souvenirsFor(trip);
+  assert.equal(new Set(s.map((x) => x.item)).size, s.length);
+  assert.ok(s.length >= 1);
+}
+// 숙소 안심 체크 (AI 없이)
+{
+  const r = checkLodgingLocal("1박 89,000원 / 체크인 15시 / 이용일 3일 전부터 환불 불가 / 바비큐 2만원 별도 / 후기: 방음이 안 돼서 시끄러웠어요, 화장실에 곰팡이");
+  assert.equal(r.cancel.risk, "high");
+  assert.equal(r.price.risk, "mid");
+  assert.ok(r.reviews.length >= 2);
+}
+// 한 줄 시작 (AI 없이)
+{
+  const r = startLocal("다음 주말 부모님이랑 속초 1박 기차로", "2026-11-04");
+  assert.equal(r.region, "seorak"); assert.equal(r.days, 2); assert.equal(r.who, "parents"); assert.equal(r.move, "transit");
 }
 
 assert.equal(parseRequestLocally("비가 와요").indoor, true);

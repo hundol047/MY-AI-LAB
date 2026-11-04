@@ -246,3 +246,95 @@ html, body { overflow-x: clip; }
 #lodgingCard { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 12px; }
 #lodgingCard .acts { margin-top: 0; }
 .leg.home { color: var(--brand); }
+
+/* 혜택 내비 */
+.benefits, .overnight, .souvenirs, .shops, .past { padding: 14px 16px; margin-top: 12px; }
+.benefits h3, .overnight h3, .souvenirs h3, .shops h3 { margin: 0 0 10px; font-size: 15px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
+.benefits .sum { font-size: 13px; color: var(--ok); font-weight: 700; }
+.benefit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.benefit-list li { border-top: 1px solid var(--line); padding-top: 10px; }
+.benefit-list li:first-child { border-top: 0; padding-top: 0; }
+.b-head { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; }
+.b-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 6px; background: var(--bg); color: var(--sub); }
+.b-badge.auto, .b-badge.open { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.b-badge.check { background: color-mix(in srgb, #d97706 14%, transparent); color: #b45309; }
+.benefit-list p { margin: 4px 0 0; font-size: 13px; color: var(--sub); }
+.b-steps { color: var(--text) !important; font-weight: 600; }
+.b-note { font-size: 12px !important; }
+.proofs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 12px; }
+.proofs > span { font-weight: 700; margin-right: 2px; }
+.proof { padding: 5px 10px; border-radius: 999px; border: 1px dashed var(--line); cursor: pointer; font-weight: 600; }
+.proof.ok { border-style: solid; border-color: var(--ok); color: var(--ok); }
+.proof-box { margin-top: 10px; font-size: 13px; }
+.proof-box summary { cursor: pointer; font-weight: 600; color: var(--sub); }
+.proof-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; margin-top: 8px; }
+.proof-grid figure { margin: 0; display: grid; gap: 4px; }
+.proof-grid img { width: 100%; aspect-ratio: 3/4; object-fit: cover; border-radius: 8px; border: 1px solid var(--line); }
+.proof-grid figcaption { font-size: 11px; color: var(--sub); }
+.proof-grid button { font-size: 11px; border: 0; background: none; color: var(--warn); padding: 0; text-align: left; }
+
+/* 1박 전환 */
+.cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
+.cmp div { background: var(--bg); border-radius: 10px; padding: 8px 10px; display: grid; }
+.cmp span { font-size: 11px; color: var(--sub); }
+.cmp b { font-size: 15px; }
+.overnight p { margin: 4px 0; font-size: 13px; }
+.overnight .night { font-weight: 600; color: #6d28d9; }
+.overnight .more { color: var(--sub); }
+.overnight .primary { margin-top: 10px; }
+
+/* 특산물 · 등록 가게 */
+.souvenirs ul, .shops ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 8px; }
+.souvenirs li, .shops li { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 14px; }
+.souvenirs li span, .shops li span { color: var(--sub); font-size: 13px; flex: 1; }
+.past { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px; font-size: 14px; margin: 0 12px 12px; }
+
+/* 숙소 안심 체크 */
+#lodgingCard .safe { flex-basis: 100%; display: grid; gap: 8px; }
+.safe textarea { width: 100%; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); font: inherit; resize: vertical; }
+.safe .primary { padding: 12px; }
+.safe-result ul { list-style: none; margin: 6px 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.safe-sum { margin: 0; font-weight: 700; }
+.safe-ask { margin: 0; font-size: 13px; color: var(--brand); font-weight: 600; }
+.lv { font-size: 11px; padding: 1px 6px; border-radius: 5px; margin-right: 4px; }
+.lv.low { background: color-mix(in srgb, var(--ok) 14%, transparent); color: var(--ok); }
+.lv.mid { background: color-mix(in srgb, #d97706 16%, transparent); color: #b45309; }
+.lv.high { background: color-mix(in srgb, var(--warn) 14%, transparent); color: var(--warn); }
+
+.owner-link { text-align: center; font-size: 13px; margin: 16px 0 0; }
+.owner-link a { color: var(--sub); }
+
+/* 사장님 화면 */
+.owner-tag { font-size: 11px; font-weight: 700; padding: 2px 6px; border-radius: 6px; background: var(--text); color: var(--bg); margin-left: 4px; }
+a.brand { color: var(--text); text-decoration: none; }
+.owner { max-width: 760px; margin: 0 auto; padding: 20px 16px 60px; display: grid; gap: 14px; }
+.owner h1 { font-size: 22px; margin: 4px 0; letter-spacing: -.02em; }
+.step { position: relative; padding: 18px 16px 16px 52px; display: grid; gap: 12px; }
+.step-no { position: absolute; left: 16px; top: 18px; width: 24px; height: 24px; border-radius: 50%; display: grid; place-items: center; background: var(--brand); color: #fff; font-weight: 800; font-size: 13px; }
+.shot { display: grid; place-items: center; gap: 10px; min-height: 120px; border: 2px dashed var(--line); border-radius: 14px; cursor: pointer; font-weight: 700; color: var(--brand); padding: 12px; }
+.shot img { max-width: 100%; max-height: 260px; border-radius: 10px; }
+.hint { margin: 0; font-size: 13px; color: var(--sub); }
+.grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; }
+.grid2 label { display: grid; gap: 4px; font-size: 13px; font-weight: 600; }
+.grid2 input, .grid2 select, .menu-row input { padding: 10px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); font: inherit; min-width: 0; }
+.check-row { display: flex !important; align-items: center; gap: 8px; }
+.menu-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+#rows { display: grid; gap: 10px; }
+.menu-row { display: grid; grid-template-columns: 2fr 1fr; gap: 6px; padding: 10px; border-radius: 12px; background: var(--bg); }
+.menu-row input[data-k="en"], .menu-row input[data-k="ja"], .menu-row input[data-k="zh"], .menu-row input[data-k="note"] { grid-column: span 1; }
+.menu-row .del { justify-self: end; grid-column: 2; }
+.qr { width: 220px; height: 220px; justify-self: center; background: #fff; padding: 8px; border-radius: 12px; }
+.acts.center { justify-content: center; }
+@media print { .top, .owner h1, #step1, #step2, .acts, .step p { display: none !important; } .step { border: 0; box-shadow: none; } }
+
+/* 다국어 메뉴 */
+.menu-page { max-width: 560px; margin: 0 auto; padding: 24px 16px 60px; }
+.menu-page h1 { margin: 0 0 4px; font-size: 24px; }
+.menu-meta { margin: 0 0 14px; color: var(--sub); font-size: 13px; }
+.menu-list { list-style: none; margin: 14px 0 0; padding: 0; display: grid; }
+.menu-list li { display: flex; justify-content: space-between; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.menu-list b { font-size: 16px; }
+.menu-list small { display: block; color: var(--sub); font-size: 12px; }
+.menu-list p { margin: 2px 0 0; font-size: 13px; color: var(--sub); }
+.menu-list span { font-weight: 700; white-space: nowrap; }
+@media (max-width: 420px) { .cmp { grid-template-columns: 1fr 1fr; } }
