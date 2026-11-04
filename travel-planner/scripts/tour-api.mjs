@@ -161,7 +161,7 @@ export async function candidates(service, place, opts = {}) {
     if (rate([...seen.values()]).some((c) => c.ok && c.km <= 2 && (c.firstimage || isEng))) break;
   }
   // 이름 검색으로 2km 안에서 못 찾으면 주변 2km 목록에서 다른 이름(예: 경포해변 ↔ 경포해수욕장)으로 등록된 것을 찾는다
-  if (!rate([...seen.values()]).some((c) => c.ok && c.km <= 2)) {
+  if (Number.isFinite(place.lat) && !rate([...seen.values()]).some((c) => c.ok && c.km <= 2)) { // 좌표 없는 항목(날짜 발표 전 축제)은 주변 검색 생략
     for (const it of await tour(service, "locationBasedList2", { mapX: String(place.lng), mapY: String(place.lat), radius: "2000", arrange: "E", numOfRows: "100", pageNo: "1" }, opts)) seen.set(it.contentid, it);
   }
   return rate([...seen.values()]);

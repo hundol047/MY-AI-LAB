@@ -1,6 +1,15 @@
 // 사장님: 메뉴판 사진 → AI가 읽고 번역 → 사장님이 확인·수정 → 등록 → 다국어 QR 메뉴
 const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+// 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 등록할 수 없다는 것을 처음부터 알린다
+fetch("api/shops?region=gangneung").then((r) => r.ok).catch(() => false).then((ok) => {
+  if (ok) return;
+  const note = document.createElement("p");
+  note.className = "card owner-off";
+  note.textContent = "이 주소는 서버 없이 올린 체험판이라 가게 등록을 할 수 없어요. 서버로 실행한 주소(npm start)에서 등록해 주세요.";
+  document.querySelector("main.owner h1").after(note);
+  document.querySelectorAll("main.owner button, main.owner input, main.owner select, main.owner textarea").forEach((el) => { el.disabled = true; });
+});
 let toastTimer;
 function toast(msg) { const el = $("#toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2400); }
 

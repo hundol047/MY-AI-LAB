@@ -388,3 +388,4 @@ body.offline .top::after {
   .lang { padding: 2px; }
   .lang button { padding: 4px 6px; }
 }
+.owner-off { padding: 14px 16px; margin: 0; font-size: 14px; line-height: 1.5; color: var(--warn); border-color: color-mix(in srgb, var(--warn) 35%, transparent); }

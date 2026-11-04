@@ -17,6 +17,15 @@
 | 날씨 반영 없음 | 예보 범위 안이면 비 오는 날을 실내 위주로 자동 변경 |
 | 오프라인·내보내기 유료 | 무료로 오프라인 열람(PWA), 링크 공유, 캘린더(.ics), 카카오맵 길찾기 |
 
+## 폰에서 쓰기 (GitHub Pages)
+
+서버 없이 파일만 올려도 일정 만들기·사진·지도·영문·오프라인이 동작한다(AI는 간단 모드, 가게 등록은 숨김).
+1. GitHub 저장소 Settings → Pages → Build and deployment → Source: **Deploy from a branch**, Branch: 이 브랜치(또는 main) / **(root)** → Save
+2. 1~2분 뒤 `https://hundol047.github.io/MY-AI-LAB/` 로 접속하면 앱으로 이동한다 (저장소 첫 `index.html`이 `travel-planner/public/`으로 보냄)
+3. 폰에 설치: 안드로이드 크롬은 메뉴(⋮) → **앱 설치/홈 화면에 추가**, 아이폰 사파리는 공유 → **홈 화면에 추가**
+
+AI·가게 등록까지 쓰려면 Node를 실행할 수 있는 호스팅(Render, Railway, Fly.io 등)에서 `npm start`로 띄운다.
+
 ## AI 기능 (OpenAI 호환 API)
 
 - **한 줄로 시작**: "이번 주말 부모님이랑 속초 1박, 차로" → 5개 선택값을 채우고 바로 일정 생성 (`/api/start`)

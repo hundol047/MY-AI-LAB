@@ -852,4 +852,9 @@ if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 이�
 
 renderPast();
 
+// 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다
+fetchT("api/shops?region=gangneung", {}, 3000)
+  .then((r) => { if (!r.ok) $("#ownerLink").hidden = true; })
+  .catch(() => { $("#ownerLink").hidden = true; });
+
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
