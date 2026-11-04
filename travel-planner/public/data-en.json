@@ -27,6 +27,9 @@
     "name": "Jeongdongjinhaebyeon Beach",
     "desc": "Jeongdongjinhaebyeon Beach is a nice, sandy beach with three major swimming spots: in front of Jeongdongjin Station, by Sandglass Park, and by the Jeongdongjin Breakwater."
   },
+  "anmok-coffee": {
+    "name": "Gangneung Coffee Street"
+  },
   "chodang-tofu": {
     "name": "Chodang Halmeoni Sundubu"
   },
@@ -112,6 +115,10 @@
     "name": "Seoraksan Cable Car",
     "desc": "A ride on the Seoraksan Cable Car is the best way to enjoy the unexplored regions of Seoraksan Mountain."
   },
+  "unification": {
+    "name": "Goseong Unification Observatory",
+    "desc": "The Goseong Unification Observatory stands as the northernmost observatory in South Korea."
+  },
   "hwajinpo": {
     "name": "Hwajinpo Lake",
     "desc": "Hwajinpo Lake is one of the most famous lagoons in Korea."
@@ -136,6 +143,10 @@
     "name": "Daepohang Port",
     "desc": "Located on the southernmost point of Sokcho, Daephohang Port is known as a place to find quality fish with the rise of Seoraksan Mountain as a popular tourist destination."
   },
+  "yongdae": {
+    "name": "Inje Hwangtae Village",
+    "desc": "Inje&rsquo;s winter landscape is at its most picturesque at the Dried Pollack Deokjang, the area&rsquo;s premier seasonal attraction, within Inje Hwangtae Village."
+  },
   "yangyang-market": {
     "name": "Yangyang Traditional Market",
     "desc": "Geographically situated where Seoraksan Mountain and Odaesan Mountain meet, Yangyang is rich in local specialties due to its unique soil and climate characteristics."
@@ -154,6 +165,14 @@
     "name": "Chuncheon National Museum",
     "desc": "Opened in 2002, Chuncheon National Museum was established to identify and promote the original form and characteristics of the regional culture of Gangwon State."
   },
+  "dakgalbi": {
+    "name": "Chuncheon Myeongdong Dakgalbi Street",
+    "desc": "This alley is lined with dakgalbi (spicy stir-fried chicken) restaurants in Myeong-dong, which is Chuncheon's main street."
+  },
+  "makguksu": {
+    "name": "Soyangho Makguksu Street",
+    "desc": "Makguksu (buckwheat noodles) is a traditional dish made from coarse buckwheat flour, where only the outer husk of the grain is removed."
+  },
   "gongjicheon": {
     "name": "Gongjicheon Recreation Area",
     "desc": "The area of Gongjicheon Stream connected to the Bukhangang River is a shelter in the middle of Chuncheon City."
@@ -165,6 +184,10 @@
   "hwacheon-river": {
     "name": "Bungeoseom Island",
     "desc": "Bungeoseom Island was created as a result of the construction of the Chuncheon Dam."
+  },
+  "nangman": {
+    "name": "Chuncheon Jungang Market",
+    "desc": "Established in 1960, Chuncheon Jungang Market is one of Chuncheon’s representative traditional markets and is connected to the bustling Chuncheon Myeongdong area."
   },
   "samak-cable": {
     "name": "Chuncheon Samaksan Mountain Lake Cable Car",
@@ -181,6 +204,9 @@
   "sheep": {
     "name": "Daegwallyeong Yangtte Ranch",
     "desc": "Daegwallyeong Yangtte Ranch is situated at an elevation of 920 meters, sprawling across 205,000 square meters of open grassland."
+  },
+  "samyang": {
+    "name": "Samyang Round Hill"
   },
   "balwang": {
     "name": "Balwangsan Cable Car",
@@ -223,6 +249,9 @@
   },
   "ganhyeon-park": {
     "name": "Ganhyeon Tourist Area"
+  },
+  "f-hwacheon": {
+    "name": "Hwacheon Sancheoneo Ice Festival"
   },
   "f-trout": {
     "name": "Pyeongchang Trout Festival",

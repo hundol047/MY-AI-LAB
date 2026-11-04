@@ -74,7 +74,7 @@ const GANGNEUNG = [
   },
 
   // 카페
-  { id: "anmok-coffee", souvenir: "강릉 커피 원두", name: "안목 커피거리", cat: "cafe", area: "anmok", lat: 37.7727, lng: 128.9470, hours: ["10:00", "22:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior", "night"], wiki: "안목해변", desc: "오션뷰 카페 30여 곳" },
+  { id: "anmok-coffee", souvenir: "강릉 커피 원두", name: "안목 커피거리", alias: ["강릉커피거리"], cat: "cafe", area: "anmok", lat: 37.7727, lng: 128.9470, hours: ["10:00", "22:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior", "night"], wiki: "안목해변", desc: "오션뷰 카페 30여 곳" },
   { id: "terarosa", souvenir: "강릉 커피 원두", name: "테라로사 커피공장 강릉본점", cat: "cafe", area: "inland", lat: 37.6965, lng: 128.8920, hours: ["09:00", "19:00"], lastEntry: "18:00", closed: [], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["senior"], wiki: "테라로사", desc: "로스터리와 커피 박물관" },
   { id: "bohemian", souvenir: "강릉 커피 원두", name: "보헤미안 박이추커피 사천점", cat: "cafe", area: "north", lat: 37.8495, lng: 128.8705, hours: ["09:00", "18:00"], lastEntry: "17:00", closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "박이추", desc: "1세대 바리스타의 핸드드립" },
   { id: "toetmaru", souvenir: "강릉 커피 원두", name: "카페 툇마루", cat: "cafe", area: "gyeongpo", lat: 37.7920, lng: 128.9140, hours: ["11:00", "19:00"], lastEntry: "18:00", closed: [2], stay: 45, indoor: true, walk: 1, pop: 2, tags: [], wiki: "초당동 (강릉시)", desc: "흑임자 라테로 유명한 초당 카페" },
@@ -91,7 +91,7 @@ const GANGNEUNG = [
   },
   { id: "central-market", souvenir: "강릉 닭강정", name: "강릉중앙시장", cat: "food", area: "downtown", lat: 37.7545, lng: 128.8990, hours: ["09:00", "19:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "강릉중앙시장", desc: "닭강정·장칼국수·감자전" },
   { id: "jumunjin-market", souvenir: "주문진 건오징어", name: "주문진수산시장", cat: "food", area: "north", lat: 37.8930, lng: 128.8290, hours: ["07:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 2, pop: 3, tags: ["senior"], wiki: "주문진수산시장", desc: "제철 회와 해산물" },
-  { id: "sacheon-mulhoe", name: "사천진항 물회거리", cat: "food", area: "north", lat: 37.8433, lng: 128.8752, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "사천진항", desc: "항구 앞 물회 골목" },
+  { id: "sacheon-mulhoe", name: "사천진항 물회거리", cat: "food", area: "north", lat: 37.8379, lng: 128.8762, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "사천진항", desc: "항구 앞 물회 골목" },
   { id: "jeongdongjin-food", name: "정동진역 앞 식당가", cat: "food", area: "south", lat: 37.6920, lng: 129.0320, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "정동진", desc: "역 앞 식당가" },
   { id: "anmok-hoe", name: "남항진 횟집거리", cat: "food", area: "anmok", lat: 37.7690, lng: 128.9515, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "남항진해수욕장", desc: "바다 보며 먹는 회" },
 
@@ -103,7 +103,7 @@ const GANGNEUNG = [
     closed: [], stay: 50, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "강릉 선교장", desc: "300년 된 사대부 고택",
   },
   { id: "gyeongpodae", name: "경포대", cat: "culture", area: "gyeongpo", lat: 37.7955, lng: 128.8965, hours: ["10:00", "18:00"], lastEntry: "17:30", closed: [1], stay: 30, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "경포대", desc: "경포호를 내려다보는 누각" },
-  { id: "chamsori", name: "참소리축음기·에디슨과학박물관", cat: "culture", area: "gyeongpo", lat: 37.7963, lng: 128.8978, hours: ["10:00", "17:00"], lastEntry: "15:30", closed: [2], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "참소리 축음기 에디슨 박물관", desc: "축음기와 에디슨 발명품 전시" },
+  { id: "chamsori", name: "참소리축음기·에디슨과학박물관", alias: ["참소리에디슨손성목영화박물관"], cat: "culture", area: "gyeongpo", lat: 37.7963, lng: 128.8978, hours: ["10:00", "17:00"], lastEntry: "15:30", closed: [2], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "참소리 축음기 에디슨 박물관", desc: "축음기와 에디슨 발명품 전시" },
   { id: "heo-park", name: "허균·허난설헌 기념공원", cat: "culture", area: "gyeongpo", lat: 37.7915, lng: 128.9070, hours: ["09:00", "18:00"], breaks: [["12:00", "13:00"]], closed: [1], stay: 40, indoor: false, walk: 2, pop: 1, tags: ["senior"], wiki: "허균·허난설헌 기념공원", desc: "솔숲 속 생가터와 기념관" },
   { id: "arte", name: "아르떼뮤지엄 강릉", cat: "culture", area: "gyeongpo", lat: 37.7870, lng: 128.9020, hours: ["10:00", "20:00"], lastEntry: "19:00", closed: [], stay: 80, indoor: true, walk: 1, pop: 3, tags: ["kids"], wiki: "아르떼뮤지엄", desc: "몰입형 미디어아트 전시" },
   { id: "gwana", name: "강릉대도호부 관아", cat: "culture", area: "downtown", lat: 37.7538, lng: 128.8957, hours: ["09:00", "18:00"], closed: [1], stay: 30, indoor: false, walk: 1, pop: 1, tags: ["senior"], wiki: "강릉대도호부 관아", desc: "고려~조선 관청 건물" },
@@ -123,21 +123,21 @@ const GANGNEUNG = [
     hours: ["09:00", "18:00"], lastEntry: "17:00", seasons: [{ months: [11, 12, 1, 2], hours: ["09:00", "17:00"], lastEntry: "16:00" }],
     closed: [1], stay: 70, indoor: false, walk: 3, pop: 1, tags: ["kids"], wiki: "강릉솔향수목원", desc: "금강소나무 숲 계곡길 · 무료",
   },
-  { id: "jumunjin-lighthouse", name: "주문진등대", cat: "nature", area: "north", lat: 37.8995, lng: 128.8295, hours: ["09:00", "18:00"], closed: [], stay: 25, indoor: false, walk: 2, pop: 1, tags: [], wiki: "주문진등대", desc: "강원 최초의 등대 · 무료" },
+  { id: "jumunjin-lighthouse", name: "주문진등대", alias: ["주문진 등대"], cat: "nature", area: "north", lat: 37.8995, lng: 128.8295, hours: ["09:00", "18:00"], closed: [], stay: 25, indoor: false, walk: 2, pop: 1, tags: [], wiki: "주문진등대", desc: "강원 최초의 등대 · 무료" },
   { id: "songjeong", name: "송정 해송숲", cat: "nature", area: "anmok", lat: 37.7785, lng: 128.9370, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 1, tags: ["senior"], wiki: "송정해수욕장 (강릉)", desc: "해변 따라 이어진 솔숲길" },
 ];
 
 // 동해·삼척 (강릉·동해 권역)
 const DONGHAE = [
   { id: "chuam", name: "추암 촛대바위", cat: "sea", area: "samcheok", lat: 37.4770, lng: 129.1580, hours: ["05:00", "22:00"], closed: [], stay: 40, indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "추암해수욕장", desc: "애국가 첫 장면의 일출 명소" },
-  { id: "nongoldam", name: "묵호 논골담길", cat: "culture", area: "donghae", lat: 37.5530, lng: 129.1180, hours: ["00:00", "23:59"], closed: [], stay: 50, indoor: false, walk: 3, pop: 2, tags: ["night"], wiki: "묵호등대", desc: "벽화 골목과 묵호등대" },
+  { id: "nongoldam", name: "묵호 논골담길", alias: ["동해 논골담길"], cat: "culture", area: "donghae", lat: 37.5530, lng: 129.1180, hours: ["00:00", "23:59"], closed: [], stay: 50, indoor: false, walk: 3, pop: 2, tags: ["night"], wiki: "묵호등대", desc: "벽화 골목과 묵호등대" },
   {
     id: "dojjaebi", name: "도째비골 스카이밸리", cat: "nature", area: "donghae", lat: 37.5506, lng: 129.1185,
     hours: ["10:00", "18:00"], seasons: [{ months: WINTER, hours: ["10:00", "17:00"] }],
     closed: [1], stay: 50, indoor: false, walk: 2, pop: 3, tags: ["kids"], wiki: "묵호등대", desc: "바다 위 스카이워크와 자이언트 슬라이드",
   },
   { id: "haerang", name: "해랑전망대", cat: "sea", area: "donghae", lat: 37.5492, lng: 129.1220, hours: ["10:00", "21:00"], closed: [], stay: 25, indoor: false, walk: 1, pop: 2, tags: ["kids", "senior", "night"], wiki: "묵호항", desc: "바다 위를 걷는 무료 전망대 · 파도 높으면 통제" },
-  { id: "mukho-port", souvenir: "묵호 건어물", name: "묵호항 회센터", cat: "food", area: "donghae", lat: 37.5500, lng: 129.1150, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "묵호항", desc: "제철 회와 물회" },
+  { id: "mukho-port", souvenir: "묵호 건어물", name: "묵호항 회센터", alias: ["묵호항 활·선어판매센터"], cat: "food", area: "donghae", lat: 37.5500, lng: 129.1150, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "묵호항", desc: "제철 회와 물회" },
   { id: "mangsang", name: "망상해변", cat: "sea", area: "donghae", lat: 37.5920, lng: 129.0890, hours: ["06:00", "22:00"], closed: [], stay: 40, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "망상해수욕장", desc: "동해안에서 손꼽히는 넓은 백사장" },
   {
     id: "hwanseon", name: "환선굴", cat: "nature", area: "samcheok", lat: 37.3250, lng: 129.0180,
@@ -157,7 +157,7 @@ const SEORAK = [
   { id: "cheongcho", name: "청초호 호수공원", cat: "nature", area: "sokcho", lat: 38.1960, lng: 128.5860, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 1, tags: ["kids", "senior", "night"], wiki: "청초호", desc: "호수 산책로와 엑스포타워" },
   { id: "seorak-cable", name: "설악산 케이블카", cat: "nature", area: "seoraksan", lat: 38.1730, lng: 128.4890, hours: ["09:00", "17:00"], lastEntry: "16:00", closed: [], stay: 90, indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "설악산", desc: "권금성까지 10분 · 강풍 시 운휴" },
   {
-    id: "unification", name: "고성 통일전망대", cat: "culture", area: "goseong", lat: 38.5870, lng: 128.3720,
+    id: "unification", name: "고성 통일전망대", alias: ["고성 통일전망타워"], cat: "culture", area: "goseong", lat: 38.5148, lng: 128.4174,
     hours: ["09:00", "16:50"], seasons: [{ months: [11, 12, 1, 2], hours: ["09:00", "15:50"] }],
     closed: [], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "통일전망대", desc: "금강산이 보이는 최북단 전망대 · 출입신고·신분증 필요", car: true,
   },
@@ -174,7 +174,7 @@ const SEORAK = [
   },
   { id: "daepo", souvenir: "속초 건어물", name: "대포항", cat: "food", area: "sokcho", lat: 38.1750, lng: 128.6070, hours: ["10:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "대포항", desc: "튀김골목과 활어 횟집" },
   { id: "dongmyeong", souvenir: "속초 건어물", name: "동명항 활어센터", cat: "food", area: "sokcho", lat: 38.2120, lng: 128.5990, hours: ["09:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동명항", desc: "영금정 옆 회센터" },
-  { id: "yongdae", souvenir: "용대리 황태", name: "용대리 황태구이 마을", cat: "food", area: "inje", lat: 38.1650, lng: 128.3600, hours: ["09:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "용대리", desc: "황태덕장 마을 황태구이" },
+  { id: "yongdae", souvenir: "용대리 황태", name: "용대리 황태구이 마을", alias: ["인제 황태마을"], cat: "food", area: "inje", lat: 38.2355, lng: 128.3611, hours: ["09:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "용대리", desc: "황태덕장 마을 황태구이" },
   { id: "yangyang-market", souvenir: "양양 송이", name: "양양전통시장", cat: "food", area: "yangyang", lat: 38.0750, lng: 128.6190, hours: ["09:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "양양군", desc: "4·9일 오일장 · 송이·메밀전" },
   { id: "geojin", name: "거진항 식당가", cat: "food", area: "goseong", lat: 38.4450, lng: 128.4580, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "거진항", desc: "곰치국·생선찜" },
   { id: "chilsung", name: "칠성조선소", cat: "cafe", area: "sokcho", lat: 38.2005, lng: 128.5880, hours: ["11:00", "20:00"], lastEntry: "19:30", closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "청초호", desc: "옛 조선소를 고친 호숫가 카페" },
@@ -193,8 +193,8 @@ const CHUNCHEON = [
   },
   { id: "soyang-skywalk", name: "소양강 스카이워크", cat: "nature", area: "cc_city", lat: 37.8950, lng: 127.7240, hours: ["10:00", "18:00"], lastEntry: "17:30", closed: [2], stay: 30, indoor: false, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "소양강 스카이워크", desc: "강 위 투명 유리 다리" },
   { id: "cc-museum", name: "국립춘천박물관", cat: "culture", area: "cc_city", lat: 37.8650, lng: 127.7480, hours: ["09:00", "18:00"], lastEntry: "17:30", closed: [1], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "국립춘천박물관", desc: "나한상 전시 「득도의 기쁨」" },
-  { id: "dakgalbi", souvenir: "춘천 닭갈비", name: "명동 닭갈비골목", cat: "food", area: "cc_city", lat: 37.8805, lng: 127.7275, hours: ["10:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "춘천 닭갈비", desc: "춘천 닭갈비 원조 골목" },
-  { id: "makguksu", souvenir: "춘천 막국수", name: "춘천 막국수 (샘밭)", cat: "food", area: "cc_city", lat: 37.9300, lng: 127.7800, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "막국수", desc: "소양댐 아래 막국수 식당가" },
+  { id: "dakgalbi", souvenir: "춘천 닭갈비", name: "명동 닭갈비골목", alias: ["춘천 명동 닭갈비 골목"], cat: "food", area: "cc_city", lat: 37.8805, lng: 127.7275, hours: ["10:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "춘천 닭갈비", desc: "춘천 닭갈비 원조 골목" },
+  { id: "makguksu", souvenir: "춘천 막국수", name: "춘천 막국수 (샘밭)", alias: ["소양호 막국수거리"], cat: "food", area: "cc_city", lat: 37.9327, lng: 127.7934, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "막국수", desc: "소양댐 아래 막국수 식당가" },
   { id: "gongjicheon", name: "공지천 유원지", cat: "nature", area: "cc_city", lat: 37.8700, lng: 127.7100, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 1, tags: ["kids", "senior", "night"], wiki: "공지천", desc: "의암호 따라 걷는 산책로" },
   {
     id: "hantan-trail", name: "한탄강 주상절리길", trailKm: 3.6, cat: "nature", area: "cheorwon", lat: 38.1580, lng: 127.2950,
@@ -203,14 +203,14 @@ const CHUNCHEON = [
   },
   { id: "goseokjeong", name: "고석정", cat: "nature", area: "cheorwon", lat: 38.1930, lng: 127.2810, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "고석정", desc: "한탄강 협곡의 바위 정자" },
   { id: "hwacheon-river", name: "화천 붕어섬", cat: "nature", area: "hwacheon", lat: 38.1007, lng: 127.6970, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "화천군", desc: "북한강 위 섬 공원" },
-  { id: "nangman", souvenir: "춘천 닭갈비", name: "춘천 낭만시장", cat: "food", area: "cc_city", lat: 37.8810, lng: 127.7270, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "춘천중앙시장", desc: "옛 중앙시장 먹거리" },
+  { id: "nangman", souvenir: "춘천 닭갈비", name: "춘천 낭만시장", alias: ["춘천 중앙시장"], cat: "food", area: "cc_city", lat: 37.8810, lng: 127.7270, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "춘천중앙시장", desc: "옛 중앙시장 먹거리" },
   { id: "dongsong", name: "철원 동송 식당가", cat: "food", area: "cheorwon", lat: 38.2100, lng: 127.2120, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동송읍", desc: "철원 오대쌀 밥집" },
   { id: "hwacheon-food", name: "화천읍 식당가", cat: "food", area: "hwacheon", lat: 38.1060, lng: 127.7050, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "화천읍", desc: "어죽·막국수" },
   { id: "samak-cable", name: "삼악산 호수케이블카", cat: "nature", area: "cc_city", lat: 37.8650, lng: 127.6920, hours: ["09:00", "18:00"], lastEntry: "17:00", closed: [], closedRanges: [["2026-11-01", "2026-11-30"]], stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "삼악산", desc: "의암호 위를 지나는 3.6km 케이블카" },
   { id: "labor-party", name: "철원 노동당사", cat: "culture", area: "cheorwon", lat: 38.2552, lng: 127.2020, hours: ["00:00", "23:59"], closed: [], stay: 25, indoor: false, walk: 1, pop: 2, tags: ["senior"], wiki: "철원 노동당사", desc: "전쟁의 흔적이 남은 건물" },
   { id: "jiktang", name: "직탕폭포", cat: "nature", area: "cheorwon", lat: 38.2097, lng: 127.2659, hours: ["06:00", "19:00"], closed: [], stay: 25, indoor: false, walk: 1, pop: 1, tags: ["senior"], wiki: "직탕폭포", desc: "한국의 나이아가라" },
   { id: "gangchon", souvenir: "춘천 닭갈비", name: "강촌 닭갈비 식당가", cat: "food", area: "nami", lat: 37.8130, lng: 127.6340, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "강촌역", desc: "남이섬 가는 길 닭갈비·막국수" },
-  { id: "gamjabat", souvenir: "춘천 감자빵", name: "카페 감자밭", cat: "cafe", area: "cc_city", lat: 37.9330, lng: 127.7700, hours: ["10:00", "20:00"], lastEntry: "19:30", closed: [], stay: 50, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "춘천시", desc: "감자빵으로 유명한 정원 카페" },
+  { id: "gamjabat", souvenir: "춘천 감자빵", name: "카페 감자밭", alias: ["감자밭"], cat: "cafe", area: "cc_city", lat: 37.9296, lng: 127.7845, hours: ["10:00", "20:00"], lastEntry: "19:30", closed: [], stay: 50, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "춘천시", desc: "감자빵으로 유명한 정원 카페" },
 ];
 
 // 평창·정선·영월·태백
@@ -221,7 +221,7 @@ const PYEONGCHANG = [
     closed: [], stay: 70, indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "대관령 양떼목장", desc: "능선 따라 걷는 양떼 목장",
   },
   {
-    id: "samyang", name: "대관령 삼양목장", cat: "nature", area: "daegwallyeong", lat: 37.7040, lng: 128.7230,
+    id: "samyang", name: "대관령 삼양목장", alias: ["삼양라운드힐"], cat: "nature", area: "daegwallyeong", lat: 37.7239, lng: 128.7197,
     hours: ["09:00", "17:00"], lastEntry: "16:00", seasons: [{ months: [11, 12, 1, 2, 3, 4], hours: ["09:00", "16:30"], lastEntry: "15:30" }],
     closed: [], stay: 100, indoor: false, walk: 2, pop: 2, tags: ["kids", "senior"], wiki: "대관령 삼양목장", desc: "동해전망대와 풍력발전기 초원",
   },
@@ -249,7 +249,7 @@ const WONJU = [
   },
   { id: "museum-san", name: "뮤지엄 산", cat: "culture", area: "ganhyeon", lat: 37.4140, lng: 127.8170, hours: ["10:00", "17:00"], lastEntry: "16:00", closed: [1], stay: 120, indoor: true, walk: 2, pop: 3, tags: ["senior"], wiki: "뮤지엄 산", desc: "안도 다다오 설계 미술관 · 제임스 터렐관은 예약 필요" },
   { id: "bangyeri", group: "ginkgo", name: "반계리 은행나무", cat: "nature", area: "ganhyeon", lat: 37.2939, lng: 127.7879, hours: ["06:00", "20:00"], closed: [], stay: 30, indoor: false, walk: 1, pop: 2, tags: ["senior"], wiki: "원주 반계리 은행나무", desc: "800년 된 천연기념물 은행나무" },
-  { id: "guryongsa", name: "치악산 구룡사", cat: "nature", area: "chiaksan", lat: 37.4040, lng: 128.0480, hours: ["09:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "구룡사 (원주)", desc: "금강소나무 숲길 끝의 천년 고찰" },
+  { id: "guryongsa", name: "치악산 구룡사", alias: ["구룡사"], cat: "nature", area: "chiaksan", lat: 37.4040, lng: 128.0480, hours: ["09:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "구룡사 (원주)", desc: "금강소나무 숲길 끝의 천년 고찰" },
   { id: "wj-market", name: "원주 중앙시장·자유시장", cat: "food", area: "wj_city", lat: 37.3480, lng: 127.9500, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "원주시", desc: "칼국수·만두·전" },
   { id: "hanwoo", souvenir: "횡성 한우", name: "횡성 한우 먹거리", cat: "food", area: "wj_city", lat: 37.4860, lng: 127.9850, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡성 한우", desc: "횡성읍 한우 식당가" },
   { id: "guryong-food", name: "구룡사 입구 식당가", cat: "food", area: "chiaksan", lat: 37.3980, lng: 128.0430, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "치악산", desc: "산채비빔밥·도토리묵" },
@@ -271,7 +271,7 @@ export const PLACES = [
 // confirmed: 날짜가 발표된 축제 → 기간 중 같은 권역 여행이면 일정에 자동 포함
 // tentative: 매년 열리지만 올해 날짜가 아직 발표되지 않은 축제 → 해당 월에 안내만
 export const FESTIVALS = [
-  { id: "f-hwacheon", name: "화천 산천어축제", region: "chuncheon", area: "hwacheon", lat: 38.1060, lng: 127.7080, start: "2027-01-09", end: "2027-01-31", hours: ["10:00", "17:00"], stay: 150, desc: "얼음낚시·맨손잡기", wiki: "화천산천어축제" },
+  { id: "f-hwacheon", name: "화천 산천어축제", alias: ["얼음나라화천 산천어축제"], region: "chuncheon", area: "hwacheon", lat: 38.1126, lng: 127.7099, start: "2027-01-09", end: "2027-01-31", hours: ["10:00", "17:00"], stay: 150, desc: "얼음낚시·맨손잡기", wiki: "화천산천어축제" },
   { id: "f-trout", name: "평창송어축제", region: "pyeongchang", area: "odaesan", lat: 37.6400, lng: 128.5600, start: "2026-12-31", end: "2027-02-01", hours: ["10:00", "17:00"], stay: 120, desc: "오대천 얼음낚시", wiki: "평창송어축제" },
   { id: "f-ginkgo", group: "ginkgo", name: "원주 반계리 은행나무축제", region: "wonju", area: "ganhyeon", lat: 37.2939, lng: 127.7879, start: "2026-10-30", end: "2026-11-12", hours: ["10:00", "17:00"], stay: 60, desc: "800년 은행나무 단풍", wiki: "원주 반계리 은행나무" },
 

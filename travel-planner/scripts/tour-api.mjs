@@ -155,7 +155,7 @@ export async function candidates(service, place, opts = {}) {
     .sort((a, b) => b.ok - a.ok || b.score - a.score || a.km - b.km);
   // 검색은 제목 부분일치라 "경포해변"으로는 "경포해수욕장"이 안 나온다. 이름 변형을 차례로 검색하고 찾으면 멈춘다.
   const variants = nameVariants(place).map((v) => v.replace(/^=/, "")).filter((v) => v.length >= 2);
-  const keywords = [...new Set([place.name.replace(/[·()]/g, " ").replace(/\s+/g, " ").trim(), ...variants, ...variants.filter((v) => /해변$/.test(v)).map((v) => v.replace(/해변$/, "해수욕장"))])];
+  const keywords = [...new Set([place.name.replace(/[·()]/g, " ").replace(/\s+/g, " ").trim(), ...(place.alias || []), ...variants, ...variants.filter((v) => /해변$/.test(v)).map((v) => v.replace(/해변$/, "해수욕장"))])];
   for (const kw of keywords.slice(0, 6)) {
     for (const it of await tour(service, "searchKeyword2", { keyword: kw, numOfRows: "30", pageNo: "1" }, opts)) seen.set(it.contentid, it);
     if (rate([...seen.values()]).some((c) => c.ok && c.km <= 2 && (c.firstimage || isEng))) break;
