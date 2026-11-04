@@ -1,5 +1,5 @@
 // 정적 파일 + AI(/api/start, /api/guide, /api/lodging-check, /api/menu-scan) + 사진(/api/photo) + 가게 등록(/api/shops, /api/qr)
-// AI는 말을 이해하고 설명만 하고, 장소 선택·시간 계산은 검증된 데이터 기반 엔진이 한다.
+// AI(OpenAI 호환 API)는 말을 이해하고 설명만 하고, 장소 선택·시간 계산은 검증된 데이터 기반 엔진이 한다.
 // 그래서 존재하지 않는 장소나 문 닫은 곳이 일정에 들어갈 수 없다.
 import http from "node:http";
 import { readFile, writeFile, stat } from "node:fs/promises";
@@ -8,9 +8,9 @@ import QRCode from "qrcode";
 import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
-import { startFromText, guide, lodgingCheck, menuScan } from "./ai.mjs";
+import { startFromText, guide, lodgingCheck, menuScan, AI_MODEL } from "./ai.mjs";
 import { REGIONS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -35,9 +35,10 @@ const SHOPS_FILE = path.join(here, "data", "shops.json");
 async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
 
 function logAIError(err) {
-  if (err instanceof Anthropic.AuthenticationError) console.error("Anthropic 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
-  else if (err instanceof Anthropic.RateLimitError) console.error("요청 한도 초과");
-  else if (err instanceof Anthropic.APIError) console.error(`API 오류 ${err.status}: ${err.message}`);
+  if (err instanceof OpenAI.AuthenticationError) console.error("AI 인증 실패: AI_API_KEY를 확인하세요.");
+  else if (err instanceof OpenAI.NotFoundError) console.error(`모델을 찾을 수 없음: AI_MODEL(${AI_MODEL})을 확인하세요.`);
+  else if (err instanceof OpenAI.RateLimitError) console.error("요청 한도 초과");
+  else if (err instanceof OpenAI.APIError) console.error(`AI API 오류 ${err.status}: ${err.message}`);
   else console.error(err.message);
 }
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
@@ -170,4 +171,7 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, () => console.log(`http://localhost:${PORT}`));
+server.listen(PORT, () => {
+  console.log(`http://localhost:${PORT}`);
+  console.log(AI_MODEL ? `AI 모델: ${AI_MODEL}` : "AI_MODEL 미설정: AI 기능은 규칙 기반으로 대체됩니다");
+});

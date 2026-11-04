@@ -17,7 +17,7 @@
 | 날씨 반영 없음 | 예보 범위 안이면 비 오는 날을 실내 위주로 자동 변경 |
 | 오프라인·내보내기 유료 | 무료로 오프라인 열람(PWA), 링크 공유, 캘린더(.ics), 카카오맵 길찾기 |
 
-## AI 기능 (Claude)
+## AI 기능 (OpenAI 호환 API)
 
 - **한 줄로 시작**: "이번 주말 부모님이랑 속초 1박, 차로" → 5개 선택값을 채우고 바로 일정 생성 (`/api/start`)
 - **AI 가이드**: 일정을 보며 묻고 고치기. "비 오면 어떡해?", "2일차에 바다 한 곳 더 넣어줘" → 답변 + 일정 변경 (`/api/guide`)
@@ -45,12 +45,22 @@
 ```bash
 cd travel-planner
 npm install
-ANTHROPIC_API_KEY=sk-ant-... TOUR_API_KEY=공공데이터포털_인증키 npm start
+AI_API_KEY=발급키 AI_MODEL=모델ID TOUR_API_KEY=공공데이터포털_Decoding키 npm start
 ```
 
-`http://localhost:8080` 접속. 키가 없어도 동작한다.
-- `ANTHROPIC_API_KEY`: 한 줄 요청 해석 (없으면 규칙 기반 해석)
-- `TOUR_API_KEY`: 한국관광공사 TourAPI 공식 사진 (없으면 위키백과·위키미디어 공용 사진)
+`http://localhost:8080` 접속. 키가 없어도 동작한다(AI 기능은 규칙 기반으로 대체).
+
+| 환경변수 | 필요한 곳 | 설명 |
+|---|---|---|
+| `AI_API_KEY` | AI 4개 기능 | AI 제공사 API 키 (`OPENAI_API_KEY`도 인식) |
+| `AI_MODEL` | AI 4개 기능 | 제공사 콘솔에 적힌 모델 ID 그대로 |
+| `AI_BASE_URL` | OpenAI가 아닌 제공사 | OpenAI 호환 API 주소 (예: `https://제공사주소/v1`). OpenAI면 비워 둔다 |
+| `AI_REASONING_EFFORT` | 선택 | 추론 모델이면 `low`/`medium`/`high` (응답 속도에는 `low`) |
+| `TOUR_API_KEY` | 장소 사진 | 공공데이터포털 한국관광공사 국문 관광정보 서비스 인증키 (Decoding) |
+| `KAKAO_REST_KEY` | 좌표 확인 스크립트 | 카카오 개발자 REST API 키 |
+
+- 메뉴판 읽기는 이미지 입력을 지원하는 모델이어야 한다.
+- 구조화 출력(json_schema)을 지원하지 않는 호환 API면 자동으로 JSON 모드로 다시 요청하고, 서버가 응답 형식을 한 번 더 검사한다. 앱 데이터에 없는 장소 id는 버린다.
 
 ## 사진
 
@@ -77,7 +87,7 @@ npm test
 
 ```
 server.mjs                정적 파일 + AI + 사진 + 가게 등록(/api/shops, /api/qr)
-ai.mjs                    Claude 호출 (한 줄 시작, AI 가이드, 숙소 안심 체크, 메뉴판 읽기)
+ai.mjs                    AI 호출 (OpenAI 호환: 한 줄 시작, AI 가이드, 숙소 안심 체크, 메뉴판 읽기)
 data/shops.json           사장님이 등록한 가게
 public/owner.html         사장님 가게 등록 화면
 public/menu.html          다국어 QR 메뉴

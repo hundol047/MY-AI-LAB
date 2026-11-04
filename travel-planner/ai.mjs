@@ -1,13 +1,14 @@
-// Claude를 쓰는 AI 기능 두 가지
-// 1) startFromText: "이번 주말 부모님이랑 속초 1박" 같은 한 줄 → 5개 선택값
-// 2) guide: 일정을 보며 묻고 고치는 AI 가이드
-// 원칙: AI는 말을 이해하고 설명만 한다. 장소는 검증된 데이터의 id 중에서만 고를 수 있고(스키마 enum),
+// AI 기능: 한 줄 시작, AI 가이드, 숙소 안심 체크, 메뉴판 읽기
+// OpenAI 방식(OpenAI 호환) API를 쓴다. 모델·주소는 환경변수로 정한다.
+//   AI_API_KEY (또는 OPENAI_API_KEY) · AI_MODEL (필수, 예: 제공사 콘솔에 적힌 모델 ID)
+//   AI_BASE_URL (OpenAI가 아닌 호환 API일 때) · AI_REASONING_EFFORT (추론 모델이면 low/medium/high)
+// 원칙: AI는 말을 이해하고 설명만 한다. 장소는 검증된 데이터의 id 중에서만 고를 수 있고(스키마 enum + 서버 재검사),
 //       실제 배치와 영업시간 확인은 일정 엔진이 다시 한다.
-import Anthropic from "@anthropic-ai/sdk";
+import OpenAI from "openai";
 import { PLACES, FESTIVALS, REGIONS } from "./public/data.js";
 import { hoursFor, addDays, fmt } from "./public/planner.js";
 
-const MODEL = "claude-opus-5-5";
+export const AI_MODEL = process.env.AI_MODEL || "";
 const CATS = ["sea", "cafe", "food", "culture", "nature"];
 const REGION_KEYS = Object.keys(REGIONS);
 const NEIGHBORS = {
@@ -16,26 +17,61 @@ const NEIGHBORS = {
 };
 
 let client = null;
-const getClient = () => (client ??= new Anthropic());
+function getClient() {
+  if (!AI_MODEL) throw new Error("AI_MODEL이 설정되지 않았습니다");
+  return (client ??= new OpenAI({
+    apiKey: process.env.AI_API_KEY || process.env.OPENAI_API_KEY,
+    ...(process.env.AI_BASE_URL ? { baseURL: process.env.AI_BASE_URL } : {}),
+    timeout: 40_000,
+    maxRetries: 1,
+  }));
+}
 
-// user: 문자열 또는 [{ text, cache }] (cache=true인 블록까지 프롬프트 캐시 → 같은 일정에 대한 다음 질문이 빨라짐)
-async function askJSON({ system, user, schema, effort }) {
-  const content = typeof user === "string" ? user
-    : user.map((b) => ({ type: "text", text: b.text, ...(b.cache ? { cache_control: { type: "ephemeral" } } : {}) }));
-  const response = await getClient().beta.messages.create({
-    model: MODEL,
-    max_tokens: 4000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-    output_config: { effort, format: { type: "json_schema", schema } },
-    messages: [{ role: "user", content }],
-  });
-  if (response.stop_reason === "refusal") throw new Error("refused");
-  if (response.stop_reason === "max_tokens") throw new Error("truncated");
-  const block = response.content.find((b) => b.type === "text");
-  if (!block) throw new Error("empty");
-  return JSON.parse(block.text);
+// 응답이 스키마를 지키는지 서버에서도 확인 (구조화 출력을 엄격히 지키지 않는 모델 대비)
+function conforms(v, sc) {
+  if (sc.enum) return sc.enum.includes(v);
+  if (sc.type === "string") return typeof v === "string";
+  if (sc.type === "integer") return Number.isInteger(v);
+  if (sc.type === "boolean") return typeof v === "boolean";
+  if (sc.type === "array") return Array.isArray(v) && v.every((x) => conforms(x, sc.items));
+  if (sc.type === "object") return v && typeof v === "object" && (sc.required || []).every((k) => k in v && conforms(v[k], sc.properties[k]));
+  return true;
+}
+
+// 같은 앞부분(system + 장소 데이터)은 제공사의 자동 프롬프트 캐시가 재사용하도록 앞에 둔다
+async function askJSON({ system, user, schema, name = "result", image = null, sanitize = (o) => o }) {
+  const text = typeof user === "string" ? user : user.map((b) => b.text).join("\n\n");
+  const content = image
+    ? [{ type: "image_url", image_url: { url: `data:${image.mediaType};base64,${image.data}` } }, { type: "text", text }]
+    : text;
+  const base = {
+    model: AI_MODEL,
+    max_completion_tokens: 6000,
+    ...(process.env.AI_REASONING_EFFORT ? { reasoning_effort: process.env.AI_REASONING_EFFORT } : {}),
+  };
+  let res;
+  try {
+    res = await getClient().chat.completions.create({
+      ...base,
+      messages: [{ role: "system", content: system }, { role: "user", content }],
+      response_format: { type: "json_schema", json_schema: { name, schema, strict: true } },
+    });
+  } catch (err) {
+    // 구조화 출력(json_schema)을 지원하지 않는 호환 API면 JSON 모드 + 스키마 설명으로 다시
+    if (!(err instanceof OpenAI.BadRequestError)) throw err;
+    res = await getClient().chat.completions.create({
+      ...base,
+      messages: [{ role: "system", content: `${system}\n\n반드시 아래 JSON 스키마에 맞는 JSON 객체 하나만 출력한다.\n${JSON.stringify(schema)}` }, { role: "user", content }],
+      response_format: { type: "json_object" },
+    });
+  }
+  const choice = res.choices?.[0];
+  if (!choice) throw new Error("empty");
+  if (choice.message?.refusal) throw new Error("refused");
+  if (choice.finish_reason === "length") throw new Error("truncated");
+  const out = sanitize(JSON.parse(choice.message?.content || ""));
+  if (!conforms(out, schema)) throw new Error("schema mismatch");
+  return out;
 }
 
 /* ---------- 1) 한 줄로 시작 ---------- */
@@ -64,7 +100,7 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
 export async function startFromText(text, today) {
-  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}`, schema: START_SCHEMA, effort: "low" });
+  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}`, schema: START_SCHEMA, name: "trip_choices" });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date) || r.date < today) r.date = addDays(today, 1);
   r.likes = [...new Set(r.likes)].slice(0, 3);
   return r;
@@ -135,9 +171,13 @@ ${hist ? `\n이전 대화:\n${hist}\n` : ""}
 사용자: ${question}` },
   ];
 
-  // 짧은 답과 정해진 형식이라 effort low로 응답 시간을 줄인다
-  const r = await askJSON({ system, user, schema, effort: "low" });
-  r.remove = r.remove.filter((id) => tripIds.includes(id));
+  // 앱 데이터에 없는 장소 id는 버린다 (답변은 살림)
+  const sanitize = (o) => ({
+    ...o,
+    remove: Array.isArray(o?.remove) ? o.remove.filter((id) => tripIds.includes(id)) : [],
+    add: Array.isArray(o?.add) ? o.add.filter((id) => allIds.includes(id)) : [],
+  });
+  const r = await askJSON({ system, user, schema, name: "guide_reply", sanitize });
   return r;
 }
 
@@ -167,7 +207,7 @@ export async function lodgingCheck({ text, nights, date }) {
   return askJSON({
     system: CHECK_SYSTEM,
     user: `여행 날짜: ${date || "미정"}, ${nights || 1}박\n\n숙소 페이지 내용:\n${String(text).slice(0, 6000)}`,
-    schema: CHECK_SCHEMA, effort: "low",
+    schema: CHECK_SCHEMA, name: "lodging_check",
   });
 }
 
@@ -202,24 +242,5 @@ const MENU_SYSTEM = `가게 사장님이 찍은 메뉴판 사진을 읽어 외�
 - shopName: 사진에 가게 이름이 있으면, 없으면 빈 문자열.`;
 
 export async function menuScan({ image, mediaType }) {
-  const response = await getClient().beta.messages.create({
-    model: MODEL,
-    max_tokens: 8000,
-    betas: ["server-side-fallback-2026-07-01"],
-    fallbacks: "default",
-    system: MENU_SYSTEM,
-    output_config: { effort: "low", format: { type: "json_schema", schema: MENU_SCHEMA } },
-    messages: [{
-      role: "user",
-      content: [
-        { type: "image", source: { type: "base64", media_type: mediaType, data: image } },
-        { type: "text", text: "이 메뉴판을 읽어 주세요." },
-      ],
-    }],
-  });
-  if (response.stop_reason === "refusal") throw new Error("refused");
-  if (response.stop_reason === "max_tokens") throw new Error("truncated");
-  const block = response.content.find((b) => b.type === "text");
-  if (!block) throw new Error("empty");
-  return JSON.parse(block.text);
+  return askJSON({ system: MENU_SYSTEM, user: "이 메뉴판을 읽어 주세요.", schema: MENU_SCHEMA, name: "menu", image: { data: image, mediaType } });
 }
