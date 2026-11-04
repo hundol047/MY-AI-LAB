@@ -1,7 +1,8 @@
 import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
-import { PLACES, REGIONS, SHOP_MALL } from "./data.js";
+import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
+import { ORIGINS } from "./origins.js";
 import { t, isEN, getLang, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
@@ -76,13 +77,82 @@ $("#form").addEventListener("submit", (e) => {
     move: segValue("move"),
   };
   const lessWalk = input.who === "parents";
-  state = { input, opts: { pace: "normal", lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [] } };
+  state = { input, opts: { pace: "normal", lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [], ...startOpts(input) } };
   restoredFromLink = false;
   dayIdx = 0;
   rebuild();
   show("result");
   loadWeather();
 });
+
+/* ---------- 출발지 (이 기기에 저장) ----------
+   첫날은 고른 출발지에서 출발한다. 없으면 권역 기준점(역·터미널). 출발 시각 자동: 가까우면 10시, 60km 넘으면 8시 */
+const distKm = (a, b) => { const r = Math.PI / 180, x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
+const savedStart = () => { const s = store.get("startPoint"); return s && Number.isFinite(s.lat) && Number.isFinite(s.lng) ? s : null; };
+function startOpts(input) {
+  const s = savedStart(), base = REGIONS[input.region].base;
+  const time = store.get("startTime") || (s && distKm(s, base) * 1.35 > 60 ? "08:00" : "");
+  return { ...(s ? { start: { name: s.name, ...(s.nameEn ? { nameEn: s.nameEn } : {}), lat: s.lat, lng: s.lng } } : {}), ...(time ? { startTime: time } : {}) };
+}
+function renderStartRow() {
+  const s = savedStart(), region = segValue("region") || "gangneung";
+  const base = REGIONS[region].base;
+  $("#startLabel").textContent = s ? (isEN() && s.nameEn ? s.nameEn : s.name) : t("{name} (기본)", { name: startName(base) });
+  $("#startTime").value = store.get("startTime") || "";
+  const recent = (store.get("startRecent") || []).filter((r) => !s || r.name !== s.name);
+  renderStartResults($("#startSearch").value, recent);
+}
+function setStart(s) {
+  if (s) {
+    store.set("startPoint", s);
+    store.set("startRecent", [s, ...(store.get("startRecent") || []).filter((r) => r.name !== s.name)].slice(0, 5));
+    toast(t("출발지를 {name}(으)로 정했어요", { name: isEN() && s.nameEn ? s.nameEn : s.name }));
+  } else { try { localStorage.removeItem("startPoint"); } catch { /* 저장소 없음 */ } }
+  $("#startSearch").value = "";
+  renderStartRow();
+}
+function startCandidates() {
+  const own = [
+    ...ORIGINS,
+    ...Object.values(REGIONS).map((r) => ({ name: r.base.name, lat: r.base.lat, lng: r.base.lng })),
+    ...LODGING.map((l) => ({ name: l.name, nameEn: isEN() ? lodgingName(l) : undefined, lat: l.lat, lng: l.lng })),
+    ...PLACES.map((p) => ({ name: p.name, nameEn: isEN() ? placeName(p) : undefined, lat: p.lat, lng: p.lng })),
+  ];
+  const seen = new Set();
+  return own.filter((o) => (seen.has(o.name) ? false : seen.add(o.name)));
+}
+function renderStartResults(q, recent = []) {
+  const box = $("#startResults");
+  const norm = (x) => String(x || "").toLowerCase().replace(/\s+/g, "");
+  const query = norm(q);
+  let list, head = "";
+  if (query) {
+    list = startCandidates().filter((o) => norm(o.name).includes(query) || norm(o.nameEn).includes(query)).slice(0, 8);
+    if (!list.length) { box.innerHTML = `<li class="none">${t("검색 결과가 없어요")}</li>`; return; }
+  } else { list = recent; head = list.length ? `<li class="head">${t("최근 출발지")}</li>` : ""; }
+  box.innerHTML = head + list.map((o, i) => `<li><button type="button" data-start="${i}">${esc(isEN() && o.nameEn ? o.nameEn : o.name)}</button></li>`).join("");
+  box._list = list;
+}
+$("#startEdit").addEventListener("click", () => {
+  const p = $("#startPanel"); p.hidden = !p.hidden; $("#startEdit").setAttribute("aria-expanded", String(!p.hidden));
+  if (!p.hidden) { renderStartRow(); $("#startSearch").focus(); }
+});
+$("#startSearch").addEventListener("input", (e) => renderStartResults(e.target.value, store.get("startRecent") || []));
+$("#startResults").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-start]"); if (!b) return;
+  const o = $("#startResults")._list[Number(b.dataset.start)];
+  setStart({ name: o.name, ...(o.nameEn ? { nameEn: o.nameEn } : {}), lat: o.lat, lng: o.lng });
+});
+$("#startDefault").addEventListener("click", () => setStart(null));
+$("#startTime").addEventListener("change", (e) => { if (e.target.value) store.set("startTime", e.target.value); else { try { localStorage.removeItem("startTime"); } catch { /* 없음 */ } } });
+$("#startGps").addEventListener("click", () => {
+  if (!navigator.geolocation) return toast(t("위치를 사용할 수 없어요"));
+  toast(t("위치를 찾는 중…"));
+  navigator.geolocation.getCurrentPosition((pos) => {
+    setStart({ name: t("내 위치"), nameEn: "My location", lat: Math.round(pos.coords.latitude * 1e5) / 1e5, lng: Math.round(pos.coords.longitude * 1e5) / 1e5 });
+  }, () => toast(t("위치 권한을 허용해 주세요")), { enableHighAccuracy: true, timeout: 10000 });
+});
+document.querySelector('.seg[data-name="region"]').addEventListener("click", () => setTimeout(renderStartRow, 0));
 
 function fillForm(input) {
   $("#date").value = input.date;
@@ -602,7 +672,7 @@ function renderCosts() {
   };
   const detail = (r) => {
     const d = r.detail;
-    if (r.key === "taxi") return t("{n}구간 · 택시 {cars}대 · {src}", { n: d.legs, cars: d.cars, src: t(TAXI.source) });
+    if (r.key === "taxi") return t("{n}구간 · 택시 {cars}대 · {src}", { n: d.legs, cars: d.cars, src: t(TAXI.source) }) + (d.far ? t(" · 출발지에서 오는 먼 구간은 기차·버스 요금 별도") : "");
     if (r.key === "fuel") return t("약 {km}km · 연비 {eff}km/L · {src}", { km: d.km, eff: FUEL.kmPerL, src: t(FUEL.source) });
     if (r.key === "bus") return t("{n}번 탑승 · 1회 {fare}", { n: d.rides, fare: won(BUS.fare) }) + (d.far ? t(" · 먼 구간 {n}번은 시외버스라 요금 확인 필요", { n: d.far }) : "");
     if (r.key === "fees") return t("요금 확인된 {n}곳 (한국관광공사)", { n: d.known }) + (e.unknownFees.length ? t(" · 요금 정보 없음: {names}", { names: e.unknownFees.map((p) => esc(placeName(p))).join(", ") }) : "");
@@ -903,6 +973,7 @@ async function switchLang(l) {
   if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000));
   applyStatic();
   heroCaption();
+  renderStartRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
 }
@@ -930,6 +1001,7 @@ if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 이�
 })();
 
 renderPast();
+renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다
 fetchT("api/shops?region=gangneung", {}, 3000)

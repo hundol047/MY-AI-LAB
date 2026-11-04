@@ -32,6 +32,11 @@ export function travel(a, b, move) {
   if (road < 0.05) return { min: 0, mode: "same", km: 0 };
   if (road <= 1.2) return { min: round5(road / 4.2 * 60), mode: "walk", km: road };
   // 시내 구간은 느리고, 먼 거리는 국도·고속도로 속도
+  // 먼 거리(60km 넘음, 예: 서울에서 출발): 자동차는 고속도로 85km/h, 그 밖(택시·대중교통)은 KTX·고속버스 80km/h + 타고 내리는 40분
+  if (road > 60) {
+    if (move === "car") return { min: round5(15 / 30 * 60 + (road - 15) / 85 * 60 + 8), mode: "car", km: road };
+    return { min: round5(road / 80 * 60 + 40), mode: "bus", km: road };
+  }
   if (drives(move)) {
     const city = Math.min(road, 15), open = Math.max(0, road - 15);
     return { min: round5(city / 30 * 60 + open / 70 * 60 + (move === "taxi" ? 4 : 8)), mode: move, km: road };
@@ -226,7 +231,10 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
 function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly, start) {
   const dateStr = addDays(input.date, dayIdx);
   const rain = !!(opts.rainDays || [])[dayIdx];
-  const { start: dayStart, end } = dayWindow(dayIdx, input.days);
+  const win = dayWindow(dayIdx, input.days), end = win.end;
+  // 첫날 출발 시각을 정했으면 그 시각에 출발지를 떠난다 (06:00~12:00)
+  const t0 = dayIdx === 0 && /^\d{2}:\d{2}$/.test(opts.startTime || "") ? toMin(opts.startTime) : null;
+  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("12:00") ? t0 : win.start;
   const pace = opts.pace || "normal";
   const limit = PACE_LIMIT[pace];
   const pool = candidates(input);
@@ -337,13 +345,17 @@ function planDays(input, opts, lodging) {
   const home = lodging && { name: `숙소(${lodging.name})`, lat: lodging.lat, lng: lodging.lng };
   for (let d = 0; d < input.days; d++) {
     const keep = (opts.keep || [])[d] || [];
-    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, d > 0 ? home : null);
+    // 첫날은 사용자가 정한 출발지(opts.start: {name, lat, lng})에서, 없으면 권역 기준점(역·터미널)에서 출발
+    const start = d > 0 ? home : (validStart(opts.start) ? opts.start : null);
+    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, start);
     usedAreas.push(day.area);
     if (lodging && d < input.days - 1) markReturn(day, lodging);
     days.push(day);
   }
   return days;
 }
+
+const validStart = (s) => !!s && Number.isFinite(s.lat) && Number.isFinite(s.lng) && Math.abs(s.lat) <= 90 && Math.abs(s.lng) <= 180 && typeof s.name === "string";
 
 function markReturn(day, lodging) {
   const last = day.items.length ? day.items[day.items.length - 1].place : day.start;

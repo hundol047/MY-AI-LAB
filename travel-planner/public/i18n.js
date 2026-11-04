@@ -117,6 +117,21 @@ const EN = {
   "숙소({name})로 · 약 {km}km": "To your stay ({name}) · about {km} km",
   "숙소 · {name}": "Stay · {name}",
   "이 지역 추천 숙소": "Places to stay in this area",
+  // 출발지
+  "출발": "Start",
+  "출발지 바꾸기": "Change",
+  "지금 위치에서": "From my location",
+  "기본(권역 역·터미널)": "Default (station·terminal)",
+  "출발지 검색 (예: 서울역, 경포, 동서울)": "Search a starting point (e.g. Seoul Station, Gyeongpo)",
+  "첫날 출발 시각": "Departure on day 1",
+  "자동": "Auto",
+  "고른 출발지는 이 기기에 저장돼요. 자동: 가까우면 10시, 멀면(60km 넘게) 8시에 출발": "Your starting point is saved on this device. Auto: leave at 10:00 if nearby, 08:00 if over 60 km away",
+  "{name} (기본)": "{name} (default)",
+  "내 위치": "My location",
+  "최근 출발지": "Recent",
+  "검색 결과가 없어요": "No matches",
+  "출발지를 {name}(으)로 정했어요": "Starting point set to {name}",
+  "위치를 찾는 중…": "Finding your location…",
   // 예상 비용
   " · 약 {won}": " · about {won}",
   " · 택시 약 {won}": " · taxi about {won}",
@@ -133,6 +148,7 @@ const EN = {
   "강원 중형택시 요금(2024년 8월 조정)": "Gangwon taxi fares (Aug 2024)",
   "오피넷 전국 휘발유 평균(2026년 10월)": "Opinet national gasoline average (Oct 2026)",
   "{n}구간 · 택시 {cars}대 · {src}": "{n} rides · {cars} taxi(s) · {src}",
+  " · 출발지에서 오는 먼 구간은 기차·버스 요금 별도": " · the long trip from your starting point (train/bus) is not included",
   "약 {km}km · 연비 {eff}km/L · {src}": "about {km} km · {eff} km/L · {src}",
   "{n}번 탑승 · 1회 {fare}": "{n} rides · {fare} each",
   " · 먼 구간 {n}번은 시외버스라 요금 확인 필요": " · {n} long ride(s) are intercity buses, check fares",
@@ -307,6 +323,7 @@ export function benefitText(b, field) {
 // 출발점: 기준 역 또는 "숙소(경포)"
 export function startName(start, lodging) {
   if (lang !== "en") return start.name;
+  if (start.nameEn) return start.nameEn;
   if (start.name.startsWith("숙소") && lodging) return t("숙소({name})", { name: lodgingName(lodging) });
   return BASE_EN[start.name] || start.name;
 }

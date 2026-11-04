@@ -112,6 +112,29 @@
         </div>
       </div>
 
+      <div class="field start-field">
+        <div class="start-row">
+          <span class="label" data-i18n>출발</span>
+          <b id="startLabel"></b>
+          <button type="button" class="ghost small" id="startEdit" aria-expanded="false" data-i18n>출발지 바꾸기</button>
+        </div>
+        <div class="start-panel" id="startPanel" hidden>
+          <div class="start-acts">
+            <button type="button" class="ghost small" id="startGps" data-i18n>지금 위치에서</button>
+            <button type="button" class="ghost small" id="startDefault" data-i18n>기본(권역 역·터미널)</button>
+          </div>
+          <input id="startSearch" type="search" maxlength="40" autocomplete="off" data-i18n-ph placeholder="출발지 검색 (예: 서울역, 경포, 동서울)">
+          <ul class="start-results" id="startResults"></ul>
+          <label class="start-time"><span data-i18n>첫날 출발 시각</span>
+            <select id="startTime">
+              <option value="" data-i18n>자동</option>
+              <option>06:00</option><option>07:00</option><option>08:00</option><option>09:00</option><option>10:00</option><option>11:00</option><option>12:00</option>
+            </select>
+          </label>
+          <p class="start-note" data-i18n>고른 출발지는 이 기기에 저장돼요. 자동: 가까우면 10시, 멀면(60km 넘게) 8시에 출발</p>
+        </div>
+      </div>
+
       <button class="primary" type="submit" data-i18n>일정 만들기</button>
     </form>
     <p class="owner-link" id="ownerLink"><a href="owner.html" data-i18n>사장님이세요? 메뉴판 사진 한 장으로 가게 등록</a></p>

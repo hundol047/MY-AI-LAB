@@ -54,9 +54,12 @@ export function estimateTrip(trip, input, people, fees = {}) {
   }
   let farBus = 0;
   if (input.move === "taxi") {
+    // 먼 출발지에서 오는 구간(60km 넘음)은 일정 엔진이 기차·버스로 잡는다 → 택시 요금에서 빼고 "별도"로 알린다
+    const taxiLegs = legs.filter((l) => l.mode === "taxi");
+    farBus = legs.filter((l) => l.mode === "bus").length;
     const cars = Math.ceil(n / TAXI.seats);
-    const low = legs.reduce((s, l) => s + taxiFare(l.km), 0) * cars;
-    rows.push({ key: "taxi", low: round100(low), high: round100(low * TAXI.highFactor), detail: { legs: legs.length, cars } });
+    const low = taxiLegs.reduce((s, l) => s + taxiFare(l.km), 0) * cars;
+    rows.push({ key: "taxi", low: round100(low), high: round100(low * TAXI.highFactor), detail: { legs: taxiLegs.length, cars, far: farBus } });
   } else if (input.move === "car") {
     const km = legs.reduce((s, l) => s + l.km, 0);
     const low = (km / FUEL.kmPerL) * FUEL.pricePerL;
@@ -64,7 +67,7 @@ export function estimateTrip(trip, input, people, fees = {}) {
   } else {
     const bus = legs.filter((l) => l.mode === "bus");
     farBus = bus.filter((l) => l.km > BUS.farKm).length;
-    const low = bus.length * BUS.fare * n;
+    const low = (bus.length - farBus) * BUS.fare * n; // 먼 구간(시외·고속버스, KTX)은 요금이 달라 합계에서 빼고 따로 알린다
     rows.push({ key: "bus", low, high: low, detail: { rides: bus.length, far: farBus } });
   }
 
