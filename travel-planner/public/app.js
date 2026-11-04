@@ -55,7 +55,7 @@ $("#date").min = addDays(tomorrow(), -1); // 오늘 (기기 시간대 기준)
 document.querySelectorAll(".seg").forEach((seg) => {
   seg.addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
-    seg.querySelectorAll("button").forEach((x) => x.classList.toggle("on", x === b));
+    seg.querySelectorAll("button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
   });
 });
 document.querySelector('.chips[data-name="likes"]').addEventListener("click", (e) => {
@@ -75,6 +75,7 @@ $("#form").addEventListener("submit", (e) => {
   };
   const lessWalk = input.who === "parents";
   state = { input, opts: { pace: "normal", lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [] } };
+  restoredFromLink = false;
   dayIdx = 0;
   rebuild();
   show("result");
@@ -126,7 +127,8 @@ async function loadWeather() {
     j.daily.time.forEach((t, i) => {
       const rain = j.daily.precipitation_probability_max[i];
       weather[t] = { rain, max: Math.round(j.daily.temperature_2m_max[i]), min: Math.round(j.daily.temperature_2m_min[i]) };
-      if (rain >= 60 && !state.opts.rainDays[i]) { state.opts.rainDays[i] = true; changed = true; }
+      // 공유받은 일정은 그대로 보여 주고, 직접 만든 일정만 비 예보에 맞춰 바꾼다
+      if (rain >= 60 && !state.opts.rainDays[i] && !restoredFromLink) { state.opts.rainDays[i] = true; changed = true; }
     });
     if (changed) { rebuild(); toast("비 예보가 있는 날은 실내 위주로 바꿨어요"); } else render();
   } catch { /* 예보 범위 밖이거나 오프라인 */ }
@@ -552,8 +554,25 @@ function renderPast() {
 }
 
 /* ---------- 지도 ---------- */
+// 지도 라이브러리는 일정 화면을 처음 열 때 받는다 (첫 화면을 가볍게)
+let leafletLoading = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve();
+  return (leafletLoading ??= new Promise((resolve, reject) => {
+    const css = document.createElement("link");
+    css.rel = "stylesheet"; css.href = "vendor/leaflet/leaflet.css";
+    document.head.append(css);
+    const js = document.createElement("script");
+    js.src = "vendor/leaflet/leaflet.js";
+    js.onload = resolve; js.onerror = () => { leafletLoading = null; reject(); };
+    document.head.append(js);
+  }));
+}
 function drawMap(day) {
-  if (!window.L) return;
+  if (!window.L) {
+    loadLeaflet().then(() => { if (trip && !$("#result").hidden) drawMap(trip.days[dayIdx]); }).catch(() => {});
+    return;
+  }
   if (!map) {
     map = L.map("map", { zoomControl: false });
     map.attributionControl.setPrefix(false);
@@ -710,7 +729,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
     const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr() }) }, 12000);
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = startLocal(text, todayStr());
+  if (!r) { r = startLocal(text, todayStr()); notifyNoAI(); }
   btn.disabled = false; btn.textContent = "만들기";
   fillForm({ ...r, days: Number(r.days) });
   $("#form").requestSubmit();
@@ -758,10 +777,23 @@ function toast(msg) {
 }
 
 /* ---------- 시작: 공유 링크 / 지난 일정 복원 ---------- */
+let restoredFromLink = false;
+let noAINotified = false;
+function notifyNoAI() {
+  if (noAINotified) return;
+  noAINotified = true;
+  setTimeout(() => toast("AI에 연결되지 않아 간단 모드로 처리했어요"), 2400);
+}
+
+// 오프라인 표시
+function updateOnline() { document.body.classList.toggle("offline", !navigator.onLine); }
+addEventListener("online", updateOnline); addEventListener("offline", updateOnline); updateOnline();
+
 (function boot() {
   const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;
   const saved = fromHash || null;
   if (saved && saved.input && PLACES.length) {
+    restoredFromLink = true;
     state = { input: saved.input, opts: { rainDays: [], exclude: [], prefer: [], avoid: [], ...saved.opts } };
     trip = planTrip(state.input, state.opts);
     show("result"); render();

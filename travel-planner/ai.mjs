@@ -39,7 +39,8 @@ function conforms(v, sc) {
 }
 
 // 같은 앞부분(system + 장소 데이터)은 제공사의 자동 프롬프트 캐시가 재사용하도록 앞에 둔다
-async function askJSON({ system, user, schema, name = "result", image = null, sanitize = (o) => o }) {
+// timeout: 화면에서 기다리는 시간보다 조금 짧게 (재시도 없이 바로 실패 → 화면은 규칙 기반으로 대체)
+async function askJSON({ system, user, schema, name = "result", image = null, sanitize = (o) => o, timeout = 18_000 }) {
   const text = typeof user === "string" ? user : user.map((b) => b.text).join("\n\n");
   const content = image
     ? [{ type: "image_url", image_url: { url: `data:${image.mediaType};base64,${image.data}` } }, { type: "text", text }]
@@ -55,7 +56,7 @@ async function askJSON({ system, user, schema, name = "result", image = null, sa
       ...base,
       messages: [{ role: "system", content: system }, { role: "user", content }],
       response_format: { type: "json_schema", json_schema: { name, schema, strict: true } },
-    });
+    }, { timeout, maxRetries: 0 });
   } catch (err) {
     // 구조화 출력(json_schema)을 지원하지 않는 호환 API면 JSON 모드 + 스키마 설명으로 다시
     if (!(err instanceof OpenAI.BadRequestError)) throw err;
@@ -63,7 +64,7 @@ async function askJSON({ system, user, schema, name = "result", image = null, sa
       ...base,
       messages: [{ role: "system", content: `${system}\n\n반드시 아래 JSON 스키마에 맞는 JSON 객체 하나만 출력한다.\n${JSON.stringify(schema)}` }, { role: "user", content }],
       response_format: { type: "json_object" },
-    });
+    }, { timeout, maxRetries: 0 });
   }
   const choice = res.choices?.[0];
   if (!choice) throw new Error("empty");
@@ -100,7 +101,7 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
 export async function startFromText(text, today) {
-  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}`, schema: START_SCHEMA, name: "trip_choices" });
+  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}`, schema: START_SCHEMA, name: "trip_choices", timeout: 10_000 });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date) || r.date < today) r.date = addDays(today, 1);
   r.likes = [...new Set(r.likes)].slice(0, 3);
   return r;
@@ -242,5 +243,5 @@ const MENU_SYSTEM = `가게 사장님이 찍은 메뉴판 사진을 읽어 외�
 - shopName: 사진에 가게 이름이 있으면, 없으면 빈 문자열.`;
 
 export async function menuScan({ image, mediaType }) {
-  return askJSON({ system: MENU_SYSTEM, user: "이 메뉴판을 읽어 주세요.", schema: MENU_SCHEMA, name: "menu", image: { data: image, mediaType } });
+  return askJSON({ system: MENU_SYSTEM, user: "이 메뉴판을 읽어 주세요.", schema: MENU_SCHEMA, name: "menu", image: { data: image, mediaType }, timeout: 40_000 });
 }

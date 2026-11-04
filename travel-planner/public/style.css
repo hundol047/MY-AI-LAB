@@ -347,3 +347,9 @@ a.brand { color: var(--text); text-decoration: none; }
 .tabs button { flex: 1 1 0; min-width: 104px; }
 .tabs button span { overflow: hidden; text-overflow: ellipsis; }
 .step-no { color: var(--on-brand); }
+
+/* 오프라인 */
+body.offline .top::after {
+  content: "오프라인 · 저장된 일정과 지도만 보여요"; position: absolute; left: 0; right: 0; top: 100%;
+  padding: 4px 16px; font-size: 12px; font-weight: 600; text-align: center; background: #b45309; color: #fff;
+}

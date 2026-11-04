@@ -44,16 +44,37 @@ function logAIError(err) {
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
 const clean = (v, max) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
 
+// 요청 본문 읽기: 너무 크거나 중간에 끊기면 기다리지 않고 실패
 function readBody(req, limit = 60_000) {
   return new Promise((resolve, reject) => {
-    let data = "";
-    req.on("data", (c) => { data += c; if (data.length > limit) req.destroy(); });
-    req.on("end", () => resolve(data));
-    req.on("error", reject);
+    let data = "", done = false;
+    req.on("data", (c) => { data += c; if (data.length > limit) { done = true; reject(new Error("too large")); req.destroy(); } });
+    req.on("end", () => { done = true; resolve(data); });
+    req.on("error", (e) => { done = true; reject(e); });
+    req.on("close", () => { if (!done) reject(new Error("aborted")); });
   });
 }
 
-const server = http.createServer(async (req, res) => {
+// 가게 등록 파일은 한 번에 하나씩 쓴다 (동시에 등록해도 서로 덮어쓰지 않게)
+let shopWrite = Promise.resolve();
+function saveShop(shop) {
+  shopWrite = shopWrite.then(async () => {
+    const shops = await loadShops();
+    shops.push(shop);
+    await writeFile(SHOPS_FILE, JSON.stringify(shops, null, 2));
+  });
+  return shopWrite;
+}
+
+// 요청 하나에서 오류가 나도 서버 전체가 꺼지지 않게 감싼다
+const server = http.createServer((req, res) => {
+  handle(req, res).catch((err) => {
+    console.error("요청 처리 오류:", req.method, req.url, err.message);
+    if (!res.headersSent) res.writeHead(500).end(); else res.end();
+  });
+});
+
+async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
 
   if (req.method === "POST" && (url.pathname === "/api/start" || url.pathname === "/api/guide")) {
@@ -110,9 +131,7 @@ const server = http.createServer(async (req, res) => {
           card: !!b.card, items, createdAt: new Date().toISOString(),
         };
         if (!shop.name || !shop.region || !items.length) return json(res, 400, { error: "가게 이름, 권역, 메뉴 1개 이상이 필요해요" });
-        const shops = await loadShops();
-        shops.push(shop);
-        await writeFile(SHOPS_FILE, JSON.stringify(shops, null, 2));
+        await saveShop(shop);
         return json(res, 200, { id: shop.id });
       } catch { return json(res, 400, {}); }
     }
@@ -121,6 +140,7 @@ const server = http.createServer(async (req, res) => {
   // 다국어 메뉴 QR 코드
   if (req.method === "GET" && url.pathname === "/api/qr") {
     const id = (url.searchParams.get("id") || "").replace(/[^a-f0-9]/g, "");
+    if (!id) { res.writeHead(400).end(); return; }
     const proto = String(req.headers["x-forwarded-proto"] || "http").split(",")[0];
     const origin = `${proto}://${req.headers.host}`;
     const svg = await QRCode.toString(`${origin}/menu.html?id=${id}`, { type: "svg", margin: 1, color: { dark: "#111111", light: "#ffffff" } });
@@ -146,7 +166,9 @@ const server = http.createServer(async (req, res) => {
 
   if (req.method !== "GET" && req.method !== "HEAD") { res.writeHead(405).end(); return; }
 
-  const rel = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname);
+  let rel;
+  try { rel = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname); }
+  catch { res.writeHead(400).end(); return; } // 잘못된 주소
   const file = path.normalize(path.join(PUBLIC, rel));
   if (!file.startsWith(PUBLIC)) { res.writeHead(403).end(); return; }
   try {
@@ -169,7 +191,14 @@ const server = http.createServer(async (req, res) => {
   } catch {
     res.writeHead(404).end();
   }
+}
+
+server.on("error", (err) => {
+  if (err.code === "EADDRINUSE") console.error(`포트 ${PORT}을(를) 이미 쓰고 있어요. 다른 포트로 실행하세요: PORT=8081 npm start`);
+  else console.error(err.message);
+  process.exit(1);
 });
+process.on("unhandledRejection", (err) => console.error("처리되지 않은 오류:", err?.message || err));
 
 server.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
