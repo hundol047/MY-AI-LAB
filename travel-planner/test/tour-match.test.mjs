@@ -20,6 +20,8 @@ assert.ok(!ok(P("속초관광수산시장", true), "속초관광수산시장 회
 assert.ok(!ok(P("사천진항 물회거리", true), "사천진항"), "식당가를 항구로 바꾸지 않음");
 assert.ok(!ok(P("안목 커피거리", true), "하슬라가배", "39"), "거리 안 개별 카페");
 
+assert.ok(!ok(P("보헤미안 박이추커피 사천점"), "보헤미안박이추커피 본점"), "다른 지점");
+assert.ok(ok(P("테라로사 커피공장 강릉본점"), "테라로사 커피공장"), "지점명 없는 등록");
 assert.equal(koreanInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "환선굴 (대이리 동굴지대)");
 assert.equal(englishInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "Hwanseongul Cave (Daei-ri Cave System)");
 assert.equal(englishInTitle("CU Gangneung Gyeongpo Hana Branch[Tax Refund Shop](CU 경포하나점)"), "CU Gangneung Gyeongpo Hana Branch");

@@ -5,7 +5,7 @@
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
 - 대상 129곳 (장소 107 + 축제 22)
-- 영문 이름 찾음 57곳 (소개 포함 51곳) · 못 찾음 72곳
+- 영문 이름 찾음 58곳 (소개 포함 52곳) · 못 찾음 71곳
 
 ## 찾은 곳
 
@@ -14,7 +14,7 @@
 | gyeongpo-beach | 경포해변 | Gangneung Gyeongpo Beach (강릉 경포해수욕장) | 0.11 | 이름 같음 | 있음 |
 | gangmun-beach | 강문해변 | Gangmun Beach (강문해변) | 0.11 | 이름 같음 | 있음 |
 | anmok-beach | 안목해변 | Anmokhaebyeon Beach (안목해변) | 0.08 | 이름 같음 | 있음 |
-| sacheon-beach | 사천해변 | Sacheon Beach (사천해변(사천해수욕장)) | 1.44 | 이름 같음 | 있음 |
+| sacheon-beach | 사천해변 | Sacheon Beach (사천해변(사천해수욕장)) | 0.01 | 이름 같음 | 있음 |
 | yeongjin-beach | 영진해변 도깨비 촬영지 | Yeongjin Beach (영진해변) | 0.41 | 앞 이름 같음 | 있음 |
 | hyangho-beach | 향호해변 버스정류장 | Hyanghohaebyeon Beach (향호해변) | 0.54 | 앞 이름 같음 | 있음 |
 | jeongdongjin | 정동진해변 | Jeongdongjinhaebyeon Beach (정동진해변) | 0.16 | 이름 같음 | 있음 |
@@ -41,9 +41,10 @@
 | cheongcho | 청초호 호수공원 | Cheongchoho Lake Park (청초호 호수공원) | 0.36 | 이름 같음 | 있음 |
 | seorak-cable | 설악산 케이블카 | Seoraksan Cable Car (설악산 케이블카) | 0.01 | 이름 같음 | 있음 |
 | hwajinpo | 화진포 | Hwajinpo Lake (화진포) | 1.65 | 이름 같음 | 있음 |
-| naksan-beach | 낙산해변 | Naksan Beach (낙산해수욕장) | 0.80 | 이름 같음 | 있음 |
+| naksan-beach | 낙산해변 | Naksan Beach (낙산해수욕장) | 0.28 | 이름 같음 | 있음 |
 | surfyy | 서피비치 | Yangyang Surfyy Beach (서피비치, 서핑(양양)) | 0.29 | 이름 같음 | 있음 |
 | hajodae | 하조대 | Hajodae Scenic Point (하조대) | 1.01 | 이름 같음 | 있음 |
+| birch | 원대리 자작나무숲 | Wondae-ri Birch Forest (Whispering Birch Forest) (원대리 자작나무 숲(속삭이는 자작나무 숲)) | 0.00 | 이름 같음 | 있음 |
 | daepo | 대포항 | Daepohang Port (대포항) | 0.04 | 이름 같음 | 있음 |
 | yangyang-market | 양양전통시장 | Yangyang Traditional Market (양양전통시장 (4, 9일)) | 0.38 | 이름 같음 | 있음 |
 | nami | 남이섬 | Nami Island (남이섬) | 0.53 | 이름 같음 | - |
@@ -52,17 +53,17 @@
 | cc-museum | 국립춘천박물관 | Chuncheon National Museum (국립춘천박물관) | 0.53 | 이름 같음 | 있음 |
 | gongjicheon | 공지천 유원지 | Gongjicheon Recreation Area (공지천유원지) | 0.52 | 이름 같음 | 있음 |
 | hantan-trail | 한탄강 주상절리길 | Hantangang River Jusangjeolli-gil (철원 한탄강 주상절리길(잔도)) | 1.89 | 이름 같음 | 있음 |
-| hwacheon-river | 화천 붕어섬 | Bungeoseom Island (붕어섬) | 1.58 | 이름 같음 | 있음 |
+| hwacheon-river | 화천 붕어섬 | Bungeoseom Island (붕어섬) | 0.00 | 이름 같음 | 있음 |
 | samak-cable | 삼악산 호수케이블카 | Chuncheon Samaksan Mountain Lake Cable Car (춘천 삼악산 호수케이블카) | 0.08 | 이름 같음 | 있음 |
 | labor-party | 철원 노동당사 | Cheorwon Korean Workers' Party Headquarters (철원 노동당사) | 0.01 | 이름 같음 | 있음 |
 | jiktang | 직탕폭포 | Jiktangpokpo Falls [National Geopark] (직탕폭포 (한탄강 국가지질공원)) | 0.00 | 이름 같음 | 있음 |
 | sheep | 대관령 양떼목장 | Daegwallyeong Yangtte Ranch (대관령양떼목장) | 0.14 | 이름 같음 | 있음 |
-| balwang | 발왕산 관광케이블카 | Balwangsan Cable Car (발왕산 관광케이블카) | 1.58 | 이름 같음 | 있음 |
+| balwang | 발왕산 관광케이블카 | Balwangsan Cable Car (발왕산 관광케이블카) | 0.00 | 이름 같음 | 있음 |
 | woljeongsa | 월정사 전나무숲길 | Woljeongsa Temple & Needle Fir Forest (월정사.월정사전나무숲) | 0.06 | 앞 이름 같음 | 있음 |
 | samtan | 삼탄아트마인 | Samtan Art Mine (삼탄아트마인) | 0.01 | 이름 같음 | 있음 |
 | cheongnyeongpo | 청령포 | Cheongnyeongpo Meandering Stream (영월 청령포) | 0.29 | 이름 같음 | - |
 | hanbando | 한반도지형 전망대 | Korean Peninsula Terrain [National Geopark] (한반도지형 (강원고생대 국가지질공원)) | 0.25 | 앞 이름 같음 | 있음 |
-| hwangji | 황지연못 | Hwangji Pond (황지연못) | 1.07 | 이름 같음 | 있음 |
+| hwangji | 황지연못 | Hwangji Pond (황지연못) | 0.01 | 이름 같음 | 있음 |
 | sogeumsan | 소금산 그랜드밸리 | Sogeumsan Mountain Grand Valley (소금산그랜드밸리) | 1.91 | 이름 같음 | 있음 |
 | bangyeri | 반계리 은행나무 | Wonju Bangye-ri Ginkgo Tree (원주 반계리 은행나무) | 0.00 | 이름 같음 | 있음 |
 | guryongsa | 치악산 구룡사 | Guryongsa Temple (구룡사) | 0.53 | 앞에 지역명 추가 | 있음 |
@@ -97,7 +98,6 @@
 | unification | 고성 통일전망대 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | ayajin | 아야진해변 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | jukdo | 죽도해변 | 2km 안에 이름이 맞는 영문 결과 없음 |
-| birch | 원대리 자작나무숲 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | dongmyeong | 동명항 활어센터 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | yongdae | 용대리 황태구이 마을 | 영문 결과 없음 |
 | geojin | 거진항 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
@@ -173,7 +173,6 @@
 | hajodae | 하조대 | Hajodae Beach (하조대해수욕장) | 0.02 | 이름 다름 |
 | jukdo | 죽도해변 | LE ONDA (르온다) | 0.08 | 이름 다름 |
 | jukdo | 죽도해변 | Ingu Beach (인구 해수욕장) | 0.22 | 이름 다름 |
-| birch | 원대리 자작나무숲 | Wondae-ri Birch Forest (Whispering Birch Forest) (원대리 자작나무 숲(속삭이는 자작나무 숲)) | 7.44 | 이름 같지만 2km 밖 |
 | daepo | 대포항 | Daepo Port Original Fried Food Alley (대포항 원조튀김골목) | 0.20 | 이름 다름 |
 | dongmyeong | 동명항 활어센터 | Sokcho Lighthouse Observatory (속초등대전망대) | 0.21 | 이름 다름 |
 | dongmyeong | 동명항 활어센터 | Yeonggeumjeong (영금정) | 0.25 | 이름 다름 |

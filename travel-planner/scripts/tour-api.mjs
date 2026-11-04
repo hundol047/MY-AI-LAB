@@ -131,6 +131,10 @@ export function judge(place, koTitle, contenttypeid) {
       const d = dice(t, v);
       r = d >= 0.6 ? { ok: true, why: `이름 유사(${d.toFixed(2)})`, score: 1 + d } : { ok: false, why: "이름 다름", score: 0 };
     }
+    // 지점이 다르면 다른 가게: "보헤미안 박이추커피 사천점" ≠ "보헤미안박이추커피 본점"
+    const ourBranch = /\S+점$/.test(place.name.trim()) ? place.name.trim().split(/\s+/).at(-1) : null;
+    const theirBranch = String(koTitle).trim().split(/\s+/).find((w) => /.+점$/.test(w) && w !== ourBranch);
+    if (ourBranch && theirBranch) r = { ok: false, why: "다른 지점", score: 0 };
     if (place.multi && ["39", "82"].includes(String(contenttypeid)) && !/시장|거리|골목|식당가|촌/.test(t)) r = { ok: false, why: "개별 음식점", score: 0 };
     if (r.score > best.score || (!best.ok && r.ok)) best = r;
   }
