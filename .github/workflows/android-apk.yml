@@ -40,6 +40,7 @@ jobs:
       - name: APK 만들기
         env:
           KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+          VERSION_CODE: ${{ github.run_number }}
         run: bash travel-planner/android/build.sh
       - uses: actions/upload-artifact@v4
         with:
