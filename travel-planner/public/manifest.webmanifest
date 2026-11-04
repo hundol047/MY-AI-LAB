@@ -1,0 +1,9 @@
+{
+  "name": "오늘강릉",
+  "short_name": "오늘강릉",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f6f5f1",
+  "theme_color": "#0b5e6b",
+  "icons": [{ "src": "icon.svg", "sizes": "any", "type": "image/svg+xml" }]
+}
