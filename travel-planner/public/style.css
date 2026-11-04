@@ -353,3 +353,27 @@ body.offline .top::after {
   content: "오프라인 · 저장된 일정과 지도만 보여요"; position: absolute; left: 0; right: 0; top: 100%;
   padding: 4px 16px; font-size: 12px; font-weight: 600; text-align: center; background: #b45309; color: #fff;
 }
+
+/* 언어 전환 (한국어 / EN) */
+.top { gap: 10px; }
+.top-right { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.lang { display: flex; padding: 3px; gap: 2px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); flex-shrink: 0; }
+.lang button { border: 0; background: none; color: var(--sub); font: inherit; font-size: 13px; font-weight: 700; padding: 5px 9px; border-radius: 7px; cursor: pointer; }
+.lang button.on { background: var(--brand); color: var(--on-brand); }
+.brand { white-space: nowrap; flex-shrink: 0; }
+@media (max-width: 480px) {
+  .top { padding: 10px 16px; }
+  .top-right { gap: 6px; }
+  .top-actions { gap: 6px; }
+  .top-actions .ghost { padding: 6px 8px; font-size: 12px; }
+  .lang button { padding: 5px 7px; font-size: 12px; }
+}
+@media (max-width: 380px) {
+  .top { padding: 10px 12px; gap: 6px; }
+  .brand { font-size: 15px; gap: 4px; }
+  .dot { margin-right: 4px; }
+  .top-right, .top-actions { gap: 4px; }
+  .top-actions .ghost { padding: 5px 7px; }
+  .lang { padding: 2px; }
+  .lang button { padding: 4px 6px; }
+}

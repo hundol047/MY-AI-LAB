@@ -1,0 +1,28 @@
+// 관광공사 결과 대조 규칙: 같은 곳만 통과시키고, 이웃 시설·개별 가게·다른 목장은 버리는지
+import assert from "node:assert/strict";
+import { judge, koreanInTitle, englishInTitle, firstSentence } from "../scripts/tour-api.mjs";
+
+
+const P = (name, multi = false) => ({ name, multi, lat: 0, lng: 0 });
+const ok = (place, title, type = "12") => judge(place, title, type).ok;
+
+assert.ok(ok(P("경포해변"), "경포해수욕장"), "해변=해수욕장");
+assert.ok(ok(P("오죽헌"), "강릉 오죽헌·시립박물관"), "·로 묶인 제목");
+assert.ok(ok(P("해랑전망대"), "도째비골 해랑전망대"), "앞에 지역명");
+assert.ok(ok(P("치악산 구룡사"), "구룡사"));
+assert.ok(ok(P("영진해변 도깨비 촬영지"), "영진해변"), "장소가 있는 해변");
+assert.ok(!ok(P("대관령 삼양목장"), "대관령 하늘목장"), "다른 목장");
+assert.ok(!ok(P("대관령 양떼목장"), "대관령하우스"));
+assert.ok(!ok(P("고석정"), "고석정 꽃밭"), "옆의 다른 시설");
+assert.ok(!ok(P("남이섬"), "남이섬 노래박물관"));
+assert.ok(ok(P("강릉중앙시장", true), "강릉 중앙시장"), "시장 자체");
+assert.ok(!ok(P("속초관광수산시장", true), "속초관광수산시장 회센터"), "시장 안 개별 가게");
+assert.ok(!ok(P("사천진항 물회거리", true), "사천진항"), "식당가를 항구로 바꾸지 않음");
+assert.ok(!ok(P("안목 커피거리", true), "하슬라가배", "39"), "거리 안 개별 카페");
+
+assert.equal(koreanInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "환선굴 (대이리 동굴지대)");
+assert.equal(englishInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (대이리 동굴지대))"), "Hwanseongul Cave (Daei-ri Cave System)");
+assert.equal(englishInTitle("CU Gangneung Gyeongpo Hana Branch[Tax Refund Shop](CU 경포하나점)"), "CU Gangneung Gyeongpo Hana Branch");
+assert.equal(firstSentence("The 7.4-kilometer cable car is long. Second."), "The 7.4-kilometer cable car is long.");
+assert.equal(firstSentence("*The information below is based on 2026. Trout fishing on ice."), "Trout fishing on ice.");
+console.log("ok - 관광공사 대조 규칙");

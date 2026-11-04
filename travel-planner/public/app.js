@@ -1,6 +1,7 @@
 import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
+import { t, isEN, getLang, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
@@ -10,6 +11,7 @@ function fetchT(url, opts = {}, ms = 5000) {
   const timer = setTimeout(() => c.abort(), ms);
   return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(timer));
 }
+// 분류 이름은 화면에 쓸 때 t()로 바꾼다
 const CAT = {
   sea: { label: "바다", color: "#0284c7" },
   cafe: { label: "카페", color: "#a16207" },
@@ -20,7 +22,6 @@ const CAT = {
 };
 const KIND = { lunch: "점심", dinner: "저녁" };
 const MODE = { walk: "도보", car: "차", bus: "버스", same: "바로 옆" };
-const WEEK = ["일", "월", "화", "수", "목", "금", "토"];
 
 let state = null; // { input, opts }
 let trip = null;
@@ -130,35 +131,27 @@ async function loadWeather() {
       // 공유받은 일정은 그대로 보여 주고, 직접 만든 일정만 비 예보에 맞춰 바꾼다
       if (rain >= 60 && !state.opts.rainDays[i] && !restoredFromLink) { state.opts.rainDays[i] = true; changed = true; }
     });
-    if (changed) { rebuild(); toast("비 예보가 있는 날은 실내 위주로 바꿨어요"); } else render();
+    if (changed) { rebuild(); toast(t("비 예보가 있는 날은 실내 위주로 바꿨어요")); } else render();
   } catch { /* 예보 범위 밖이거나 오프라인 */ }
 }
 
 /* ---------- 렌더링 ---------- */
-function dateLabel(ds) {
-  const [y, m, d] = ds.split("-").map(Number);
-  return `${m}월 ${d}일 (${WEEK[new Date(y, m - 1, d).getDay()]})`;
-}
-function minutesLabel(m) {
-  const h = Math.floor(m / 60), r = m % 60;
-  return h ? `${h}시간${r ? ` ${r}분` : ""}` : `${r}분`;
-}
 
 function render() {
   const { input } = state;
-  const nights = ["당일", "1박 2일", "2박 3일"][input.days - 1];
+  const nights = t(["당일", "1박 2일", "2박 3일"][input.days - 1]);
   $("#tripTitle").textContent = `${dateLabel(input.date)} · ${nights}`;
-  const t = trip.totals;
+  const tot = trip.totals;
   $("#stats").innerHTML = `
-    <span>${t.places}곳</span>
-    <span>이동 ${minutesLabel(t.moveMin)}</span>
-    <span class="${t.conflicts ? "warn" : "ok"}">${t.conflicts ? `영업시간 충돌 ${t.conflicts}건` : "영업시간·휴무 확인 완료"}</span>
-    ${trip.days.every((d) => d.road) && state.input.move === "car" ? `<span>실제 도로 기준</span>` : ""}`;
+    <span>${t("{n}곳", { n: tot.places })}</span>
+    <span>${t("이동 {t}", { t: minutesLabel(tot.moveMin) })}</span>
+    <span class="${tot.conflicts ? "warn" : "ok"}">${tot.conflicts ? t("영업시간 충돌 {n}건", { n: tot.conflicts }) : t("영업시간·휴무 확인 완료")}</span>
+    ${trip.days.every((d) => d.road) && state.input.move === "car" ? `<span>${t("실제 도로 기준")}</span>` : ""}`;
 
   $("#tabs").innerHTML = trip.days.map((d, i) => {
     const w = weather[d.date];
     return `<button type="button" data-i="${i}" class="${i === dayIdx ? "on" : ""}">
-      <strong>${i + 1}일차</strong><span>${d.areaName}${w ? ` · ${w.min}°/${w.max}°${w.rain >= 40 ? ` · 비 ${w.rain}%` : ""}` : ""}</span>
+      <strong>${t("{n}일차", { n: i + 1 })}</strong><span>${esc(areaName(d.areaName))}${w ? ` · ${w.min}°/${w.max}°${w.rain >= 40 ? t(" · 비 {p}%", { p: w.rain }) : ""}` : ""}</span>
     </button>`;
   }).join("");
 
@@ -167,7 +160,7 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">조건에 맞는 장소가 없어요. 조건을 바꿔보세요.</li>`) + lodgingHTML(day);
+  $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day);
   renderFestivals();
   renderLodging();
   renderBenefits();
@@ -180,22 +173,23 @@ function render() {
 
 function itemHTML(it, i, day) {
   const p = it.place, c = CAT[p.cat];
-  const leg = i === 0 ? `${day.start.name}에서 ${MODE[it.travelMode]} ${it.travelMin}분` : it.travelMode === "same" ? "바로 옆" : `${MODE[it.travelMode]} ${it.travelMin}분`;
+  const mode = t(MODE[it.travelMode]);
+  const leg = i === 0 ? t("{start}에서 {mode} {min}분", { start: esc(startName(day.start, trip.lodging)), mode, min: it.travelMin }) : it.travelMode === "same" ? t("바로 옆") : t("{mode} {min}분", { mode, min: it.travelMin });
   const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>
   <li class="item" data-i="${i}">
     <div class="time"><b>${fmt(it.start)}</b><span>${fmt(it.end)}</span></div>
     <article class="card place">
-      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${c.label}</em></div>
+      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em></div>
       <div class="info">
-        <div class="meta"><span class="tag" style="--c:${c.color}">${KIND[it.kind] || c.label}</span>${p.indoor ? `<span class="tag soft">실내</span>` : ""}</div>
-        <h3>${p.name}</h3>
-        <p>${p.desc}</p>
+        <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}</div>
+        <h3>${esc(placeName(p))}</h3>
+        <p>${esc(placeDesc(p))}</p>
         <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
-        <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">길찾기</a>
-        <button class="ghost small" type="button" data-swap="${i}">바꾸기</button>
+        <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
+        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
       </div>
       </div>
     </article>
@@ -206,13 +200,13 @@ function itemHTML(it, i, day) {
 const searchName = (p) => p.name;
 
 function hoursLabel(p, date) {
-  if (p.cat === "festival") return `축제 기간 ${p.start.slice(5).replace("-", ".")}–${p.end.slice(5).replace("-", ".")}`;
+  if (p.cat === "festival") return t("축제 기간 {a}–{b}", { a: p.start.slice(5).replace("-", "."), b: p.end.slice(5).replace("-", ".") });
   const h = hoursFor(p, date);
-  if (h.open === 0 && h.close >= 1439) return "상시 개방";
-  if (p.multi) return `가게별 상이 · 대체로 ${fmt(h.open)}–${fmt(h.close)}`;
-  let s = `운영 ${fmt(h.open)}–${fmt(h.close)}`;
-  if (h.lastEntry !== null) s += ` · ${p.cat === "food" || p.cat === "cafe" ? "주문" : "입장"} ${fmt(h.lastEntry)}까지`;
-  if (h.breaks.length) s += ` · 휴식 ${h.breaks.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(", ")}`;
+  if (h.open === 0 && h.close >= 1439) return t("상시 개방");
+  if (p.multi) return t("가게별 상이 · 대체로 {a}–{b}", { a: fmt(h.open), b: fmt(h.close) });
+  let s = t("운영 {a}–{b}", { a: fmt(h.open), b: fmt(h.close) });
+  if (h.lastEntry !== null) s += t(p.cat === "food" || p.cat === "cafe" ? " · 주문 {t}까지" : " · 입장 {t}까지", { t: fmt(h.lastEntry) });
+  if (h.breaks.length) s += t(" · 휴식 {r}", { r: h.breaks.map(([a, b]) => `${fmt(a)}–${fmt(b)}`).join(", ") });
   return s;
 }
 
@@ -262,47 +256,40 @@ async function applyRoad(i) {
 function renderStatsOnly() { if (trip.days.every((d) => d.road)) render(); }
 
 /* ---------- 사진 ----------
-   1) photos.json: 미리 모아 둔 장소별 사진 (scripts/bake-photos.mjs)
-   2) /api/photo: 서버에 한국관광공사 TourAPI 키가 있으면 공식 사진
-   3) 위키백과 대표 사진 / 위키미디어 공용 검색 (동시에 요청해 먼저 온 것)
+   1) photos.json: 한국관광공사 TourAPI에서 이름·좌표(2km)를 확인해 미리 모은 사진 (scripts/bake-photos.mjs, reports/photos.md)
+   2) /api/photo: 서버에 TourAPI 키가 있으면 같은 검증 규칙으로 찾은 공식 사진
+   3) 위키백과 대표 사진: 장소에 지정된 문서(p.wiki)만, 여러 가게가 모인 곳은 제외 (다른 곳 사진 방지)
    속도: 화면에 보이는 카드만, 동시에 4개까지, 요청마다 3.5초 제한, 못 찾은 곳은 하루 동안 다시 찾지 않음 */
 const DAY_MS = 864e5;
-const imgCache = store.get("img3") || {};
+const imgCache = store.get("img4") || {};
 let baked = {};
 const bakedReady = fetchT("photos.json", {}, 3000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (baked = j));
 let photoApi = true; // 서버에 사진 키가 없으면 첫 요청 뒤로 건너뜀
+// 화면에 보일 이름: id나 한국어 이름으로 장소를 찾아 현재 언어로
+const nameOf = (id, ko) => { const p = (id && placeById(id)) || PLACES.find((x) => x.name === ko); return p ? placeName(p) : ko; };
 const placeById = (id) => PLACES.find((p) => p.id === id) || trip?.days.flatMap((d) => d.items).find((i) => i.id === id)?.place;
 
 async function getJSON(url, ms = 3500) {
   try { const r = await fetchT(url, {}, ms); return r.ok ? await r.json() : null; } catch { return null; }
 }
-const firstHit = (tasks) => new Promise((resolve) => {
-  let left = tasks.length;
-  if (!left) resolve("");
-  tasks.forEach((t) => t.then((v) => { if (v) resolve(v); else if (--left === 0) resolve(""); }, () => { if (--left === 0) resolve(""); }));
-});
 async function photoFor(p) {
   if (!p) return "";
+  await bakedReady;
+  if (baked[p.id]) return baked[p.id]; // 검증된 사진이 언제나 먼저
   const hit = imgCache[p.id];
   if (hit && (hit.url || Date.now() - hit.t < DAY_MS)) return hit.url || "";
-  await bakedReady;
-  let src = baked[p.id] || "";
+  let src = "";
   if (!src && photoApi) {
     try {
       const r = await fetchT(`api/photo?id=${encodeURIComponent(p.id)}&name=${encodeURIComponent(p.name)}&lat=${p.lat}&lng=${p.lng}`, {}, 3500);
       if (r.ok) src = (await r.json()).url || ""; else if (r.status === 404 || r.status === 405) photoApi = false;
     } catch { photoApi = false; }
   }
-  if (!src) {
-    const q = encodeURIComponent(p.name.replace(/[·()]/g, " "));
-    src = await firstHit([
-      p.wiki ? getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.wiki)}`).then((j) => j?.thumbnail?.source || "") : Promise.resolve(""),
-      getJSON(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=1&gsrsearch=${q}&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json&origin=*`)
-        .then((j) => { const pg = j?.query?.pages && Object.values(j.query.pages)[0]; return pg?.imageinfo?.[0]?.thumburl || ""; }),
-    ]);
+  if (!src && p.wiki && !p.multi) {
+    src = (await getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(p.wiki)}`))?.thumbnail?.source || "";
   }
   imgCache[p.id] = { url: src, t: Date.now() };
-  store.set("img3", imgCache);
+  store.set("img4", imgCache);
   return src;
 }
 function setPhoto(el, src) {
@@ -329,11 +316,12 @@ const photoObserver = "IntersectionObserver" in window
   : null;
 function loadImages() {
   document.querySelectorAll(".thumb[data-photo]").forEach((el) => {
-    const cached = imgCache[el.dataset.photo]?.url;
+    const cached = baked[el.dataset.photo] || imgCache[el.dataset.photo]?.url;
     if (cached) return setPhoto(el, cached); // 이미 찾은 사진은 바로
     if (photoObserver) photoObserver.observe(el); else { photoQueue.push(el); pumpPhotos(); }
   });
 }
+// 첫 화면 히어로: photos.json의 경포해변 사진
 (async () => {
   const src = await photoFor(PLACES.find((p) => p.id === "gyeongpo-beach"));
   if (src) $("#hero").style.setProperty("--hero", `url("${src.replace(/\/\d+px-/, "/1280px-")}")`);
@@ -345,15 +333,15 @@ function renderFestivals() {
   const box = $("#festivals");
   if (!list.length) { box.hidden = true; return; }
   box.hidden = false;
-  const fmtRange = (f) => f.confirmed ? `${f.start.slice(5).replace("-", ".")}–${f.end.slice(5).replace("-", ".")}` : `매년 ${f.months.join("·")}월 · 날짜 발표 전`;
+  const fmtRange = (f) => f.confirmed ? `${f.start.slice(5).replace("-", ".")}–${f.end.slice(5).replace("-", ".")}` : t("매년 {m}월 · 날짜 발표 전", { m: monthsLabel(f.months) });
   list.sort((a, b) => (b.here - a.here) || (b.confirmed - a.confirmed));
   const row = (f) => `
     <li class="${f.here && f.confirmed ? "in" : ""}">
-      <b>${f.name}</b><span>${REGIONS[f.region].label} · ${fmtRange(f)}</span>
-      ${f.here && f.confirmed && trip.days.some((d) => d.items.some((i) => i.id === f.id)) ? `<em>일정에 넣었어요</em>` : ""}
+      <b>${esc(placeName(f))}</b><span>${regionLabel(f.region, REGIONS[f.region].label)} · ${fmtRange(f)}</span>
+      ${f.here && f.confirmed && trip.days.some((d) => d.items.some((i) => i.id === f.id)) ? `<em>${t("일정에 넣었어요")}</em>` : ""}
     </li>`;
   const top = list.slice(0, 3), rest = list.slice(3);
-  box.innerHTML = `<h3>여행 기간의 강원 축제</h3><ul>${top.map(row).join("")}</ul>${rest.length ? `<details><summary>${rest.length}개 더 보기</summary><ul>${rest.map(row).join("")}</ul></details>` : ""}`;
+  box.innerHTML = `<h3>${t("여행 기간의 강원 축제")}</h3><ul>${top.map(row).join("")}</ul>${rest.length ? `<details><summary>${t("{n}개 더 보기", { n: rest.length })}</summary><ul>${rest.map(row).join("")}</ul></details>` : ""}`;
 }
 
 /* ---------- 숙소: 여행 내내 한 곳 ---------- */
@@ -364,19 +352,19 @@ function renderLodging() {
   const q = encodeURIComponent(l.query);
   box.innerHTML = `
     <div class="info">
-      <div class="meta"><span class="tag" style="--c:var(--brand)">추천 숙소 · ${l.nights}박 내내</span></div>
-      <h3>${l.name} · ${l.typeLabel}</h3>
-      <p>${l.desc}</p>
-      <div class="why">${l.reason}${l.others.length ? ` · 다른 선택: ${l.others.join(", ")}` : ""}</div>
+      <div class="meta"><span class="tag" style="--c:var(--brand)">${l.nights === 1 ? t("추천 숙소 · 1박") : t("추천 숙소 · {n}박 내내", { n: l.nights })}</span></div>
+      <h3>${esc(lodgingName(l))} · ${typeLabel(l.type, l.typeLabel)}</h3>
+      <p>${esc(lodgingDesc(l))}</p>
+      <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
     <div class="acts">
-      <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버에서 찾기</a>
-      <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">카카오맵</a>
-      <button class="ghost small" type="button" id="safeOpen">예약 전 안심 체크</button>
+      <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("네이버에서 찾기")}</a>
+      <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">${t("카카오맵")}</a>
+      <button class="ghost small" type="button" id="safeOpen">${t("예약 전 안심 체크")}</button>
     </div>
     <form class="safe" id="safeForm" hidden>
-      <textarea id="safeText" rows="5" maxlength="6000" placeholder="예약하려는 숙소 페이지의 가격, 취소·환불 규정, 후기를 그대로 붙여넣으세요"></textarea>
-      <button type="submit" class="primary">확인</button>
+      <textarea id="safeText" rows="5" maxlength="6000" placeholder="${t("예약하려는 숙소 페이지의 가격, 취소·환불 규정, 후기를 그대로 붙여넣으세요")}"></textarea>
+      <button type="submit" class="primary">${t("확인")}</button>
       <div class="safe-result" id="safeResult"></div>
     </form>`;
 }
@@ -388,28 +376,28 @@ document.addEventListener("click", (e) => {
 document.addEventListener("submit", async (e) => {
   if (e.target.id !== "safeForm") return;
   e.preventDefault();
-  const text = $("#safeText").value.trim(); if (text.length < 20) return toast("숙소 페이지 내용을 조금 더 붙여넣어 주세요");
-  const btn = e.target.querySelector("button"); btn.disabled = true; btn.textContent = "확인 중…";
+  const text = $("#safeText").value.trim(); if (text.length < 20) return toast(t("숙소 페이지 내용을 조금 더 붙여넣어 주세요"));
+  const btn = e.target.querySelector("button"); btn.disabled = true; btn.textContent = t("확인 중…");
   let r = null;
   try {
-    const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date }) }, 20000);
+    const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date, lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) r = checkLodgingLocal(text);
-  btn.disabled = false; btn.textContent = "확인";
-  const level = { low: "안심", mid: "주의", high: "위험" };
+  btn.disabled = false; btn.textContent = t("확인");
+  const level = { low: t("안심"), mid: t("주의"), high: t("위험") };
   $("#safeResult").innerHTML = `
     <p class="safe-sum">${esc(r.summary)}</p>
     <ul>
-      <li><b class="lv ${r.cancel.risk}">${level[r.cancel.risk]}</b> 취소·환불: ${esc(r.cancel.plain)}</li>
-      <li><b class="lv ${r.price.risk}">${level[r.price.risk]}</b> 가격: ${esc(r.price.plain)}</li>
-      ${r.reviews.map((v) => `<li><b class="lv ${v.risk}">${level[v.risk]}</b> 후기: ${esc(v.plain)}</li>`).join("")}
+      <li><b class="lv ${r.cancel.risk}">${level[r.cancel.risk]}</b> ${t("취소·환불: ")}${esc(r.cancel.plain)}</li>
+      <li><b class="lv ${r.price.risk}">${level[r.price.risk]}</b> ${t("가격: ")}${esc(r.price.plain)}</li>
+      ${r.reviews.map((v) => `<li><b class="lv ${v.risk}">${level[v.risk]}</b> ${t("후기: ")}${esc(v.plain)}</li>`).join("")}
     </ul>
-    ${r.ask.length ? `<p class="safe-ask">예약 전에 물어볼 것: ${r.ask.map(esc).join(" · ")}</p>` : ""}`;
+    ${r.ask.length ? `<p class="safe-ask">${t("예약 전에 물어볼 것: ")}${r.ask.map(esc).join(" · ")}</p>` : ""}`;
 });
 function lodgingHTML(day) {
   if (!trip.lodging || day.dayIdx >= state.input.days - 1) return "";
-  return `<li class="leg home">숙소(${trip.lodging.name})로 · 약 ${day.toLodgingKm ?? "-"}km</li>`;
+  return `<li class="leg home">${t("숙소({name})로 · 약 {km}km", { name: esc(lodgingName(trip.lodging)), km: day.toLodgingKm ?? "-" })}</li>`;
 }
 
 /* ---------- 혜택 내비 + 증빙 보관함 ---------- */
@@ -422,24 +410,24 @@ function renderBenefits() {
   box.hidden = false;
   const proofs = loadProofs();
   const total = list.filter((b) => b.kind === "place").reduce((a, b) => a + b.amount, 0);
-  const badge = { auto: "일정에 포함 · 현장에서 받기", open: `신청 가능 · ${list.find((b) => b.status === "open")?.end?.slice(5).replace("-", ".")} 마감`, check: "하반기 공고 확인 필요" };
+  const badge = { auto: t("일정에 포함 · 현장에서 받기"), check: t("하반기 공고 확인 필요") };
   box.innerHTML = `
-    <h3>이 일정으로 받는 혜택${total ? ` <span class="sum">현장 환급 ${total.toLocaleString()}원</span>` : ""}</h3>
+    <h3>${t("이 일정으로 받는 혜택")}${total ? ` <span class="sum">${t("현장 환급 {n}원", { n: total.toLocaleString() })}</span>` : ""}</h3>
     <ul class="benefit-list">${list.map((b) => {
       const need = b.proofs || [];
       const have = need.filter((p) => (proofs[b.id + ":" + p] || []).length).length;
       return `<li>
-        <div class="b-head"><b>${b.title}</b><span class="b-badge ${b.status}">${b.status === "open" ? `신청 가능 · ${b.end.slice(5).replace("-", ".")} 마감` : badge[b.status]}</span></div>
-        <p>${b.how}</p>
-        ${b.steps ? `<p class="b-steps">${b.steps.map((t, i) => `${i + 1}. ${t}`).join("  ")}</p>` : ""}
-        ${b.note ? `<p class="b-note">${b.note}</p>` : ""}
-        ${need.length ? `<div class="proofs"><span>증빙 ${have}/${need.length}</span>${need.map((p) => {
+        <div class="b-head"><b>${benefitText(b, "title")}</b><span class="b-badge ${b.status}">${b.status === "open" ? t("신청 가능 · {d} 마감", { d: b.end.slice(5).replace("-", ".") }) : badge[b.status]}</span></div>
+        <p>${benefitText(b, "how")}</p>
+        ${b.steps ? `<p class="b-steps">${benefitText(b, "steps").map((x, i) => `${i + 1}. ${x}`).join("  ")}</p>` : ""}
+        ${b.note ? `<p class="b-note">${benefitText(b, "note")}</p>` : ""}
+        ${need.length ? `<div class="proofs"><span>${t("증빙 {a}/{b}", { a: have, b: need.length })}</span>${need.map((p) => {
           const n = (proofs[b.id + ":" + p] || []).length;
-          return `<label class="proof ${n ? "ok" : ""}">${n ? "✓ " : "+ "}${p}${n > 1 ? ` ${n}장` : ""}<input type="file" accept="image/*" capture="environment" data-proof="${b.id}:${p}" hidden></label>`;
+          return `<label class="proof ${n ? "ok" : ""}">${n ? "✓ " : "+ "}${t(p)}${n > 1 ? t(" {n}장", { n }) : ""}<input type="file" accept="image/*" capture="environment" data-proof="${b.id}:${p}" hidden></label>`;
         }).join("")}</div>` : ""}
       </li>`;
     }).join("")}</ul>
-    ${Object.values(proofs).some((a) => a.length) ? `<details class="proof-box"><summary>증빙 보관함 보기</summary><div class="proof-grid">${Object.entries(proofs).flatMap(([k, arr]) => arr.map((src, i) => `<figure><img src="${src}" alt=""><figcaption>${k.split(":").slice(1).join(":")}</figcaption><button type="button" data-del="${k}|${i}">삭제</button></figure>`)).join("")}</div></details>` : ""}`;
+    ${Object.values(proofs).some((a) => a.length) ? `<details class="proof-box"><summary>${t("증빙 보관함 보기")}</summary><div class="proof-grid">${Object.entries(proofs).flatMap(([k, arr]) => arr.map((src, i) => `<figure><img src="${src}" alt=""><figcaption>${t(k.split(":").slice(1).join(":"))}</figcaption><button type="button" data-del="${k}|${i}">${t("삭제")}</button></figure>`)).join("")}</div></details>` : ""}`;
 }
 // 영수증 사진은 줄여서 이 기기에만 저장
 function shrink(file, max = 1200) {
@@ -463,8 +451,8 @@ $("#benefits").addEventListener("change", async (e) => {
     const src = await shrink(e.target.files[0], 900);
     const all = loadProofs();
     (all[key] ||= []).push(src);
-    toast(store.set(proofKey(), all) ? "증빙을 보관함에 넣었어요" : "저장 공간이 부족해요. 사진을 몇 장 지워주세요");
-  } catch { toast("사진을 읽지 못했어요"); }
+    toast(store.set(proofKey(), all) ? t("증빙을 보관함에 넣었어요") : t("저장 공간이 부족해요. 사진을 몇 장 지워주세요"));
+  } catch { toast(t("사진을 읽지 못했어요")); }
   renderBenefits();
 });
 $("#benefits").addEventListener("click", (e) => {
@@ -485,18 +473,18 @@ function renderOvernight() {
   if (!c || !c.added.length) { box.hidden = true; return; }
   box.hidden = false;
   box.innerHTML = `
-    <h3>하룻밤 더하면</h3>
+    <h3>${t("하룻밤 더하면")}</h3>
     <div class="cmp">
-      <div><span>볼 수 있는 곳</span><b>+${c.added.length}곳</b></div>
-      <div><span>밤 코스</span><b>${c.endAfter > c.endBefore ? `${fmt(c.endAfter)}까지` : "없음"}</b></div>
-      <div><span>숙소</span><b>${c.lodging.name}</b></div>
+      <div><span>${t("볼 수 있는 곳")}</span><b>${t("+{n}곳", { n: c.added.length })}</b></div>
+      <div><span>${t("밤 코스")}</span><b>${c.endAfter > c.endBefore ? t("{t}까지", { t: fmt(c.endAfter) }) : t("없음")}</b></div>
+      <div><span>${t("숙소")}</span><b>${esc(lodgingName(c.lodging))}</b></div>
     </div>
-    ${c.endAfter > c.endBefore && c.evening.length ? `<p class="night">밤 코스: ${c.evening.filter((e) => e.start >= c.endBefore - 60).map((e) => `${fmt(e.start)} ${e.name}`).join(" → ")}</p>` : ""}
-    <p class="more">둘째 날: ${c.trip.days[1].items.map((i) => i.place.name).join(", ")}</p>
-    ${c.festivals.length ? `<p class="night">다음 날 축제: ${c.festivals.map((f) => f.name).join(", ")}</p>` : ""}
-    ${c.benefits.length ? `<p class="more">받을 수 있는 혜택: ${c.benefits.map((b) => b.title).join(", ")}</p>` : ""}
-    <p class="more">추가 비용: 숙박비(${c.lodging.typeLabel})와 식사 2끼 · 숙박비는 날짜마다 달라 검색으로 확인하세요</p>
-    <button type="button" class="primary" id="toOvernight">1박 2일로 바꾸기</button>`;
+    ${c.endAfter > c.endBefore && c.evening.length ? `<p class="night">${t("밤 코스: ")}${c.evening.filter((e) => e.start >= c.endBefore - 60).map((e) => `${fmt(e.start)} ${esc(nameOf(e.id, e.name))}`).join(" → ")}</p>` : ""}
+    <p class="more">${t("둘째 날: ")}${c.trip.days[1].items.map((i) => esc(placeName(i.place))).join(", ")}</p>
+    ${c.festivals.length ? `<p class="night">${t("다음 날 축제: ")}${c.festivals.map((f) => esc(placeName(f))).join(", ")}</p>` : ""}
+    ${c.benefits.length ? `<p class="more">${t("받을 수 있는 혜택: ")}${c.benefits.map((b) => benefitText(b, "title")).join(", ")}</p>` : ""}
+    <p class="more">${t("추가 비용: 숙박비({type})와 식사 2끼 · 숙박비는 날짜마다 달라 검색으로 확인하세요", { type: typeLabel(c.lodging.type, c.lodging.typeLabel) })}</p>
+    <button type="button" class="primary" id="toOvernight">${t("1박 2일로 바꾸기")}</button>`;
 }
 document.addEventListener("click", (e) => {
   if (e.target.id !== "toOvernight") return;
@@ -505,7 +493,7 @@ document.addEventListener("click", (e) => {
   dayIdx = 0;
   rebuild();
   window.scrollTo({ top: 0, behavior: "smooth" });
-  toast("1박 2일로 바꿨어요");
+  toast(t("1박 2일로 바꿨어요"));
 });
 
 /* ---------- 사장님이 등록한 가게 (다국어 메뉴) ---------- */
@@ -519,8 +507,8 @@ async function renderShops() {
   const list = shopsCache[region];
   if (!list.length || state.input.region !== region) { box.hidden = true; return; }
   box.hidden = false;
-  box.innerHTML = `<h3>사장님이 직접 등록한 가게</h3><ul>${list.slice(0, 6).map((x) => `
-    <li><b>${esc(x.name)}</b><span>${esc(x.hours || x.address || "")}</span><a class="ghost small" href="menu.html?id=${x.id}" target="_blank" rel="noopener">메뉴 ${x.count}개 · 4개 언어</a></li>`).join("")}</ul>`;
+  box.innerHTML = `<h3>${t("사장님이 직접 등록한 가게")}</h3><ul>${list.slice(0, 6).map((x) => `
+    <li><b>${esc(x.name)}</b><span>${esc(x.hours || x.address || "")}</span><a class="ghost small" href="menu.html?id=${x.id}" target="_blank" rel="noopener">${t("메뉴 {n}개 · 4개 언어", { n: x.count })}</a></li>`).join("")}</ul>`;
 }
 
 /* ---------- 특산물 재주문 ---------- */
@@ -535,13 +523,13 @@ function renderSouvenirs() {
   const entry = { id, date: state.input.date, region: REGIONS[state.input.region].label, items: list };
   store.set("pastTrips", [entry, ...past.filter((p) => p.id !== id)].slice(0, 5));
   box.innerHTML = `
-    <h3>집에서 다시 맛보기</h3>
-    <ul>${list.map((s) => `<li><b>${s.item}</b><span>${s.from}에서</span><button type="button" class="ghost small" data-copy="${s.item}">검색어 복사</button></li>`).join("")}</ul>
-    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${SHOP_MALL.name}(강원도 공식 쇼핑몰)에서 주문하기</a>`;
+    <h3>${t("집에서 다시 맛보기")}</h3>
+    <ul>${list.map((s) => `<li><b>${s.item}</b><span>${t("{from}에서", { from: esc(nameOf(null, s.from)) })}</span><button type="button" class="ghost small" data-copy="${s.item}">${t("검색어 복사")}</button></li>`).join("")}</ul>
+    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${t("{mall}(강원도 공식 쇼핑몰)에서 주문하기", { mall: SHOP_MALL.name })}</a>`;
 }
 document.addEventListener("click", async (e) => {
-  const t = e.target.dataset.copy; if (!t) return;
-  try { await navigator.clipboard.writeText(t); toast(`"${t}" 복사했어요`); } catch { toast(t); }
+  const text = e.target.dataset.copy; if (!text) return;
+  try { await navigator.clipboard.writeText(text); toast(t("\"{t}\" 복사했어요", { t: text })); } catch { toast(text); }
 });
 function renderPast() {
   const past = (store.get("pastTrips") || []).filter((p) => p.date < todayStr());
@@ -549,8 +537,9 @@ function renderPast() {
   if (!past.length) { box.hidden = true; return; }
   const p = past[0];
   box.hidden = false;
-  box.innerHTML = `<b>지난 ${p.region} 여행에서 먹은 ${p.items.slice(0, 2).map((i) => i.item).join(", ")}</b>
-    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">집에서 다시 주문</a>`;
+  const regionKey = p.id.split(":")[0];
+  box.innerHTML = `<b>${t("지난 {region} 여행에서 먹은 {items}", { region: regionLabel(regionKey, p.region), items: p.items.slice(0, 2).map((i) => i.item).join(", ") })}</b>
+    <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${t("집에서 다시 주문")}</a>`;
 }
 
 /* ---------- 지도 ---------- */
@@ -592,13 +581,13 @@ function drawMap(day) {
     L.polyline([[day.start.lat, day.start.lng], ...pts], { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
     applyRoad(dayIdx);
   }
-  const startLabel = day.start.name.startsWith("숙소") ? "숙" : "출";
-  L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(day.start.name);
+  const startLabel = t(day.start.name.startsWith("숙소") ? "숙" : "출");
+  L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(esc(startName(day.start, trip.lodging)));
   const L0 = trip.lodging;
-  if (L0 && !day.start.name.startsWith("숙소")) L.marker([L0.lat, L0.lng], { icon: L.divIcon({ className: "pin base", html: "<span>숙</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(`숙소 · ${L0.name}`);
+  if (L0 && !day.start.name.startsWith("숙소")) L.marker([L0.lat, L0.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${t("숙")}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(t("숙소 · {name}", { name: esc(lodgingName(L0)) }));
   day.items.forEach((it, i) => {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
-    L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${it.place.name}`);
+    L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${esc(placeName(it.place))}`);
   });
   map.invalidateSize();
   const extra = trip.lodging ? [[trip.lodging.lat, trip.lodging.lng]] : [];
@@ -610,17 +599,17 @@ function addLocateControl() {
   const Ctl = L.Control.extend({
     onAdd() {
       const b = L.DomUtil.create("button", "locate");
-      b.type = "button"; b.title = "내 위치"; b.setAttribute("aria-label", "내 위치");
+      b.type = "button"; b.title = t("내 위치"); b.setAttribute("aria-label", t("내 위치"));
       b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
       L.DomEvent.on(b, "click", (e) => {
         L.DomEvent.stop(e);
-        if (!navigator.geolocation) return toast("위치를 사용할 수 없어요");
+        if (!navigator.geolocation) return toast(t("위치를 사용할 수 없어요"));
         navigator.geolocation.getCurrentPosition((pos) => {
           const ll = [pos.coords.latitude, pos.coords.longitude];
           if (meMarker) meMarker.remove();
           meMarker = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }).addTo(map);
           map.setView(ll, 14);
-        }, () => toast("위치 권한을 허용해 주세요"), { enableHighAccuracy: true, timeout: 8000 });
+        }, () => toast(t("위치 권한을 허용해 주세요")), { enableHighAccuracy: true, timeout: 8000 });
       });
       return b;
     },
@@ -643,7 +632,7 @@ $("#timeline").addEventListener("click", (e) => {
   render(); persist();
   applyRoad(dayIdx);
   const now = trip.days[dayIdx].items[i];
-  toast(now ? `${now.place.name}(으)로 바꿨어요` : "대신 갈 수 있는 곳이 없어 뺐어요");
+  toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
 });
 
 $("#quick").addEventListener("click", (e) => {
@@ -679,12 +668,12 @@ function compactTrip() {
     days: trip.days.map((d) => ({ date: d.date, areaName: d.areaName, items: d.items.map((i) => ({ id: i.id, name: i.place.name, start: fmt(i.start) })) })),
   };
 }
-async function askGuide(question) {
-  bubble("me", question);
-  const wait = bubble("ai pending", "생각 중");
+async function askGuide(question, shown = question) {
+  bubble("me", shown);
+  const wait = bubble("ai pending", t("생각 중"));
   let r = null;
   try {
-    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip() }) }, 20000);
+    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) r = guideLocal(question, trip, dayIdx);
@@ -701,8 +690,8 @@ async function askGuide(question) {
     rebuild();
     // 엔진이 다시 확인한 결과를 그대로 알려준다
     const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
-    const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => placeById(id)?.name || id);
-    note = missed.length ? ` (${missed.join(", ")}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)` : " 영업시간을 다시 확인해 일정에 반영했어요.";
+    const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => (placeById(id) ? placeName(placeById(id)) : id));
+    note = missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요.");
   }
   wait.classList.remove("pending");
   wait.innerHTML = esc(r.answer + note);
@@ -715,7 +704,8 @@ $("#askForm").addEventListener("submit", (e) => {
   askGuide(text);
 });
 $("#suggest").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (b) askGuide(b.textContent);
+  // 추천 질문은 화면 언어로 보여 주고, 보내는 문장은 한국어 원문 (AI 미연결 간단 모드도 알아듣게)
+  const b = e.target.closest("button"); if (b) askGuide(b.dataset.ko || b.textContent.trim(), b.textContent.trim());
 });
 
 /* ---------- AI로 한 줄 시작 ---------- */
@@ -726,11 +716,11 @@ $("#aiStart").addEventListener("submit", async (e) => {
   const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
   let r = null;
   try {
-    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr() }) }, 12000);
+    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 12000);
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) { r = startLocal(text, todayStr()); notifyNoAI(); }
-  btn.disabled = false; btn.textContent = "만들기";
+  btn.disabled = false; btn.textContent = t("만들기");
   fillForm({ ...r, days: Number(r.days) });
   $("#form").requestSubmit();
   if (r.summary) toast(r.summary);
@@ -740,8 +730,8 @@ $("#aiStart").addEventListener("submit", async (e) => {
 $("#shareBtn").addEventListener("click", async () => {
   const url = location.href;
   try {
-    if (navigator.share) await navigator.share({ title: "강릉 여행 일정", url });
-    else { await navigator.clipboard.writeText(url); toast("링크를 복사했어요"); }
+    if (navigator.share) await navigator.share({ title: t("강원 여행 일정"), url });
+    else { await navigator.clipboard.writeText(url); toast(t("링크를 복사했어요")); }
   } catch {}
 });
 
@@ -756,7 +746,7 @@ $("#icsBtn").addEventListener("click", () => {
       `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
       `DTSTART;TZID=Asia/Seoul:${stamp(d.date, it.start)}`,
       `DTEND;TZID=Asia/Seoul:${stamp(d.date, it.end)}`,
-      `SUMMARY:${icsText(it.place.name)}`,
+      `SUMMARY:${icsText(placeName(it.place))}`,
       `LOCATION:${icsText(it.place.name)}`,
       `GEO:${it.place.lat};${it.place.lng}`,
       "END:VEVENT");
@@ -764,7 +754,7 @@ $("#icsBtn").addEventListener("click", () => {
   lines.push("END:VCALENDAR");
   const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = `강릉여행_${state.input.date}.ics`; a.click();
+  a.href = URL.createObjectURL(blob); a.download = `${isEN() ? "gangwon-trip" : "강원여행"}_${state.input.date}.ics`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 
@@ -782,12 +772,27 @@ let noAINotified = false;
 function notifyNoAI() {
   if (noAINotified) return;
   noAINotified = true;
-  setTimeout(() => toast("AI에 연결되지 않아 간단 모드로 처리했어요"), 2400);
+  setTimeout(() => toast(t("AI에 연결되지 않아 간단 모드로 처리했어요")), 2400);
 }
 
 // 오프라인 표시
 function updateOnline() { document.body.classList.toggle("offline", !navigator.onLine); }
 addEventListener("online", updateOnline); addEventListener("offline", updateOnline); updateOnline();
+
+/* ---------- 언어 전환 (한국어 / EN) ---------- */
+async function switchLang(l) {
+  setLang(l);
+  if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000));
+  applyStatic();
+  if (trip && !$("#result").hidden) render();
+  renderPast();
+}
+document.querySelector(".lang").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-lang]");
+  if (b && b.dataset.lang !== getLang()) switchLang(b.dataset.lang);
+});
+applyStatic();
+if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 이름을 먼저 받아 첫 화면부터 영어로
 
 (function boot() {
   const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;

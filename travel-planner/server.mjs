@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
 import { startFromText, guide, lodgingCheck, menuScan, AI_MODEL } from "./ai.mjs";
-import { REGIONS } from "./public/data.js";
+import { REGIONS, PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(here, "public");
@@ -83,8 +83,8 @@ async function handle(req, res) {
       const text = url.pathname === "/api/start" ? body.text : body.question;
       if (typeof text !== "string" || !text.trim() || text.length > 300) { res.writeHead(400).end(); return; }
       const result = url.pathname === "/api/start"
-        ? await startFromText(text.trim(), body.today)
-        : await guide({ question: text.trim(), history: body.history, trip: body.trip });
+        ? await startFromText(text.trim(), body.today, body.lang)
+        : await guide({ question: text.trim(), history: body.history, trip: body.trip, lang: body.lang });
       res.writeHead(200, { "content-type": MIME[".json"] }).end(JSON.stringify(result));
     } catch (err) { logAIError(err); res.writeHead(503).end(); }
     return;
@@ -150,14 +150,14 @@ async function handle(req, res) {
 
   // 장소 사진: 한국관광공사 TourAPI (TOUR_API_KEY가 있을 때만)
   if (req.method === "GET" && url.pathname === "/api/photo") {
+    // 앱 데이터에 있는 장소만 (이름·좌표·여러 가게 여부를 데이터에서 가져와 같은 검증 규칙으로 찾는다)
     const id = url.searchParams.get("id") || "";
-    const place = { name: url.searchParams.get("name") || "", lat: Number(url.searchParams.get("lat")), lng: Number(url.searchParams.get("lng")) };
-    if (!process.env.TOUR_API_KEY || !place.name || !Number.isFinite(place.lat)) { res.writeHead(404).end(); return; }
+    const place = PLACES.find((p) => p.id === id) || FESTIVALS.find((f) => f.id === id);
+    if (!process.env.TOUR_API_KEY) { res.writeHead(404).end(); return; } // 키 없음: 앱이 이후 요청을 건너뜀
+    if (!place) { json(res, 200, { url: "" }); return; }
     try {
       if (!photoCache.has(id)) photoCache.set(id, await tourPhoto(place, process.env.TOUR_API_KEY));
-      const photo = photoCache.get(id);
-      if (!photo) { res.writeHead(404).end(); return; }
-      res.writeHead(200, { "content-type": MIME[".json"], "cache-control": "public, max-age=86400" }).end(JSON.stringify({ url: photo }));
+      res.writeHead(200, { "content-type": MIME[".json"], "cache-control": "public, max-age=86400" }).end(JSON.stringify({ url: photoCache.get(id) }));
     } catch {
       res.writeHead(502).end();
     }

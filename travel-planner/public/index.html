@@ -8,21 +8,28 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="preconnect" href="https://tile.openstreetmap.org" crossorigin>
   <link rel="preconnect" href="https://router.project-osrm.org" crossorigin>
+  <link rel="preconnect" href="https://tong.visitkorea.or.kr">
   <link rel="preconnect" href="https://ko.wikipedia.org" crossorigin>
-  <link rel="preconnect" href="https://upload.wikimedia.org" crossorigin>
   <link rel="preconnect" href="https://api.open-meteo.com" crossorigin>
   <link rel="modulepreload" href="planner.js">
   <link rel="modulepreload" href="data.js">
+  <link rel="modulepreload" href="i18n.js">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="vendor/pretendard/pretendardvariable-dynamic-subset.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header class="top">
-    <button class="brand" id="home" type="button"><span class="dot"></span>오늘강원</button>
-    <div class="top-actions" id="topActions" hidden>
-      <button class="ghost" id="shareBtn" type="button">링크 공유</button>
-      <button class="ghost" id="icsBtn" type="button">캘린더 저장</button>
+    <button class="brand" id="home" type="button"><span class="dot"></span><span data-i18n>오늘강원</span></button>
+    <div class="top-right">
+      <div class="top-actions" id="topActions" hidden>
+        <button class="ghost" id="shareBtn" type="button" data-i18n>링크 공유</button>
+        <button class="ghost" id="icsBtn" type="button" data-i18n>캘린더 저장</button>
+      </div>
+      <div class="lang" role="group" aria-label="Language">
+        <button type="button" data-lang="ko" lang="ko">한국어</button>
+        <button type="button" data-lang="en" lang="en">EN</button>
+      </div>
     </div>
   </header>
 
@@ -30,74 +37,74 @@
   <main id="setup" class="setup">
     <section class="hero" id="hero">
       <div class="hero-text">
-        <h1>강원 여행 일정,<br>고르기만 하세요</h1>
+        <h1 data-i18n>강원 여행 일정,<br>고르기만 하세요</h1>
       </div>
     </section>
 
     <form class="card ai-start" id="aiStart">
       <span class="ai-badge">AI</span>
-      <input id="aiStartInput" maxlength="200" placeholder="예) 주말에 부모님이랑 속초 1박" autocomplete="off">
-      <button type="submit">만들기</button>
+      <input id="aiStartInput" maxlength="200" data-i18n-ph placeholder="예) 주말에 부모님이랑 속초 1박" autocomplete="off">
+      <button type="submit" data-i18n>만들기</button>
     </form>
 
     <section class="card past" id="past" hidden></section>
 
     <form class="card form" id="form">
       <div class="field">
-        <span class="label">어디로</span>
+        <span class="label" data-i18n>어디로</span>
         <div class="seg wrap" data-name="region">
-          <button type="button" data-v="gangneung" class="on">강릉·동해</button>
-          <button type="button" data-v="seorak">속초·양양</button>
-          <button type="button" data-v="chuncheon">춘천·철원</button>
-          <button type="button" data-v="pyeongchang">평창·정선</button>
-          <button type="button" data-v="wonju">원주</button>
+          <button type="button" data-v="gangneung" class="on" data-i18n>강릉·동해</button>
+          <button type="button" data-v="seorak" data-i18n>속초·양양</button>
+          <button type="button" data-v="chuncheon" data-i18n>춘천·철원</button>
+          <button type="button" data-v="pyeongchang" data-i18n>평창·정선</button>
+          <button type="button" data-v="wonju" data-i18n>원주</button>
         </div>
       </div>
 
       <div class="field">
-        <label class="label" for="date">언제</label>
+        <label class="label" for="date" data-i18n>언제</label>
         <div class="row">
           <input type="date" id="date" class="date" required>
           <div class="seg" data-name="days">
-            <button type="button" data-v="1">당일</button>
-            <button type="button" data-v="2" class="on">1박 2일</button>
-            <button type="button" data-v="3">2박 3일</button>
+            <button type="button" data-v="1" data-i18n>당일</button>
+            <button type="button" data-v="2" class="on" data-i18n>1박 2일</button>
+            <button type="button" data-v="3" data-i18n>2박 3일</button>
           </div>
         </div>
       </div>
 
       <div class="field">
-        <span class="label">누구와</span>
+        <span class="label" data-i18n>누구와</span>
         <div class="seg" data-name="who">
-          <button type="button" data-v="solo">혼자</button>
-          <button type="button" data-v="couple" class="on">연인·친구</button>
-          <button type="button" data-v="family">아이와</button>
-          <button type="button" data-v="parents">부모님과</button>
+          <button type="button" data-v="solo" data-i18n>혼자</button>
+          <button type="button" data-v="couple" class="on" data-i18n>연인·친구</button>
+          <button type="button" data-v="family" data-i18n>아이와</button>
+          <button type="button" data-v="parents" data-i18n>부모님과</button>
         </div>
       </div>
 
       <div class="field">
-        <span class="label">좋아하는 것 <em>여러 개 가능</em></span>
+        <span class="label" data-i18n>좋아하는 것 <em>여러 개 가능</em></span>
         <div class="chips" data-name="likes">
-          <button type="button" data-v="sea" class="on">바다</button>
-          <button type="button" data-v="cafe" class="on">카페</button>
-          <button type="button" data-v="food">맛집</button>
-          <button type="button" data-v="culture">역사·문화</button>
-          <button type="button" data-v="nature">자연·산책</button>
+          <button type="button" data-v="sea" class="on" data-i18n>바다</button>
+          <button type="button" data-v="cafe" class="on" data-i18n>카페</button>
+          <button type="button" data-v="food" data-i18n>맛집</button>
+          <button type="button" data-v="culture" data-i18n>역사·문화</button>
+          <button type="button" data-v="nature" data-i18n>자연·산책</button>
         </div>
       </div>
 
       <div class="field">
-        <span class="label">이동</span>
+        <span class="label" data-i18n>이동</span>
         <div class="seg" data-name="move">
-          <button type="button" data-v="car" class="on">자동차</button>
-          <button type="button" data-v="transit">대중교통·도보</button>
+          <button type="button" data-v="car" class="on" data-i18n>자동차</button>
+          <button type="button" data-v="transit" data-i18n>대중교통·도보</button>
         </div>
       </div>
 
-      <button class="primary" type="submit">일정 만들기</button>
+      <button class="primary" type="submit" data-i18n>일정 만들기</button>
     </form>
-    <p class="owner-link"><a href="owner.html">사장님이세요? 메뉴판 사진 한 장으로 가게 등록</a></p>
+    <p class="owner-link"><a href="owner.html" data-i18n>사장님이세요? 메뉴판 사진 한 장으로 가게 등록</a></p>
   </main>
 
   <!-- 2. 결과 -->
@@ -107,7 +114,7 @@
         <h2 id="tripTitle"></h2>
         <div class="stats" id="stats"></div>
       </div>
-      <button class="ghost small" id="editBtn" type="button">조건 변경</button>
+      <button class="ghost small" id="editBtn" type="button" data-i18n>조건 변경</button>
     </div>
 
     <section class="festivals" id="festivals" hidden></section>
@@ -121,24 +128,24 @@
 
     <div class="adjust">
       <div class="chips quick" id="quick">
-        <button type="button" data-q="rain">비가 와요</button>
-        <button type="button" data-q="lessWalk">덜 걷고 싶어요</button>
-        <button type="button" data-q="relaxed">여유롭게</button>
-        <button type="button" data-q="packed">더 알차게</button>
+        <button type="button" data-q="rain" data-i18n>비가 와요</button>
+        <button type="button" data-q="lessWalk" data-i18n>덜 걷고 싶어요</button>
+        <button type="button" data-q="relaxed" data-i18n>여유롭게</button>
+        <button type="button" data-q="packed" data-i18n>더 알차게</button>
       </div>
     </div>
 
     <section class="card guide" id="guide">
-      <div class="guide-head"><span class="ai-badge">AI 가이드</span></div>
+      <div class="guide-head"><span class="ai-badge" data-i18n>AI 가이드</span></div>
       <div class="guide-log" id="guideLog"></div>
       <div class="chips suggest" id="suggest">
-        <button type="button">비 오면 어떡해?</button>
-        <button type="button">아이랑 가도 괜찮을까?</button>
-        <button type="button">오늘 운영시간 알려줘</button>
+        <button type="button" data-i18n>비 오면 어떡해?</button>
+        <button type="button" data-i18n>아이랑 가도 괜찮을까?</button>
+        <button type="button" data-i18n>오늘 운영시간 알려줘</button>
       </div>
       <form class="ask" id="askForm">
-        <input id="askInput" maxlength="200" placeholder="예) 2일차에 바다 한 곳 더 넣어줘" autocomplete="off">
-        <button type="submit">보내기</button>
+        <input id="askInput" maxlength="200" data-i18n-ph placeholder="예) 2일차에 바다 한 곳 더 넣어줘" autocomplete="off">
+        <button type="submit" data-i18n>보내기</button>
       </form>
     </section>
 

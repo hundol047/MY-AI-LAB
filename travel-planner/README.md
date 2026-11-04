@@ -56,7 +56,7 @@ AI_API_KEY=발급키 AI_MODEL=모델ID TOUR_API_KEY=공공데이터포털_Decodi
 | `AI_MODEL` | AI 4개 기능 | 제공사 콘솔에 적힌 모델 ID 그대로 |
 | `AI_BASE_URL` | OpenAI가 아닌 제공사 | OpenAI 호환 API 주소 (예: `https://제공사주소/v1`). OpenAI면 비워 둔다 |
 | `AI_REASONING_EFFORT` | 선택 | 추론 모델이면 `low`/`medium`/`high` (응답 속도에는 `low`) |
-| `TOUR_API_KEY` | 장소 사진 | 공공데이터포털 한국관광공사 국문 관광정보 서비스 인증키 (Decoding) |
+| `TOUR_API_KEY` | 장소 사진·영문 이름 | 공공데이터포털 한국관광공사 국문(KorService2)·영문(EngService2) 관광정보 서비스 인증키 (Decoding) |
 | `KAKAO_REST_KEY` | 좌표 확인 스크립트 | 카카오 개발자 REST API 키 |
 
 - 메뉴판 읽기는 이미지 입력을 지원하는 모델이어야 한다.
@@ -64,16 +64,34 @@ AI_API_KEY=발급키 AI_MODEL=모델ID TOUR_API_KEY=공공데이터포털_Decodi
 
 ## 사진
 
-화면은 아래 순서로 장소 사진을 찾는다.
-1. `public/photos.json` — 미리 모아 둔 사진 주소
-2. `/api/photo` — 서버에 `TOUR_API_KEY`가 있으면 한국관광공사 공식 사진. 이름으로 찾은 결과 중 **좌표가 2km 안에 있는 것만** 써서 이름이 같은 다른 가게 사진이 붙지 않게 한다
-3. 위키백과 대표 사진 → 위키미디어 공용 검색
+사진은 한국관광공사 TourAPI 국문 관광정보(KorService2)의 대표 사진(`firstimage`)을 쓴다. **맞는 곳의 사진인지 확인한 것만** `public/photos.json`({장소 id: 주소})에 넣는다.
 
-사진을 미리 모아 두려면:
+- 이름 검색(`searchKeyword2`, 해변↔해수욕장·지점명 뺀 이름 등 변형 포함) + 주변 2km 목록(`locationBasedList2`)에서 후보를 모은다
+- **좌표 2km 안 + 이름 대응**만 통과: 지역명·띄어쓰기를 빼고 비교, 앞에 지역명이 더 붙은 것("도째비골 해랑전망대")은 같은 곳, 뒤에 다른 말이 붙은 것("고석정 꽃밭", "남이섬 노래박물관")은 옆의 다른 시설로 보고 버린다
+- 시장·식당가처럼 여러 가게가 모인 곳(`multi`)은 그 시장·거리 자체로 등록된 결과만 쓴다 (개별 가게 사진 금지)
+- 이미지 주소는 https로 바꾸고 실제로 열리는지 확인한다 (`tong.visitkorea.or.kr`)
+- 매칭된 관광공사 제목·거리, 버린 후보와 이유, 못 찾은 곳은 [`reports/photos.md`](reports/photos.md)에 남는다. 틀린 매칭을 발견하면 `scripts/bake-photos.mjs`의 `REJECT`에 contentid를 넣고 다시 돌린다
 
 ```bash
-TOUR_API_KEY=공공데이터포털_인증키 node scripts/bake-photos.mjs
+TOUR_API_KEY=Decoding키 node scripts/bake-photos.mjs     # → public/photos.json, reports/photos.md
 ```
+
+화면은 ① `photos.json` → ② `/api/photo`(서버에 키가 있으면 같은 규칙으로 찾기) → ③ 장소에 지정된 위키백과 문서 사진(여러 가게가 모인 곳 제외) 순으로 쓴다. 첫 화면 히어로도 `photos.json`의 경포해변 사진이다. 사진이 없는 곳은 분류 색 카드로 보인다.
+
+## 영문 (외국인용)
+
+오른쪽 위 `한국어 / EN` 버튼으로 바꾼다. 선택은 이 기기에 기억하고, 처음 방문하면 브라우저 언어가 한국어가 아닐 때 EN으로 연다.
+
+- 장소 이름·소개: 한국관광공사 영문 관광정보(EngService2) → `public/data-en.json`({id: {name, desc}}). 영문 제목 괄호 속 한국어 원명(예: `Gangneung Gyeongpo Beach (강릉 경포해수욕장)`)이 우리 이름과 대응하고 좌표가 2km 안인 것만 쓴다. 소개는 `detailCommon2` 개요의 **첫 문장 그대로**(요약·창작 없음, 200자 넘거나 그곳 이름이 없는 문장이면 생략). 영문 데이터가 없는 곳은 한국어 이름·설명 그대로 보인다. 근거는 [`reports/english.md`](reports/english.md)
+- 화면 고정 문구(선택 항목, 버튼, 탭, 운영시간 "Open/last entry/break/Always open/Varies by shop", 축제·숙소·혜택·1박 카드, 알림)는 `public/i18n.js` 한 곳에 모았다. 한국어 원문이 키라 사전에 없는 문구는 한국어로 남는다
+- 일정 엔진과 선택 항목(5개, 각 5개 이하)은 언어와 무관하게 그대로다
+- AI가 연결되어 있으면 EN 화면에서는 AI 답변도 영어로 받는다. AI 없이 쓰는 간단 모드의 답변·한 줄 시작 해석은 한국어 기준이다
+
+```bash
+TOUR_API_KEY=Decoding키 node scripts/bake-english.mjs    # → public/data-en.json, reports/english.md
+```
+
+두 스크립트는 응답을 `.cache/tour/`(git 제외)에 저장해 다시 돌려도 API를 다시 부르지 않는다. 새로 받으려면 폴더를 지운다.
 
 ## 테스트
 
@@ -81,7 +99,7 @@ TOUR_API_KEY=공공데이터포털_인증키 node scripts/bake-photos.mjs
 npm test
 ```
 
-권역·기간·동행·이동수단·취향·요일·계절·속도·날씨의 21,600개 조합에서 영업시간·휴무·입장마감·브레이크타임 충돌 0건, 중복 장소 없음, 시간 겹침 없음, 숙소 추천, `바꾸기` 후 앞 일정 유지, 실제 도로 시간 재계산을 검사한다.
+관광공사 결과 대조 규칙(같은 곳만 통과, 이웃 시설·개별 가게 배제)과, 권역·기간·동행·이동수단·취향·요일·계절·속도·날씨의 21,600개 조합에서 영업시간·휴무·입장마감·브레이크타임 충돌 0건, 중복 장소 없음, 시간 겹침 없음, 숙소 추천, `바꾸기` 후 앞 일정 유지, 실제 도로 시간 재계산을 검사한다.
 
 ## 구조
 
@@ -95,13 +113,19 @@ public/ai-local.js        AI 서버가 없을 때 규칙 기반 대체
 public/data.js            권역, 장소(운영시간·휴무), 축제, 숙소 지역
 public/planner.js         일정 엔진 (점수화 → 지역 선택 → 제약 만족 배치 → 숙소 → 검증)
 public/app.js             화면, 지도(OpenStreetMap + OSRM 도로 경로, 내 위치), 날씨, 축제, 숙소, 사진, 공유, 캘린더
-scripts/bake-photos.mjs   장소 사진 미리 모으기
+public/i18n.js            한국어/EN 문구 사전, 장소 영문 이름 적용
+public/photos.json        검증된 장소 사진 (bake-photos)
+public/data-en.json       장소 영문 이름·소개 (bake-english)
+scripts/tour-api.mjs      한국관광공사 TourAPI 클라이언트 + 장소 대조 규칙
+scripts/bake-photos.mjs   장소 사진 모으기 + reports/photos.md
+scripts/bake-english.mjs  영문 이름·소개 모으기 + reports/english.md
+screenshots/              화면 확인 (360·390·1280px × 라이트/다크 × 한국어/EN)
 ```
 
 ## 속도
 
 - 외부 요청(사진·날씨·도로 경로·AI)에는 모두 시간 제한이 있어, 응답이 늦어도 화면은 기다리지 않는다 (사진 3.5초, 날씨 4초, 경로 5초, AI 시작 12초·가이드 20초 뒤 규칙 기반으로 대체)
-- 사진은 화면에 보이는 카드만, 동시에 4개까지, 위키백과·공용을 동시에 요청해 먼저 온 것을 쓴다. 못 찾은 곳은 하루 동안 다시 찾지 않는다
+- 사진은 화면에 보이는 카드만, 동시에 4개까지 불러온다. 미리 모은 사진이 없어 찾아본 곳은 결과를 기억하고, 못 찾은 곳은 하루 동안 다시 찾지 않는다
 - 서비스 워커: 앱 파일은 캐시에서 바로 띄우고 뒤에서 갱신, 지도 타일·사진은 한 번 받으면 캐시
 - 서버: 텍스트 파일 gzip 압축, 라이브러리·글꼴은 30일 캐시
 - AI 가이드: 장소 데이터를 프롬프트 캐시에 두고 effort low로 응답 시간 단축
@@ -114,6 +138,7 @@ scripts/bake-photos.mjs   장소 사진 미리 모으기
   KAKAO_REST_KEY=카카오_REST_키 node scripts/check-coords.mjs          # 확인만
   KAKAO_REST_KEY=카카오_REST_키 node scripts/check-coords.mjs --write  # 고치기
   ```
+  사진 매칭 리포트(`reports/photos.md`)의 "이름 같지만 2km 밖" 항목도 좌표가 어긋난 후보다 (예: 철원 노동당사, 반계리 은행나무, 강릉솔향수목원, 삼탄아트마인, 한반도지형 전망대, 직탕폭포, 정동심곡 바다부채길, 횡성호수길).
   키가 없으면 오픈스트리트맵 검색을 쓴다(더 느리고 한국 장소 정확도가 낮음). 화면의 `길찾기`는 카카오맵 장소 검색으로 연결되므로 좌표가 조금 어긋나도 실제 위치로 안내된다.
 - 운영시간은 2026년 11월에 공식 홈페이지·지자체 관광포털·예매처 정보로 확인했다. 출처끼리 다르면 가장 짧은 시간을 썼다. 시장·횟집거리처럼 가게가 모인 곳은 "가게별 상이"로 표시한다.
 - 공식 시간을 찾지 못해 보수적으로 넣은 곳: 뮤지엄 산(10:00–17:00, 월 휴관만 확인), 하조대·구룡사(주간), 월정사 전나무숲(24시간 개방이지만 해 지기 전으로 배치). 시연 전에 전화로 확인하면 좋다.

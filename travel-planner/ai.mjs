@@ -100,8 +100,11 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 - move: 자동차·렌터카=car, 기차·버스·뚜벅이=transit. 언급이 없으면 car.
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
-export async function startFromText(text, today) {
-  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}`, schema: START_SCHEMA, name: "trip_choices", timeout: 10_000 });
+// 화면이 영어(lang="en")면 사람에게 보이는 글(summary·answer·plain 등)만 영어로 받는다. 선택값·id는 그대로.
+const replyIn = (lang) => (lang === "en" ? "\n\n(사용자 화면이 영어다. 사람에게 보이는 문장은 모두 영어로 쓴다.)" : "");
+
+export async function startFromText(text, today, lang) {
+  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}${replyIn(lang)}`, schema: START_SCHEMA, name: "trip_choices", timeout: 10_000 });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date) || r.date < today) r.date = addDays(today, 1);
   r.likes = [...new Set(r.likes)].slice(0, 3);
   return r;
@@ -127,7 +130,7 @@ function candidatesFor(trip) {
   return { list, dates };
 }
 
-export async function guide({ question, history, trip }) {
+export async function guide({ question, history, trip, lang }) {
   const { list, dates } = candidatesFor(trip);
   const tripIds = trip.days.flatMap((d) => d.items.map((i) => i.id)).filter((id) => list.some((p) => p.id === id));
   const allIds = list.map((p) => p.id);
@@ -169,7 +172,7 @@ export async function guide({ question, history, trip }) {
 현재 일정:
 ${planLines}
 ${hist ? `\n이전 대화:\n${hist}\n` : ""}
-사용자: ${question}` },
+사용자: ${question}${replyIn(lang)}` },
   ];
 
   // 앱 데이터에 없는 장소 id는 버린다 (답변은 살림)
@@ -204,10 +207,10 @@ const CHECK_SYSTEM = `여행자가 숙소를 예약하기 전에 붙여넣은 �
 - ask: 예약 전에 숙소에 물어볼 것 최대 3개.
 - summary: 전체 판단 한 문장. 쉬운 말, 존댓말.`;
 
-export async function lodgingCheck({ text, nights, date }) {
+export async function lodgingCheck({ text, nights, date, lang }) {
   return askJSON({
     system: CHECK_SYSTEM,
-    user: `여행 날짜: ${date || "미정"}, ${nights || 1}박\n\n숙소 페이지 내용:\n${String(text).slice(0, 6000)}`,
+    user: `여행 날짜: ${date || "미정"}, ${nights || 1}박\n\n숙소 페이지 내용:\n${String(text).slice(0, 6000)}${replyIn(lang)}`,
     schema: CHECK_SCHEMA, name: "lodging_check",
   });
 }

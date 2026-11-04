@@ -1,0 +1,200 @@
+{
+  "gyeongpo-beach": {
+    "name": "Gangneung Gyeongpo Beach",
+    "desc": "Located 1 kilometer away from Gyeongpodae Pavilion and 6 kilometers from downtown Gangneung, Gyeongpo Beach is a sand bank formed between Gyeongpoho Lake and the ocean."
+  },
+  "gangmun-beach": {
+    "name": "Gangmun Beach",
+    "desc": "Located in Gangmun-dong, Gangmun Beach is lined with fresh hoe (sliced raw fish) restaurants along Gangmunhang Port."
+  },
+  "anmok-beach": {
+    "name": "Anmokhaebyeon Beach",
+    "desc": "Anmokhaebyeon Beach spans over 500 meters in length and covers an area of 20,000 square meters."
+  },
+  "sacheon-beach": {
+    "name": "Sacheon Beach",
+    "desc": "Nestled between Gyeongpodae Beach and Yeongok Beach, Sacheon Beach is a clean and quiet beach covering an area of 18,000 ㎡ over a length of 300 meters."
+  },
+  "yeongjin-beach": {
+    "name": "Yeongjin Beach",
+    "desc": "Yeongjinhaebyeon Beach is a quiet and clean beach filled with the blue hue of the sea, making it a popular attraction among the locals."
+  },
+  "hyangho-beach": {
+    "name": "Hyanghohaebyeon Beach",
+    "desc": "Hyanghohaebyeon Beach is a white sandy beach backed by pine forest complete with a campground."
+  },
+  "jeongdongjin": {
+    "name": "Jeongdongjinhaebyeon Beach",
+    "desc": "Jeongdongjinhaebyeon Beach is a nice, sandy beach with three major swimming spots: in front of Jeongdongjin Station, by Sandglass Park, and by the Jeongdongjin Breakwater."
+  },
+  "chodang-tofu": {
+    "name": "Chodang Halmeoni Sundubu"
+  },
+  "jjamppong-tofu": {
+    "name": "Gangneung Jjamppong Sundubu Donghwa Garden",
+    "desc": "This restaurant was the first to start selling jjamppong sundubu (spicy seafood and soft bean curd soup) in Chodang Dubu Village."
+  },
+  "ojukheon": {
+    "name": "Ojukheon House & Municipal Museum",
+    "desc": "Ojukheon House, a Treasure, is an important house which shows the lifestyle and architectual style of the early Joseon dynasty."
+  },
+  "seongyojang": {
+    "name": "Seongyojang House",
+    "desc": "Seongyojang House is the former upper class residence of Lee Nae-beon (1703-1781) and his family in Gangneung, Gangwon State."
+  },
+  "gyeongpodae": {
+    "name": "Gyeongpodae Pavilion",
+    "desc": "Gyeongpodae Pavilion, located on a small hill north of Gyeongpoho Lake, is one of the eight scenic sites of Gwangdong (northeastern coast)."
+  },
+  "heo-park": {
+    "name": "Heo Gyun and Heo Nanseolheon Memorial Park"
+  },
+  "arte": {
+    "name": "ARTE Museum Valley Gangneung",
+    "desc": "ARTE Museum Valley Gangneung, located by Gyeongpo Lake, is the third immersive media art exhibition presented by d'strict, a digital media design company."
+  },
+  "haslla": {
+    "name": "Haslla Art World",
+    "desc": "Haslla Art World is an art space that harmonizes nature, people and art."
+  },
+  "time-museum": {
+    "name": "Jeongdongjin Time Museum",
+    "desc": "Jeongdongjin Time Museum is comprised of a steam locomotive and 180-meter-long train at the famous Sandglass Park."
+  },
+  "gyeongpo-lake": {
+    "name": "Gyeongpoho Lake",
+    "desc": "Gyeongpoho Lake is a popular attraction, with beautiful natural scenery and many cultural relics nearby."
+  },
+  "chuam": {
+    "name": "Chuam Chotdaebawi Rock",
+    "desc": "Chuam Chotdaebawi Rock in Donghae-si, Gangwon-do is one of Korea’s most famous tourist attractions."
+  },
+  "nongoldam": {
+    "name": "Donghae Nongoldam-gil Street (Deungdae Damhwa Village)",
+    "desc": "Nongoldam-gil Street, formed in 1941, was transformed in 2010 with the \"Nongoldam-gil Street\" project by the Donghae Culture Center."
+  },
+  "dojjaebi": {
+    "name": "Dojjaebigol Sky Valley",
+    "desc": "Dojjaebigol Sky Valley, located between Mukho Lighthouse and Wolsotaekji, provides a beautiful view of East Sea with various activities."
+  },
+  "haerang": {
+    "name": "Dojjaebigol Haerang Observatory"
+  },
+  "mangsang": {
+    "name": "Mangsanghaebyeon Beach",
+    "desc": "Mangsang Beach is sought out by many families and tourists for its beautiful white sand, lush pine forest, shallow waters, and location in a neighborhood full of convenient facilities."
+  },
+  "hwanseon": {
+    "name": "Hwanseongul Cave (Daei-ri Cave System)",
+    "desc": "Hwanseongul Cave is the largest limestone cave in Asia, formed estimated 530 million years ago."
+  },
+  "sokcho-beach": {
+    "name": "Sokcho Beach",
+    "desc": "Sokcho Beach opened in 1976 and is one of Korea's representative beaches."
+  },
+  "yeonggeumjeong": {
+    "name": "Yeonggeumjeong",
+    "desc": "Yeonggeumjeong refers to the area covering the shore by the Sokcho Lighthouse in Sokcho-si City."
+  },
+  "abai": {
+    "name": "Abai Village Ferry",
+    "desc": "Gaetbae (boat without engine) is an exotic means of transportation to cross the Abai Village at the mouth of Cheongchoho Lake."
+  },
+  "cheongcho": {
+    "name": "Cheongchoho Lake Park",
+    "desc": "Cheongchoho Lake Park is where the 1999 International Tourism & Culture Expo was held."
+  },
+  "seorak-cable": {
+    "name": "Seoraksan Cable Car",
+    "desc": "A ride on the Seoraksan Cable Car is the best way to enjoy the unexplored regions of Seoraksan Mountain."
+  },
+  "hwajinpo": {
+    "name": "Hwajinpo Lake",
+    "desc": "Hwajinpo Lake is one of the most famous lagoons in Korea."
+  },
+  "naksan-beach": {
+    "name": "Naksan Beach",
+    "desc": "Naksan Beach is one of the most famous beaches in Yangyang, located in Joseon-ri, Yangyang-eup, Yangyang-gun, Gangwon-do."
+  },
+  "surfyy": {
+    "name": "Yangyang Surfyy Beach",
+    "desc": "Surfyy Beach is a 1 kilometer-long beach designated for surfing, just north of Hajodae Beach in Yangyang."
+  },
+  "hajodae": {
+    "name": "Hajodae Scenic Point",
+    "desc": "The rocky coastline along Hyeonbuk-myeon in Yangyang called Hajodae is one of the Eight Sights of Yangyang."
+  },
+  "daepo": {
+    "name": "Daepohang Port",
+    "desc": "Located on the southernmost point of Sokcho, Daephohang Port is known as a place to find quality fish with the rise of Seoraksan Mountain as a popular tourist destination."
+  },
+  "yangyang-market": {
+    "name": "Yangyang Traditional Market",
+    "desc": "Geographically situated where Seoraksan Mountain and Odaesan Mountain meet, Yangyang is rich in local specialties due to its unique soil and climate characteristics."
+  },
+  "nami": {
+    "name": "Nami Island"
+  },
+  "kimyoujeong": {
+    "name": "The Literary Village of Kim You Jeong"
+  },
+  "soyang-skywalk": {
+    "name": "Soyanggang Skywalk",
+    "desc": "The Soyanggang Skywalk, extending over the river, spans 174 meters in length, with a transparent glass floor covering 156 meters of its section."
+  },
+  "cc-museum": {
+    "name": "Chuncheon National Museum",
+    "desc": "Opened in 2002, Chuncheon National Museum was established to identify and promote the original form and characteristics of the regional culture of Gangwon State."
+  },
+  "gongjicheon": {
+    "name": "Gongjicheon Recreation Area",
+    "desc": "The area of Gongjicheon Stream connected to the Bukhangang River is a shelter in the middle of Chuncheon City."
+  },
+  "hantan-trail": {
+    "name": "Hantangang River Jusangjeolli-gil",
+    "desc": "This 3.6-km trail in the Hantangang River UNESCO Global Geopark is filled with awe-inspiring cliffs and various size rocks."
+  },
+  "hwacheon-river": {
+    "name": "Bungeoseom Island",
+    "desc": "Bungeoseom Island was created as a result of the construction of the Chuncheon Dam."
+  },
+  "samak-cable": {
+    "name": "Chuncheon Samaksan Mountain Lake Cable Car",
+    "desc": "Samaksan Mountain Lake Cable Car is the longest cable car in Korea, which connects Samcheon-dong and Samaksan Mountain across Uiamho Lake."
+  },
+  "sheep": {
+    "name": "Daegwallyeong Yangtte Ranch",
+    "desc": "Daegwallyeong Yangtte Ranch is situated at an elevation of 920 meters, sprawling across 205,000 square meters of open grassland."
+  },
+  "balwang": {
+    "name": "Balwangsan Cable Car",
+    "desc": "Equipped with 100 eight-passenger cabins, Balwangsan Cable Car is a 7.4-kilometer-long cable car that ensures a swift and safe ride."
+  },
+  "woljeongsa": {
+    "name": "Woljeongsa Temple & Needle Fir Forest",
+    "desc": "Woljeongsa Temple, established in 643 during the Silla dynasty, is located on Odaesan Mountain."
+  },
+  "cheongnyeongpo": {
+    "name": "Cheongnyeongpo Meandering Stream"
+  },
+  "hwangji": {
+    "name": "Hwangji Pond",
+    "desc": "Hwangji Pond, located in downtown Taebaek, is a source of the Nakdonggang River, flowing all the way to the Yeongnam Plain."
+  },
+  "sogeumsan": {
+    "name": "Sogeumsan Mountain Grand Valley",
+    "desc": "Home to beautiful rivers, majestic cliffs, and stunning old trees, Sogeum Mountain Grand Valley offers an impressive view."
+  },
+  "guryongsa": {
+    "name": "Guryongsa Temple",
+    "desc": "Guryongsa Temple is located 6 kilometers from Birobong Peak on Chiaksan Mountain, in the direction of Hakkok-ri."
+  },
+  "wj-market": {
+    "name": "Wonju Jungang Market",
+    "desc": "Opened in the 1950s as a five-day market, Wonju Jungang Market is now a permanently operated market."
+  },
+  "f-trout": {
+    "name": "Pyeongchang Trout Festival",
+    "desc": "Details for the 2027 festivals will be updated as they become available.*In the past, winters in this region were unforgiving."
+  }
+}

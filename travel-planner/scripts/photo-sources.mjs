@@ -1,49 +1,25 @@
-// 장소 사진 찾기: 한국관광공사 TourAPI(공식, 가게 사진 포함) → 위키백과 → 위키미디어 공용
-const TOUR = "https://apis.data.go.kr/B551011/KorService2/searchKeyword2";
+// 장소 사진 찾기: 한국관광공사 TourAPI 국문(KorService2)
+// 이름 검색 + 주변 2km 목록에서, 이름이 같은 곳(scripts/tour-api.mjs의 judge)이면서 좌표 2km 안이고 사진이 있는 결과만 쓴다.
+// 여러 가게가 모인 거리·시장(multi)은 그 거리·시장 자체로 등록된 결과만 허용한다 (개별 가게 사진 금지).
+import { candidates, https } from "./tour-api.mjs";
 
-function km(a, b) {
-  const R = 6371, r = Math.PI / 180;
-  const x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2;
-  return 2 * R * Math.asin(Math.sqrt(x));
-}
-async function getJSON(url) {
-  const res = await fetch(url, { headers: { "User-Agent": "ohneul-gangwon/1.0" } });
-  if (!res.ok) return null;
-  return res.json();
+export const MAX_KM = 2;
+
+// 판정 근거까지 돌려준다: { url, match, rejected } — match/rejected는 리포트용
+export async function tourPhotoMatch(place, key, opts = {}) {
+  const list = await candidates("KorService2", place, { key, ...opts });
+  const near = list.filter((c) => c.km <= MAX_KM);
+  const match = near.find((c) => c.ok && c.firstimage && !(opts.reject || []).includes(String(c.contentid)));
+  // 리포트: 가까운데 이름이 달라 버린 것 / 이름은 같은데 멀어서 버린 것
+  const rejected = [
+    ...near.filter((c) => c !== match && c.firstimage && (c.score > 0 || c.km < 0.3 || (opts.reject || []).includes(String(c.contentid)))).slice(0, 3)
+      .map((c) => ({ title: c.title, km: c.km, why: (opts.reject || []).includes(String(c.contentid)) ? "수동 검토로 제외" : c.ok ? "더 맞는 결과 있음" : c.why })),
+    ...list.filter((c) => c.ok && c.km > MAX_KM).slice(0, 2).map((c) => ({ title: c.title, km: c.km, why: `이름 같지만 ${MAX_KM}km 밖` })),
+  ];
+  return { url: match ? https(match.firstimage) : "", match, rejected };
 }
 
-// 이름으로 검색한 뒤, 좌표가 2km 안에 있고 사진이 있는 결과 중 가장 가까운 것을 고른다 (동명 가게 오인 방지)
 export async function tourPhoto(place, key) {
   if (!key) return "";
-  const keyword = place.name.replace(/[·()]/g, " ").replace(/\s+/g, " ").trim();
-  const q = new URLSearchParams({ serviceKey: key, MobileOS: "ETC", MobileApp: "ohneul-gangwon", _type: "json", numOfRows: "20", pageNo: "1", keyword });
-  const j = await getJSON(`${TOUR}?${q}`);
-  let items = j?.response?.body?.items?.item || [];
-  if (!Array.isArray(items)) items = [items];
-  const near = items
-    .filter((it) => it.firstimage && it.mapx && it.mapy)
-    .map((it) => ({ url: it.firstimage, d: km(place, { lat: Number(it.mapy), lng: Number(it.mapx) }) }))
-    .filter((it) => it.d <= 2)
-    .sort((a, b) => a.d - b.d);
-  return near[0]?.url.replace(/^http:/, "https:") || "";
-}
-
-export async function wikiPhoto(place) {
-  if (!place.wiki) return "";
-  const j = await getJSON(`https://ko.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(place.wiki)}`);
-  return j?.thumbnail?.source || "";
-}
-
-export async function commonsPhoto(place) {
-  const q = encodeURIComponent(place.name.replace(/[·()]/g, " "));
-  const j = await getJSON(`https://commons.wikimedia.org/w/api.php?action=query&generator=search&gsrnamespace=6&gsrlimit=1&gsrsearch=${q}&prop=imageinfo&iiprop=url&iiurlwidth=480&format=json`);
-  const page = j?.query?.pages && Object.values(j.query.pages)[0];
-  return page?.imageinfo?.[0]?.thumburl || "";
-}
-
-export async function findPhoto(place, key) {
-  for (const fn of [() => tourPhoto(place, key), () => wikiPhoto(place), () => commonsPhoto(place)]) {
-    try { const url = await fn(); if (url) return url; } catch { /* 다음 출처 */ }
-  }
-  return "";
+  try { return (await tourPhotoMatch(place, key)).url; } catch { return ""; }
 }
