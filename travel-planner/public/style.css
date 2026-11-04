@@ -411,3 +411,21 @@ body.offline .top::after {
   .seg button { flex: 1 1 40%; min-width: 0; white-space: normal; line-height: 1.2; }
   .seg.days button { flex: 1 1 30%; }
 }
+
+/* 예상 비용 */
+.costs { padding: 16px; display: grid; gap: 10px; margin-top: 14px; }
+.costs h3 { margin: 0; font-size: 16px; }
+.cost-total { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.cost-total b { font-size: 22px; letter-spacing: -.02em; color: var(--brand); }
+.cost-total span { font-size: 13px; color: var(--sub); }
+.cost-people { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font-size: 13px; }
+.cost-people span { color: var(--sub); margin-left: 4px; }
+.cost-people b { min-width: 18px; text-align: center; }
+.cost-people .ghost { width: 32px; height: 32px; padding: 0; font-size: 16px; }
+.cost-rows { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.cost-rows li { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; border-top: 1px solid var(--line); padding-top: 10px; }
+.cost-rows li div { display: grid; gap: 2px; min-width: 0; }
+.cost-rows li b { font-size: 14px; }
+.cost-rows li span { font-size: 12px; color: var(--sub); line-height: 1.45; }
+.cost-rows li strong { font-size: 14px; white-space: nowrap; }
+.cost-note { margin: 0; font-size: 11.5px; color: var(--sub); line-height: 1.5; }

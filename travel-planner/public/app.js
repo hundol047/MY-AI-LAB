@@ -1,6 +1,7 @@
 import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
+import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { t, isEN, getLang, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
@@ -166,6 +167,7 @@ function render() {
   renderBenefits();
   renderOvernight();
   renderSouvenirs();
+  renderCosts();
   renderShops();
   loadImages();
   drawMap(day);
@@ -174,7 +176,8 @@ function render() {
 function itemHTML(it, i, day) {
   const p = it.place, c = CAT[p.cat];
   const mode = t(MODE[it.travelMode]);
-  const leg = i === 0 ? t("{start}에서 {mode} {min}분", { start: esc(startName(day.start, trip.lodging)), mode, min: it.travelMin }) : it.travelMode === "same" ? t("바로 옆") : t("{mode} {min}분", { mode, min: it.travelMin });
+  let leg = i === 0 ? t("{start}에서 {mode} {min}분", { start: esc(startName(day.start, trip.lodging)), mode, min: it.travelMin }) : it.travelMode === "same" ? t("바로 옆") : t("{mode} {min}분", { mode, min: it.travelMin });
+  if (it.travelMode === "taxi" && it.km) leg += t(" · 약 {won}", { won: won(taxiFare(it.km)) });
   const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>
@@ -461,7 +464,9 @@ document.addEventListener("submit", async (e) => {
 });
 function lodgingHTML(day) {
   if (!trip.lodging || day.dayIdx >= state.input.days - 1) return "";
-  return `<li class="leg home">${t("숙소({name})로 · 약 {km}km", { name: esc(lodgingName(trip.lodging)), km: day.toLodgingKm ?? "-" })}</li>`;
+  const roadKm = (day.toLodgingKm ?? 0) * 1.35;
+  const fare = state.input.move === "taxi" && roadKm > 1.2 ? t(" · 택시 약 {won}", { won: won(taxiFare(roadKm)) }) : "";
+  return `<li class="leg home">${t("숙소({name})로 · 약 {km}km", { name: esc(lodgingName(trip.lodging)), km: day.toLodgingKm ?? "-" })}${fare}</li>`;
 }
 
 /* ---------- 혜택 내비 + 증빙 보관함 ---------- */
@@ -574,6 +579,55 @@ async function renderShops() {
   box.innerHTML = `<h3>${t("사장님이 직접 등록한 가게")}</h3><ul>${list.slice(0, 6).map((x) => `
     <li><b>${esc(x.name)}</b><span>${esc(x.hours || x.address || "")}</span><a class="ghost small" href="menu.html?id=${x.id}" target="_blank" rel="noopener">${t("메뉴 {n}개 · 4개 언어", { n: x.count })}</a></li>`).join("")}</ul>`;
 }
+
+/* ---------- 예상 비용 (일정 맨 마지막) ----------
+   교통(택시 요금·연료·버스)과 입장료는 근거 있는 값, 식사·숙박은 앱이 정한 평균 범위 (costs.js) */
+let feesData = {};
+fetchT("fees.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { feesData = j; if (trip && !$("#result").hidden) renderCosts(); });
+const won = (n) => (isEN() ? `₩${Math.round(n).toLocaleString("en-US")}` : `${Math.round(n).toLocaleString("ko-KR")}원`);
+const wonShort = (n) => {
+  if (isEN()) return `₩${n >= 10000 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")}`;
+  return n >= 10000 ? `${(Math.round(n / 1000) / 10).toLocaleString("ko-KR")}만 원` : `${Math.round(n).toLocaleString("ko-KR")}원`;
+};
+const range = (lo, hi) => (lo === hi ? wonShort(lo) : `${wonShort(lo)} ~ ${wonShort(hi)}`);
+function peopleNow() { return state.opts.people || defaultPeople(state.input.who); }
+function renderCosts() {
+  const box = $("#costs");
+  if (!trip?.days?.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const people = peopleNow();
+  const e = estimateTrip(trip, state.input, people, feesData);
+  const label = {
+    taxi: t("택시"), fuel: t("자동차 연료"), bus: t("버스"), fees: t("입장료"), meals: t("식사·카페"), stay: t("숙박"),
+  };
+  const detail = (r) => {
+    const d = r.detail;
+    if (r.key === "taxi") return t("{n}구간 · 택시 {cars}대 · {src}", { n: d.legs, cars: d.cars, src: t(TAXI.source) });
+    if (r.key === "fuel") return t("약 {km}km · 연비 {eff}km/L · {src}", { km: d.km, eff: FUEL.kmPerL, src: t(FUEL.source) });
+    if (r.key === "bus") return t("{n}번 탑승 · 1회 {fare}", { n: d.rides, fare: won(BUS.fare) }) + (d.far ? t(" · 먼 구간 {n}번은 시외버스라 요금 확인 필요", { n: d.far }) : "");
+    if (r.key === "fees") return t("요금 확인된 {n}곳 (한국관광공사)", { n: d.known }) + (e.unknownFees.length ? t(" · 요금 정보 없음: {names}", { names: e.unknownFees.map((p) => esc(placeName(p))).join(", ") }) : "");
+    if (r.key === "meals") return t("점심 {l} · 저녁 {d} · 카페 {c} (앱 가정: 1인 점심 {a}, 저녁 {b})", { l: d.lunch, d: d.dinner, c: d.cafe, a: range(...ASSUME.lunch), b: range(...ASSUME.dinner) });
+    if (r.key === "stay") return t("{n}박 · {units}{unit} · {type} (앱 가정: 평균 범위, 주말·성수기엔 더 비쌈)", { n: d.nights, units: d.units, unit: d.type === "guesthouse" ? t("명") : t("실"), type: typeLabel(d.type, trip.lodging.typeLabel) });
+    return "";
+  };
+  box.innerHTML = `
+    <h3>${t("예상 비용")}</h3>
+    <div class="cost-total"><b>${range(e.total.low, e.total.high)}</b><span>${t("1인당 {r}", { r: range(e.perPerson.low, e.perPerson.high) })}</span></div>
+    <div class="cost-people">
+      <span>${t("어른")}</span><button type="button" class="ghost small" data-ppl="adults:-1" aria-label="-">−</button><b>${people.adults}</b><button type="button" class="ghost small" data-ppl="adults:1" aria-label="+">+</button>
+      <span>${t("어린이")}</span><button type="button" class="ghost small" data-ppl="kids:-1" aria-label="-">−</button><b>${people.kids}</b><button type="button" class="ghost small" data-ppl="kids:1" aria-label="+">+</button>
+    </div>
+    <ul class="cost-rows">${e.rows.map((r) => `<li><div><b>${label[r.key]}</b><span>${detail(r)}</span></div><strong>${range(r.low, r.high)}</strong></li>`).join("")}</ul>
+    <p class="cost-note">${t("집에서 강원까지 오가는 교통비, 주차·통행료, 쇼핑은 빠져 있어요. 식사·숙박은 앱이 정한 평균 범위라 실제와 다를 수 있어요.")}</p>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-ppl]"); if (!b || !state) return;
+  const [k, d] = b.dataset.ppl.split(":");
+  const p = { ...peopleNow() };
+  p[k] = Math.max(k === "adults" ? 1 : 0, Math.min(10, p[k] + Number(d)));
+  state.opts.people = p;
+  renderCosts(); persist();
+});
 
 /* ---------- 특산물 재주문 ---------- */
 function renderSouvenirs() {
