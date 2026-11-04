@@ -165,7 +165,7 @@ const SEORAK = [
   { id: "ayajin", name: "아야진해변", cat: "sea", area: "goseong", lat: 38.2700, lng: 128.5560, hours: ["06:00", "21:00"], closed: [], stay: 30, indoor: false, walk: 1, pop: 1, tags: ["kids"], wiki: "아야진해수욕장", desc: "바위와 에메랄드빛 바다" },
   { id: "naksan-beach", name: "낙산해변", cat: "sea", area: "yangyang", lat: 38.1159, lng: 128.6358, hours: ["06:00", "22:00"], closed: [], stay: 40, indoor: false, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "낙산해수욕장", desc: "낙산사 아래 긴 백사장" },
   { id: "surfyy", name: "서피비치", cat: "sea", area: "yangyang", lat: 38.0303, lng: 128.7180, hours: ["09:00", "20:00"], closed: [], stay: 60, indoor: false, walk: 1, pop: 3, tags: ["night"], wiki: "하조대해수욕장", desc: "서핑과 해변 바" },
-  { id: "hajodae", name: "하조대", cat: "nature", area: "yangyang", lat: 38.0228, lng: 128.7244, hours: ["06:00", "20:00"], closed: [], stay: 40, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "하조대", desc: "바다 절벽 위 정자와 등대 · 무료" },
+  { id: "hajodae", name: "하조대", cat: "nature", area: "yangyang", lat: 38.0211, lng: 128.7357, hours: ["06:00", "20:00"], closed: [], stay: 40, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "하조대", desc: "바다 절벽 위 정자와 등대 · 무료" },
   { id: "jukdo", name: "죽도해변", cat: "sea", area: "yangyang", lat: 37.9715, lng: 128.7600, hours: ["06:00", "22:00"], closed: [], stay: 40, indoor: false, walk: 1, pop: 2, tags: ["night"], wiki: "죽도해수욕장", desc: "서핑 마을과 카페 거리" },
   {
     id: "birch", name: "원대리 자작나무숲", cat: "nature", area: "inje", lat: 38.0092, lng: 128.1943,
@@ -243,7 +243,7 @@ const PYEONGCHANG = [
 // 원주
 const WONJU = [
   {
-    id: "sogeumsan", name: "소금산 그랜드밸리", cat: "nature", area: "ganhyeon", lat: 37.3730, lng: 127.8180,
+    id: "sogeumsan", name: "소금산 그랜드밸리", cat: "nature", area: "ganhyeon", lat: 37.3646, lng: 127.8340,
     hours: ["09:00", "18:00"], lastEntry: "16:30", seasons: [{ months: WINTER, hours: ["09:00", "17:00"], lastEntry: "15:30" }],
     closed: [1], stay: 120, indoor: false, walk: 3, pop: 3, tags: [], wiki: "소금산", desc: "출렁다리·울렁다리·스카이타워",
   },
@@ -253,9 +253,9 @@ const WONJU = [
   { id: "wj-market", name: "원주 중앙시장·자유시장", cat: "food", area: "wj_city", lat: 37.3480, lng: 127.9500, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "원주시", desc: "칼국수·만두·전" },
   { id: "hanwoo", souvenir: "횡성 한우", name: "횡성 한우 먹거리", cat: "food", area: "wj_city", lat: 37.4860, lng: 127.9850, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡성 한우", desc: "횡성읍 한우 식당가" },
   { id: "guryong-food", name: "구룡사 입구 식당가", cat: "food", area: "chiaksan", lat: 37.3980, lng: 128.0430, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "치악산", desc: "산채비빔밥·도토리묵" },
-  { id: "ganhyeon-food", name: "간현관광지 식당가", cat: "food", area: "ganhyeon", lat: 37.3720, lng: 127.8150, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "간현관광지", desc: "소금산 아래 식당가" },
+  { id: "ganhyeon-food", name: "간현관광지 식당가", cat: "food", area: "ganhyeon", lat: 37.3646, lng: 127.8340, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "간현관광지", desc: "소금산 아래 식당가" },
   { id: "hoengseong-lake", name: "횡성호수길", alias: ["횡성호수길 5구간"], cat: "nature", area: "chiaksan", lat: 37.5456, lng: 128.0670, hours: ["06:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "횡성호", desc: "호수 둘레 숲길" },
-  { id: "ganhyeon-park", name: "간현유원지", cat: "nature", area: "ganhyeon", lat: 37.3710, lng: 127.8140, hours: ["00:00", "23:59"], closed: [], stay: 30, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "간현관광지", desc: "섬강 강변 산책로" },
+  { id: "ganhyeon-park", name: "간현유원지", alias: ["간현관광지"], cat: "nature", area: "ganhyeon", lat: 37.3646, lng: 127.8340, hours: ["00:00", "23:59"], closed: [], stay: 30, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "간현관광지", desc: "섬강 강변 산책로" },
 ];
 
 export const PLACES = [

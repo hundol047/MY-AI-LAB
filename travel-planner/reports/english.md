@@ -5,7 +5,7 @@
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
 - 대상 129곳 (장소 107 + 축제 22)
-- 영문 이름 찾음 58곳 (소개 포함 52곳) · 못 찾음 71곳
+- 영문 이름 찾음 59곳 (소개 포함 52곳) · 못 찾음 70곳
 
 ## 찾은 곳
 
@@ -43,7 +43,7 @@
 | hwajinpo | 화진포 | Hwajinpo Lake (화진포) | 1.65 | 이름 같음 | 있음 |
 | naksan-beach | 낙산해변 | Naksan Beach (낙산해수욕장) | 0.28 | 이름 같음 | 있음 |
 | surfyy | 서피비치 | Yangyang Surfyy Beach (서피비치, 서핑(양양)) | 0.29 | 이름 같음 | 있음 |
-| hajodae | 하조대 | Hajodae Scenic Point (하조대) | 1.01 | 이름 같음 | 있음 |
+| hajodae | 하조대 | Hajodae Scenic Point (하조대) | 0.01 | 이름 같음 | 있음 |
 | birch | 원대리 자작나무숲 | Wondae-ri Birch Forest (Whispering Birch Forest) (원대리 자작나무 숲(속삭이는 자작나무 숲)) | 0.00 | 이름 같음 | 있음 |
 | daepo | 대포항 | Daepohang Port (대포항) | 0.04 | 이름 같음 | 있음 |
 | yangyang-market | 양양전통시장 | Yangyang Traditional Market (양양전통시장 (4, 9일)) | 0.38 | 이름 같음 | 있음 |
@@ -64,10 +64,11 @@
 | cheongnyeongpo | 청령포 | Cheongnyeongpo Meandering Stream (영월 청령포) | 0.29 | 이름 같음 | - |
 | hanbando | 한반도지형 전망대 | Korean Peninsula Terrain [National Geopark] (한반도지형 (강원고생대 국가지질공원)) | 0.25 | 앞 이름 같음 | 있음 |
 | hwangji | 황지연못 | Hwangji Pond (황지연못) | 0.01 | 이름 같음 | 있음 |
-| sogeumsan | 소금산 그랜드밸리 | Sogeumsan Mountain Grand Valley (소금산그랜드밸리) | 1.91 | 이름 같음 | 있음 |
+| sogeumsan | 소금산 그랜드밸리 | Sogeumsan Mountain Grand Valley (소금산그랜드밸리) | 0.26 | 이름 같음 | 있음 |
 | bangyeri | 반계리 은행나무 | Wonju Bangye-ri Ginkgo Tree (원주 반계리 은행나무) | 0.00 | 이름 같음 | 있음 |
 | guryongsa | 치악산 구룡사 | Guryongsa Temple (구룡사) | 0.53 | 앞에 지역명 추가 | 있음 |
 | wj-market | 원주 중앙시장·자유시장 | Wonju Jungang Market (원주 중앙시장) | 0.23 | 이름 같음 | 있음 |
+| ganhyeon-park | 간현유원지 | Ganhyeon Tourist Area (간현관광지) | 0.01 | 이름 같음 | - |
 | f-trout | 평창송어축제 | Pyeongchang Trout Festival (평창송어축제) | 0.80 | 이름 같음 | 있음 |
 
 ## 못 찾은 곳 (화면에서 한국어 이름 그대로)
@@ -123,7 +124,6 @@
 | guryong-food | 구룡사 입구 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | ganhyeon-food | 간현관광지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | hoengseong-lake | 횡성호수길 | 영문 결과 없음 |
-| ganhyeon-park | 간현유원지 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | f-hwacheon | 화천 산천어축제 | 2km 안에 이름이 맞는 영문 결과 없음 |
 | f-ginkgo | 원주 반계리 은행나무축제 | 영문 결과 없음 |
 | t-christmas | 강릉 크리스마스 겨울축제 | 영문 결과 없음 |
@@ -170,7 +170,6 @@
 | samcheok-cable | 삼척해상케이블카 | Mokpo Marine Cable Car (목포 해상케이블카) | 382.79 | 이름 같지만 2km 밖 |
 | sokcho-market | 속초관광수산시장 | Abai Village Ferry (아바이마을 갯배) | 0.27 | 이름 다름 |
 | unification | 고성 통일전망대 | Odusan Unification Observatory (오두산 통일전망대) | 173.60 | 이름 같지만 2km 밖 |
-| hajodae | 하조대 | Hajodae Beach (하조대해수욕장) | 0.02 | 이름 다름 |
 | jukdo | 죽도해변 | LE ONDA (르온다) | 0.08 | 이름 다름 |
 | jukdo | 죽도해변 | Ingu Beach (인구 해수욕장) | 0.22 | 이름 다름 |
 | daepo | 대포항 | Daepo Port Original Fried Food Alley (대포항 원조튀김골목) | 0.20 | 이름 다름 |
@@ -184,6 +183,8 @@
 | museum-san | 뮤지엄 산 | Museum 1 (뮤지엄 원) | 275.69 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Chuncheon Jungang Market (춘천 중앙시장) | 62.17 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Maze Art Wonju Jungang Market (미로예술 원주중앙시장) | 0.24 | 이름 다름 |
+| ganhyeon-food | 간현관광지 식당가 | Wonju Sogeumsan Ulleong Bridge (원주 소금산 울렁다리) | 0.01 | 이름 다름 |
+| ganhyeon-food | 간현관광지 식당가 | Ganhyeon Tourist Area (간현관광지) | 0.01 | 이름 다름 |
 | t-daegwallyeong | 대관령 눈꽃축제 | Daegwallyeong Snow Festival (대관령 눈꽃축제) | NaN | 더 맞는 결과 있음 |
 | t-yeongwol | 영월 단종문화제 | Danjong Culture Festival (단종문화제) | NaN | 더 맞는 결과 있음 |
 | t-mime | 춘천 마임축제 | Chuncheon Mime Festival (춘천마임축제) | NaN | 더 맞는 결과 있음 |
