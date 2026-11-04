@@ -26,12 +26,16 @@ for (const days of [1, 2, 3])
                 allDays++; if (d.items.some((i) => i.kind === "lunch")) lunchDays++;
                 for (let k = 1; k < d.items.length; k++) assert.ok(d.items[k].start >= d.items[k - 1].end, "시간 겹침");
               }
-              for (let k = 0; k < trip.days.length - 1; k++) assert.ok(trip.days[k].lodging, "숙소 추천 없음");
-              assert.ok(!trip.days[trip.days.length - 1].lodging, "마지막 날은 숙소 없음");
+              // 숙소는 여행 내내 한 곳: 둘째 날부터 모두 같은 숙소에서 출발
+              if (days > 1) {
+                assert.ok(trip.lodging, "숙소 추천 없음");
+                for (let k = 1; k < trip.days.length; k++) assert.equal(trip.days[k].start.lat, trip.lodging.lat, "숙소가 바뀜");
+              } else assert.equal(trip.lodging, null);
               const swapped = swapItem(trip, input, opts, 0, 1);
               assert.equal(verify(swapped.days), 0);
               assert.notEqual(swapped.days[0].items[1]?.id, trip.days[0].items[1].id);
               assert.deepEqual(swapped.days[0].items[0].id, trip.days[0].items[0].id);
+              assert.equal(swapped.lodging?.id, trip.lodging?.id, "바꾸기 후에도 숙소 유지");
             }
 
 assert.ok(carItems / carDays >= 4, `자동차 일정 하루 평균 장소 수 ${carItems / carDays}`);

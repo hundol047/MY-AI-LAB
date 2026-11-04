@@ -109,7 +109,7 @@ button { cursor: pointer; }
 .tabs button.on { border-color: var(--brand); background: var(--brand-soft); }
 .tabs button.on strong { color: var(--brand); }
 
-.adjust { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-bottom: 18px; }
+.adjust { display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; margin-bottom: 12px; }
 .quick button { font-size: 13px; padding: 7px 13px; }
 .ask { display: flex; gap: 8px; }
 .ask input {
@@ -220,3 +220,27 @@ html, body { overflow-x: clip; }
 .festivals details { margin-top: 6px; font-size: 13px; }
 .festivals summary { cursor: pointer; color: var(--sub); font-weight: 600; }
 .festivals details ul { margin-top: 6px; }
+
+/* AI */
+.ai-badge {
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px;
+  background: linear-gradient(135deg, #0b5e6b, #6d28d9); color: #fff; font-size: 12px; font-weight: 800; white-space: nowrap;
+}
+.ai-start { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; margin: 0 0 12px; }
+.ai-start input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; outline: none; }
+.ai-start button { padding: 10px 16px; border: 0; border-radius: 10px; background: var(--text); color: var(--bg); font-weight: 700; white-space: nowrap; }
+.setup .hero { margin-bottom: -28px; }
+.setup .ai-start { margin-left: 12px; margin-right: 12px; }
+
+.guide { padding: 14px; margin-bottom: 18px; display: grid; grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.guide-log { display: grid; gap: 8px; max-height: 260px; overflow-y: auto; }
+.guide-log:empty { display: none; }
+.msg { max-width: 85%; padding: 9px 12px; border-radius: 14px; font-size: 14px; line-height: 1.5; white-space: pre-wrap; }
+.msg.me { justify-self: end; background: var(--brand); color: #fff; border-bottom-right-radius: 4px; }
+.msg.ai { justify-self: start; background: var(--bg); border: 1px solid var(--line); border-bottom-left-radius: 4px; }
+.msg.pending { color: var(--sub); }
+.suggest button { font-size: 13px; padding: 6px 12px; }
+
+#lodgingCard { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 10px; margin-top: 12px; }
+#lodgingCard .acts { margin-top: 0; }
+.leg.home { color: var(--brand); }

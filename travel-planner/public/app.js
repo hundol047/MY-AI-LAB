@@ -1,5 +1,6 @@
 import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf } from "./planner.js";
 import { PLACES, REGIONS } from "./data.js";
+import { startLocal, guideLocal } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
 const CAT = {
@@ -98,6 +99,7 @@ function rebuild(keepLayout = false) {
   if (!keepLayout) delete opts.keep;
   state.opts = opts;
   trip = planTrip(state.input, opts);
+  if (trip.lodging) state.opts.lodgingId = trip.lodging.id; // 조건을 조금 바꿔도 숙소는 그대로
   render();
   persist();
   trip.days.forEach((_, i) => applyRoad(i));
@@ -158,6 +160,7 @@ function render() {
   const day = trip.days[dayIdx];
   $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">조건에 맞는 장소가 없어요. 조건을 바꿔보세요.</li>`) + lodgingHTML(day);
   renderFestivals();
+  renderLodging();
   loadImages();
   drawMap(day);
 }
@@ -232,7 +235,7 @@ async function applyRoad(i) {
     const re = retimeDay(day, state.input, state.opts, legMins);
     if (re) {
       const days = trip.days.slice(); days[i] = re;
-      trip = summarize(days);
+      trip = summarize(days, trip.lodging);
       if (i === dayIdx) render(); else renderStatsOnly();
       persist();
       return;
@@ -306,28 +309,27 @@ function renderFestivals() {
   box.innerHTML = `<h3>여행 기간의 강원 축제</h3><ul>${top.map(row).join("")}</ul>${rest.length ? `<details><summary>${rest.length}개 더 보기</summary><ul>${rest.map(row).join("")}</ul></details>` : ""}`;
 }
 
-/* ---------- 숙소 ---------- */
-function lodgingHTML(day) {
-  const l = day.lodging;
-  if (!l) return "";
+/* ---------- 숙소: 여행 내내 한 곳 ---------- */
+function renderLodging() {
+  const box = $("#lodgingCard"), l = trip.lodging;
+  if (!l) { box.hidden = true; return; }
+  box.hidden = false;
   const q = encodeURIComponent(l.query);
-  return `
-  <li class="leg">숙소까지 약 ${l.km}km</li>
-  <li class="item">
-    <div class="time"><b>밤</b><span>숙박</span></div>
-    <article class="card lodging">
-      <div class="info">
-        <div class="meta"><span class="tag" style="--c:#0b5e6b">추천 숙소</span></div>
-        <h3>${l.name} · ${l.typeLabel}</h3>
-        <p>${l.desc}</p>
-        <div class="why">${l.reason}${l.others.length ? ` · 다른 선택: ${l.others.join(", ")}` : ""}</div>
-        <div class="acts">
-          <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버에서 찾기</a>
-          <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">카카오맵</a>
-        </div>
-      </div>
-    </article>
-  </li>`;
+  box.innerHTML = `
+    <div class="info">
+      <div class="meta"><span class="tag" style="--c:#0b5e6b">추천 숙소 · ${l.nights}박 내내</span></div>
+      <h3>${l.name} · ${l.typeLabel}</h3>
+      <p>${l.desc}</p>
+      <div class="why">${l.reason}${l.others.length ? ` · 다른 선택: ${l.others.join(", ")}` : ""}</div>
+    </div>
+    <div class="acts">
+      <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">네이버에서 찾기</a>
+      <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">카카오맵</a>
+    </div>`;
+}
+function lodgingHTML(day) {
+  if (!trip.lodging || day.dayIdx >= state.input.days - 1) return "";
+  return `<li class="leg home">숙소(${trip.lodging.name})로 · 약 ${day.toLodgingKm ?? "-"}km</li>`;
 }
 
 /* ---------- 지도 ---------- */
@@ -354,13 +356,14 @@ function drawMap(day) {
   }
   const startLabel = day.start.name.startsWith("숙소") ? "숙" : "출";
   L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(day.start.name);
-  if (day.lodging) L.marker([day.lodging.lat, day.lodging.lng], { icon: L.divIcon({ className: "pin base", html: "<span>숙</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(`숙소 · ${day.lodging.name}`);
+  const L0 = trip.lodging;
+  if (L0 && !day.start.name.startsWith("숙소")) L.marker([L0.lat, L0.lng], { icon: L.divIcon({ className: "pin base", html: "<span>숙</span>", iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(`숙소 · ${L0.name}`);
   day.items.forEach((it, i) => {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
     L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${it.place.name}`);
   });
   map.invalidateSize();
-  const extra = day.lodging ? [[day.lodging.lat, day.lodging.lng]] : [];
+  const extra = trip.lodging ? [[trip.lodging.lat, trip.lodging.lng]] : [];
   map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14 });
 }
 
@@ -418,25 +421,81 @@ $("#quick").addEventListener("click", (e) => {
   rebuild();
 });
 
-$("#askForm").addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const text = $("#askInput").value.trim(); if (!text) return;
-  const btn = e.submitter || $("#askForm button");
-  btn.disabled = true; btn.textContent = "…";
+/* ---------- AI 가이드 ---------- */
+const guideHistory = [];
+const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+function bubble(who, text) {
+  const el = document.createElement("div");
+  el.className = `msg ${who}`;
+  el.innerHTML = esc(text);
+  $("#guideLog").append(el);
+  $("#guideLog").scrollTop = $("#guideLog").scrollHeight;
+  return el;
+}
+function compactTrip() {
   const o = state.opts;
-  const current = { likes: state.input.likes, who: state.input.who, prefer: o.prefer, avoid: o.avoid, indoor: !!o.indoor, lessWalk: !!o.lessWalk, pace: o.pace };
+  return {
+    input: state.input,
+    opts: { pace: o.pace, lessWalk: !!o.lessWalk, indoor: !!o.indoor, prefer: o.prefer || [], avoid: o.avoid || [] },
+    lodging: trip.lodging && { name: trip.lodging.name, typeLabel: trip.lodging.typeLabel },
+    days: trip.days.map((d) => ({ date: d.date, areaName: d.areaName, items: d.items.map((i) => ({ id: i.id, name: i.place.name, start: fmt(i.start) })) })),
+  };
+}
+async function askGuide(question) {
+  bubble("me", question);
+  const wait = bubble("ai pending", "…");
   let r = null;
   try {
-    const res = await fetch("api/adjust", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, current }) });
+    const res = await fetch("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip() }) });
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = { ...current, ...parseRequestLocally(text) };
-  o.prefer = r.prefer || []; o.avoid = r.avoid || [];
-  o.indoor = !!r.indoor; o.lessWalk = !!r.lessWalk; o.pace = r.pace || o.pace;
-  rebuild();
+  if (!r) r = guideLocal(question, trip, dayIdx);
+  let note = "";
+  if (r.changed) {
+    const o = state.opts, uniq = (a) => [...new Set(a)];
+    o.exclude = uniq([...(o.exclude || []), ...(r.remove || [])]).filter((id) => !(r.add || []).includes(id));
+    o.must = uniq([...(o.must || []), ...(r.add || [])]);
+    if (r.prefer) o.prefer = r.prefer;
+    if (r.avoid) o.avoid = r.avoid;
+    if (r.indoor === "on") o.indoor = true; else if (r.indoor === "off") { o.indoor = false; o.rainDays = []; }
+    if (r.lessWalk === "on") o.lessWalk = true; else if (r.lessWalk === "off") o.lessWalk = false;
+    if (r.pace && r.pace !== "keep") o.pace = r.pace;
+    rebuild();
+    // 엔진이 다시 확인한 결과를 그대로 알려준다
+    const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
+    const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => placeById(id)?.name || id);
+    note = missed.length ? ` (${missed.join(", ")}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)` : " 영업시간을 다시 확인해 일정에 반영했어요.";
+  }
+  wait.classList.remove("pending");
+  wait.innerHTML = esc(r.answer + note);
+  guideHistory.push({ q: question, a: r.answer });
+}
+$("#askForm").addEventListener("submit", (e) => {
+  e.preventDefault();
+  const text = $("#askInput").value.trim(); if (!text) return;
   $("#askInput").value = "";
-  btn.disabled = false; btn.textContent = "반영";
-  toast(r.summary || "요청을 반영했어요");
+  askGuide(text);
+});
+$("#suggest").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (b) askGuide(b.textContent);
+});
+
+/* ---------- AI로 한 줄 시작 ---------- */
+const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
+$("#aiStart").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = $("#aiStartInput").value.trim(); if (!text) return;
+  const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
+  let r = null;
+  try {
+    const res = await fetch("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr() }) });
+    if (res.ok) r = await res.json();
+  } catch {}
+  if (!r) r = startLocal(text, todayStr());
+  btn.disabled = false; btn.textContent = "만들기";
+  fillForm({ ...r, days: Number(r.days) });
+  $("#form").requestSubmit();
+  if (r.summary) toast(r.summary);
 });
 
 /* ---------- 공유 / 캘린더 ---------- */

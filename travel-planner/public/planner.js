@@ -120,6 +120,7 @@ function baseScore(p, input, opts, rain) {
   let s = p.pop;
   if (p.cat === "festival") s += 10; // 여행 날짜에 열리는 축제는 최우선
   if (p.region !== regionOf(input)) s -= 3; // 고른 권역 우선
+  if ((opts.must || []).includes(p.id)) s += 8; // AI 가이드에게 넣어 달라고 한 곳
   const likes = input.likes || [];
   if (likes.includes(p.cat)) s += 3;
   if ((opts.prefer || []).includes(p.cat)) s += 2.5;
@@ -311,22 +312,34 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   return { date: dateStr, dayIdx, start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
 }
 
+// 숙소는 여행 내내 한 곳: 짐을 옮기지 않도록 모든 밤을 같은 숙소에서 묵는다
 export function planTrip(input, opts = {}) {
+  if (input.days < 2) return finalize(planDays(input, opts, null), null);
+  const fixed = opts.lodgingId && LODGING.find((l) => l.id === opts.lodgingId);
+  // 1차: 출발지 기준으로 일정을 짜서 여행 동선을 파악 → 동선 전체에 가장 알맞은 숙소 선택
+  const lodging = fixed ? lodgingInfo(input, fixed) : chooseLodging(input, planDays(input, opts, null));
+  // 2차: 둘째 날부터는 그 숙소에서 출발하도록 다시 계산
+  return finalize(planDays(input, opts, lodging), lodging);
+}
+
+function planDays(input, opts, lodging) {
   const used = new Set();
   const usedAreas = [];
   const days = [];
-  let start = null;
+  const home = lodging && { name: `숙소(${lodging.name})`, lat: lodging.lat, lng: lodging.lng };
   for (let d = 0; d < input.days; d++) {
     const keep = (opts.keep || [])[d] || [];
-    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, start);
+    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, d > 0 ? home : null);
     usedAreas.push(day.area);
-    if (d < input.days - 1) {
-      day.lodging = chooseLodging(input, day);
-      start = { name: `숙소(${day.lodging.name})`, lat: day.lodging.lat, lng: day.lodging.lng };
-    }
+    if (lodging && d < input.days - 1) markReturn(day, lodging);
     days.push(day);
   }
-  return finalize(days);
+  return days;
+}
+
+function markReturn(day, lodging) {
+  const last = day.items.length ? day.items[day.items.length - 1].place : day.start;
+  day.toLodgingKm = Math.round(distanceKm(last, lodging) * 10) / 10;
 }
 
 // 특정 장소만 교체: 그 앞은 유지, 다른 날은 그대로, 뒤쪽만 다시 계산
@@ -338,10 +351,10 @@ export function swapItem(trip, input, opts, dayIdx, itemIdx) {
   const exclude = new Set([...(opts.exclude || []), day.items[itemIdx].id]);
   const usedAreas = trip.days.filter((_, i) => i !== dayIdx).map((d) => d.area);
   const newDay = planDay(input, opts, dayIdx, used, usedAreas, keep, exclude, false, day.start);
-  if (day.lodging) newDay.lodging = day.lodging; // 숙소는 그대로 (다음 날 출발점 유지)
+  if (trip.lodging && dayIdx < input.days - 1) markReturn(newDay, trip.lodging); // 숙소는 그대로
   const days = trip.days.slice();
   days[dayIdx] = newDay;
-  return finalize(days);
+  return finalize(days, trip.lodging);
 }
 
 // 맞춤 숙소: 그날 마지막 장소에서 가깝고, 동행·취향·이동수단에 맞는 숙소 지역과 종류
@@ -359,33 +372,46 @@ const TYPE_REASON = {
   resort: "취사·수영장 등 가족 편의시설이 있어요",
   hanok: "조용하고 온돌방이라 편안해요",
 };
-export function chooseLodging(input, day) {
-  const last = day.items.length ? day.items[day.items.length - 1].place : day.start;
+// 모든 밤의 "그날 마지막 장소 → 숙소 → 다음 날 첫 장소" 거리 합이 가장 작고, 동행·취향에 맞는 숙소 지역
+export function chooseLodging(input, days) {
   const wanted = WHO_TYPES[input.who] || WHO_TYPES.solo;
-  const regions = new Set([regionOf(input), last.region].filter(Boolean));
+  const legs = [];
+  const regions = new Set([regionOf(input)]);
+  for (let i = 0; i < days.length; i++) {
+    for (const it of days[i].items) regions.add(it.place.region);
+    if (i < days.length - 1) {
+      const last = days[i].items.at(-1)?.place, next = days[i + 1].items[0]?.place;
+      if (last) legs.push(last);
+      if (next) legs.push(next);
+    }
+  }
+  if (!legs.length) legs.push(baseOf(input));
   let best = null;
   for (const l of LODGING) {
     if (!regions.has(l.region)) continue;
-    const km = distanceKm(last, l);
+    const km = legs.reduce((sum, p) => sum + distanceKm(p, l), 0) / legs.length;
     let v = -km * (input.move === "car" ? 0.25 : 0.6);
     const match = wanted.find((t) => l.types.includes(t));
     if (match) v += 6 - wanted.indexOf(match) * 1.5;
     if ((input.likes || []).includes("sea") && l.types.includes("ocean")) v += 2;
     if (input.move !== "car" && l.types.includes("business")) v += 2;
-    if (!best || v > best.v) best = { l, v, match: match || l.types[0], km };
+    if (!best || v > best.v) best = { l, v };
   }
-  const l = best.l;
-  const type = best.match;
+  return lodgingInfo(input, best.l);
+}
+
+function lodgingInfo(input, l) {
+  const wanted = WHO_TYPES[input.who] || WHO_TYPES.solo;
+  const type = wanted.find((t) => l.types.includes(t)) || l.types[0];
   return {
-    id: l.id, name: l.name, lat: l.lat, lng: l.lng, desc: l.desc,
+    id: l.id, name: l.name, lat: l.lat, lng: l.lng, desc: l.desc, nights: input.days - 1,
     type, typeLabel: LODGING_TYPES[type], reason: TYPE_REASON[type],
     others: l.types.filter((t) => t !== type).map((t) => LODGING_TYPES[t]),
-    km: Math.round(best.km * 10) / 10,
     query: `${l.name} ${LODGING_TYPES[type]}`,
   };
 }
 
-function finalize(days) {
+function finalize(days, lodging = null) {
   let places = 0, moveMin = 0, walkKm = 0;
   for (const d of days) {
     for (const it of d.items) {
@@ -394,7 +420,7 @@ function finalize(days) {
       walkKm += it.place.walk * 0.4;
     }
   }
-  return { days, totals: { places, moveMin, walkKm: Math.round(walkKm * 10) / 10, conflicts: verify(days) } };
+  return { days, lodging, totals: { places, moveMin, walkKm: Math.round(walkKm * 10) / 10, conflicts: verify(days) } };
 }
 
 // 영업시간·휴무·입장마감·브레이크타임 충돌 검사 (항상 0이어야 함)
@@ -425,8 +451,8 @@ export function retimeDay(day, input, opts, legMins) {
   return { ...day, items, road: true };
 }
 
-export function summarize(days) {
-  return finalize(days);
+export function summarize(days, lodging = null) {
+  return finalize(days, lodging);
 }
 
 // 자연어 요청 → 조건 (AI 서버가 없을 때 쓰는 규칙 기반 해석)
