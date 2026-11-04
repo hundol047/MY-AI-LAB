@@ -16,11 +16,14 @@ export function startLocal(text, today) {
   for (const [k, words] of Object.entries(REGION_WORDS)) if (has(...words)) { r.region = k; break; }
   if (has("당일", "하루")) r.days = 1;
   if (has("1박")) r.days = 2;
-  if (has("2박", "3박")) r.days = 3;
+  if (has("2박")) r.days = 3;
+  if (has("3박")) r.days = 4;
+  if (has("4박", "5박", "6박", "일주일")) r.days = 5;
   if (has("혼자")) r.who = "solo";
   if (has("아이", "애들", "가족", "아들", "딸")) r.who = "family";
   if (has("부모님", "엄마", "아빠", "어머니", "아버지", "어르신")) r.who = "parents";
   if (has("기차", "버스", "뚜벅", "대중교통", "KTX")) r.move = "transit";
+  if (has("택시")) r.move = "taxi";
   const cats = { sea: ["바다", "해변"], cafe: ["카페", "커피"], food: ["맛집", "먹", "시장"], culture: ["역사", "문화", "박물관", "전시"], nature: ["자연", "산책", "숲", "산", "호수"] };
   for (const [c, words] of Object.entries(cats)) if (has(...words)) r.likes.push(c);
   if (!r.likes.length) r.likes = ["sea", "food"];

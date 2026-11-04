@@ -1,0 +1,1069 @@
+{
+ "l-gyeongpo": {
+  "ocean": [
+   {
+    "id": "2804293",
+    "name": "하이오션 경포",
+    "lat": 37.80351,
+    "lng": 128.90365,
+    "km": 0.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/59/2803159_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 경포로463번길 30-5",
+    "view": true
+   },
+   {
+    "id": "2903111",
+    "name": "스카이베이호텔 경포",
+    "lat": 37.80423,
+    "lng": 128.90782,
+    "km": 0.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/01/2903101_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 해안로 476 (강문동)",
+    "view": true
+   },
+   {
+    "id": "142816",
+    "name": "경포비치관광호텔",
+    "lat": 37.79902,
+    "lng": 128.91362,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/21/1584021_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 해안로406번길 17 (강문동)",
+    "view": true
+   }
+  ],
+  "resort": [
+   {
+    "id": "1798704",
+    "name": "라카이 샌드파인",
+    "lat": 37.80706,
+    "lng": 128.90446,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/28/3504828_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 해안로 536 (안현동)"
+   },
+   {
+    "id": "3372157",
+    "name": "컨피네스 오션 스위트 호텔",
+    "lat": 37.83659,
+    "lng": 128.87467,
+    "km": 4.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/29/3372129_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 사천면 진리항구2길 5"
+   }
+  ],
+  "pension": [
+   {
+    "id": "2653056",
+    "name": "Y&G비즈니스호텔&펜션",
+    "lat": 37.80528,
+    "lng": 128.90166,
+    "km": 0.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/60/2653060_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 경포로475번길 41 (안현동)"
+   },
+   {
+    "id": "3532452",
+    "name": "솔향기펜션",
+    "lat": 37.80016,
+    "lng": 128.9,
+    "km": 0.4,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 경포로371번길 63-4 (저동)"
+   },
+   {
+    "id": "3534252",
+    "name": "경포 그곳에가면",
+    "lat": 37.79634,
+    "lng": 128.91151,
+    "km": 0.7,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 해안로 381-2 (초당동)"
+   }
+  ]
+ },
+ "l-anmok": {
+  "ocean": [
+   {
+    "id": "4091446",
+    "name": "신라모노그램 강릉",
+    "lat": 37.78597,
+    "lng": 128.92608,
+    "km": 1.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/58/4091458_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 해안로 210 (송정동)",
+    "view": true
+   },
+   {
+    "id": "2603352",
+    "name": "세인트존스 호텔",
+    "lat": 37.79128,
+    "lng": 128.92093,
+    "km": 2.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/54/2603354_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 창해로 307 (강문동)",
+    "view": true
+   },
+   {
+    "id": "2903063",
+    "name": "파인아트라벨",
+    "lat": 37.7757,
+    "lng": 128.94203,
+    "km": 0.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/53/2903053_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 해안로 32 (견소동)"
+   }
+  ],
+  "pension": [
+   {
+    "id": "3537760",
+    "name": "안목을높이다",
+    "lat": 37.7744,
+    "lng": 128.94455,
+    "km": 0.7,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 창해로 27 (견소동)"
+   },
+   {
+    "id": "3537835",
+    "name": "당신의안목",
+    "lat": 37.77349,
+    "lng": 128.94601,
+    "km": 0.9,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 창해로14번길 6 (견소동)"
+   },
+   {
+    "id": "3537737",
+    "name": "We펜션",
+    "lat": 37.77326,
+    "lng": 128.94606,
+    "km": 0.9,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 창해로 10-1 (견소동)"
+   }
+  ],
+  "guesthouse": [
+   {
+    "id": "3539791",
+    "name": "강문애",
+    "lat": 37.78747,
+    "lng": 128.92604,
+    "km": 1.5,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 창해로 245 (강문동)"
+   },
+   {
+    "id": "3539026",
+    "name": "캡슐인강릉",
+    "lat": 37.79486,
+    "lng": 128.91816,
+    "km": 2.5,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 창해로 352-1 (강문동)"
+   }
+  ]
+ },
+ "l-gn-station": {
+  "business": [
+   {
+    "id": "2595938",
+    "name": "더뷰티호텔",
+    "lat": 37.76151,
+    "lng": 128.89951,
+    "km": 0.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/02/2596102_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 옥천로62번길 19"
+   },
+   {
+    "id": "2651624",
+    "name": "(주)강릉씨티호텔",
+    "lat": 37.76433,
+    "lng": 128.87672,
+    "km": 2.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/22/4081622_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 교동광장로 112 (교동)"
+   },
+   {
+    "id": "2903089",
+    "name": "호텔이스트나인",
+    "lat": 37.76543,
+    "lng": 128.87659,
+    "km": 2.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/77/2903077_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 교동광장로100번길 8-6 (교동)"
+   }
+  ],
+  "guesthouse": [
+   {
+    "id": "3538419",
+    "name": "슈밍게스트하우스",
+    "lat": 37.76158,
+    "lng": 128.89917,
+    "km": 0.2,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 강릉대로 272 (교동)"
+   },
+   {
+    "id": "3537620",
+    "name": "게스트하우스아카펠라",
+    "lat": 37.75858,
+    "lng": 128.90037,
+    "km": 0.5,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 동부시장3길 7 (옥천동)"
+   },
+   {
+    "id": "3547803",
+    "name": "안씨하우스(AnC House)",
+    "lat": 37.75719,
+    "lng": 128.89688,
+    "km": 0.7,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 경강로2115번길 18 (옥천동)"
+   }
+  ],
+  "hanok": [
+   {
+    "id": "2531222",
+    "name": "강릉오죽한옥마을",
+    "lat": 37.77733,
+    "lng": 128.87797,
+    "km": 2.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/66/3525066_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 죽헌길 114 (죽헌동)"
+   },
+   {
+    "id": "3540259",
+    "name": "한옥스테이 파인앤프렌즈",
+    "lat": 37.77619,
+    "lng": 128.93305,
+    "km": 3.3,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 팔송길15번길 10 (송정동)"
+   },
+   {
+    "id": "2647026",
+    "name": "석가헌",
+    "lat": 37.71902,
+    "lng": 128.90487,
+    "km": 4.9,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 모산로70번길 30"
+   }
+  ]
+ },
+ "l-jeongdongjin": {
+  "ocean": [
+   {
+    "id": "2399147",
+    "name": "호텔탑스빌",
+    "lat": 37.68532,
+    "lng": 129.03661,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/98/2398798_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 강동면 헌화로 1007-42",
+    "view": true
+   },
+   {
+    "id": "584282",
+    "name": "썬크루즈 호텔&리조트",
+    "lat": 37.68197,
+    "lng": 129.04395,
+    "km": 1.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/34/3069134_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 강동면 헌화로 950-39",
+    "view": true
+   },
+   {
+    "id": "1048785",
+    "name": "하슬라아트월드",
+    "lat": 37.70551,
+    "lng": 129.00787,
+    "km": 2.6,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/70/2730070_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 강동면 율곡로 1441",
+    "view": true
+   }
+  ],
+  "pension": [
+   {
+    "id": "3022827",
+    "name": "스테이인터뷰 강릉",
+    "lat": 37.70795,
+    "lng": 129.01224,
+    "km": 2.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/11/3022811_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 강동면 율곡로 1458"
+   },
+   {
+    "id": "3537855",
+    "name": "오션그레이트펜션",
+    "lat": 37.68577,
+    "lng": 129.04196,
+    "km": 1.2,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 강동면 헌화로 982-20"
+   },
+   {
+    "id": "3539443",
+    "name": "산성펜션텔",
+    "lat": 37.67833,
+    "lng": 129.02438,
+    "km": 1.4,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 강동면 산성우리길 12-5"
+   }
+  ]
+ },
+ "l-jumunjin": {
+  "pension": [
+   {
+    "id": "3534096",
+    "name": "리비에라",
+    "lat": 37.86968,
+    "lng": 128.84432,
+    "km": 0.5,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 연곡면 해안로 1461-1"
+   },
+   {
+    "id": "3539901",
+    "name": "욜로호텔앤펜션",
+    "lat": 37.89413,
+    "lng": 128.8287,
+    "km": 3.3,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 주문진읍 항구윗길 13"
+   },
+   {
+    "id": "3536519",
+    "name": "더원",
+    "lat": 37.90213,
+    "lng": 128.82954,
+    "km": 4,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 주문진읍 해안로 1933-1"
+   }
+  ],
+  "ocean": [
+   {
+    "id": "3372157",
+    "name": "컨피네스 오션 스위트 호텔",
+    "lat": 37.83659,
+    "lng": 128.87467,
+    "km": 4.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/29/3372129_image2_1.jpg",
+    "addr": "강원특별자치도 강릉시 사천면 진리항구2길 5"
+   },
+   {
+    "id": "3532526",
+    "name": "EZ호텔",
+    "lat": 37.89012,
+    "lng": 128.82788,
+    "km": 3,
+    "photo": "",
+    "addr": "강원특별자치도 강릉시 주문진읍 해안로 1735-1"
+   }
+  ]
+ },
+ "l-mukho": {
+  "ocean": [
+   {
+    "id": "1772807",
+    "name": "동해보양온천 컨벤션호텔",
+    "lat": 37.59272,
+    "lng": 129.08738,
+    "km": 5.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/32/4058532_image2_1.jpg",
+    "addr": "강원특별자치도 동해시 동해대로 6285 (망상동)",
+    "view": true
+   },
+   {
+    "id": "142819",
+    "name": "뉴동해 관광호텔",
+    "lat": 37.52674,
+    "lng": 129.10338,
+    "km": 2.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/60/3013660_image2_1.jpg",
+    "addr": "강원특별자치도 동해시 평릉길 1 (천곡동)"
+   },
+   {
+    "id": "2481151",
+    "name": "동해현진관광호텔",
+    "lat": 37.51979,
+    "lng": 129.11769,
+    "km": 3.4,
+    "photo": "",
+    "addr": "강원특별자치도 동해시 동굴로 125-3"
+   }
+  ]
+ },
+ "l-samcheok": {
+  "pension": [
+   {
+    "id": "938538",
+    "name": "솔향기가득한집",
+    "lat": 37.39792,
+    "lng": 129.21442,
+    "km": 2.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/86/1816586_image2_1.jpg",
+    "addr": "강원특별자치도 삼척시 근덕면 삼척로 3874-29"
+   }
+  ]
+ },
+ "l-sokcho": {
+  "ocean": [
+   {
+    "id": "397656",
+    "name": "굿모닝 호텔",
+    "lat": 38.19059,
+    "lng": 128.60031,
+    "km": 0.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/34/1583234_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 해오름로 204",
+    "view": true
+   },
+   {
+    "id": "2910942",
+    "name": "팜파스리조트",
+    "lat": 38.18906,
+    "lng": 128.60076,
+    "km": 0.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/84/4081684_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 동해대로 3964 (조양동)",
+    "view": true
+   },
+   {
+    "id": "2910876",
+    "name": "리센 오션파크 호텔",
+    "lat": 38.18891,
+    "lng": 128.60326,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/09/4077809_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 해오름로 167 (조양동)",
+    "view": true
+   }
+  ],
+  "business": [
+   {
+    "id": "137326",
+    "name": "대궐파크",
+    "lat": 38.18946,
+    "lng": 128.59548,
+    "km": 0.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/42/709642_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 부월1길 38"
+   },
+   {
+    "id": "2910876",
+    "name": "리센 오션파크 호텔",
+    "lat": 38.18891,
+    "lng": 128.60326,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/09/4077809_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 해오름로 167 (조양동)"
+   },
+   {
+    "id": "620411",
+    "name": "시나브로 모텔",
+    "lat": 38.19093,
+    "lng": 128.58992,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/41/4054841_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 엑스포로 13"
+   }
+  ],
+  "guesthouse": [
+   {
+    "id": "2697923",
+    "name": "화이트스테이션 호스텔",
+    "lat": 38.19217,
+    "lng": 128.5955,
+    "km": 0.4,
+    "photo": "",
+    "addr": "강원특별자치도 속초시 미리내길 17-1"
+   },
+   {
+    "id": "2676467",
+    "name": "속초비치호스텔",
+    "lat": 38.18592,
+    "lng": 128.60551,
+    "km": 1.2,
+    "photo": "",
+    "addr": "강원특별자치도 속초시 해오름로 129"
+   }
+  ]
+ },
+ "l-seorakdong": {
+  "resort": [
+   {
+    "id": "3465936",
+    "name": "델피노 소노캄",
+    "lat": 38.20747,
+    "lng": 128.49737,
+    "km": 3.6,
+    "photo": "",
+    "addr": "강원특별자치도 고성군 토성면 미시령옛길 1153"
+   },
+   {
+    "id": "3466048",
+    "name": "소노펠리체 델피노",
+    "lat": 38.20747,
+    "lng": 128.49737,
+    "km": 3.6,
+    "photo": "",
+    "addr": "강원특별자치도 고성군 토성면 미시령옛길 1153"
+   }
+  ],
+  "pension": [
+   {
+    "id": "658845",
+    "name": "초원리조텔",
+    "lat": 38.16555,
+    "lng": 128.52725,
+    "km": 1.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/84/2992284_image2_1.jpg",
+    "addr": "강원특별자치도 속초시 청봉로5길 19 (설악동)"
+   }
+  ]
+ },
+ "l-yangyang": {
+  "guesthouse": [
+   {
+    "id": "3533009",
+    "name": "인스턴트호텔",
+    "lat": 37.98132,
+    "lng": 128.75729,
+    "km": 2.6,
+    "photo": "",
+    "addr": "강원특별자치도 양양군 현남면 동산큰길 80"
+   },
+   {
+    "id": "3438565",
+    "name": "3.42 스테이",
+    "lat": 37.9769,
+    "lng": 128.75671,
+    "km": 3,
+    "photo": "",
+    "addr": "강원특별자치도 양양군 현남면 동해대로 849-22"
+   }
+  ],
+  "ocean": [
+   {
+    "id": "2907517",
+    "name": "지오 파인트리",
+    "lat": 38.02657,
+    "lng": 128.71033,
+    "km": 3.9,
+    "photo": "",
+    "addr": "강원특별자치도 양양군 현북면 동해대로 1579-25",
+    "view": true
+   },
+   {
+    "id": "3089133",
+    "name": "브리드호텔 양양",
+    "lat": 37.97094,
+    "lng": 128.7621,
+    "km": 3.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/08/3089108_image2_1.jpg",
+    "addr": "강원특별자치도 양양군 현남면 인구항길 17"
+   }
+  ],
+  "pension": [
+   {
+    "id": "3080469",
+    "name": "코게러지 호텔",
+    "lat": 38.00551,
+    "lng": 128.72945,
+    "km": 1.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/46/3080446_image2_1.jpg",
+    "addr": "강원특별자치도 양양군 현북면 동해대로 1269-7"
+   },
+   {
+    "id": "2903760",
+    "name": "38마린리조트",
+    "lat": 38.00662,
+    "lng": 128.72991,
+    "km": 1.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/48/2903748_image2_1.jpg",
+    "addr": "강원특별자치도 양양군 현북면 동해대로 1280"
+   },
+   {
+    "id": "2499273",
+    "name": "하조대 비치하우스",
+    "lat": 38.01999,
+    "lng": 128.72633,
+    "km": 2.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/56/4093356_image2_1.jpg",
+    "addr": "강원특별자치도 양양군 현북면 하륜길 26"
+   }
+  ]
+ },
+ "l-goseong": {
+  "pension": [
+   {
+    "id": "2941159",
+    "name": "서로재",
+    "lat": 38.31619,
+    "lng": 128.51795,
+    "km": 1.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/11/2941111_image2_1.jpg",
+    "addr": "강원특별자치도 고성군 죽왕면 봉수대길 118"
+   },
+   {
+    "id": "2814151",
+    "name": "스테이가진",
+    "lat": 38.36467,
+    "lng": 128.50689,
+    "km": 4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/45/2812945_image2_1.jpg",
+    "addr": "강원특별자치도 고성군 가진해변길 168"
+   },
+   {
+    "id": "3533115",
+    "name": "크로톤풀빌라",
+    "lat": 38.29379,
+    "lng": 128.54742,
+    "km": 4.7,
+    "photo": "",
+    "addr": "강원특별자치도 고성군 죽왕면 교암2길 40"
+   }
+  ]
+ },
+ "l-inje": {
+  "pension": [
+   {
+    "id": "900367",
+    "name": "펜션포유",
+    "lat": 38.04915,
+    "lng": 128.20499,
+    "km": 3.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/24/1843124_image2_1.jpg",
+    "addr": "강원특별자치도 인제군 인제읍 고사리길 73"
+   },
+   {
+    "id": "138081",
+    "name": "아웃도어패밀리",
+    "lat": 38.04324,
+    "lng": 128.20631,
+    "km": 4.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/31/3592431_image2_1.jpg",
+    "addr": "강원특별자치도 인제군 인제읍 내린천로 6215"
+   },
+   {
+    "id": "4109577",
+    "name": "인제 내린천 자작나무숲 겨울이네 펜션",
+    "lat": 38.03441,
+    "lng": 128.21562,
+    "km": 5.6,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/99/4109599_image2_1.jpg",
+    "addr": "강원특별자치도 인제군 인제읍 내린천로 6082-8"
+   }
+  ]
+ },
+ "l-cc-city": {
+  "business": [
+   {
+    "id": "627386",
+    "name": "테마모텔",
+    "lat": 37.87341,
+    "lng": 127.71632,
+    "km": 0.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/09/589009_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 방송길36번길 73-10"
+   },
+   {
+    "id": "2804265",
+    "name": "더잭슨나인스호텔",
+    "lat": 37.87381,
+    "lng": 127.71415,
+    "km": 1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/21/2803021_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 중앙로 193 더잭슨나인스호텔"
+   },
+   {
+    "id": "142813",
+    "name": "춘천세종호텔",
+    "lat": 37.88663,
+    "lng": 127.73154,
+    "km": 1.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/63/3588363_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 봉의산길 31 (봉의동)"
+   }
+  ],
+  "guesthouse": [
+   {
+    "id": "2826777",
+    "name": "춘천일기스테이",
+    "lat": 37.8823,
+    "lng": 127.72946,
+    "km": 0.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/27/2826527_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 중앙로27번길 9-1 (옥천동)"
+   },
+   {
+    "id": "3532992",
+    "name": "교동스테이",
+    "lat": 37.88163,
+    "lng": 127.73675,
+    "km": 1.3,
+    "photo": "",
+    "addr": "강원특별자치도 춘천시 교동길 59-7 (교동)"
+   }
+  ]
+ },
+ "l-uiam": {
+  "ocean": [
+   {
+    "id": "2708678",
+    "name": "케이티엔지(KT&G) 상상마당춘천스테이",
+    "lat": 37.87283,
+    "lng": 127.70253,
+    "km": 0.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/39/2709339_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 스포츠타운길399번길 22"
+   },
+   {
+    "id": "2907487",
+    "name": "호텔공지천",
+    "lat": 37.87292,
+    "lng": 127.70732,
+    "km": 0.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/81/2907481_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 수변공원길 11 (삼천동)"
+   },
+   {
+    "id": "2804265",
+    "name": "더잭슨나인스호텔",
+    "lat": 37.87381,
+    "lng": 127.71415,
+    "km": 1.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/21/2803021_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 중앙로 193 더잭슨나인스호텔"
+   }
+  ]
+ },
+ "l-gangchon": {
+  "pension": [
+   {
+    "id": "690998",
+    "name": "숲속의강촌",
+    "lat": 37.80307,
+    "lng": 127.63613,
+    "km": 1.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/57/3588957_image2_1.jpg",
+    "addr": "강원특별자치도 춘천시 남산면 강촌로 186-3"
+   },
+   {
+    "id": "1802452",
+    "name": "W펜션",
+    "lat": 37.80671,
+    "lng": 127.63726,
+    "km": 1.7,
+    "photo": "",
+    "addr": "강원특별자치도 춘천시 남산면 강촌로 143"
+   }
+  ]
+ },
+ "l-cheorwon": {
+  "pension": [
+   {
+    "id": "562354",
+    "name": "오벨리스크",
+    "lat": 38.20542,
+    "lng": 127.26761,
+    "km": 4.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/89/1843189_image2_1.jpg",
+    "addr": "강원특별자치도 철원군 동송읍 태봉대교길 139"
+   },
+   {
+    "id": "562923",
+    "name": "한탄강 디퍼펜션",
+    "lat": 38.20457,
+    "lng": 127.26792,
+    "km": 4.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/80/1843180_image2_1.jpg",
+    "addr": "강원특별자치도 철원군 동송읍 태봉대교길 140-1"
+   },
+   {
+    "id": "560988",
+    "name": "노스텔지아 펜션",
+    "lat": 38.20179,
+    "lng": 127.27132,
+    "km": 4.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/02/1843202_image2_1.jpg",
+    "addr": "강원특별자치도 철원군 동송읍 한탄강길 189"
+   }
+  ]
+ },
+ "l-hwacheon": {
+  "pension": [
+   {
+    "id": "2531375",
+    "name": "다가가다한옥",
+    "lat": 38.09677,
+    "lng": 127.72572,
+    "km": 1.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/44/2592444_image2_1.jpg",
+    "addr": "강원특별자치도 화천군 평화로 167 다가가다한옥"
+   },
+   {
+    "id": "2618553",
+    "name": "라포레98",
+    "lat": 38.11592,
+    "lng": 127.71201,
+    "km": 1.2,
+    "photo": "",
+    "addr": "강원특별자치도 화천군 화천읍 산수화로 119-11"
+   }
+  ]
+ },
+ "l-yongpyong": {
+  "resort": [
+   {
+    "id": "951444",
+    "name": "홀리데이인&스위트 알펜시아 평창",
+    "lat": 37.66091,
+    "lng": 128.66853,
+    "km": 1.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/56/2921356_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 대관령면 솔봉로 325"
+   }
+  ],
+  "pension": [
+   {
+    "id": "2761960",
+    "name": "황미숙펜션",
+    "lat": 37.66271,
+    "lng": 128.69889,
+    "km": 0.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/35/2801135_image2_1.JPG",
+    "addr": "강원특별자치도 평창군 대관령면 삼현동1길 10-17"
+   },
+   {
+    "id": "2761023",
+    "name": "에델바이스",
+    "lat": 37.66433,
+    "lng": 128.71112,
+    "km": 1.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/04/4109604_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 대관령면 송전1길 81-8"
+   },
+   {
+    "id": "2761142",
+    "name": "대관령푸른솔펜션",
+    "lat": 37.6645,
+    "lng": 128.71177,
+    "km": 2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/38/2765138_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 대관령면 송전1길 20"
+   }
+  ]
+ },
+ "l-jinbu": {
+  "pension": [
+   {
+    "id": "2570521",
+    "name": "체르맛트",
+    "lat": 37.6199,
+    "lng": 128.51956,
+    "km": 4.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/14/2568314_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 진부면 지령동길 51"
+   },
+   {
+    "id": "2761559",
+    "name": "펜트하우스풀빌라",
+    "lat": 37.68262,
+    "lng": 128.56695,
+    "km": 4.8,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/71/4110271_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 진부면 방아다리로 264-56"
+   },
+   {
+    "id": "2760023",
+    "name": "숲사이길펜션",
+    "lat": 37.68635,
+    "lng": 128.59323,
+    "km": 5.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/05/2764505_image2_1.jpg",
+    "addr": "강원특별자치도 평창군 진부면 간평길 233-2"
+   }
+  ]
+ },
+ "l-jeongseon": {
+  "hanok": [
+   {
+    "id": "1972030",
+    "name": "상유재",
+    "lat": 37.37938,
+    "lng": 128.66066,
+    "km": 0.1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/22/2629122_image2_1.jpg",
+    "addr": "강원특별자치도 정선군 정선읍 봉양3길 22-8"
+   }
+  ]
+ },
+ "l-gohan": {
+  "resort": [
+   {
+    "id": "138965",
+    "name": "하이원리조트 콘도",
+    "lat": 37.21038,
+    "lng": 128.82715,
+    "km": 2.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/83/3019583_image2_1.jpg",
+    "addr": "강원특별자치도 정선군 고한읍 하이원길 265-1"
+   }
+  ],
+  "business": [
+   {
+    "id": "2711378",
+    "name": "마을호텔18번가",
+    "lat": 37.20297,
+    "lng": 128.85085,
+    "km": 0.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/84/4068684_image2_1.jpg",
+    "addr": "강원특별자치도 정선군 고한읍 고한2길 36"
+   },
+   {
+    "id": "659010",
+    "name": "하이랜드호텔",
+    "lat": 37.20864,
+    "lng": 128.84266,
+    "km": 1.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/46/2628546_image2_1.jpg",
+    "addr": "강원특별자치도 정선군 고한읍 고한로 26"
+   },
+   {
+    "id": "143034",
+    "name": "하이원 그랜드호텔",
+    "lat": 37.21267,
+    "lng": 128.82157,
+    "km": 2.9,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/91/3588691_image2_1.jpg",
+    "addr": "강원특별자치도 정선군 사북읍 하이원길 265"
+   }
+  ]
+ },
+ "l-yeongwol": {
+  "pension": [
+   {
+    "id": "1122064",
+    "name": "강가에 하얀집 펜션",
+    "lat": 37.1788,
+    "lng": 128.43477,
+    "km": 2.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/77/4010077_image2_1.jpg",
+    "addr": "강원특별자치도 영월군 영월읍 선돌길 83-9"
+   },
+   {
+    "id": "138384",
+    "name": "동강빌리지",
+    "lat": 37.20051,
+    "lng": 128.5073,
+    "km": 4.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/85/1948485_image2_1.jpg",
+    "addr": "강원특별자치도 영월군 영월읍 동강로 225"
+   },
+   {
+    "id": "397691",
+    "name": "하늘샘펜션",
+    "lat": 37.20306,
+    "lng": 128.50604,
+    "km": 4.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/44/1826444_image2_1.jpg",
+    "addr": "강원특별자치도 영월군 영월읍 둥글바위길 58"
+   }
+  ]
+ },
+ "l-taebaek": {
+  "business": [
+   {
+    "id": "681618",
+    "name": "패스텔모텔",
+    "lat": 37.17292,
+    "lng": 128.98982,
+    "km": 1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/73/3342473_image2_1.jpg",
+    "addr": "강원특별자치도 태백시 서황지로 16-8 (황지동)"
+   },
+   {
+    "id": "681597",
+    "name": "알프스모텔",
+    "lat": 37.17314,
+    "lng": 128.98964,
+    "km": 1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/95/684995_image2_1.jpg",
+    "addr": "강원특별자치도 태백시 서황지로 16-11"
+   },
+   {
+    "id": "3044531",
+    "name": "동아호텔",
+    "lat": 37.17615,
+    "lng": 128.9868,
+    "km": 1.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/05/3054205_image2_1.jpg",
+    "addr": "강원특별자치도 태백시 먹거리길 36 (황지동)"
+   }
+  ]
+ },
+ "l-wj-city": {
+  "business": [
+   {
+    "id": "2907697",
+    "name": "오키드호텔",
+    "lat": 37.34671,
+    "lng": 127.92899,
+    "km": 1,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/01/4119801_image2_1.jpg",
+    "addr": "강원특별자치도 원주시 봉화로 26 (단계동)"
+   },
+   {
+    "id": "1742887",
+    "name": "베니키아 호텔 비즈인",
+    "lat": 37.34114,
+    "lng": 127.92385,
+    "km": 1.5,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/11/3573911_image2_1.jpg",
+    "addr": "강원특별자치도 원주시 만대로 7-1 (무실동)"
+   },
+   {
+    "id": "816294",
+    "name": "원모텔",
+    "lat": 37.35792,
+    "lng": 127.95617,
+    "km": 2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/72/819672_image2_1.jpg",
+    "addr": "강원특별자치도 원주시 현충로 20-7"
+   }
+  ]
+ },
+ "l-jijeong": {
+  "resort": [
+   {
+    "id": "137475",
+    "name": "오크밸리",
+    "lat": 37.43432,
+    "lng": 127.81751,
+    "km": 2.7,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/18/3513018_image2_1.jpg",
+    "addr": "강원특별자치도 원주시 지정면 오크밸리1길 66"
+   }
+  ]
+ },
+ "l-chiak": {
+  "pension": [
+   {
+    "id": "2692119",
+    "name": "클라우드펜션",
+    "lat": 37.42592,
+    "lng": 128.06903,
+    "km": 3.9,
+    "photo": "",
+    "addr": "강원특별자치도 원주시 소초면 백교길 107"
+   }
+  ]
+ }
+}

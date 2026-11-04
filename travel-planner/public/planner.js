@@ -22,15 +22,19 @@ export function distanceKm(a, b) {
   return 2 * R * Math.asin(Math.sqrt(x));
 }
 
+// 차로 다니는 이동수단 (자동차·택시): 같은 도로 시간, 동선 반경
+export const drives = (move) => move === "car" || move === "taxi";
+
 // 직선거리 × 도로 보정계수로 실제 이동시간 추정
+// 자동차는 주차·출발 준비 8분, 택시는 부르고 기다리는 4분을 더한다
 export function travel(a, b, move) {
   const road = distanceKm(a, b) * 1.35;
   if (road < 0.05) return { min: 0, mode: "same", km: 0 };
   if (road <= 1.2) return { min: round5(road / 4.2 * 60), mode: "walk", km: road };
   // 시내 구간은 느리고, 먼 거리는 국도·고속도로 속도
-  if (move === "car") {
+  if (drives(move)) {
     const city = Math.min(road, 15), open = Math.max(0, road - 15);
-    return { min: round5(city / 30 * 60 + open / 70 * 60 + 8), mode: "car", km: road };
+    return { min: round5(city / 30 * 60 + open / 70 * 60 + (move === "taxi" ? 4 : 8)), mode: move, km: road };
   }
   const city = Math.min(road, 10), open = Math.max(0, road - 10);
   return { min: round5(city / 18 * 60 + open / 45 * 60 + (open ? 25 : 15)), mode: "bus", km: road };
@@ -165,7 +169,7 @@ function pickAnchors(input, opts, rain, used, usedAreas, dateStr, from) {
     if (usedAreas.includes(key)) total -= 6;
     if (area.region !== regionOf(input)) total -= 6;
     const far = distanceKm(BASE, area);
-    total -= input.move === "car" ? far * 0.2 : far * 0.4;
+    total -= drives(input.move) ? far * 0.2 : far * 0.4;
     ranked.push({ key, total });
   }
   ranked.sort((a, b) => b.total - a.total);
@@ -290,13 +294,13 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
       let v = baseScore(p, input, opts, rain);
-      v -= r.tr.min * (input.move === "car" ? 0.08 : 0.12);
+      v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
       v -= r.wait * 0.05;
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);
-      const radius = input.move === "car" ? 6 : 4;
-      if (fromAnchor > (input.move === "car" ? 30 : 20)) continue; // 하루 동선 밖
-      if (fromAnchor > radius) v -= (fromAnchor - radius) * (input.move === "car" ? 1.2 : 1.5);
+      const radius = drives(input.move) ? 6 : 4;
+      if (fromAnchor > (drives(input.move) ? 30 : 20)) continue; // 하루 동선 밖
+      if (fromAnchor > radius) v -= (fromAnchor - radius) * (drives(input.move) ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
       if (items.length && items[items.length - 1].place.cat === p.cat) v -= 1.5;
@@ -394,11 +398,11 @@ export function chooseLodging(input, days) {
   for (const l of LODGING) {
     if (!regions.has(l.region)) continue;
     const km = legs.reduce((sum, p) => sum + distanceKm(p, l), 0) / legs.length;
-    let v = -km * (input.move === "car" ? 0.25 : 0.6);
+    let v = -km * (drives(input.move) ? 0.25 : 0.6);
     const match = wanted.find((t) => l.types.includes(t));
     if (match) v += 6 - wanted.indexOf(match) * 1.5;
     if ((input.likes || []).includes("sea") && l.types.includes("ocean")) v += 2;
-    if (input.move !== "car" && l.types.includes("business")) v += 2;
+    if (input.move === "transit" && l.types.includes("business")) v += 2; // 대중교통이면 역·터미널 근처
     if (l.region === regionOf(input)) v += 3; // 고른 권역 안의 숙소 우선
     if (!best || v > best.v) best = { l, v };
   }
@@ -450,7 +454,7 @@ export function retimeDay(day, input, opts, legMins) {
     // 계획보다 앞당기지는 않고, 도로 사정으로 늦어질 때만 뒤로 민다
     const r = tryPlace(it.place, from, Math.max(t, it.start - leg), input, opts, end + 60, day.date, leg);
     if (!r) return null;
-    items.push({ ...it, start: r.start, end: r.finish, travelMin: leg, road: it.travelMode === "car" });
+    items.push({ ...it, start: r.start, end: r.finish, travelMin: leg, road: drives(it.travelMode) });
     from = it.place; t = r.finish;
   }
   return { ...day, items, road: true };

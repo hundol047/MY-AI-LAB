@@ -81,10 +81,10 @@ const START_SCHEMA = {
   properties: {
     region: { type: "string", enum: REGION_KEYS },
     date: { type: "string", description: "YYYY-MM-DD" },
-    days: { type: "integer", enum: [1, 2, 3] },
+    days: { type: "integer", enum: [1, 2, 3, 4, 5] },
     who: { type: "string", enum: ["solo", "couple", "family", "parents"] },
     likes: { type: "array", items: { type: "string", enum: CATS } },
-    move: { type: "string", enum: ["car", "transit"] },
+    move: { type: "string", enum: ["car", "taxi", "transit"] },
     summary: { type: "string" },
   },
   required: ["region", "date", "days", "who", "likes", "move", "summary"],
@@ -94,10 +94,10 @@ const START_SCHEMA = {
 const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용자가 한 줄로 말한 여행 계획을 앱의 선택값으로 바꾼다.
 - region: gangneung(강릉·동해·삼척·정동진), seorak(속초·양양·고성·설악산·인제), chuncheon(춘천·남이섬·화천·철원·홍천), pyeongchang(평창·대관령·정선·영월·태백), wonju(원주·횡성). 지역 언급이 없으면 취향에 가장 맞는 곳.
 - date: 오늘 날짜를 기준으로 "내일", "이번 주말", "다음 달 3일" 등을 실제 날짜로. 언급이 없으면 내일.
-- days: 당일=1, 1박 2일=2, 2박 3일 이상=3. 언급이 없으면 2.
+- days: 당일=1, 1박 2일=2, 2박 3일=3, 3박 4일=4, 4박 5일 이상=5. 언급이 없으면 2.
 - who: 혼자=solo, 연인·친구=couple, 아이·가족=family, 부모님·어르신=parents. 언급이 없으면 couple.
 - likes: sea(바다), cafe(카페), food(맛집·시장), culture(역사·문화·전시), nature(자연·산책). 1~3개.
-- move: 자동차·렌터카=car, 기차·버스·뚜벅이=transit. 언급이 없으면 car.
+- move: 자동차·렌터카=car, 택시=taxi, 기차·버스·뚜벅이=transit. 언급이 없으면 car.
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
 // 화면이 영어(lang="en")면 사람에게 보이는 글(summary·answer·plain 등)만 영어로 받는다. 선택값·id는 그대로.

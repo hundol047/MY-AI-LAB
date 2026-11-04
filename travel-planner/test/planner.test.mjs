@@ -1,43 +1,55 @@
 // 모든 조건 조합에서 영업시간·휴무 충돌이 없는지, 하루 일정이 성립하는지 검사
 import assert from "node:assert/strict";
-import { planTrip, swapItem, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor } from "../public/planner.js";
+import { planTrip, swapItem, drives, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor } from "../public/planner.js";
 import { checkLodgingLocal, startLocal } from "../public/ai-local.js";
 import { PLACES } from "../public/data.js";
 
 let runs = 0, carDays = 0, carItems = 0, lunchDays = 0, allDays = 0;
+function check(input, pace, rain) {
+  const { days, move } = input;
+  const opts = { pace, rainDays: Array(days).fill(rain) };
+  const trip = planTrip(input, opts);
+  runs++;
+  assert.equal(trip.totals.conflicts, 0, JSON.stringify(input));
+  const ids = trip.days.flatMap((d) => d.items.map((i) => i.id));
+  assert.equal(new Set(ids).size, ids.length, "중복 장소");
+  for (const d of trip.days) {
+    // 강원 산간은 대중교통 배차가 적어 하루 1곳도 허용, 자동차는 최소 2곳
+    assert.ok(d.items.length >= (drives(move) ? 2 : 1), `일정이 너무 짧음 ${JSON.stringify(input)}`);
+    if (drives(move)) { carDays++; carItems += d.items.length; }
+    allDays++; if (d.items.some((i) => i.kind === "lunch")) lunchDays++;
+    for (let k = 1; k < d.items.length; k++) assert.ok(d.items[k].start >= d.items[k - 1].end, "시간 겹침");
+  }
+  // 숙소는 여행 내내 한 곳: 둘째 날부터 모두 같은 숙소에서 출발
+  if (days > 1) {
+    assert.ok(trip.lodging, "숙소 추천 없음");
+    for (let k = 1; k < trip.days.length; k++) assert.equal(trip.days[k].start.lat, trip.lodging.lat, "숙소가 바뀜");
+  } else assert.equal(trip.lodging, null);
+  const swapped = swapItem(trip, input, opts, 0, 1);
+  assert.equal(verify(swapped.days), 0);
+  assert.notEqual(swapped.days[0].items[1]?.id, trip.days[0].items[1].id);
+  assert.deepEqual(swapped.days[0].items[0].id, trip.days[0].items[0].id);
+  assert.equal(swapped.lodging?.id, trip.lodging?.id, "바꾸기 후에도 숙소 유지");
+}
+
+// 기본: 권역·기간(1~3일)·동행·이동(자동차·택시·대중교통)·취향·요일·계절·속도·날씨의 모든 조합
 for (const region of ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"])
 for (const days of [1, 2, 3])
   for (const who of ["solo", "couple", "family", "parents"])
-    for (const move of ["car", "transit"])
+    for (const move of ["car", "taxi", "transit"])
       for (const likes of [[], ["sea"], ["cafe", "food"], ["culture", "nature"], ["sea", "cafe", "food", "culture", "nature"]])
         for (const date of ["2026-11-09", "2026-11-10", "2026-11-11", "2026-11-14", "2026-11-15", "2027-07-07"])
           for (const pace of ["relaxed", "normal", "packed"])
-            for (const rain of [false, true]) {
-              const input = { region, date, days, who, likes, move };
-              const opts = { pace, rainDays: [rain, rain, rain] };
-              const trip = planTrip(input, opts);
-              runs++;
-              assert.equal(trip.totals.conflicts, 0, JSON.stringify(input));
-              const ids = trip.days.flatMap((d) => d.items.map((i) => i.id));
-              assert.equal(new Set(ids).size, ids.length, "중복 장소");
-              for (const d of trip.days) {
-                // 강원 산간은 대중교통 배차가 적어 하루 1곳도 허용, 자동차는 최소 2곳
-                assert.ok(d.items.length >= (move === "car" ? 2 : 1), `일정이 너무 짧음 ${JSON.stringify(input)}`);
-                if (move === "car") { carDays++; carItems += d.items.length; }
-                allDays++; if (d.items.some((i) => i.kind === "lunch")) lunchDays++;
-                for (let k = 1; k < d.items.length; k++) assert.ok(d.items[k].start >= d.items[k - 1].end, "시간 겹침");
-              }
-              // 숙소는 여행 내내 한 곳: 둘째 날부터 모두 같은 숙소에서 출발
-              if (days > 1) {
-                assert.ok(trip.lodging, "숙소 추천 없음");
-                for (let k = 1; k < trip.days.length; k++) assert.equal(trip.days[k].start.lat, trip.lodging.lat, "숙소가 바뀜");
-              } else assert.equal(trip.lodging, null);
-              const swapped = swapItem(trip, input, opts, 0, 1);
-              assert.equal(verify(swapped.days), 0);
-              assert.notEqual(swapped.days[0].items[1]?.id, trip.days[0].items[1].id);
-              assert.deepEqual(swapped.days[0].items[0].id, trip.days[0].items[0].id);
-              assert.equal(swapped.lodging?.id, trip.lodging?.id, "바꾸기 후에도 숙소 유지");
-            }
+            for (const rain of [false, true]) check({ region, date, days, who, likes, move }, pace, rain);
+// 긴 일정: 3박 4일·4박 5일 (장소가 모자라 같은 곳을 다시 넣거나 하루가 비지 않는지)
+for (const region of ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"])
+for (const days of [4, 5])
+  for (const who of ["solo", "family", "parents"])
+    for (const move of ["car", "taxi", "transit"])
+      for (const likes of [[], ["sea", "food"], ["culture", "nature"]])
+        for (const date of ["2026-11-09", "2026-11-14", "2027-07-07"])
+          for (const pace of ["normal", "packed"])
+            for (const rain of [false, true]) check({ region, date, days, who, likes, move }, pace, rain);
 
 assert.ok(carItems / carDays >= 4, `자동차 일정 하루 평균 장소 수 ${carItems / carDays}`);
 assert.ok(lunchDays / allDays >= 0.97, `점심 포함 비율 ${lunchDays / allDays}`);
@@ -106,4 +118,16 @@ assert.equal(hoursFor(P("solhyang"), "2026-12-01").close, 17 * 60);
 assert.equal(parseRequestLocally("비가 와요").indoor, true);
 assert.equal(parseRequestLocally("아이가 지쳤어요").lessWalk, true);
 assert.deepEqual(parseRequestLocally("카페는 빼주세요").avoid, ["cafe"]);
+// 택시: 자동차와 같은 도로 시간, 주차 대신 기다리는 시간이라 조금 빠르다
+{
+  const a = { lat: 37.7643, lng: 128.8996 }, b = { lat: 37.8055, lng: 128.9087 };
+  const car = planTrip({ region: "gangneung", date: "2026-11-10", days: 2, who: "couple", likes: [], move: "car" }, {});
+  const taxi = planTrip({ region: "gangneung", date: "2026-11-10", days: 2, who: "couple", likes: [], move: "taxi" }, {});
+  assert.ok(taxi.days.flatMap((d) => d.items).some((i) => i.travelMode === "taxi"), "택시 이동 표시");
+  assert.ok(car.days.flatMap((d) => d.items).every((i) => i.travelMode !== "taxi"));
+  void a; void b;
+}
+assert.equal(startLocal("다음 주 3박 4일 속초 택시로", "2026-11-04").days, 4);
+assert.equal(startLocal("4박 5일 강릉 여행", "2026-11-04").days, 5);
+assert.equal(startLocal("주말에 택시 타고 춘천", "2026-11-04").move, "taxi");
 console.log(`ok - ${runs}개 조합, 충돌 0건`);

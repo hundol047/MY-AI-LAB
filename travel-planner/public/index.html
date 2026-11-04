@@ -72,10 +72,12 @@
         <label class="label" for="date" data-i18n>언제</label>
         <div class="row">
           <input type="date" id="date" class="date" required>
-          <div class="seg" data-name="days">
+          <div class="seg wrap days" data-name="days">
             <button type="button" data-v="1" data-i18n>당일</button>
             <button type="button" data-v="2" class="on" data-i18n>1박 2일</button>
             <button type="button" data-v="3" data-i18n>2박 3일</button>
+            <button type="button" data-v="4" data-i18n>3박 4일</button>
+            <button type="button" data-v="5" data-i18n>4박 5일</button>
           </div>
         </div>
       </div>
@@ -103,8 +105,9 @@
 
       <div class="field">
         <span class="label" data-i18n>이동</span>
-        <div class="seg" data-name="move">
+        <div class="seg wrap" data-name="move">
           <button type="button" data-v="car" class="on" data-i18n>자동차</button>
+          <button type="button" data-v="taxi" data-i18n>택시</button>
           <button type="button" data-v="transit" data-i18n>대중교통·도보</button>
         </div>
       </div>

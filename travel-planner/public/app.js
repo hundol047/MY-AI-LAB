@@ -1,4 +1,4 @@
-import { planTrip, swapItem, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
+import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
 import { t, isEN, getLang, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
@@ -21,7 +21,7 @@ const CAT = {
   festival: { label: "축제", color: "#db2777" },
 };
 const KIND = { lunch: "점심", dinner: "저녁" };
-const MODE = { walk: "도보", car: "차", bus: "버스", same: "바로 옆" };
+const MODE = { walk: "도보", car: "차", taxi: "택시", bus: "버스", same: "바로 옆" };
 
 let state = null; // { input, opts }
 let trip = null;
@@ -139,14 +139,14 @@ async function loadWeather() {
 
 function render() {
   const { input } = state;
-  const nights = t(["당일", "1박 2일", "2박 3일"][input.days - 1]);
+  const nights = t(["당일", "1박 2일", "2박 3일", "3박 4일", "4박 5일"][input.days - 1] || `${input.days - 1}박 ${input.days}일`);
   $("#tripTitle").textContent = `${dateLabel(input.date)} · ${nights}`;
   const tot = trip.totals;
   $("#stats").innerHTML = `
     <span>${t("{n}곳", { n: tot.places })}</span>
     <span>${t("이동 {t}", { t: minutesLabel(tot.moveMin) })}</span>
     <span class="${tot.conflicts ? "warn" : "ok"}">${tot.conflicts ? t("영업시간 충돌 {n}건", { n: tot.conflicts }) : t("영업시간·휴무 확인 완료")}</span>
-    ${trip.days.every((d) => d.road) && state.input.move === "car" ? `<span>${t("실제 도로 기준")}</span>` : ""}`;
+    ${trip.days.every((d) => d.road) && drives(state.input.move) ? `<span>${t("실제 도로 기준")}</span>` : ""}`;
 
   $("#tabs").innerHTML = trip.days.map((d, i) => {
     const w = weather[d.date];
@@ -240,8 +240,10 @@ async function applyRoad(i) {
   if (!day || !day.items.length) return;
   const route = await roadRoute(day);
   if (!route || trip.days[i] !== day) return;
-  if (state.input.move === "car" && !day.road) {
-    const legMins = route.legs.map((sec) => Math.max(5, Math.round((sec / 60 + 5) / 5) * 5));
+  if (drives(state.input.move) && !day.road) {
+    // 실제 도로 시간 + 자동차는 주차 5분, 택시는 기다리는 2분
+    const extra = state.input.move === "taxi" ? 2 : 5;
+    const legMins = route.legs.map((sec) => Math.max(5, Math.round((sec / 60 + extra) / 5) * 5));
     const re = retimeDay(day, state.input, state.opts, legMins);
     if (re) {
       const days = trip.days.slice(); days[i] = re;
@@ -383,7 +385,29 @@ function renderFestivals() {
   box.innerHTML = `<h3>${t("여행 기간의 강원 축제")}</h3><ul>${top.map(row).join("")}</ul>${rest.length ? `<details><summary>${t("{n}개 더 보기", { n: rest.length })}</summary><ul>${rest.map(row).join("")}</ul></details>` : ""}`;
 }
 
-/* ---------- 숙소: 여행 내내 한 곳 ---------- */
+/* ---------- 숙소: 여행 내내 한 곳 ----------
+   추천 숙소 지역 + 그 지역의 실제 숙소 3곳 (한국관광공사 숙박 정보, scripts/bake-lodging.mjs → lodging-places.json)
+   "바다·호수 전망"은 관광공사 소개글에 적힌 경우만 표시한다 */
+let lodgingPlaces = null;
+const lodgingPlacesReady = fetchT("lodging-places.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({}))
+  .then((j) => { lodgingPlaces = j; if (trip?.lodging && !$("#result").hidden) renderLodging(); });
+function staysFor(l) {
+  const byType = lodgingPlaces?.[l.id] || {};
+  return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
+}
+function staysHTML(l) {
+  const list = staysFor(l);
+  if (!list.length) return "";
+  return `<div class="stays"><b>${t("이 지역 추천 숙소")}</b><ul>${list.map((h) => {
+    const q = encodeURIComponent(h.name);
+    return `<li>
+      <div class="stay-img"${h.photo ? ` style="background-image:url('${h.photo}')"` : ""}></div>
+      <div class="stay-info"><strong>${esc(h.name)}</strong>
+        <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
+      <div class="stay-acts"><a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("네이버")}</a><a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">${t("카카오")}</a></div>
+    </li>`;
+  }).join("")}</ul><p class="stay-note">${t("한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 가격과 빈 방은 예약 사이트에서 확인하세요")}</p></div>`;
+}
 function renderLodging() {
   const box = $("#lodgingCard"), l = trip.lodging;
   if (!l) { box.hidden = true; return; }
@@ -396,6 +420,7 @@ function renderLodging() {
       <p>${esc(lodgingDesc(l))}</p>
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
+    ${staysHTML(l)}
     <div class="acts">
       <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("네이버에서 찾기")}</a>
       <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">${t("카카오맵")}</a>
