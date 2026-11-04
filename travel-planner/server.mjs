@@ -2,7 +2,7 @@
 // AI는 말을 이해하고 설명만 하고, 장소 선택·시간 계산은 검증된 데이터 기반 엔진이 한다.
 // 그래서 존재하지 않는 장소나 문 닫은 곳이 일정에 들어갈 수 없다.
 import http from "node:http";
-import { readFile, writeFile } from "node:fs/promises";
+import { readFile, writeFile, stat } from "node:fs/promises";
 import { randomBytes } from "node:crypto";
 import QRCode from "qrcode";
 import { gzipSync } from "node:zlib";
@@ -157,8 +157,11 @@ const server = http.createServer(async (req, res) => {
       "cache-control": rel.startsWith("/vendor/") ? "public, max-age=2592000, immutable" : "no-cache",
     };
     if (/\.(html|js|css|json|svg|webmanifest)$/.test(ext) && /gzip/.test(req.headers["accept-encoding"] || "")) {
-      body = gzipCache.get(file) || gzipSync(body);
-      gzipCache.set(file, body);
+      // 파일이 바뀌면(수정 시각) 다시 압축 — 옛 버전을 보내지 않도록
+      const mtime = (await stat(file)).mtimeMs;
+      const hit = gzipCache.get(file);
+      if (hit && hit.mtime === mtime) body = hit.body;
+      else { body = gzipSync(body); gzipCache.set(file, { mtime, body }); }
       headers["content-encoding"] = "gzip";
     }
     res.writeHead(200, headers).end(body);

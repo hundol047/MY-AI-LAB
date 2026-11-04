@@ -50,7 +50,7 @@ function tomorrow() {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
 }
 $("#date").value = tomorrow();
-$("#date").min = new Date().toISOString().slice(0, 10);
+$("#date").min = addDays(tomorrow(), -1); // 오늘 (기기 시간대 기준)
 
 document.querySelectorAll(".seg").forEach((seg) => {
   seg.addEventListener("click", (e) => {
@@ -362,7 +362,7 @@ function renderLodging() {
   const q = encodeURIComponent(l.query);
   box.innerHTML = `
     <div class="info">
-      <div class="meta"><span class="tag" style="--c:#0b5e6b">추천 숙소 · ${l.nights}박 내내</span></div>
+      <div class="meta"><span class="tag" style="--c:var(--brand)">추천 숙소 · ${l.nights}박 내내</span></div>
       <h3>${l.name} · ${l.typeLabel}</h3>
       <p>${l.desc}</p>
       <div class="why">${l.reason}${l.others.length ? ` · 다른 선택: ${l.others.join(", ")}` : ""}</div>
@@ -489,7 +489,7 @@ function renderOvernight() {
       <div><span>밤 코스</span><b>${c.endAfter > c.endBefore ? `${fmt(c.endAfter)}까지` : "없음"}</b></div>
       <div><span>숙소</span><b>${c.lodging.name}</b></div>
     </div>
-    ${c.evening.length ? `<p class="night">밤 코스: ${c.evening.map((e) => `${fmt(e.start)} ${e.name}`).join(" → ")}</p>` : ""}
+    ${c.endAfter > c.endBefore && c.evening.length ? `<p class="night">밤 코스: ${c.evening.filter((e) => e.start >= c.endBefore - 60).map((e) => `${fmt(e.start)} ${e.name}`).join(" → ")}</p>` : ""}
     <p class="more">둘째 날: ${c.trip.days[1].items.map((i) => i.place.name).join(", ")}</p>
     ${c.festivals.length ? `<p class="night">다음 날 축제: ${c.festivals.map((f) => f.name).join(", ")}</p>` : ""}
     ${c.benefits.length ? `<p class="more">받을 수 있는 혜택: ${c.benefits.map((b) => b.title).join(", ")}</p>` : ""}
@@ -726,6 +726,8 @@ $("#shareBtn").addEventListener("click", async () => {
   } catch {}
 });
 
+// 캘린더 파일 규칙: 쉼표·세미콜론·역슬래시는 앞에 역슬래시
+const icsText = (t) => String(t).replace(/[\\;,]/g, (c) => "\\" + c);
 $("#icsBtn").addEventListener("click", () => {
   const stamp = (ds, min) => ds.replace(/-/g, "") + "T" + fmt(min).replace(":", "") + "00";
   const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ohneul-gangneung//KO", "CALSCALE:GREGORIAN"];
@@ -735,8 +737,8 @@ $("#icsBtn").addEventListener("click", () => {
       `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
       `DTSTART;TZID=Asia/Seoul:${stamp(d.date, it.start)}`,
       `DTEND;TZID=Asia/Seoul:${stamp(d.date, it.end)}`,
-      `SUMMARY:${it.place.name}`,
-      `LOCATION:${it.place.name}`,
+      `SUMMARY:${icsText(it.place.name)}`,
+      `LOCATION:${icsText(it.place.name)}`,
       `GEO:${it.place.lat};${it.place.lng}`,
       "END:VEVENT");
   }));
