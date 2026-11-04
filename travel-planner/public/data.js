@@ -201,7 +201,7 @@ const CHUNCHEON = [
     hours: ["09:00", "16:00"], seasons: [{ months: [12, 1, 2], hours: ["09:00", "15:00"] }],
     closed: [2], stay: 100, indoor: false, walk: 3, pop: 3, tags: [], wiki: "한탄강", desc: "절벽에 매달린 잔도 3.6km",
   },
-  { id: "goseokjeong", name: "고석정", cat: "nature", area: "cheorwon", lat: 38.1930, lng: 127.2810, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "고석정", desc: "한탄강 협곡의 바위 정자" },
+  { id: "goseokjeong", name: "고석정", cat: "nature", area: "cheorwon", lat: 38.1860, lng: 127.2869, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "고석정", desc: "한탄강 협곡의 바위 정자" },
   { id: "hwacheon-river", name: "화천 붕어섬", cat: "nature", area: "hwacheon", lat: 38.1007, lng: 127.6970, hours: ["00:00", "23:59"], closed: [], stay: 40, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "화천군", desc: "북한강 위 섬 공원" },
   { id: "nangman", souvenir: "춘천 닭갈비", name: "춘천 낭만시장", alias: ["춘천 중앙시장"], cat: "food", area: "cc_city", lat: 37.8810, lng: 127.7270, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "춘천중앙시장", desc: "옛 중앙시장 먹거리" },
   { id: "dongsong", name: "철원 동송 식당가", cat: "food", area: "cheorwon", lat: 38.2100, lng: 127.2120, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동송읍", desc: "철원 오대쌀 밥집" },

@@ -173,6 +173,9 @@
 | dongmyeong | 동명항 활어센터 | Sokcho Lighthouse Observatory (속초등대전망대) | 0.21 | 이름 다름 |
 | dongmyeong | 동명항 활어센터 | Yeonggeumjeong (영금정) | 0.25 | 이름 다름 |
 | geojin | 거진항 식당가 | Geojin Port (거진항) | 0.23 | 이름 다름 |
+| goseokjeong | 고석정 | Goseokjeong National Tourist Area (고석정국민관광지) | 0.00 | 이름 다름 |
+| goseokjeong | 고석정 | Cheorwon Facilities Management Office (Formerly, Iron Triangle Battlefield (철원 시설물관리사업소 (구 철의삼각전적관)) | 0.00 | 이름 다름 |
+| goseokjeong | 고석정 | Hantangang River [National Geopark] (한탄강(국가지질공원, 고석정)) | 0.23 | 이름 다름 |
 | museum-san | 뮤지엄 산 | Museum 1 (뮤지엄 원) | 275.69 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Chuncheon Jungang Market (춘천 중앙시장) | 62.17 | 이름 같지만 2km 밖 |
 | wj-market | 원주 중앙시장·자유시장 | Maze Art Wonju Jungang Market (미로예술 원주중앙시장) | 0.24 | 이름 다름 |
