@@ -26,6 +26,14 @@
 
 AI·가게 등록까지 쓰려면 Node를 실행할 수 있는 호스팅(Render, Railway, Fly.io 등)에서 `npm start`로 띄운다.
 
+## 안드로이드 앱 (APK)
+
+`android/`의 작은 안드로이드 앱이 앱 파일(`public/`) 전체를 APK 안에 넣고 웹뷰로 연다. 웹 주소 없이도, 인터넷이 없어도 열리고, 지도·사진·날씨만 인터넷을 쓴다. 서버가 없으므로 AI는 간단 모드, 가게 등록은 숨겨진다. 앱 밖 주소(카카오맵·네이버 길찾기)는 휴대폰의 해당 앱·브라우저로 연다. 캘린더 파일 저장은 앱에서는 되지 않는다.
+- 다운로드(항상 최신): `https://github.com/hundol047/MY-AI-LAB/releases/download/android-latest/ohneul-gangwon.apk`
+- 만들기: `.github/workflows/android-apk.yml`이 앱·안드로이드 코드가 바뀌어 push될 때 GitHub 러너의 안드로이드 SDK로 `android/build.sh`를 돌려(Gradle 없이 javac → d8 → aapt2 → zipalign → apksigner) 릴리스 `android-latest`에 올린다. 직접 만들려면 `ANDROID_HOME=SDK경로 bash android/build.sh`
+- 서명 키: 저장소 Secrets에 `ANDROID_KEYSTORE_B64`·`ANDROID_KEYSTORE_PASS`가 없으면 빌드마다 새 키로 서명한다. 이 경우 새 버전을 설치하려면 기존 앱을 지우고 설치해야 한다. 키는 공개 저장소에 넣지 않는다.
+- 설치: 폰에서 파일을 받아 열고, 처음 한 번 "출처를 알 수 없는 앱 설치"를 허용한다.
+
 ## AI 기능 (OpenAI 호환 API)
 
 - **한 줄로 시작**: "이번 주말 부모님이랑 속초 1박, 차로" → 5개 선택값을 채우고 바로 일정 생성 (`/api/start`)

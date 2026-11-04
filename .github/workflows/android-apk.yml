@@ -1,0 +1,56 @@
+# 오늘강원 안드로이드 APK 만들기 → GitHub 릴리스(android-latest)에 올린다.
+# 다운로드 주소는 항상 같다: https://github.com/hundol047/MY-AI-LAB/releases/download/android-latest/ohneul-gangwon.apk
+# 앱 파일(travel-planner/public)이나 안드로이드 코드가 바뀌어 push되면 다시 만든다. Actions 탭에서 "Run workflow"로도 돌릴 수 있다.
+# 서명 키를 고정하려면(업데이트를 지우지 않고 설치하려면) 저장소 Secrets에
+#   ANDROID_KEYSTORE_B64 (PKCS12 키저장소를 base64로), ANDROID_KEYSTORE_PASS (암호, 별칭은 ohneul) 를 넣는다.
+#   없으면 빌드마다 새 키로 서명한다.
+name: 안드로이드 APK
+
+on:
+  push:
+    paths:
+      - "travel-planner/public/**"
+      - "travel-planner/android/**"
+      - ".github/workflows/android-apk.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-apk
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+      - name: 서명 키 준비 (있으면)
+        env:
+          KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
+        run: |
+          if [ -n "$KS_B64" ]; then echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/ohneul.p12"; echo "KEYSTORE_FILE=$RUNNER_TEMP/ohneul.p12" >> "$GITHUB_ENV"; fi
+      - name: APK 만들기
+        env:
+          KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
+        run: bash travel-planner/android/build.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ohneul-gangwon-apk
+          path: travel-planner/android/dist/ohneul-gangwon.apk
+      - name: 릴리스에 올리기 (android-latest)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete android-latest --yes --cleanup-tag || true
+          gh release create android-latest travel-planner/android/dist/ohneul-gangwon.apk \
+            --target "$GITHUB_SHA" --prerelease \
+            --title "오늘강원 안드로이드 앱 (최신)" \
+            --notes "폰에서 이 파일을 받아 설치하세요. 처음 설치할 때 '출처를 알 수 없는 앱 설치'를 허용해야 합니다. 브랜치 ${GITHUB_REF_NAME}, 커밋 ${GITHUB_SHA::7}에서 만들었습니다."
