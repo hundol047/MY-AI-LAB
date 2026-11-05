@@ -864,7 +864,7 @@ async function askGuide(question, shown = question) {
     const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = guideLocal(question, trip, dayIdx);
+  if (!r) r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData });
   let note = "";
   if (r.changed) {
     const o = state.opts, uniq = (a) => [...new Set(a)];
