@@ -2,6 +2,19 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8">
+  <script>
+    // 스타일시트보다 먼저 둔다 (뒤에 두면 스타일시트를 다 받을 때까지 화면이 멈춤)
+    // 일본어·중국어 화면: 그 언어 자료를 앱 코드와 함께 바로 받기 시작하고, 번역될 때까지 글자를 숨긴다 (최대 3초)
+    (function () {
+      var l; try { l = localStorage.getItem("lang"); } catch (e) {}
+      if (!l) { var n = (navigator.languages && navigator.languages[0]) || navigator.language || ""; l = /^ja\b/i.test(n) ? "ja" : /^zh\b/i.test(n) ? "zh" : ""; }
+      if (l !== "ja" && l !== "zh") return;
+      ["i18n-cjk.js", "knowledge-intl.js"].forEach(function (f) { var k = document.createElement("link"); k.rel = "modulepreload"; k.href = f; document.head.appendChild(k); });
+      document.documentElement.classList.add("i18n-wait");
+      setTimeout(function () { document.documentElement.classList.remove("i18n-wait"); }, 3000);
+    })();
+  </script>
+  <style>.i18n-wait body { visibility: hidden; }</style>
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>오늘강원</title>
   <meta name="theme-color" content="#0b5e6b">

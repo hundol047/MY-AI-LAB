@@ -543,10 +543,6 @@ export const FEST = {
 
 /* ---------- 특산물 (화면 표시용. 복사하는 검색어는 한국어 그대로: 강원더몰이 한국어 사이트) ---------- */
 export const SOUVENIR = {
-  en: { "강릉 커피 원두": "Gangneung coffee beans", "초당두부": "Chodang tofu", "강릉 닭강정": "Gangneung sweet-crispy chicken", "주문진 건오징어": "Jumunjin dried squid", "묵호 건어물": "Mukho dried seafood",
-    "속초 오징어순대": "Sokcho squid sundae", "속초 건어물": "Sokcho dried seafood", "용대리 황태": "Yongdae-ri dried pollack", "양양 송이": "Yangyang pine mushrooms", "춘천 닭갈비": "Chuncheon dakgalbi",
-    "춘천 막국수": "Chuncheon buckwheat noodles", "춘천 감자빵": "Chuncheon potato bread", "대관령 황태": "Daegwallyeong dried pollack", "정선 곤드레나물": "Jeongseon gondre greens", "영월 메밀전병": "Yeongwol buckwheat crepes",
-    "봉평 메밀": "Bongpyeong buckwheat", "태백 한우": "Taebaek hanwoo beef", "횡성 한우": "Hoengseong hanwoo beef" },
   ja: { "강릉 커피 원두": "江陵のコーヒー豆", "초당두부": "草堂豆腐", "강릉 닭강정": "江陵タッカンジョン", "주문진 건오징어": "注文津の干しイカ", "묵호 건어물": "墨湖の干物",
     "속초 오징어순대": "束草イカスンデ", "속초 건어물": "束草の干物", "용대리 황태": "龍垈里ファンテ", "양양 송이": "襄陽の松茸", "춘천 닭갈비": "春川タッカルビ",
     "춘천 막국수": "春川マックッス", "춘천 감자빵": "春川ジャガイモパン", "대관령 황태": "大関嶺ファンテ", "정선 곤드레나물": "旌善コンドレ(山菜)", "영월 메밀전병": "寧越そばジョンビョン",

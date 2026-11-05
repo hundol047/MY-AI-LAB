@@ -2,6 +2,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { JA, ZH, REGION, AREA, BASE, LODGING as LODGING_T, TYPE, REASON, BENEFIT, FEST, FEST_DESC, SOUVENIR } from "../public/i18n-cjk.js";
+import { SOUVENIR_EN } from "../public/i18n.js";
 import { NAMES_JA, NAMES_ZH, TIPS_JA, TIPS_ZH } from "../public/knowledge-intl.js";
 import { PLACES, FESTIVALS, REGIONS, AREAS, LODGING, BENEFITS } from "../public/data.js";
 
@@ -26,7 +27,7 @@ for (const l of ["ja", "zh"]) {
   for (const b of BENEFITS) assert.ok(BENEFIT[l][b.id]?.title && BENEFIT[l][b.id]?.how, `${l} 혜택 ${b.id}`);
   for (const f of FESTIVALS) assert.ok(FEST[l][f.id] && FEST_DESC[l][f.id], `${l} 축제 ${f.name}`);
 }
-for (const s of new Set([...PLACES, ...FESTIVALS].map((p) => p.souvenir).filter(Boolean))) for (const l of ["en", "ja", "zh"]) assert.ok(SOUVENIR[l][s], `${l} 특산물 ${s}`);
+for (const s of new Set([...PLACES, ...FESTIVALS].map((p) => p.souvenir).filter(Boolean))) { assert.ok(SOUVENIR_EN[s], `en 특산물 ${s}`); for (const l of ["ja", "zh"]) assert.ok(SOUVENIR[l][s], `${l} 특산물 ${s}`); }
 for (const p of PLACES) assert.ok(NAMES_JA[p.id] && NAMES_ZH[p.id] && TIPS_JA[p.id] && TIPS_ZH[p.id], `장소 ${p.name}`);
 // 화면 HTML의 번역 대상 문구도 모두 사전에 있어야 한다
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");

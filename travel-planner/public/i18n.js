@@ -5,8 +5,12 @@
 // - 장소 이름·설명은 data-en.json(한국관광공사 영문 관광정보, scripts/bake-english.mjs)에서. 없으면 한국어 그대로.
 // - 일정 엔진(planner.js)은 언어와 무관하게 그대로 쓰고, 화면에 보일 때만 바꾼다.
 
-import { JA, ZH, REGION, AREA, BASE, LODGING, TYPE, REASON, BENEFIT, FEST, FEST_DESC, SOUVENIR } from "./i18n-cjk.js";
-import { NAMES_JA, NAMES_ZH, TIPS_JA, TIPS_ZH } from "./knowledge-intl.js";
+// 일본어·중국어 표는 그 언어를 고를 때만 받는다 (한국어·영어 사용자는 첫 화면이 가볍게)
+let C = null;
+let cjkReady = null;
+function loadCJK() {
+  return (cjkReady ??= Promise.all([import("./i18n-cjk.js"), import("./knowledge-intl.js")]).then(([a, b]) => { C = { ...a, ...b }; }));
+}
 
 const KEY = "lang";
 export const LANGS = ["ko", "en", "ja", "zh"];
@@ -233,9 +237,8 @@ const EN = {
   "AI에 연결되지 않아 간단 모드로 처리했어요": "AI is unavailable, so simple mode was used",
 };
 
-const DICT = { en: EN, ja: JA, zh: ZH };
 export function t(ko, vars) {
-  const d = DICT[lang];
+  const d = lang === "en" ? EN : lang === "ja" ? C?.JA : lang === "zh" ? C?.ZH : null;
   let s = d && Object.hasOwn(d, ko) ? d[ko] : ko;
   if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ""));
   return s;
@@ -332,9 +335,9 @@ const BENEFIT_EN = {
 };
 
 // 언어별 표: 영어는 이 파일, 일본어·중국어는 i18n-cjk.js
-const pick = (tables) => tables[lang];
-const T_REGION = { en: REGION_EN, ...REGION }, T_AREA = { en: AREA_EN, ...AREA }, T_BASE = { en: BASE_EN, ...BASE };
-const T_LODGING = { en: LODGING_EN, ...LODGING }, T_TYPE = { en: TYPE_EN, ...TYPE }, T_REASON = { en: REASON_EN, ...REASON }, T_BENEFIT = { en: BENEFIT_EN, ...BENEFIT };
+const EN_TABLES = { REGION: REGION_EN, AREA: AREA_EN, BASE: BASE_EN, LODGING: LODGING_EN, TYPE: TYPE_EN, REASON: REASON_EN, BENEFIT: BENEFIT_EN };
+const pick = (name) => (lang === "en" ? EN_TABLES[name] : lang === "ko" ? null : C?.[name]?.[lang]);
+const T_REGION = "REGION", T_AREA = "AREA", T_BASE = "BASE", T_LODGING = "LODGING", T_TYPE = "TYPE", T_REASON = "REASON", T_BENEFIT = "BENEFIT";
 export const regionLabel = (key, ko) => pick(T_REGION)?.[key] || ko;
 export const areaName = (ko) => pick(T_AREA)?.[ko] || ko;
 export const lodgingName = (l) => pick(T_LODGING)?.[l.id]?.[0] || l.name;
@@ -345,8 +348,12 @@ export const lodgingReason = (l) => pick(T_REASON)?.[l.type] || l.reason;
 export function benefitText(b, field) {
   return pick(T_BENEFIT)?.[b.id]?.[field] ?? b[field];
 }
+export const SOUVENIR_EN = { "강릉 커피 원두": "Gangneung coffee beans", "초당두부": "Chodang tofu", "강릉 닭강정": "Gangneung sweet-crispy chicken", "주문진 건오징어": "Jumunjin dried squid", "묵호 건어물": "Mukho dried seafood",
+    "속초 오징어순대": "Sokcho squid sundae", "속초 건어물": "Sokcho dried seafood", "용대리 황태": "Yongdae-ri dried pollack", "양양 송이": "Yangyang pine mushrooms", "춘천 닭갈비": "Chuncheon dakgalbi",
+    "춘천 막국수": "Chuncheon buckwheat noodles", "춘천 감자빵": "Chuncheon potato bread", "대관령 황태": "Daegwallyeong dried pollack", "정선 곤드레나물": "Jeongseon gondre greens", "영월 메밀전병": "Yeongwol buckwheat crepes",
+    "봉평 메밀": "Bongpyeong buckwheat", "태백 한우": "Taebaek hanwoo beef", "횡성 한우": "Hoengseong hanwoo beef" };
 // 특산물: 외국어 화면은 번역 + 한국어(강원더몰에서 그대로 검색하는 말)
-export const souvenirName = (ko) => (lang === "ko" || !SOUVENIR[lang]?.[ko] ? ko : `${SOUVENIR[lang][ko]} (${ko})`);
+export const souvenirName = (ko) => { const s = lang === "en" ? SOUVENIR_EN[ko] : C?.SOUVENIR?.[lang]?.[ko]; return lang === "ko" || !s ? ko : `${s} (${ko})`; };
 // 출발점: 기준 역 또는 "숙소(경포)"
 export function startName(start, lodging) {
   if (lang === "ko") return start.name;
@@ -358,26 +365,28 @@ export function startName(start, lodging) {
 /* ---------- 장소 영문 데이터 ---------- */
 let dataEn = {};
 let dataEnReady = null;
+// 화면 언어에 필요한 외국어 자료를 받는다: 영어 장소 자료(영어·일본어·중국어), 일본어·중국어 표(그 두 언어만)
+export function loadLang(fetcher = fetch) {
+  return Promise.all([lang !== "ko" && loadDataEn(fetcher), (lang === "ja" || lang === "zh") && loadCJK()]);
+}
 export function loadDataEn(fetcher = fetch) {
   return (dataEnReady ??= fetcher("data-en.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { dataEn = j || {}; namesEnCache = null; }));
 }
 // 일본어·중국어: 장소는 knowledge-intl.js의 이름, 축제는 i18n-cjk.js의 이름 (없으면 영어, 그다음 한국어)
-const NAMES = { ja: NAMES_JA, zh: NAMES_ZH };
 export const placeName = (p) => {
   if (lang === "ko") return p.name;
   if (lang === "en") return dataEn[p.id]?.name || p.name;
-  return NAMES[lang][p.id] || FEST[lang][p.id] || dataEn[p.id]?.name || p.name;
+  return C?.[lang === "ja" ? "NAMES_JA" : "NAMES_ZH"]?.[p.id] || C?.FEST?.[lang]?.[p.id] || dataEn[p.id]?.name || p.name;
 };
 // 무료 간단 모드 가이드가 영어 질문 속 장소 이름을 알아듣도록
 let namesEnCache = null; // 같은 객체를 돌려줘야 가이드가 영어 이름 색인을 다시 만들지 않는다
 export const namesEn = () => (namesEnCache ??= Object.fromEntries(Object.entries(dataEn).map(([id, v]) => [id, v.name])));
-const TIPS_CJK = { ja: TIPS_JA, zh: TIPS_ZH };
 const firstSentence = (s) => (s.match(/^.*?。/) || [s])[0];
 export const placeDesc = (p) => {
   if (lang === "ko") return p.desc;
   if (lang === "en") return dataEn[p.id]?.desc || p.desc;
-  const tip = TIPS_CJK[lang][p.id];
-  return tip ? firstSentence(tip) : FEST_DESC[lang][p.id] || p.desc;
+  const tip = C?.[lang === "ja" ? "TIPS_JA" : "TIPS_ZH"]?.[p.id];
+  return tip ? firstSentence(tip) : C?.FEST_DESC?.[lang]?.[p.id] || p.desc;
 };
 
 /* ---------- index.html의 고정 문구 ----------
@@ -385,6 +394,7 @@ export const placeDesc = (p) => {
    처음 바꿀 때 한국어 원문을 data-ko에 보관해 두고, 그 원문을 키로 찾는다. */
 export function applyStatic(root = document) {
   document.documentElement.lang = HTML_LANG[lang];
+  if (lang === "ko" || lang === "en" || C) document.documentElement.classList.remove("i18n-wait"); // 일본어·중국어는 표를 받은 뒤에 보인다
   root.querySelectorAll("[data-i18n]").forEach((el) => {
     el.dataset.ko ??= el.innerHTML.trim();
     el.innerHTML = t(el.dataset.ko);

@@ -1,10 +1,10 @@
 import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
-import { checkLodgingLocal } from "./ai-local.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
-import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
-import { startLocal, guideLocal, changeNote } from "./ai-local.js";
+import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
+// 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
+const localAI = () => import("./ai-local.js");
 
 const $ = (s) => document.querySelector(s);
 // 응답이 늦으면 기다리지 않고 포기 (화면이 멈춰 보이지 않게)
@@ -531,7 +531,7 @@ document.addEventListener("submit", async (e) => {
     const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date, lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = checkLodgingLocal(text, getLang());
+  if (!r) r = (await localAI()).checkLodgingLocal(text, getLang());
   btn.disabled = false; btn.textContent = t("확인");
   const level = { low: t("안심"), mid: t("주의"), high: t("위험") };
   $("#safeResult").innerHTML = `
@@ -877,7 +877,7 @@ async function askGuide(question, shown = question) {
   } catch {}
   if (!r) {
     if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000)); // 한국어 화면에서도 영어 질문의 장소 이름을 알아듣게
-    r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
+    r = (await localAI()).guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
   }
   let note = "";
   if (r.changed) {
@@ -893,7 +893,7 @@ async function askGuide(question, shown = question) {
     // 엔진이 다시 확인한 결과를 그대로 알려준다
     const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
     const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => (placeById(id) ? placeName(placeById(id)) : id));
-    note = changeNote(r.lang, missed) ?? (missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요."));
+    note = (await localAI()).changeNote(r.lang, missed) ?? (missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요."));
   }
   wait.classList.remove("pending");
   wait.innerHTML = esc(r.answer + note);
@@ -921,7 +921,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
     const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 7000); // 서버 6초 + 1초
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) { r = startLocal(text, todayStr()); notifyNoAI(); }
+  if (!r) { r = (await localAI()).startLocal(text, todayStr()); notifyNoAI(); }
   btn.disabled = false; btn.textContent = t("만들기");
   fillForm({ ...r, days: Number(r.days) });
   $("#form").requestSubmit();
@@ -984,7 +984,7 @@ addEventListener("online", updateOnline); addEventListener("offline", updateOnli
 /* ---------- 언어 전환 (한국어 / EN / 日本語 / 中文) ---------- */
 async function switchLang(l) {
   setLang(l);
-  if (isForeign()) await loadDataEn((u) => fetchT(u, {}, 4000));
+  await loadLang((u) => fetchT(u, {}, 4000));
   applyStatic();
   heroCaption();
   renderStartRow();
@@ -995,8 +995,9 @@ document.querySelector(".lang").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]");
   if (b && b.dataset.lang !== getLang()) switchLang(b.dataset.lang);
 });
-applyStatic();
-if (isForeign()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 데이터를 먼저 받아 첫 화면부터 그 언어로 (일본어·중국어도 축제 소개·영문 이름 찾기에 씀)
+applyStatic(); // 한국어·영어 고정 문구는 바로
+await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
+if (getLang() === "ja" || getLang() === "zh") applyStatic();
 
 (function boot() {
   const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;
@@ -1023,3 +1024,5 @@ fetchT("api/shops?region=gangneung", {}, 3000)
   .catch(() => { $("#ownerLink").hidden = true; });
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// 첫 화면을 그린 뒤 한가할 때 무료 간단 모드를 미리 받아 둔다 (질문할 때 바로 답하게)
+(window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => localAI().catch(() => {}));
