@@ -113,12 +113,16 @@ function findPlaces(norm, regions, namesEn, question = "") {
   // 영어 낱말이 영문 이름 낱말의 앞부분이면 그 장소 ("hwanseon" → "Hwanseongul Cave")
   const qWords = String(question).toLowerCase().split(/[^a-z]+/).filter((w) => w.length >= 5);
   for (const [id, toks] of en) for (const tok of toks.slice(3)) for (const w of qWords) if (tok !== w && !enWords.has(w) && tok.startsWith(w)) hits.push({ id, at: n.indexOf(w), len: w.length });
+  // 영어 이름의 고유 낱말(5자 이상)은 질문 속 낱말과 통째로 같아야 한다 ("grandmother" 속 "grand"는 소금산 Grand Valley가 아님)
+  const qWordSet = new Set(qWords);
   for (const p of PLACES) {
     const full = [p.name, ...(p.alias || [])].flatMap((x) => [x.replace(/\s/g, "").toLowerCase(), stripName(x)])
       .concat(cjkTokensOf(p.id));
     // 별명은 이 여행 권역의 장소만 (예: "케이블카"가 다른 권역 케이블카를 가리키지 않게)
     const nick = regions.has(p.region) ? [...(NICKS[p.id] || []), ...(NICKS_EN[p.id] || []), ...(NICKS_JA[p.id] || []), ...(NICKS_ZH[p.id] || [])] : [];
-    for (const tok of [...new Set([...full, ...(en.get(p.id) || []), ...nick])]) {
+    const enToks = en.get(p.id) || [];
+    for (const w of enToks.slice(3)) if (qWordSet.has(w)) hits.push({ id: p.id, at: n.indexOf(w), len: w.length });
+    for (const tok of [...new Set([...full, ...enToks.slice(0, 3), ...nick])]) {
       const at = n.indexOf(tok.toLowerCase());
       if (tok.length >= 2 && at >= 0) hits.push({ id: p.id, at, len: tok.length });
     }
@@ -130,10 +134,12 @@ function findPlaces(norm, regions, namesEn, question = "") {
 const dist = (a, b) => Math.hypot(a.lat - b.lat, (a.lng - b.lng) * 0.8);
 
 // 일정이 바뀐 뒤 화면이 덧붙이는 말 (한국어·영어는 화면 번역 t()를 쓰고, 일본어·중국어는 여기서)
-export function changeNote(lang, missed) {
-  if (lang === "ja") return missed.length ? `(${missed.join("、")}は営業時間・休業日が合わず入れられませんでした)` : " 営業時間を確認し直してプランに反映しました。";
-  if (lang === "zh") return missed.length ? `(${missed.join("、")}因营业时间或休息日不合适，没能加入)` : " 已重新确认营业时间并更新行程。";
-  return null;
+export function changeNote(lang, hours = [], far = []) {
+  if (lang !== "ja" && lang !== "zh") return null;
+  if (!hours.length && !far.length) return lang === "ja" ? " 営業時間を確認し直してプランに反映しました。" : " 已重新确认营业时间并更新行程。";
+  const h = hours.length ? (lang === "ja" ? `(${hours.join("、")}は営業時間かルートが合わず入れられませんでした)` : `(${hours.join("、")}因营业时间或路线不合适，没能加入)`) : "";
+  const f = far.length ? (lang === "ja" ? `(${far.join("、")}は今回の旅のエリアから遠いため入れられませんでした)` : `(${far.join("、")}离这次行程的区域太远，没能加入)`) : "";
+  return h + f;
 }
 
 export function guideLocal(question, trip, dayIdx, ctx = {}) {

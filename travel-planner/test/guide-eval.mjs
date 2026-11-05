@@ -234,7 +234,23 @@ const BLIND = {
   zh: [["乌竹轩和船桥庄哪个适合孩子？", { kind: "kids" }], ["许筠纪念公园要门票吗", { kind: "fee", place: "heo-park" }], ["第二天太赶了", { kind: "prefs", pace: "relaxed" }], ["江门海水浴场适合拍照吗？", { kind: "photo", place: "gangmun-beach" }], ["加上注文津灯塔", { kind: "add", add: "jumunjin-lighthouse" }], ["有要走很多路的地方吗？", { kind: "walk" }], ["有地方停车吗？", { kind: "faq:주차" }]],
 };
 
-const SETS = process.argv.includes("--holdout") ? HOLDOUT : process.argv.includes("--blind") ? BLIND : Object.fromEntries(Object.keys(CASES).map((k) => [k, [...CASES[k], ...HOLDOUT[k], ...BLIND[k]]]));
+// 네 번째 묶음: 처음 잴 때 ko 93%·en 87%·ja 93%·zh 93% (전체 92%)였던 묶음 (아메리카노·나이·"grandmother"·歩きすぎ 등을 고친 뒤 넣어 둠)
+const FRESH = {
+  ko: [["선교장 몇 시에 닫아요", { kind: "hours" }], ["하슬라 입장권 가격", { kind: "fee" }], ["오죽헌 둘러보는데 얼마나 걸림", { kind: "duration" }], ["7살 아이랑 가기 괜찮나요", { kind: "kids" }], ["할머니 모시고 가는데 무리일까", { kind: "parents" }],
+    ["휠체어로 다닐 수 있어?", { kind: "walk" }], ["소나기 오면 어디 가지", { kind: "rain" }], ["일출 명소 어디야", { kind: "sunrise" }], ["저녁 먹을 곳", { kind: "food" }], ["아메리카노 맛있는 데", { kind: "cafe" }],
+    ["주차장 있어요?", { kind: "faq:주차" }], ["테라로사 넣어줘", { kind: "add" }], ["경포호 둘레길은 빼자", { kind: "remove" }], ["첫날 너무 많이 걸어", { kind: "prefs" }], ["자작나무숲 어때", { kind: "place", region: "seorak" }]],
+  en: [["When does Seongyojang close?", { kind: "hours" }], ["Ticket price for Haslla Art World", { kind: "fee" }], ["How long should I spend at Ojukheon?", { kind: "duration" }], ["We have a 7 year old, is this ok?", { kind: "kids" }], ["Is it too hard for my grandmother?", { kind: "parents" }],
+    ["Is it wheelchair accessible?", { kind: "walk" }], ["Plan B for rain?", { kind: "rain" }], ["Best place for sunrise?", { kind: "sunrise" }], ["Dinner recommendations?", { kind: "food" }], ["Good coffee nearby?", { kind: "cafe" }],
+    ["Is there parking?", { kind: "faq:주차" }], ["Please add Terarosa", { kind: "add" }], ["Remove Gyeongpo Lake", { kind: "remove" }], ["Day 1 is too tiring", { kind: "prefs" }], ["What's the birch forest like?", { kind: "place", region: "seorak" }]],
+  ja: [["船橋荘は何時に閉まる？", { kind: "hours" }], ["ハスラ・アートワールドの入場料は？", { kind: "fee" }], ["烏竹軒の見学時間はどれくらい？", { kind: "duration" }], ["7歳の子どもと一緒でも楽しめる？", { kind: "kids" }], ["祖母と行くのは大変？", { kind: "parents" }],
+    ["車椅子でも回れますか", { kind: "walk" }], ["雨の日の代わりのプランは？", { kind: "rain" }], ["日の出が見たい", { kind: "sunrise" }], ["晩ご飯のおすすめ", { kind: "food" }], ["おいしいコーヒーの店", { kind: "cafe" }],
+    ["駐車場はある？", { kind: "faq:주차" }], ["テラロサを追加して", { kind: "add" }], ["鏡浦湖は外して", { kind: "remove" }], ["1日目は歩きすぎ", { kind: "prefs" }], ["白樺の森はどう？", { kind: "place", region: "seorak" }]],
+  zh: [["船桥庄几点关门？", { kind: "hours" }], ["哈斯拉艺术世界门票多少？", { kind: "fee" }], ["乌竹轩要逛多久？", { kind: "duration" }], ["带7岁小孩去合适吗", { kind: "kids" }], ["带奶奶去会不会太辛苦", { kind: "parents" }],
+    ["坐轮椅能逛吗", { kind: "walk" }], ["下雨的话怎么办", { kind: "rain" }], ["想看日出", { kind: "sunrise" }], ["晚餐推荐", { kind: "food" }], ["哪里咖啡好喝", { kind: "cafe" }],
+    ["有停车场吗？", { kind: "faq:주차" }], ["加上Terarosa", { kind: "add" }], ["把镜浦湖去掉", { kind: "remove" }], ["第一天走太多了", { kind: "prefs" }], ["白桦林怎么样？", { kind: "place", region: "seorak" }]],
+};
+
+const SETS = process.argv.includes("--holdout") ? HOLDOUT : process.argv.includes("--blind") ? BLIND : process.argv.includes("--fresh") ? FRESH : Object.fromEntries(Object.keys(CASES).map((k) => [k, [...CASES[k], ...HOLDOUT[k], ...BLIND[k], ...FRESH[k]]]));
 const MIN = 0.95; // npm test 기준: 언어마다 95% 이상
 const verbose = !process.argv.includes("--check");
 let failedLangs = 0;

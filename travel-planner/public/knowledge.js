@@ -10,7 +10,7 @@ import { JA_PHRASES, ZH_PHRASES, toSimplified } from "./knowledge-intl.js";
 export const SYNONYMS = [
   // 누구와
   [["엄빠", "울엄마", "우리엄마", "어무니", "엄니", "아부지", "울아빠", "우리아빠", "노부모", "효도여행", "할머니", "할아버지", "부모랑", "양가"], "부모님"],
-  [["애기", "아기", "꼬맹이", "초딩", "유아", "애들", "아이들", "키즈", "자녀", "딸래미", "아들래미", "어린이"], "아이"],
+  [["유치원생", "초등학생", "애기", "아기", "꼬맹이", "초딩", "유아", "애들", "아이들", "키즈", "자녀", "딸래미", "아들래미", "어린이"], "아이"],
   [["여친", "남친", "애인", "와이프", "아내", "남편", "신랑", "데이트", "커플", "둘이서"], "연인"],
   [["나홀로", "혼행", "솔로", "1인"], "혼자"],
   // 이동
@@ -23,7 +23,7 @@ export const SYNONYMS = [
   [["눈와", "눈온", "폭설"], "눈"],
   // 하고 싶은 것
   [["배고", "먹을", "먹고", "밥집", "식당", "점심", "저녁밥", "식사", "먹거리", "음식"], "맛집"],
-  [["디저트", "빵집", "베이커리", "커피"], "카페"],
+  [["아메리카노", "라떼", "에스프레소", "핸드드립", "디저트", "빵집", "베이커리", "커피"], "카페"],
   [["야경", "야간", "밤에", "저녁에", "밤바다"], "밤"],
   [["해돋이", "해뜨는", "해뜨"], "일출"],
   [["인생샷", "포토존", "포토스팟", "인스타", "사진찍"], "사진"],
@@ -83,6 +83,7 @@ export function normalize(text) {
     t = toSimplified(t);
     for (const [re, to] of ZH_PHRASES) t = t.replace(re, to);
   }
+  t = t.replace(/\d+\s*(살|세)\s*(아이|애|딸|아들|짜리)?/g, " 아이 "); // "7살", "5세 아들"
   t = t.replace(/\s/g, "");
   for (const [words, to] of SYNONYMS) for (const w of words) if (t.includes(w)) t = t.split(w).join(to);
   return t;
@@ -363,8 +364,8 @@ export const EN_PHRASES = [
   [/\b(remove|skip|drop|delete|cancel|take out|don'?t want to go)\b/g, " 빼 "],
   [/\b(one more|another)\b/g, " 한곳더 "],
   [/\b(rain|rains|rainy|raining|rainfall)\b/g, " 비 "],
-  [/\b(kids?|children|child|baby|babies|toddlers?|family)\b/g, " 아이 "],
-  [/\b(parents|elderly|seniors?|mom|dad|mother|father|grandparents?)\b/g, " 부모님 "],
+  [/\b(kids?|children|child|baby|babies|toddlers?|family|son|daughter|\d+[\s-]*(?:years?|yrs?)[\s-]*old)\b/g, " 아이 "],
+  [/\b(parents|elderly|seniors?|mom|dad|mother|father|grandparents?|grandma|grandpa|grandmother|grandfather)\b/g, " 부모님 "],
   [/\b(stairs|steps|steep|wheelchair|stroller|hilly|uphill|a lot of walking|lots of walking|much walking|walk a lot)\b/g, " 계단 "],
   [/\b(parking|park the car|park my car|car park|(?:where|can) (?:do|can|should|to)? ?(?:i|we)? ?park)\b/g, " 주차 "],
   [/\b(sunrise)\b/g, " 일출 "], [/\b(photos?|pictures?|instagram|photo spots?)\b/g, " 사진 "],
@@ -378,7 +379,7 @@ export const EN_PHRASES = [
   [/\b(relaxed|slow|slowly|easy pace|take it easy|lighter)\b/g, " 여유 "],
   [/\b(packed|more places|full day)\b/g, " 알차 "],
   [/\b(indoors?|inside)\b/g, " 실내 "],
-  [/\b(cafes?|coffee|dessert|bakery)\b/g, " 카페 "],
+  [/\b(cafes?|coffee|dessert|bakery|latte|espresso|americano)\b/g, " 카페 "],
   [/\b(restaurants?|food|eat|eating|lunch|dinner|hungry|meal)\b/g, " 맛집 "],
   [/\b(beach(?:es)?|sea|ocean|seaside)\b/g, " 바다 "],
   [/\b(museums?|history|culture|art|gallery)\b/g, " 박물관 "],

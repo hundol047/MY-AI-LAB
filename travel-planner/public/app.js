@@ -480,13 +480,30 @@ function priceLinks(query, compact) {
   return `<a class="ghost small price" href="${priceUrl[main](query)}" target="_blank" rel="noopener">${compact ? t("최저가 비교") : t("이 지역 숙소 최저가 비교")}</a>`
     + `<a class="ghost small" href="${priceUrl[other](query)}" target="_blank" rel="noopener">${otherLabel}</a>`;
 }
+// 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
+const STAY_ART = (() => {
+  const bg = '<defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3f1ef"/><stop offset="1" stop-color="#f6ecdc"/></linearGradient></defs><rect width="56" height="56" fill="url(#b)"/>';
+  const T = "#0b5e6b", M = "#5f9b9a", A = "#f2a541", W = "#ffffff";
+  const art = {
+    ocean: `<circle cx="42" cy="15" r="5" fill="${A}"/><rect x="14" y="14" width="20" height="28" rx="2" fill="${T}"/><g fill="${W}"><rect x="18" y="19" width="4" height="4"/><rect x="26" y="19" width="4" height="4"/><rect x="18" y="27" width="4" height="4"/><rect x="26" y="27" width="4" height="4"/></g><rect y="42" width="56" height="14" fill="${M}"/><path d="M4 47q4-3 8 0t8 0t8 0t8 0t8 0t8 0" fill="none" stroke="${W}" stroke-width="2" stroke-linecap="round"/>`,
+    business: `<rect x="10" y="18" width="16" height="30" rx="2" fill="${M}"/><rect x="24" y="10" width="22" height="38" rx="2" fill="${T}"/><g fill="${W}"><rect x="28" y="15" width="4" height="4"/><rect x="37" y="15" width="4" height="4"/><rect x="28" y="23" width="4" height="4"/><rect x="37" y="23" width="4" height="4"/><rect x="28" y="31" width="4" height="4"/><rect x="37" y="31" width="4" height="4"/><rect x="14" y="23" width="3" height="3"/><rect x="19" y="23" width="3" height="3"/><rect x="14" y="30" width="3" height="3"/><rect x="19" y="30" width="3" height="3"/></g><rect y="48" width="56" height="8" fill="${M}" opacity=".5"/>`,
+    pension: `<circle cx="44" cy="30" r="7" fill="${M}"/><rect x="43" y="34" width="2" height="12" fill="${T}"/><path d="M8 28L22 15L36 28Z" fill="${A}"/><rect x="11" y="28" width="22" height="18" fill="${T}"/><rect x="19" y="34" width="6" height="12" fill="${W}"/><rect x="13" y="31" width="4" height="4" fill="${W}"/><rect y="46" width="56" height="10" fill="${M}" opacity=".5"/>`,
+    hanok: `<path d="M5 25Q10 28 28 24Q46 28 51 25L46 19Q28 22 10 19Z" fill="${T}"/><path d="M16 19Q28 11 40 19Z" fill="${T}"/><rect x="12" y="27" width="32" height="17" fill="#f3e3c3"/><g fill="${T}"><rect x="12" y="27" width="2" height="17"/><rect x="27" y="27" width="2" height="17"/><rect x="42" y="27" width="2" height="17"/></g><g fill="${M}"><rect x="16" y="31" width="8" height="8"/><rect x="32" y="31" width="8" height="8"/></g><rect x="8" y="44" width="40" height="4" fill="${M}"/>`,
+    resort: `<path d="M0 34L14 20L24 28L36 14L56 34V56H0Z" fill="${M}" opacity=".7"/><rect x="10" y="26" width="36" height="20" rx="2" fill="${T}"/><g fill="${W}"><rect x="14" y="30" width="5" height="4"/><rect x="22" y="30" width="5" height="4"/><rect x="30" y="30" width="5" height="4"/><rect x="38" y="30" width="4" height="4"/><rect x="14" y="37" width="5" height="4"/><rect x="22" y="37" width="5" height="4"/><rect x="30" y="37" width="5" height="4"/><rect x="38" y="37" width="4" height="4"/></g><rect x="6" y="46" width="44" height="5" rx="2.5" fill="#7cc4c9"/>`,
+    guesthouse: `<path d="M12 27L28 14L44 27Z" fill="${T}"/><rect x="15" y="27" width="26" height="19" fill="${M}"/><circle cx="28" cy="33" r="3.5" fill="${W}"/><rect x="25" y="38" width="6" height="8" fill="${T}"/><rect x="36" y="16" width="4" height="7" fill="${T}"/><circle cx="46" cy="14" r="3" fill="${A}"/><rect y="46" width="56" height="10" fill="${M}" opacity=".45"/>`,
+  };
+  return Object.fromEntries(Object.entries(art).map(([k, v]) => [k, `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56">${bg}${v}</svg>`).replace(/'/g, "%27")}')`])); // style="…" 안에 들어가므로 작은따옴표
+})();
 function staysHTML(l) {
   const list = staysFor(l);
   if (!list.length) return "";
+  const byType = lodgingPlaces?.[l.id] || {};
+  const type = byType[l.type]?.length ? l.type : Object.keys(byType).find((k) => byType[k]?.length) || l.type; // staysFor가 고른 목록의 종류
+  const art = STAY_ART[type] || STAY_ART.pension;
   return `<div class="stays"><b>${t("이 지역 추천 숙소")}</b><ul>${list.map((h) => {
     const q = encodeURIComponent(h.name);
     return `<li>
-      <div class="stay-img"${h.photo ? ` style="background-image:url('${h.photo}')"` : ""}></div>
+      <div class="stay-img" style="background-image:${h.photo ? `url('${h.photo}'), ` : ""}${art}"></div>
       <div class="stay-info"><strong>${esc(h.name)}</strong>
         <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
       <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
@@ -892,8 +909,14 @@ async function askGuide(question, shown = question) {
     rebuild();
     // 엔진이 다시 확인한 결과를 그대로 알려준다
     const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
-    const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => (placeById(id) ? placeName(placeById(id)) : id));
-    note = (await localAI()).changeNote(r.lang, missed) ?? (missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요."));
+    // 못 넣은 곳: 이번 여행 권역 밖이라 먼 곳과, 영업시간·휴무가 안 맞는 곳을 나눠 이유를 알려 준다
+    const regions = new Set(trip.days.flatMap((d) => d.items.map((i) => i.place.region)).concat(state.input.region));
+    const notPlaced = (r.add || []).filter((id) => !placed.has(id)).map(placeById).filter(Boolean);
+    const far = notPlaced.filter((p) => !regions.has(p.region)).map(placeName);
+    const hours = notPlaced.filter((p) => regions.has(p.region)).map(placeName);
+    note = (await localAI()).changeNote(r.lang, hours, far) ?? (!notPlaced.length ? t(" 영업시간을 다시 확인해 일정에 반영했어요.")
+      : (hours.length ? t(" ({names}은(는) 영업시간이나 동선이 맞지 않아 넣지 못했어요)", { names: hours.join(", ") }) : "")
+        + (far.length ? t(" ({names}은(는) 이번 여행 지역에서 멀어 넣지 못했어요)", { names: far.join(", ") }) : ""));
   }
   wait.classList.remove("pending");
   wait.innerHTML = esc(r.answer + note);
