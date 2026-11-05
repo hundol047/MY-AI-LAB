@@ -1,21 +1,14 @@
 // AI 기능: 한 줄 시작, AI 가이드, 숙소 안심 체크, 메뉴판 읽기
-// 제공사는 둘 중 하나를 환경변수로 고른다.
-//   Claude (기본): ANTHROPIC_API_KEY · CLAUDE_AI_MODEL (기본 claude-opus-5-5) · CLAUDE_AI_EFFORT (기본 low)
-//   OpenAI 호환: AI_API_KEY (또는 OPENAI_API_KEY) · AI_MODEL · AI_BASE_URL · AI_REASONING_EFFORT
-//   AI_PROVIDER=claude|openai 로 직접 고를 수도 있다. 지정이 없으면 ANTHROPIC_API_KEY가 있을 때 Claude.
+// OpenAI 방식(OpenAI 호환) API를 쓴다. 모델·주소는 환경변수로 정한다. 키가 없으면 화면이 무료 간단 모드(public/ai-local.js)로 답한다.
+//   AI_API_KEY (또는 OPENAI_API_KEY) · AI_MODEL (필수, 예: 제공사 콘솔에 적힌 모델 ID)
+//   AI_BASE_URL (OpenAI가 아닌 호환 API일 때) · AI_REASONING_EFFORT (추론 모델이면 low/medium/high)
 // 원칙: AI는 말을 이해하고 설명만 한다. 장소는 검증된 데이터의 id 중에서만 고를 수 있고(스키마 enum + 서버 재검사),
 //       실제 배치와 영업시간 확인은 일정 엔진이 다시 한다.
 import OpenAI from "openai";
-import Anthropic from "@anthropic-ai/sdk";
 import { PLACES, FESTIVALS, REGIONS } from "./public/data.js";
 import { hoursFor, addDays, fmt } from "./public/planner.js";
 
-export const AI_PROVIDER = process.env.AI_PROVIDER
-  || (process.env.ANTHROPIC_API_KEY ? "claude" : process.env.AI_MODEL ? "openai" : "");
-export const AI_MODEL = AI_PROVIDER === "claude"
-  ? process.env.CLAUDE_AI_MODEL || "claude-opus-5-5"
-  : process.env.AI_MODEL || "";
-const CLAUDE_AI_EFFORT = process.env.CLAUDE_AI_EFFORT || "low"; // 화면에서 기다리는 기능이라 빠른 쪽이 기본
+export const AI_MODEL = process.env.AI_MODEL || "";
 // 기다리는 최대 시간. 넘으면 서버가 실패를 돌려주고 화면은 바로 무료 간단 모드로 답한다 (화면 쪽은 이보다 1초 길게 기다림)
 export const START_MS = 6_000, GUIDE_MS = 8_000;
 const CATS = ["sea", "cafe", "food", "culture", "nature"];
@@ -49,42 +42,7 @@ function conforms(v, sc) {
 
 // 같은 앞부분(system + 장소 데이터)은 제공사의 자동 프롬프트 캐시가 재사용하도록 앞에 둔다
 // timeout: 화면에서 기다리는 시간보다 조금 짧게 (재시도 없이 바로 실패 → 화면은 규칙 기반으로 대체)
-async function askJSON(opts) {
-  if (AI_PROVIDER === "claude") return askClaude(opts);
-  return askOpenAI(opts);
-}
-
-/* ---------- Claude (Anthropic API) ---------- */
-let claude = null;
-const getClaude = () => (claude ??= new Anthropic({ timeout: 40_000, maxRetries: 1 }));
-
-// system과 캐시 표시된 앞부분(장소 데이터)은 cache_control로 캐시해 같은 여행의 다음 질문을 빠르고 싸게 한다
-async function askClaude({ system, user, schema, image = null, sanitize = (o) => o, timeout = 18_000 }) {
-  const blocks = typeof user === "string" ? [{ text: user }] : user;
-  const content = [
-    ...(image ? [{ type: "image", source: { type: "base64", media_type: image.mediaType, data: image.data } }] : []),
-    ...blocks.map((b) => ({ type: "text", text: b.text, ...(b.cache ? { cache_control: { type: "ephemeral" } } : {}) })),
-  ];
-  const res = await getClaude().beta.messages.create({
-    model: AI_MODEL,
-    max_tokens: 8000,
-    system: [{ type: "text", text: system, cache_control: { type: "ephemeral" } }],
-    messages: [{ role: "user", content }],
-    output_config: { effort: CLAUDE_AI_EFFORT, format: { type: "json_schema", schema } },
-    // 안전 분류기가 거절하면 서버가 알맞은 다른 Claude 모델로 이어서 답한다
-    ...(/^claude-(opus-5|sonnet-5-5|fable-5-1)/.test(AI_MODEL)
-      ? { betas: ["server-side-fallback-2026-07-01"], fallbacks: "default" } : {}),
-  }, { timeout, maxRetries: 0 });
-  if (res.stop_reason === "refusal") throw new Error("refused");
-  if (res.stop_reason === "max_tokens") throw new Error("truncated");
-  const text = res.content.filter((b) => b.type === "text").map((b) => b.text).join("");
-  const out = sanitize(JSON.parse(text));
-  if (!conforms(out, schema)) throw new Error("schema mismatch");
-  return out;
-}
-
-/* ---------- OpenAI 호환 API ---------- */
-async function askOpenAI({ system, user, schema, name = "result", image = null, sanitize = (o) => o, timeout = 18_000 }) {
+async function askJSON({ system, user, schema, name = "result", image = null, sanitize = (o) => o, timeout = 18_000 }) {
   const text = typeof user === "string" ? user : user.map((b) => b.text).join("\n\n");
   const content = image
     ? [{ type: "image_url", image_url: { url: `data:${image.mediaType};base64,${image.data}` } }, { type: "text", text }]

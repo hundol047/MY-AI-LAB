@@ -88,4 +88,16 @@ for (const q of ["비 오면 어떡해?", "아이랑 가도 괜찮을까?", "오
   r = askEn(q);
   assert.doesNotMatch(r.answer, /[가-힣]/, `영어 화면인데 한국어 답: ${q} → ${r.answer}`);
 }
+// 한 줄 시작: 4개 언어
+for (const [q, want] of [
+  ["Day trip to Chuncheon with my kids by train", { region: "chuncheon", who: "family", days: 1, move: "transit" }],
+  ["週末に彼女と江陵へ2泊、レンタカーで", { region: "gangneung", who: "couple", days: 3, move: "car" }],
+  ["和父母去平昌三天两夜，坐高铁", { region: "pyeongchang", who: "parents", days: 3, move: "transit" }],
+  ["3月5日から原州に1泊、一人旅、バスで", { region: "wonju", who: "solo", days: 2, move: "transit", date: "2027-03-05" }],
+  ["Solo trip to Gangneung for 3 nights, taxi", { region: "gangneung", who: "solo", days: 4, move: "taxi" }],
+  ["带孩子去束草两天一夜，自驾", { region: "seorak", who: "family", days: 2, move: "car" }],
+]) {
+  const got = startLocal(q, "2026-11-05");
+  for (const [k, v] of Object.entries(want)) assert.equal(got[k], v, `${q} → ${k}`);
+}
 console.log("ok - 무료 간단 모드 가이드");

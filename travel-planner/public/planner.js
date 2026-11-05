@@ -487,6 +487,8 @@ export function parseRequestLocally(text) {
   if (has("덜걷", "걷기싫", "걷기힘", "다리", "힘들", "지쳐", "지쳤", "피곤", "무릎", "유모차", "어르신")) out.lessWalk = true;
   if (has("여유", "천천히", "느긋")) out.pace = "relaxed";
   if (has("알차", "많이", "빡빡", "더많")) out.pace = "packed";
+  // "너무 빡빡해", "힘들어"처럼 일정이 벅차다는 말은 여유롭게 (빡빡하게 해 달라는 뜻이 아님)
+  if (/너무(빡빡|많|바빠|힘들|촘촘)|빡빡(해|한데|하네|하다|해요)(?!줘)|벅차|힘들어|정신없/.test(t)) out.pace = "relaxed";
   const cats = { sea: ["바다", "해변"], cafe: ["카페", "커피"], food: ["맛집", "먹", "시장", "회"], culture: ["역사", "문화", "박물관", "전시", "미술"], nature: ["자연", "산책", "숲", "호수"] };
   for (const [cat, words] of Object.entries(cats)) {
     for (const w of words) {

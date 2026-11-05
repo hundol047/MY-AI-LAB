@@ -5,10 +5,9 @@
   "type": "module",
   "scripts": {
     "start": "node server.mjs",
-    "test": "node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/planner.test.mjs"
+    "test": "node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/guide-eval.mjs --check && node test/planner.test.mjs"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^1.5.0",
     "openai": "^7.50.0",
     "qrcode": "^1.5.4"
   }

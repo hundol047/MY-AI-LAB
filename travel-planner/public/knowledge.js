@@ -4,6 +4,8 @@
 // - 2026-11 작성. 앱에 있는 강원 5개 권역 장소 107곳 모두.
 // - FAQ의 answer는 문장 하나 또는 권역별 문장 { 권역: 문장 }.
 
+import { JA_PHRASES, ZH_PHRASES, toSimplified } from "./knowledge-intl.js";
+
 // 같은 뜻의 다른 표현 → 앱이 알아듣는 말. 긴 표현부터 바꾼다 (공백 없앤 문장에 적용)
 export const SYNONYMS = [
   // 누구와
@@ -25,7 +27,7 @@ export const SYNONYMS = [
   [["야경", "야간", "밤에", "저녁에", "밤바다"], "밤"],
   [["해돋이", "해뜨는", "해뜨"], "일출"],
   [["인생샷", "포토존", "포토스팟", "인스타", "사진찍"], "사진"],
-  [["오르막", "경사", "휠체어", "유모차", "무릎"], "계단"],
+  [["걷는거힘든", "걷기힘든곳", "많이걷는", "오래걷는", "오르막", "경사", "휠체어", "유모차", "무릎"], "계단"],
   [["입장료", "요금", "가격", "비용", "공짜", "무료야", "얼마야", "얼마예요", "얼마에요", "얼마임", "얼만데"], "입장료"],
   [["얼마나걸", "몇시간", "몇분", "오래걸", "시간이얼마"], "소요시간"],
   [["몇시", "운영시간", "영업시간", "문닫", "문열", "휴무", "쉬는날", "열어", "오픈", "마감"], "운영"],
@@ -33,9 +35,54 @@ export const SYNONYMS = [
   [["사람많", "붐비", "웨이팅", "대기", "줄서", "줄이"], "혼잡"],
 ];
 
+// 질문이 어느 언어인지: 가나가 있으면 일본어, 한자만 있으면 중국어(일본어에만 쓰는 글자·말이 있으면 일본어), 한글은 화면 언어(영어 화면의 추천 질문 버튼은 한국어 문장을 보내므로), 로마자는 영어
+export function detectLang(text, ui = "ko") {
+  const t = String(text);
+  if (/[\u3040-\u30ff]/.test(t)) return "ja";
+  if (/[\u4e00-\u9fff]/.test(t) && !/[가-힣]/.test(t)) return /[営駅観沢]|料金|入場料|駐車|両親/.test(t) ? "ja" : "zh";
+  if (/[가-힣]/.test(t)) return ui === "en" ? "en" : "ko";
+  if (/[a-z]/i.test(t)) return "en";
+  return ui;
+}
+
+// 여행 조건 말(권역·기간·누구와·이동·날짜): 영어·일본어·중국어 → 한국어 (한 줄 시작과 가이드가 함께 쓴다)
+const TRIP_PHRASES = [
+  // 날짜
+  [/day after tomorrow|明後日|あさって|后天/gi, " 모레 "], [/\btomorrow\b|明日|あした|明天/gi, " 내일 "],
+  [/this weekend|\bweekend\b|\b(saturday|sunday)\b|週末|周末|土日|土曜日?|日曜日?|星期六|星期天|星期日|周六|周日/gi, " 주말 "],
+  [/(\d{1,2})\s*月\s*(\d{1,2})\s*[日号]/g, " $1월$2일 "],
+  [/\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\.?\s+(\d{1,2})(?:st|nd|rd|th)?\b/gi, (_, m, d) => ` ${"janfebmaraprmayjunjulaugsepoctnovdec".indexOf(m.toLowerCase().slice(0, 3)) / 3 + 1}월${d}일 `],
+  [/\b(\d{1,2})(?:st|nd|rd|th)?\s+(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\b/gi, (_, d, m) => ` ${"janfebmaraprmayjunjulaugsepoctnovdec".indexOf(m.toLowerCase().slice(0, 3)) / 3 + 1}월${d}일 `],
+  // 기간 (긴 것부터)
+  [/\b(4|5|6|four|five|six) nights?\b|\ba week\b|[456]泊|1週間|一週間|[四五六]晚|[456]晚|一周/gi, " 4박 "],
+  [/\b(3|three) nights?\b|\b4 days\b|3泊|三泊|三晚|3晚|四天三夜|4天3夜/gi, " 3박 "],
+  [/\b(2|two) nights?\b|\b3 days\b|2泊|二泊|两晚|2晚|三天两夜|3天2夜/gi, " 2박 "],
+  [/\b(1|one) night\b|\bovernight\b|\b2 days\b|1泊|一泊|一晚|1晚|两天一夜|2天1夜/gi, " 1박 "],
+  [/day trip|\bone day\b|日帰り|一日游|当天来回|当日往返/gi, " 당일 "],
+  // 누구와
+  [/\b(alone|solo|by myself|on my own)\b|ひとり旅|一人旅|一个人|独自/gi, " 혼자 "],
+  [/\b(girlfriend|boyfriend|partner|wife|husband|couple|date|honeymoon)\b|彼女|彼氏|恋人|夫婦|カップル|デート|女朋友|男朋友|情侣|老婆|老公|约会|蜜月/gi, " 연인 "],
+  // 이동
+  [/\b(public transport|public transportation|train|trains|bus|buses|ktx|subway|by rail)\b|電車|バス|公共交通|地下鉄|火车|高铁|大巴|公交|地铁/gi, " 대중교통 "],
+  [/\b(taxi|cab)\b|タクシー|出租车|打车/gi, " 택시 "],
+  [/\b(by car|rental car|rent a car|drive|driving|self-drive)\b|レンタカー|車で|ドライブ|自驾|开车|租车/gi, " 자동차 "],
+  // 권역
+  [/\b(gangneung|donghae|samcheok|jeongdongjin)\b|江陵|カンヌン|東海|三陟|正東津|东海|正东津/gi, " 강릉 "],
+  [/\b(sokcho|yangyang|seoraksan|seorak|goseong|inje)\b|束草|ソクチョ|襄陽|ヤンヤン|雪嶽|雪岳|ソラク|高城|麟蹄|襄阳/gi, " 속초 "],
+  [/\b(chuncheon|hwacheon|cheorwon)\b|春川|チュンチョン|華川|鉄原|华川|铁原/gi, " 춘천 "],
+  [/\b(pyeongchang|daegwallyeong|jeongseon|yeongwol|taebaek)\b|平昌|ピョンチャン|大関嶺|旌善|寧越|太白|大关岭|宁越/gi, " 평창 "],
+  [/\b(wonju|hoengseong)\b|原州|ウォンジュ|横城/gi, " 원주 "],
+];
+
 export function normalize(text) {
   let t = String(text).toLowerCase();
+  for (const [re, to] of TRIP_PHRASES) t = t.replace(re, to);
   if (/[a-z]/.test(t)) for (const [re, to] of EN_PHRASES) t = t.replace(re, to);
+  if (/[\u3040-\u30ff\u4e00-\u9fff]/.test(t)) {
+    for (const [re, to] of JA_PHRASES) t = t.replace(re, to);
+    t = toSimplified(t);
+    for (const [re, to] of ZH_PHRASES) t = t.replace(re, to);
+  }
   t = t.replace(/\s/g, "");
   for (const [words, to] of SYNONYMS) for (const w of words) if (t.includes(w)) t = t.split(w).join(to);
   return t;
@@ -280,7 +327,7 @@ export const THEMES = {
 // 권역 공통 질문 (장소와 상관없는 것)
 export const FAQ = [
   { keys: ["주차"], answer: "앱 데이터에는 주차 정보가 없어요. 해변·시장·카페거리는 주말에 주차가 붐비니 오전 일찍 가거나 근처 공영주차장을 찾아보세요." },
-  { keys: ["가는법", "어떻게가", "ktx", "KTX", "기차타", "버스타", "서울에서"], answer: {
+  { keys: ["가는법", "어떻게가", "ktx", "KTX", "기차타", "버스타", "서울에서", "대중교통"], answer: {
     gangneung: "서울에서 강릉까지는 KTX로 약 2시간이에요. 고속버스도 자주 있어요.",
     seorak: "서울에서 속초·양양까지는 고속버스로 2시간 30분 안팎이에요. 기차는 아직 없어요.",
     chuncheon: "서울에서 춘천까지는 ITX-청춘 열차로 1시간 남짓이고, 경춘선 전철로도 갈 수 있어요.",
@@ -305,9 +352,10 @@ export const EN_PHRASES = [
   [/\bday\s*(\d)\b/g, " $1일차 "], [/\b(\d)(st|nd|rd|th)\s+day\b/g, " $1일차 "],
   [/\bfirst day\b/g, " 첫날 "], [/\bsecond day\b/g, " 둘째날 "], [/\bthird day\b/g, " 셋째날 "], [/\blast day\b/g, " 마지막날 "],
   // "no cafes" → "카페 말고" (빼 달라는 뜻)
-  [/\b(?:no|without|avoid|skip|remove|drop|less)\s+(cafes?|coffee)\b/g, " 카페 말고 "],
-  [/\b(?:no|without|avoid|skip|remove|drop|less)\s+(beach(?:es)?|sea|ocean)\b/g, " 바다 말고 "],
-  [/\b(?:no|without|avoid|skip|remove|drop|less)\s+(museums?|history|culture)\b/g, " 박물관 말고 "],
+  [/\b(?:no|without|avoid|skip|remove|drop|less|fewer)\s+(cafes?|coffee)\b/g, " 카페 말고 "],
+  [/\b(?:no|without|avoid|skip|remove|drop|less|fewer)\s+(beach(?:es)?|sea|ocean)\b/g, " 바다 말고 "],
+  [/\b(?:no|without|avoid|skip|remove|drop|less|fewer)\s+(museums?|history|culture|galleries|art)\b/g, " 박물관 말고 "],
+  [/\b(?:no|without|avoid|skip|less)\s+(restaurants?|food)\b/g, " 맛집 말고 "],
   [/\b(walk less|less walking|less walk|not walk much|too much walking|tired|exhausted)\b/g, " 덜걷 "],
   [/\b(how long|how much time|duration)\b/g, " 소요시간 "],
   [/\b(how much|price|prices|fee|fees|ticket|tickets|cost|admission|entrance)\b/g, " 입장료 "],
@@ -318,15 +366,16 @@ export const EN_PHRASES = [
   [/\b(kids?|children|child|baby|babies|toddlers?|family)\b/g, " 아이 "],
   [/\b(parents|elderly|seniors?|mom|dad|mother|father|grandparents?)\b/g, " 부모님 "],
   [/\b(stairs|steps|steep|wheelchair|stroller|hilly|uphill|a lot of walking|lots of walking|much walking|walk a lot)\b/g, " 계단 "],
-  [/\b(parking|park the car|park my car)\b/g, " 주차 "],
+  [/\b(parking|park the car|park my car|car park|(?:where|can) (?:do|can|should|to)? ?(?:i|we)? ?park)\b/g, " 주차 "],
   [/\b(sunrise)\b/g, " 일출 "], [/\b(photos?|pictures?|instagram|photo spots?)\b/g, " 사진 "],
   [/\b(night|evening|at night)\b/g, " 밤 "],
-  [/\b(souvenirs?|gifts?|local specialt(?:y|ies))\b/g, " 특산물 "],
-  [/\b(get there|from seoul|ktx|train|bus|how to go)\b/g, " 가는법 "],
-  [/\b(hotels?|accommodation|lodging|where to sleep)\b/g, " 숙소 "],
+  [/\b(souvenirs?|gifts?|local specialt(?:y|ies)|bring home|take home|famous for)\b/g, " 특산물 "],
+  [/\b(get there|from seoul|how to go|how do i get|how can i get)\b/g, " 가는법 "],
+  [/\b(hotels?|accommodation|lodging|where to sleep|where (?:are|do|will|should) (?:we|i) stay|staying)\b/g, " 숙소 "],
   [/\b(add|include|put in|want to go|wanna go|visit|go to)\b/g, " 넣어 "],
   [/\b(crowded|busy|wait|waiting|queue|line up)\b/g, " 혼잡 "],
-  [/\b(relaxed|slow|slowly|easy pace|take it easy)\b/g, " 여유 "],
+  [/\b(too (?:packed|busy|rushed|much|tight|tiring)|hectic|exhausting|overloaded)\b/g, " 너무빡빡해 "],
+  [/\b(relaxed|slow|slowly|easy pace|take it easy|lighter)\b/g, " 여유 "],
   [/\b(packed|more places|full day)\b/g, " 알차 "],
   [/\b(indoors?|inside)\b/g, " 실내 "],
   [/\b(cafes?|coffee|dessert|bakery)\b/g, " 카페 "],
@@ -369,6 +418,7 @@ export const NICKS_EN = {
   "museum-san": ["museumsan"],
   sogeumsan: ["sogeumsan", "grandvalley", "suspensionbridge"],
   bangyeri: ["ginkgotree"],
+  "heo-park": ["heogyun", "heonanseolheon"],
 };
 
 export const TIPS_EN = {

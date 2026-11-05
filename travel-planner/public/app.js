@@ -4,7 +4,7 @@ import { checkLodgingLocal } from "./ai-local.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
 import { t, isEN, getLang, namesEn, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
-import { startLocal, guideLocal } from "./ai-local.js";
+import { startLocal, guideLocal, changeNote } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
 // 응답이 늦으면 기다리지 않고 포기 (화면이 멈춰 보이지 않게)
@@ -890,7 +890,7 @@ async function askGuide(question, shown = question) {
     // 엔진이 다시 확인한 결과를 그대로 알려준다
     const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
     const missed = (r.add || []).filter((id) => !placed.has(id)).map((id) => (placeById(id) ? placeName(placeById(id)) : id));
-    note = missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요.");
+    note = changeNote(r.lang, missed) ?? (missed.length ? t(" ({names}은(는) 영업시간·휴무가 맞지 않아 넣지 못했어요)", { names: missed.join(", ") }) : t(" 영업시간을 다시 확인해 일정에 반영했어요."));
   }
   wait.classList.remove("pending");
   wait.innerHTML = esc(r.answer + note);
