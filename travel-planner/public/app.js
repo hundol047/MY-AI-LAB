@@ -3,7 +3,7 @@ import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
-import { t, isEN, getLang, namesEn, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
+import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 import { startLocal, guideLocal, changeNote } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
@@ -97,7 +97,7 @@ function startOpts(input) {
 function renderStartRow() {
   const s = savedStart(), region = segValue("region") || "gangneung";
   const base = REGIONS[region].base;
-  $("#startLabel").textContent = s ? (isEN() && s.nameEn ? s.nameEn : s.name) : t("{name} (기본)", { name: startName(base) });
+  $("#startLabel").textContent = s ? (isForeign() && s.nameEn ? s.nameEn : s.name) : t("{name} (기본)", { name: startName(base) });
   $("#startTime").value = store.get("startTime") || "";
   const recent = (store.get("startRecent") || []).filter((r) => !s || r.name !== s.name);
   renderStartResults($("#startSearch").value, recent);
@@ -106,7 +106,7 @@ function setStart(s) {
   if (s) {
     store.set("startPoint", s);
     store.set("startRecent", [s, ...(store.get("startRecent") || []).filter((r) => r.name !== s.name)].slice(0, 5));
-    toast(t("출발지를 {name}(으)로 정했어요", { name: isEN() && s.nameEn ? s.nameEn : s.name }));
+    toast(t("출발지를 {name}(으)로 정했어요", { name: isForeign() && s.nameEn ? s.nameEn : s.name }));
   } else { try { localStorage.removeItem("startPoint"); } catch { /* 저장소 없음 */ } }
   $("#startSearch").value = "";
   renderStartRow();
@@ -115,8 +115,8 @@ function startCandidates() {
   const own = [
     ...ORIGINS,
     ...Object.values(REGIONS).map((r) => ({ name: r.base.name, lat: r.base.lat, lng: r.base.lng })),
-    ...LODGING.map((l) => ({ name: l.name, nameEn: isEN() ? lodgingName(l) : undefined, lat: l.lat, lng: l.lng })),
-    ...PLACES.map((p) => ({ name: p.name, nameEn: isEN() ? placeName(p) : undefined, lat: p.lat, lng: p.lng })),
+    ...LODGING.map((l) => ({ name: l.name, nameEn: isForeign() ? lodgingName(l) : undefined, lat: l.lat, lng: l.lng })),
+    ...PLACES.map((p) => ({ name: p.name, nameEn: isForeign() ? placeName(p) : undefined, lat: p.lat, lng: p.lng })),
   ];
   const seen = new Set();
   return own.filter((o) => (seen.has(o.name) ? false : seen.add(o.name)));
@@ -130,7 +130,7 @@ function renderStartResults(q, recent = []) {
     list = startCandidates().filter((o) => norm(o.name).includes(query) || norm(o.nameEn).includes(query)).slice(0, 8);
     if (!list.length) { box.innerHTML = `<li class="none">${t("검색 결과가 없어요")}</li>`; return; }
   } else { list = recent; head = list.length ? `<li class="head">${t("최근 출발지")}</li>` : ""; }
-  box.innerHTML = head + list.map((o, i) => `<li><button type="button" data-start="${i}">${esc(isEN() && o.nameEn ? o.nameEn : o.name)}</button></li>`).join("");
+  box.innerHTML = head + list.map((o, i) => `<li><button type="button" data-start="${i}">${esc(isForeign() && o.nameEn ? o.nameEn : o.name)}</button></li>`).join("");
   box._list = list;
 }
 $("#startEdit").addEventListener("click", () => {
@@ -475,7 +475,7 @@ const priceUrl = {
   google: (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`, // 구글 검색의 숙소 정보에 여러 예약 사이트 가격이 함께 나온다
 };
 function priceLinks(query, compact) {
-  const [main, other] = isEN() ? ["google", "naver"] : ["naver", "google"];
+  const [main, other] = isForeign() ? ["google", "naver"] : ["naver", "google"];
   const otherLabel = other === "naver" ? t("네이버") : t("구글");
   return `<a class="ghost small price" href="${priceUrl[main](query)}" target="_blank" rel="noopener">${compact ? t("최저가 비교") : t("이 지역 숙소 최저가 비교")}</a>`
     + `<a class="ghost small" href="${priceUrl[other](query)}" target="_blank" rel="noopener">${otherLabel}</a>`;
@@ -531,7 +531,7 @@ document.addEventListener("submit", async (e) => {
     const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date, lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = checkLodgingLocal(text);
+  if (!r) r = checkLodgingLocal(text, getLang());
   btn.disabled = false; btn.textContent = t("확인");
   const level = { low: t("안심"), mid: t("주의"), high: t("위험") };
   $("#safeResult").innerHTML = `
@@ -665,9 +665,9 @@ async function renderShops() {
    교통(택시 요금·연료·버스)과 입장료는 근거 있는 값, 식사·숙박은 앱이 정한 평균 범위 (costs.js) */
 let feesData = {};
 fetchT("fees.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { feesData = j; if (trip && !$("#result").hidden) renderCosts(); });
-const won = (n) => (isEN() ? `₩${Math.round(n).toLocaleString("en-US")}` : `${Math.round(n).toLocaleString("ko-KR")}원`);
+const won = (n) => (isForeign() ? `₩${Math.round(n).toLocaleString("en-US")}` : `${Math.round(n).toLocaleString("ko-KR")}원`);
 const wonShort = (n) => {
-  if (isEN()) return `₩${n >= 10000 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")}`;
+  if (isForeign()) return `₩${n >= 10000 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")}`;
   return n >= 10000 ? `${(Math.round(n / 1000) / 10).toLocaleString("ko-KR")}만 원` : `${Math.round(n).toLocaleString("ko-KR")}원`;
 };
 const range = (lo, hi) => (lo === hi ? wonShort(lo) : `${wonShort(lo)} ~ ${wonShort(hi)}`);
@@ -723,7 +723,7 @@ function renderSouvenirs() {
   store.set("pastTrips", [entry, ...past.filter((p) => p.id !== id)].slice(0, 5));
   box.innerHTML = `
     <h3>${t("집에서 다시 맛보기")}</h3>
-    <ul>${list.map((s) => `<li><b>${s.item}</b><span>${t("{from}에서", { from: esc(nameOf(null, s.from)) })}</span><button type="button" class="ghost small" data-copy="${s.item}">${t("검색어 복사")}</button></li>`).join("")}</ul>
+    <ul>${list.map((s) => `<li><b>${esc(souvenirName(s.item))}</b><span>${t("{from}에서", { from: esc(nameOf(null, s.from)) })}</span><button type="button" class="ghost small" data-copy="${s.item}">${t("검색어 복사")}</button></li>`).join("")}</ul>
     <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${t("{mall}(강원도 공식 쇼핑몰)에서 주문하기", { mall: SHOP_MALL.name })}</a>`;
 }
 document.addEventListener("click", async (e) => {
@@ -737,7 +737,7 @@ function renderPast() {
   const p = past[0];
   box.hidden = false;
   const regionKey = p.id.split(":")[0];
-  box.innerHTML = `<b>${t("지난 {region} 여행에서 먹은 {items}", { region: regionLabel(regionKey, p.region), items: p.items.slice(0, 2).map((i) => i.item).join(", ") })}</b>
+  box.innerHTML = `<b>${t("지난 {region} 여행에서 먹은 {items}", { region: regionLabel(regionKey, p.region), items: p.items.slice(0, 2).map((i) => souvenirName(i.item)).join(", ") })}</b>
     <a class="ghost small" href="${SHOP_MALL.url}" target="_blank" rel="noopener">${t("집에서 다시 주문")}</a>`;
 }
 
@@ -953,7 +953,7 @@ $("#icsBtn").addEventListener("click", () => {
   lines.push("END:VCALENDAR");
   const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = `${isEN() ? "gangwon-trip" : "강원여행"}_${state.input.date}.ics`; a.click();
+  a.href = URL.createObjectURL(blob); a.download = `${isForeign() ? "gangwon-trip" : "강원여행"}_${state.input.date}.ics`; a.click();
   setTimeout(() => URL.revokeObjectURL(a.href), 1000);
 });
 
@@ -978,10 +978,10 @@ function notifyNoAI() {
 function updateOnline() { document.body.classList.toggle("offline", !navigator.onLine); }
 addEventListener("online", updateOnline); addEventListener("offline", updateOnline); updateOnline();
 
-/* ---------- 언어 전환 (한국어 / EN) ---------- */
+/* ---------- 언어 전환 (한국어 / EN / 日本語 / 中文) ---------- */
 async function switchLang(l) {
   setLang(l);
-  if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000));
+  if (isForeign()) await loadDataEn((u) => fetchT(u, {}, 4000));
   applyStatic();
   heroCaption();
   renderStartRow();
@@ -993,7 +993,7 @@ document.querySelector(".lang").addEventListener("click", (e) => {
   if (b && b.dataset.lang !== getLang()) switchLang(b.dataset.lang);
 });
 applyStatic();
-if (isEN()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 이름을 먼저 받아 첫 화면부터 영어로
+if (isForeign()) await loadDataEn((u) => fetchT(u, {}, 4000)); // 영문 장소 데이터를 먼저 받아 첫 화면부터 그 언어로 (일본어·중국어도 축제 소개·영문 이름 찾기에 씀)
 
 (function boot() {
   const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;

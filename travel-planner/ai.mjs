@@ -103,7 +103,8 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
 // 화면이 영어(lang="en")면 사람에게 보이는 글(summary·answer·plain 등)만 영어로 받는다. 선택값·id는 그대로.
-const replyIn = (lang) => (lang === "en" ? "\n\n(사용자 화면이 영어다. 사람에게 보이는 문장은 모두 영어로 쓴다.)" : "");
+const REPLY_LANG = { en: "영어", ja: "일본어", zh: "중국어(간체)" };
+const replyIn = (lang) => (REPLY_LANG[lang] ? `\n\n(사용자 화면이 ${REPLY_LANG[lang]}다. 사람에게 보이는 문장은 모두 ${REPLY_LANG[lang]}로 쓴다.)` : "");
 
 export async function startFromText(text, today, lang) {
   const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}${replyIn(lang)}`, schema: START_SCHEMA, name: "trip_choices", timeout: START_MS });

@@ -1,22 +1,30 @@
-// 화면 언어 (한국어 / English): 고정 문구 사전과 장소 영문 데이터를 한 곳에서 관리한다.
+// 화면 언어 (한국어 / English / 日本語 / 中文): 고정 문구 사전과 장소 외국어 데이터를 한 곳에서 관리한다.
+// - 일본어·중국어(간체) 사전은 i18n-cjk.js, 장소 이름·팁은 knowledge-intl.js.
 // - 고정 문구는 한국어 원문을 키로 쓴다: t("일정 만들기") → EN이면 "Make my plan". 사전에 없으면 한국어 그대로.
 // - {이름}은 값 자리: t("{n}곳", { n: 3 }) → "3 places"
 // - 장소 이름·설명은 data-en.json(한국관광공사 영문 관광정보, scripts/bake-english.mjs)에서. 없으면 한국어 그대로.
 // - 일정 엔진(planner.js)은 언어와 무관하게 그대로 쓰고, 화면에 보일 때만 바꾼다.
 
+import { JA, ZH, REGION, AREA, BASE, LODGING, TYPE, REASON, BENEFIT, FEST, SOUVENIR } from "./i18n-cjk.js";
+import { NAMES_JA, NAMES_ZH, TIPS_JA, TIPS_ZH } from "./knowledge-intl.js";
+
 const KEY = "lang";
+export const LANGS = ["ko", "en", "ja", "zh"];
 function initialLang() {
-  try { const s = localStorage.getItem(KEY); if (s === "ko" || s === "en") return s; } catch { /* 저장소 없음 */ }
+  try { const s = localStorage.getItem(KEY); if (LANGS.includes(s)) return s; } catch { /* 저장소 없음 */ }
   const langs = navigator.languages?.length ? navigator.languages : [navigator.language || "ko"];
-  return /^ko\b/i.test(langs[0] || "") ? "ko" : "en";
+  const first = langs[0] || "";
+  return /^ko\b/i.test(first) ? "ko" : /^ja\b/i.test(first) ? "ja" : /^zh\b/i.test(first) ? "zh" : "en";
 }
 let lang = initialLang();
 export const getLang = () => lang;
 export const isEN = () => lang === "en";
+export const isForeign = () => lang !== "ko"; // 외국어 화면(영어·일본어·중국어): 원화 표기, 구글 우선 등
+const HTML_LANG = { ko: "ko", en: "en", ja: "ja", zh: "zh-Hans" };
 export function setLang(l) {
-  lang = l === "en" ? "en" : "ko";
+  lang = LANGS.includes(l) ? l : "ko";
   try { localStorage.setItem(KEY, lang); } catch { /* 기억 못 해도 동작 */ }
-  document.documentElement.lang = lang;
+  document.documentElement.lang = HTML_LANG[lang];
 }
 
 /* ---------- 고정 문구 ---------- */
@@ -222,11 +230,13 @@ const EN = {
   "강원 여행 일정": "Gangwon trip plan",
   "링크를 복사했어요": "Link copied",
   "비 예보가 있는 날은 실내 위주로 바꿨어요": "Rain is forecast, so those days now focus on indoor places",
-  "AI에 연결되지 않아 간단 모드로 처리했어요": "AI is unavailable, so simple mode was used (Korean only)",
+  "AI에 연결되지 않아 간단 모드로 처리했어요": "AI is unavailable, so simple mode was used",
 };
 
+const DICT = { en: EN, ja: JA, zh: ZH };
 export function t(ko, vars) {
-  let s = lang === "en" && Object.hasOwn(EN, ko) ? EN[ko] : ko;
+  const d = DICT[lang];
+  let s = d && Object.hasOwn(d, ko) ? d[ko] : ko;
   if (vars) s = s.replace(/\{(\w+)\}/g, (_, k) => (vars[k] ?? ""));
   return s;
 }
@@ -235,14 +245,21 @@ export function t(ko, vars) {
 const WEEK_KO = ["일", "월", "화", "수", "목", "금", "토"];
 const WEEK_EN = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 const MONTH_EN = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const WEEK_JA = ["日", "月", "火", "水", "木", "金", "土"];
+const WEEK_ZH = ["日", "一", "二", "三", "四", "五", "六"];
 export function dateLabel(ds) {
   const [y, m, d] = ds.split("-").map(Number);
   const w = new Date(y, m - 1, d).getDay();
-  return lang === "en" ? `${WEEK_EN[w]}, ${MONTH_EN[m - 1]} ${d}` : `${m}월 ${d}일 (${WEEK_KO[w]})`;
+  if (lang === "en") return `${WEEK_EN[w]}, ${MONTH_EN[m - 1]} ${d}`;
+  if (lang === "ja") return `${m}月${d}日(${WEEK_JA[w]})`;
+  if (lang === "zh") return `${m}月${d}日 周${WEEK_ZH[w]}`;
+  return `${m}월 ${d}일 (${WEEK_KO[w]})`;
 }
 export function minutesLabel(min) {
   const h = Math.floor(min / 60), r = min % 60;
   if (lang === "en") return h ? `${h}h${r ? ` ${r}m` : ""}` : `${r} min`;
+  if (lang === "ja") return h ? `${h}時間${r ? `${r}分` : ""}` : `${r}分`;
+  if (lang === "zh") return h ? `${h}小时${r ? `${r}分钟` : ""}` : `${r}分钟`;
   return h ? `${h}시간${r ? ` ${r}분` : ""}` : `${r}분`;
 }
 export const monthsLabel = (months) => (lang === "en" ? months.map((m) => MONTH_EN[m - 1]).join("·") : months.join("·"));
@@ -314,23 +331,28 @@ const BENEFIT_EN = {
   },
 };
 
-export const regionLabel = (key, ko) => (lang === "en" ? REGION_EN[key] || ko : ko);
-export const areaName = (ko) => (lang === "en" ? AREA_EN[ko] || ko : ko);
-export const lodgingName = (l) => (lang === "en" ? LODGING_EN[l.id]?.[0] || l.name : l.name);
-export const lodgingDesc = (l) => (lang === "en" ? LODGING_EN[l.id]?.[1] || l.desc : l.desc);
-export const typeLabel = (type, ko) => (lang === "en" ? TYPE_EN[type] || ko : ko);
-export const typeLabelFromKo = (ko) => (lang === "en" ? TYPE_EN[TYPE_KO_TO_KEY[ko]] || ko : ko);
-export const lodgingReason = (l) => (lang === "en" ? REASON_EN[l.type] || l.reason : l.reason);
+// 언어별 표: 영어는 이 파일, 일본어·중국어는 i18n-cjk.js
+const pick = (tables) => tables[lang];
+const T_REGION = { en: REGION_EN, ...REGION }, T_AREA = { en: AREA_EN, ...AREA }, T_BASE = { en: BASE_EN, ...BASE };
+const T_LODGING = { en: LODGING_EN, ...LODGING }, T_TYPE = { en: TYPE_EN, ...TYPE }, T_REASON = { en: REASON_EN, ...REASON }, T_BENEFIT = { en: BENEFIT_EN, ...BENEFIT };
+export const regionLabel = (key, ko) => pick(T_REGION)?.[key] || ko;
+export const areaName = (ko) => pick(T_AREA)?.[ko] || ko;
+export const lodgingName = (l) => pick(T_LODGING)?.[l.id]?.[0] || l.name;
+export const lodgingDesc = (l) => pick(T_LODGING)?.[l.id]?.[1] || l.desc;
+export const typeLabel = (type, ko) => pick(T_TYPE)?.[type] || ko;
+export const typeLabelFromKo = (ko) => pick(T_TYPE)?.[TYPE_KO_TO_KEY[ko]] || ko;
+export const lodgingReason = (l) => pick(T_REASON)?.[l.type] || l.reason;
 export function benefitText(b, field) {
-  const v = lang === "en" ? BENEFIT_EN[b.id]?.[field] : null;
-  return v ?? b[field];
+  return pick(T_BENEFIT)?.[b.id]?.[field] ?? b[field];
 }
+// 특산물: 외국어 화면은 번역 + 한국어(강원더몰에서 그대로 검색하는 말)
+export const souvenirName = (ko) => (lang === "ko" || !SOUVENIR[lang]?.[ko] ? ko : `${SOUVENIR[lang][ko]} (${ko})`);
 // 출발점: 기준 역 또는 "숙소(경포)"
 export function startName(start, lodging) {
-  if (lang !== "en") return start.name;
+  if (lang === "ko") return start.name;
   if (start.nameEn) return start.nameEn;
   if (start.name.startsWith("숙소") && lodging) return t("숙소({name})", { name: lodgingName(lodging) });
-  return BASE_EN[start.name] || start.name;
+  return pick(T_BASE)?.[start.name] || start.name;
 }
 
 /* ---------- 장소 영문 데이터 ---------- */
@@ -339,16 +361,29 @@ let dataEnReady = null;
 export function loadDataEn(fetcher = fetch) {
   return (dataEnReady ??= fetcher("data-en.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (dataEn = j || {})));
 }
-export const placeName = (p) => (lang === "en" && dataEn[p.id]?.name) || p.name;
+// 일본어·중국어: 장소는 knowledge-intl.js의 이름, 축제는 i18n-cjk.js의 이름 (없으면 영어, 그다음 한국어)
+const NAMES = { ja: NAMES_JA, zh: NAMES_ZH };
+export const placeName = (p) => {
+  if (lang === "ko") return p.name;
+  if (lang === "en") return dataEn[p.id]?.name || p.name;
+  return NAMES[lang][p.id] || FEST[lang][p.id] || dataEn[p.id]?.name || p.name;
+};
 // 무료 간단 모드 가이드가 영어 질문 속 장소 이름을 알아듣도록
 export const namesEn = () => Object.fromEntries(Object.entries(dataEn).map(([id, v]) => [id, v.name]));
-export const placeDesc = (p) => (lang === "en" && dataEn[p.id]?.desc) || p.desc;
+const TIPS_CJK = { ja: TIPS_JA, zh: TIPS_ZH };
+const firstSentence = (s) => (s.match(/^.*?。/) || [s])[0];
+export const placeDesc = (p) => {
+  if (lang === "ko") return p.desc;
+  if (lang === "en") return dataEn[p.id]?.desc || p.desc;
+  const tip = TIPS_CJK[lang][p.id];
+  return tip ? firstSentence(tip) : dataEn[p.id]?.desc || p.desc; // 축제는 영어 소개(관광공사)
+};
 
 /* ---------- index.html의 고정 문구 ----------
    data-i18n: 내용(innerHTML), data-i18n-ph: placeholder, data-i18n-title: title·aria-label.
    처음 바꿀 때 한국어 원문을 data-ko에 보관해 두고, 그 원문을 키로 찾는다. */
 export function applyStatic(root = document) {
-  document.documentElement.lang = lang;
+  document.documentElement.lang = HTML_LANG[lang];
   root.querySelectorAll("[data-i18n]").forEach((el) => {
     el.dataset.ko ??= el.innerHTML.trim();
     el.innerHTML = t(el.dataset.ko);

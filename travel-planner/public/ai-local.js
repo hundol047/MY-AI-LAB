@@ -345,32 +345,44 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     "这是不用AI服务器的简易模式。可以带上地点名问营业时间、门票、带孩子/父母、台阶、要待多久，或者说“加上乌竹轩”“第2天再加一个海边”“不要咖啡”“少走路”。"));
 }
 
-// 숙소 안심 체크 (AI 없이): 붙여넣은 글에서 위험한 표현을 찾는다
-export function checkLodgingLocal(text) {
+// 숙소 안심 체크 (AI 없이): 붙여넣은 글에서 위험한 표현을 찾는다. 결과 문장은 화면 언어로
+const LC = {
+  ko: { noRule: "취소 규정 문구를 찾지 못했어요. 예약 전에 꼭 확인하세요.", noRefund: "환불 불가 조건이 있어요. 일정이 바뀌면 돈을 돌려받지 못할 수 있어요.", late: "임박해서 취소하면 환불이 안 돼요. 며칠 전까지 무료 취소인지 확인하세요.", fee: "취소 시점에 따라 수수료가 붙어요.", free: "무료 취소가 가능해요. 마감 시점만 확인하세요.",
+    extra: "추가 인원·바비큐·현장 결제 등 별도 요금이 있어요. 총액을 확인하세요.", noCompare: "평소 가격과 비교할 데이터는 없어요. 같은 날짜 다른 숙소와 비교해 보세요.",
+    rv: ["곰팡이·습기 이야기가 있어요", "벌레가 나왔다는 후기가 있어요", "소음 이야기가 있어요", "냄새 이야기가 있어요", "청결 문제 후기가 있어요", "사진과 다르다는 후기가 있어요", "응대가 불친절했다는 후기가 있어요", "주차가 불편하다는 후기가 있어요"],
+    ask: ["무료 취소 마감 시점", "추가 요금 포함 총액", "주차 가능 대수"], sum: { low: "큰 위험 신호는 보이지 않아요.", mid: "예약 전에 확인할 점이 있어요.", high: "환불 조건이 까다로워요. 신중하게 예약하세요." }, note: " (AI 연결 없이 문구만 살펴본 결과예요)" },
+  en: { noRule: "No cancellation policy found. Check it before booking.", noRefund: "There's a no-refund condition. If your plans change, you may not get your money back.", late: "Late cancellations aren't refunded. Check how many days before free cancellation ends.", fee: "A fee applies depending on when you cancel.", free: "Free cancellation is available. Just check the deadline.",
+    extra: "There are extra charges (extra guests, barbecue, pay on site). Check the total.", noCompare: "There's no usual-price data to compare. Compare with other places for the same dates.",
+    rv: ["Reviews mention mold or damp", "Reviews mention bugs", "Reviews mention noise", "Reviews mention smells", "Reviews mention cleanliness problems", "Reviews say it differs from the photos", "Reviews mention unfriendly staff", "Reviews say parking is difficult"],
+    ask: ["Free cancellation deadline", "Total price including extra charges", "Number of parking spaces"], sum: { low: "No major warning signs.", mid: "There are things to check before booking.", high: "Strict refund conditions. Book carefully." }, note: " (checked the wording only, without AI)" },
+  ja: { noRule: "キャンセル規定の記載が見つかりません。予約前に必ず確認してください。", noRefund: "返金不可の条件があります。予定が変わるとお金が戻らないかもしれません。", late: "直前のキャンセルは返金されません。何日前まで無料キャンセルか確認してください。", fee: "キャンセルの時期によって手数料がかかります。", free: "無料キャンセルができます。締切だけ確認してください。",
+    extra: "追加人数・バーベキュー・現地払いなど別料金があります。総額を確認してください。", noCompare: "普段の料金と比べるデータはありません。同じ日の他の宿と比べてみてください。",
+    rv: ["カビ・湿気の話があります", "虫が出たという口コミがあります", "騒音の話があります", "においの話があります", "清潔さに問題があるという口コミがあります", "写真と違うという口コミがあります", "対応が不親切だったという口コミがあります", "駐車が不便という口コミがあります"],
+    ask: ["無料キャンセルの締切", "追加料金込みの総額", "駐車できる台数"], sum: { low: "大きな危険信号は見当たりません。", mid: "予約前に確認したい点があります。", high: "返金条件が厳しいです。慎重に予約してください。" }, note: " (AIなしで文面だけを見た結果です)" },
+  zh: { noRule: "没找到取消规定的内容。预订前请一定确认。", noRefund: "有不可退款的条件。行程变了可能拿不回钱。", late: "临近取消不退款。请确认提前几天可以免费取消。", fee: "根据取消时间会收手续费。", free: "可以免费取消。只要确认截止时间。",
+    extra: "有加人、烧烤、现场付款等额外费用。请确认总价。", noCompare: "没有平时价格可以比较。请和同一天的其他住宿比比看。",
+    rv: ["评价提到发霉、潮湿", "有评价说出现了虫子", "评价提到噪音", "评价提到异味", "有评价说卫生有问题", "有评价说和照片不一样", "有评价说服务态度不好", "有评价说停车不方便"],
+    ask: ["免费取消截止时间", "含额外费用的总价", "可停车数量"], sum: { low: "没看到大的风险信号。", mid: "预订前有需要确认的地方。", high: "退款条件很严格。请谨慎预订。" }, note: " (未连接AI，只检查了文字)" },
+};
+export function checkLodgingLocal(text, lang = "ko") {
+  const M = LC[lang] || LC.ko;
   const t = text.replace(/\s+/g, " ");
   const find = (re) => re.test(t);
-  let cancel = { risk: "low", plain: "취소 규정 문구를 찾지 못했어요. 예약 전에 꼭 확인하세요." };
-  if (find(/환불\s*불가|취소\s*불가|환불이?\s*안/)) cancel = { risk: "high", plain: "환불 불가 조건이 있어요. 일정이 바뀌면 돈을 돌려받지 못할 수 있어요." };
-  else if (find(/(당일|1일 ?전|전날).{0,10}(취소|환불).{0,10}(불가|0%|없)/)) cancel = { risk: "mid", plain: "임박해서 취소하면 환불이 안 돼요. 며칠 전까지 무료 취소인지 확인하세요." };
-  else if (find(/위약금|수수료|\d+\s*%\s*(공제|환불)/)) cancel = { risk: "mid", plain: "취소 시점에 따라 수수료가 붙어요." };
-  else if (find(/무료\s*취소/)) cancel = { risk: "low", plain: "무료 취소가 가능해요. 마감 시점만 확인하세요." };
-  const price = find(/추가\s*(요금|인원|비용)|별도|현장\s*결제|바비큐.{0,6}(유료|별도)/)
-    ? { risk: "mid", plain: "추가 인원·바비큐·현장 결제 등 별도 요금이 있어요. 총액을 확인하세요." }
-    : { risk: "low", plain: "평소 가격과 비교할 데이터는 없어요. 같은 날짜 다른 숙소와 비교해 보세요." };
-  const words = [
-    [/곰팡이|습기|눅눅/, "곰팡이·습기 이야기가 있어요"], [/벌레|바퀴/, "벌레가 나왔다는 후기가 있어요"],
-    [/소음|시끄|방음/, "소음 이야기가 있어요"], [/냄새|악취/, "냄새 이야기가 있어요"],
-    [/더럽|청소.{0,4}안|머리카락|위생/, "청결 문제 후기가 있어요"], [/사진과\s*(다|달)|사진이랑/, "사진과 다르다는 후기가 있어요"],
-    [/불친절|응대/, "응대가 불친절했다는 후기가 있어요"], [/주차.{0,6}(어렵|불가|좁|없)/, "주차가 불편하다는 후기가 있어요"],
-  ];
-  const reviews = words.filter(([re]) => find(re)).map(([, plain]) => ({ risk: "mid", plain }));
+  let cancel = { risk: "low", plain: M.noRule };
+  if (find(/환불\s*불가|취소\s*불가|환불이?\s*안|non-?refundable|返金不可|不可退款|不退款/i)) cancel = { risk: "high", plain: M.noRefund };
+  else if (find(/(당일|1일 ?전|전날).{0,10}(취소|환불).{0,10}(불가|0%|없)/)) cancel = { risk: "mid", plain: M.late };
+  else if (find(/위약금|수수료|\d+\s*%\s*(공제|환불)|cancellation fee|キャンセル料|手续费/i)) cancel = { risk: "mid", plain: M.fee };
+  else if (find(/무료\s*취소|free cancellation|無料キャンセル|免费取消/i)) cancel = { risk: "low", plain: M.free };
+  const price = find(/추가\s*(요금|인원|비용)|별도|현장\s*결제|바비큐.{0,6}(유료|별도)|extra (charge|guest|fee)|pay at (the )?property|追加料金|現地払い|额外费用|到店付款/i)
+    ? { risk: "mid", plain: M.extra }
+    : { risk: "low", plain: M.noCompare };
+  const words = [/곰팡이|습기|눅눅|mold|damp|カビ|发霉/i, /벌레|바퀴|bugs?|cockroach|虫|蟑螂/i, /소음|시끄|방음|noisy|noise|うるさ|騒音|噪音|吵/i, /냄새|악취|smell|におい|臭/i,
+    /더럽|청소.{0,4}안|머리카락|위생|dirty|unclean|汚|不干净|脏/i, /사진과\s*(다|달)|사진이랑|not like the photos|写真と違|和照片不一样/i, /불친절|응대|rude|不親切|态度差/i, /주차.{0,6}(어렵|불가|좁|없)|parking (is )?(hard|difficult)|駐車.{0,4}(難|不便)|停车.{0,4}(难|不便)/i];
+  const reviews = words.map((re, i) => (find(re) ? { risk: "mid", plain: M.rv[i] } : null)).filter(Boolean);
   const ask = [];
-  if (cancel.risk !== "low") ask.push("무료 취소 마감 시점");
-  if (price.risk === "mid") ask.push("추가 요금 포함 총액");
-  if (find(/주차/)) ask.push("주차 가능 대수");
+  if (cancel.risk !== "low") ask.push(M.ask[0]);
+  if (price.risk === "mid") ask.push(M.ask[1]);
+  if (find(/주차|parking|駐車|停车/i)) ask.push(M.ask[2]);
   const worst = [cancel.risk, price.risk, ...reviews.map((r) => r.risk)].includes("high") ? "high" : reviews.length >= 2 || cancel.risk === "mid" ? "mid" : "low";
-  return {
-    summary: { low: "큰 위험 신호는 보이지 않아요.", mid: "예약 전에 확인할 점이 있어요.", high: "환불 조건이 까다로워요. 신중하게 예약하세요." }[worst] + " (AI 연결 없이 문구만 살펴본 결과예요)",
-    cancel, price, reviews, ask,
-  };
+  return { summary: M.sum[worst] + M.note, cancel, price, reviews, ask };
 }

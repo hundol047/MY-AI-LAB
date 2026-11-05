@@ -35,12 +35,12 @@ export const SYNONYMS = [
   [["사람많", "붐비", "웨이팅", "대기", "줄서", "줄이"], "혼잡"],
 ];
 
-// 질문이 어느 언어인지: 가나가 있으면 일본어, 한자만 있으면 중국어(일본어에만 쓰는 글자·말이 있으면 일본어), 한글은 화면 언어(영어 화면의 추천 질문 버튼은 한국어 문장을 보내므로), 로마자는 영어
+// 질문이 어느 언어인지: 가나가 있으면 일본어, 한자만 있으면 중국어(일본어에만 쓰는 글자·말이 있으면 일본어), 한글은 화면 언어, 로마자는 영어
 export function detectLang(text, ui = "ko") {
   const t = String(text);
   if (/[\u3040-\u30ff]/.test(t)) return "ja";
   if (/[\u4e00-\u9fff]/.test(t) && !/[가-힣]/.test(t)) return /[営駅観沢]|料金|入場料|駐車|両親/.test(t) ? "ja" : "zh";
-  if (/[가-힣]/.test(t)) return ui === "en" ? "en" : "ko";
+  if (/[가-힣]/.test(t)) return ui; // 한국어 문장은 화면 언어로 답한다 (추천 질문 버튼은 화면 언어와 상관없이 한국어 문장을 보냄)
   if (/[a-z]/i.test(t)) return "en";
   return ui;
 }
