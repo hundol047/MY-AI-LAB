@@ -556,3 +556,41 @@ export const SOUVENIR = {
     "춘천 막국수": "春川荞麦冷面", "춘천 감자빵": "春川土豆面包", "대관령 황태": "大关岭黄太鱼干", "정선 곤드레나물": "旌善小蓟菜", "영월 메밀전병": "宁越荞麦煎饼卷",
     "봉평 메밀": "蓬坪荞麦", "태백 한우": "太白韩牛", "횡성 한우": "横城韩牛" },
 };
+
+/* ---------- 축제 설명 (data.js의 한국어 desc를 옮긴 것) ---------- */
+export const FEST_DESC = {
+  ja: {
+    "f-hwacheon": "氷上釣り・手づかみ体験", "f-trout": "五台川の氷上釣り", "f-ginkgo": "樹齢800年のイチョウの紅葉", "t-christmas": "月花通り・安木海岸の光の祭り", "t-sunrise": "1月1日の初日の出",
+    "t-hongcheon": "洪川江の氷上釣り", "t-daegwallyeong": "雪像とそり", "t-taebaek": "太白山国立公園の雪像", "t-yeongwol": "端宗の国葬を再現", "t-mime": "路上パフォーマンスの祭り",
+    "t-rose": "五十川バラ公園", "t-dano": "ユネスコ人類無形文化遺産", "t-corn": "とうもろこし体験・グルメ", "t-tomato": "トマトのプール", "t-dakgalbi": "タッカルビ・マックッスのグルメ",
+    "t-hyoseok": "蓬坪のそばの花畑", "t-dancing": "路上パレードのダンス祭り", "t-coffee": "コーヒー通り・ハンドドリップ体験", "t-arirang": "アリラン公演", "t-hanwoo": "韓牛グルメ",
+    "t-salmon": "南大川でサケの手づかみ", "t-seorak": "束草を代表する文化祭", "k-gn-cherry": "鏡浦湿地広場", "k-gn-heritage-night": "江陵大都護府官衙、西部市場、明洲洞一帯", "k-gn-noodle": "江陵 月花通り一帯",
+    "k-gn-ojuk-bread": "江陵烏竹韓屋村", "k-gn-beer": "鏡浦海水浴場の中央広場", "k-gn-pork": "江陵 月花通り", "k-gn-summer": "鏡浦海水浴場の特設ステージと中央広場", "k-gn-puppet": "溟州芸術広場 · 有料",
+    "k-dh-lavender": "東海市 武陵別有天地 · 有料", "k-gn-bread": "江陵大都護府官衙", "f-gn-dandandan": "江陵端午祭伝授教育館一帯", "k-sc-summer": "束草海水浴場一帯", "k-sc-displaced": "束草エキスポ芝生広場",
+    "k-yy-bonfire": "襄陽 洛山海水浴場B地区 · 有料", "k-yy-cherry": "襄陽 松茸彫刻公園", "k-sc-yeongnang-cherry": "永郎湖の芝生広場", "k-ij-flower": "麟蹄郡北面 龍垈観光地一帯", "k-gs-octopus": "大津港一帯",
+    "k-cw-mediaart": "鉄原労働党舎と鉄原歴史文化公園一帯", "k-yg-belly": "楊口 西川レポーツ公園一帯", "k-cw-yeogijeogi": "鉄原郡 金化生態体育公園一帯 · 有料", "k-cc-puppet": "春川人形劇場", "k-cc-military": "春川水辺公園一帯",
+    "f-cw-ice": "漢灘江の水上道を歩く氷上トレッキング · 入場料1万ウォン(鉄原愛商品券5千ウォン還元)", "k-yg-gomchi": "楊口レポーツ公園一帯", "k-cc-sul": "KT&G想像マダン春川 · 6月はミニ酒フェスタ", "k-cc-water": "春川水辺公園 · 有料", "k-hc-sannamul": "都市山林公園トリの森",
+    "k-hc-beer": "都市山林公園トリの森", "k-js-duwibong": "新東邑 義林キル テバク市場、丹谷渓谷", "k-js-heritage-night": "旌善郡 旌善邑一帯", "k-js-jeonbyeong": "旌善アリラン市場", "k-js-skytrail": "旌善 天空の森の道一帯 · 有料",
+    "k-yw-photo": "東江写真博物館 · 有料", "k-js-coal": "旌善郡 舎北邑一帯(M650博物館、ルーツ館、650通り)", "k-tb-sannamul": "長省タンタン広場一帯", "k-tb-sunflower": "太白ひまわり祭り会場 · 有料", "k-tb-festival": "太白市庁一帯",
+    "k-pc-heat": "平昌郡 大和面 暑さ狩り祭り会場 · 有料", "k-pc-music": "アルペンシア・コンサートホール / 大関嶺野外公演場(ミュージックテント)", "k-wj-naora": "小金山グランドバレー内のナオラショー広場", "k-hs-tomato": "屯内総合体育公園一帯 · 有料", "k-wj-samto": "原州総合運動場",
+    "k-wj-heritage-night": "原州 江原監営", "k-wj-sweetpotato": "艮峴観光団地 第3駐車場", "k-wj-poppy": "ヒナゲシ祭り会場 · 有料", "k-hs-summernight": "横城 蟾江の河川敷", "k-hs-lake": "望郷の丘と横城湖水の道5区間一帯 · 有料",
+    "k-wj-rooftop": "韓国観光公社の屋上",
+  },
+  zh: {
+    "f-hwacheon": "冰钓·徒手抓鱼", "f-trout": "五台川冰钓", "f-ginkgo": "800年银杏树的秋色", "t-christmas": "月花街·安木海边灯光节", "t-sunrise": "1月1日看日出",
+    "t-hongcheon": "洪川江冰钓", "t-daegwallyeong": "雪雕和雪橇", "t-taebaek": "太白山国立公园雪雕", "t-yeongwol": "重现端宗国葬", "t-mime": "街头表演节",
+    "t-rose": "五十川玫瑰公园", "t-dano": "联合国教科文组织人类非物质文化遗产", "t-corn": "玉米体验·美食", "t-tomato": "番茄泳池", "t-dakgalbi": "铁板鸡排·荞麦冷面美食",
+    "t-hyoseok": "蓬坪荞麦花田", "t-dancing": "街头巡游舞蹈节", "t-coffee": "咖啡街·手冲咖啡体验", "t-arirang": "阿里郎演出", "t-hanwoo": "韩牛美食",
+    "t-salmon": "南大川徒手抓鲑鱼", "t-seorak": "束草代表性文化节", "k-gn-cherry": "镜浦湿地广场", "k-gn-heritage-night": "江陵大都护府官衙、西部市场、明洲洞一带", "k-gn-noodle": "江陵月花街一带",
+    "k-gn-ojuk-bread": "江陵乌竹韩屋村", "k-gn-beer": "镜浦海水浴场中央广场", "k-gn-pork": "江陵月花街", "k-gn-summer": "镜浦海水浴场特设舞台和中央广场", "k-gn-puppet": "溟州艺术广场 · 收费",
+    "k-dh-lavender": "东海市武陵别有天地 · 收费", "k-gn-bread": "江陵大都护府官衙", "f-gn-dandandan": "江陵端午祭传授教育馆一带", "k-sc-summer": "束草海水浴场一带", "k-sc-displaced": "束草世博草坪广场",
+    "k-yy-bonfire": "襄阳洛山海水浴场B区 · 收费", "k-yy-cherry": "襄阳松茸雕塑公园", "k-sc-yeongnang-cherry": "永郎湖草坪广场", "k-ij-flower": "麟蹄郡北面龙垈观光地一带", "k-gs-octopus": "大津港一带",
+    "k-cw-mediaart": "铁原劳动党旧址和铁原历史文化公园一带", "k-yg-belly": "杨口西川休闲运动公园一带", "k-cw-yeogijeogi": "铁原郡金化生态体育公园一带 · 收费", "k-cc-puppet": "春川木偶剧场", "k-cc-military": "春川水边公园一带",
+    "f-cw-ice": "汉滩江水上步道冰上徒步 · 门票1万韩元(返还铁原爱商品券5千韩元)", "k-yg-gomchi": "杨口休闲运动公园一带", "k-cc-sul": "KT&G想象广场春川 · 6月有迷你酒节", "k-cc-water": "春川水边公园 · 收费", "k-hc-sannamul": "城市森林公园橡子林",
+    "k-hc-beer": "城市森林公园橡子林", "k-js-duwibong": "新东邑义林路大博集市、丹谷溪谷", "k-js-heritage-night": "旌善郡旌善邑一带", "k-js-jeonbyeong": "旌善阿里郎市场", "k-js-skytrail": "旌善天空林道一带 · 收费",
+    "k-yw-photo": "东江摄影博物馆 · 收费", "k-js-coal": "旌善郡舍北邑一带(M650博物馆、根源馆、650街)", "k-tb-sannamul": "长省炭炭广场一带", "k-tb-sunflower": "太白向日葵节会场 · 收费", "k-tb-festival": "太白市政府一带",
+    "k-pc-heat": "平昌郡大和面消暑节会场 · 收费", "k-pc-music": "阿尔卑西亚音乐厅 / 大关岭户外演出场(音乐帐篷)", "k-wj-naora": "小金山大峡谷内的Naora秀广场", "k-hs-tomato": "屯内综合体育公园一带 · 收费", "k-wj-samto": "原州综合运动场",
+    "k-wj-heritage-night": "原州江原监营", "k-wj-sweetpotato": "艮岘观光园区第3停车场", "k-wj-poppy": "虞美人节会场 · 收费", "k-hs-summernight": "横城蟾江河滩", "k-hs-lake": "望乡之丘和横城湖水步道第5段一带 · 收费",
+    "k-wj-rooftop": "韩国观光公社屋顶",
+  },
+};

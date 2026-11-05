@@ -5,7 +5,7 @@
 // - 장소 이름·설명은 data-en.json(한국관광공사 영문 관광정보, scripts/bake-english.mjs)에서. 없으면 한국어 그대로.
 // - 일정 엔진(planner.js)은 언어와 무관하게 그대로 쓰고, 화면에 보일 때만 바꾼다.
 
-import { JA, ZH, REGION, AREA, BASE, LODGING, TYPE, REASON, BENEFIT, FEST, SOUVENIR } from "./i18n-cjk.js";
+import { JA, ZH, REGION, AREA, BASE, LODGING, TYPE, REASON, BENEFIT, FEST, FEST_DESC, SOUVENIR } from "./i18n-cjk.js";
 import { NAMES_JA, NAMES_ZH, TIPS_JA, TIPS_ZH } from "./knowledge-intl.js";
 
 const KEY = "lang";
@@ -376,7 +376,7 @@ export const placeDesc = (p) => {
   if (lang === "ko") return p.desc;
   if (lang === "en") return dataEn[p.id]?.desc || p.desc;
   const tip = TIPS_CJK[lang][p.id];
-  return tip ? firstSentence(tip) : dataEn[p.id]?.desc || p.desc; // 축제는 영어 소개(관광공사)
+  return tip ? firstSentence(tip) : FEST_DESC[lang][p.id] || p.desc;
 };
 
 /* ---------- index.html의 고정 문구 ----------

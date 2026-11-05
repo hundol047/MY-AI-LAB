@@ -1,7 +1,7 @@
 // 화면 언어: 영어 사전에 있는 모든 문구와 지역·숙소·혜택·축제·장소 이름이 일본어·중국어에도 있는지
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { JA, ZH, REGION, AREA, BASE, LODGING as LODGING_T, TYPE, REASON, BENEFIT, FEST, SOUVENIR } from "../public/i18n-cjk.js";
+import { JA, ZH, REGION, AREA, BASE, LODGING as LODGING_T, TYPE, REASON, BENEFIT, FEST, FEST_DESC, SOUVENIR } from "../public/i18n-cjk.js";
 import { NAMES_JA, NAMES_ZH, TIPS_JA, TIPS_ZH } from "../public/knowledge-intl.js";
 import { PLACES, FESTIVALS, REGIONS, AREAS, LODGING, BENEFITS } from "../public/data.js";
 
@@ -24,7 +24,7 @@ for (const l of ["ja", "zh"]) {
   for (const x of LODGING) assert.equal(LODGING_T[l][x.id]?.length, 2, `${l} 숙소 지역 ${x.id}`);
   for (const ty of ["guesthouse", "business", "ocean", "pension", "resort", "hanok"]) assert.ok(TYPE[l][ty] && REASON[l][ty], `${l} 숙소 종류 ${ty}`);
   for (const b of BENEFITS) assert.ok(BENEFIT[l][b.id]?.title && BENEFIT[l][b.id]?.how, `${l} 혜택 ${b.id}`);
-  for (const f of FESTIVALS) assert.ok(FEST[l][f.id], `${l} 축제 ${f.name}`);
+  for (const f of FESTIVALS) assert.ok(FEST[l][f.id] && FEST_DESC[l][f.id], `${l} 축제 ${f.name}`);
 }
 for (const s of new Set([...PLACES, ...FESTIVALS].map((p) => p.souvenir).filter(Boolean))) for (const l of ["en", "ja", "zh"]) assert.ok(SOUVENIR[l][s], `${l} 특산물 ${s}`);
 for (const p of PLACES) assert.ok(NAMES_JA[p.id] && NAMES_ZH[p.id] && TIPS_JA[p.id] && TIPS_ZH[p.id], `장소 ${p.name}`);
