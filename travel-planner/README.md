@@ -19,7 +19,7 @@
 
 ## 화면 언어
 
-한국어·English·日本語·中文(간체) 4개 언어. 브라우저 언어를 보고 처음 언어를 고르고, 머리글 버튼으로 바꾼다. 영어 문구는 `public/i18n.js`, 일본어·중국어 문구·지역·숙소·혜택·축제·특산물 이름은 `public/i18n-cjk.js`, 장소 이름·팁은 `public/knowledge-intl.js`. 빠진 번역은 `node test/i18n.test.mjs`가 잡는다. 숙소 이름(관광공사 자료)은 예약 사이트·간판과 같도록 한국어 그대로 둔다.
+한국어·English·日本語·中文(간체) 4개 언어. 브라우저 언어를 보고 처음 언어를 고르고, 머리글 버튼으로 바꾼다. 영어 문구는 `public/i18n.js`, 일본어·중국어 문구·지역·숙소·혜택·축제·특산물 이름은 `public/i18n-cjk.js`, 장소 이름·팁은 `public/knowledge-intl.js`. 빠진 번역은 `node test/i18n.test.mjs`가 잡는다. 첫 화면 고정 문구는 느린 회선에서도 한국어가 먼저 보이지 않도록 `index.html` 안에도 들어 있다: 문구를 바꾸면 `node scripts/bake-static-i18n.mjs`를 돌린다(`npm test`가 최신인지 확인). 숙소 이름(관광공사 자료)은 예약 사이트·간판과 같도록 한국어 그대로 둔다.
 
 ## 폰에서 쓰기 (GitHub Pages)
 

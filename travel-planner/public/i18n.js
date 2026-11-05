@@ -32,7 +32,7 @@ export function setLang(l) {
 }
 
 /* ---------- 고정 문구 ---------- */
-const EN = {
+export const EN = {
   // 머리글·첫 화면
   "오늘강원": "Oneul Gangwon",
   "링크 공유": "Share",

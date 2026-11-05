@@ -995,7 +995,8 @@ document.querySelector(".lang").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]");
   if (b && b.dataset.lang !== getLang()) switchLang(b.dataset.lang);
 });
-applyStatic(); // 한국어·영어 고정 문구는 바로
+// 첫 화면 고정 문구는 index.html 끝의 static-i18n이 이미 그 언어로 바꿔 두었다. 일본어·중국어는 표를 받기 전에 다시 바꾸면 한국어로 돌아가므로 건너뛴다
+if (getLang() === "ko" || getLang() === "en") applyStatic();
 await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
 if (getLang() === "ja" || getLang() === "zh") applyStatic();
 
