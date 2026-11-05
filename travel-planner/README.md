@@ -36,6 +36,7 @@ AI·가게 등록까지 쓰려면 Node를 실행할 수 있는 호스팅(Render,
 - 다운로드(항상 최신): `https://github.com/hundol047/MY-AI-LAB/releases/download/android-latest/ohneul-gangwon.apk`
 - 만들기: `.github/workflows/android-apk.yml`이 앱·안드로이드 코드가 바뀌어 push될 때 GitHub 러너의 안드로이드 SDK로 `android/build.sh`를 돌려(Gradle 없이 javac → d8 → aapt2 → zipalign → apksigner) 릴리스 `android-latest`에 올린다. 직접 만들려면 `ANDROID_HOME=SDK경로 bash android/build.sh`
 - 서명 키: 저장소 Secrets에 `ANDROID_KEYSTORE_B64`·`ANDROID_KEYSTORE_PASS`가 없으면 빌드마다 새 키로 서명한다. 이 경우 새 버전을 설치하려면 기존 앱을 지우고 설치해야 한다. 키는 공개 저장소에 넣지 않는다.
+- 고정 서명 키의 인증서 SHA-256: `2B:BD:F0:7B:30:6B:98:F2:CA:61:84:9F:EA:FC:FD:98:38:7C:FB:F3:DD:11:52:4F:E5:1E:5C:2A:D2:10:03:38`. Actions 로그의 "APK 만들기" 단계에 찍히는 값(`Signer #1 certificate SHA-256 digest`)이 이것과 같으면 고정 키로 서명된 것이다. 키 파일(.p12)과 암호는 저장소 밖에 보관한다(잃어버리면 기존 설치본을 지우지 않고는 업데이트할 수 없다)
 - 설치: 폰에서 파일을 받아 열고, 처음 한 번 "출처를 알 수 없는 앱 설치"를 허용한다.
 
 ## AI 기능 (OpenAI 호환 API, 키가 없으면 무료 간단 모드)
