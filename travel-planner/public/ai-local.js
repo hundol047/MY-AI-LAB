@@ -1,5 +1,5 @@
 // AI 서버에 연결되지 않았을 때 쓰는 간단한 규칙 기반 대체
-import { addDays, parseRequestLocally, hoursFor, fmt } from "./planner.js";
+import { addDays, parseRequestLocally, hoursFor, fmt, RAIN } from "./planner.js";
 import { PLACES } from "./data.js";
 import { normalize, NICKS, TIPS, THEMES, FAQ } from "./knowledge.js";
 
@@ -152,10 +152,12 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   /* 2) 정보 질문 ("카페 빼줘", "바다 말고"처럼 빼 달라는 말이면 건너뛰고 3)으로) */
   const negate = wantsRemove || /(말고|싫|없이|그만)/.test(n);
   if (!negate) {
-    const rain = n.includes("비") && !/비빔|비교|비슷|비싸|비행|비밀/.test(n);
+    const rain = RAIN.test(question) || /(?<![가-힣])비(?![빔교슷싸행밀용])/.test(n);
     if (has("운영")) {
-      const lines = targets.filter((p) => p.hours || p.start).map((p) => hoursLine(p, day.date));
-      if (lines.length) return { ...nothing, answer: `${dayLabel}(${day.date.slice(5).replace("-", "/")}) 운영시간이에요. ${lines.join(", ")}.` };
+      const dateOf = (p) => trip.days.find((d) => d.items.some((i) => i.id === p.id))?.date || day.date;
+        const lines = targets.filter((p) => p.hours || p.start).map((p) => `${hoursLine(p, dateOf(p))}${mentioned.length ? `(${dateOf(p).slice(5).replace("-", "/")})` : ""}`);
+        const note = mentioned.length === 1 ? (TIPS[mentioned[0].id] || "").split(/(?<=[요다]\.)\s/).find((x) => /오일장|통제|운휴|예약|휴무/.test(x)) : "";
+      if (lines.length) return { ...nothing, answer: `${mentioned.length ? "운영시간이에요." : `${dayLabel}(${day.date.slice(5).replace("-", "/")}) 운영시간이에요.`} ${lines.join(", ")}.${note ? ` ${note}` : ""}` };
     }
     if (has("입장료")) {
       const ps = targets.filter((p) => !p.start && p.cat !== "food" && p.cat !== "cafe");
@@ -211,7 +213,10 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
       if (ps.length) return { ...nothing, answer: `${dayLabel} 동선 근처 ${cat === "cafe" ? "카페" : "먹을 곳"}이에요. ${ps.map((p) => `${p.name}(${p.desc})`).join(", ")}. 넣고 싶으면 이름과 함께 "넣어줘"라고 말해 주세요.` };
     }
     const faq = FAQ.find((f) => f.keys.some((k) => n.includes(k)));
-    if (faq) return { ...nothing, answer: faq.answer };
+    if (faq) {
+        const r = typeof faq.answer === "string" ? faq.answer : faq.answer[ctx.input?.region] || faq.answer.gangneung;
+        return { ...nothing, answer: r + (faq.after || "") };
+      }
     if (mentioned.length) {
       const p = mentioned[0];
       const facts = [p.indoor ? "실내" : "야외", `보통 ${p.stay || 60}분`, p.walk >= 3 ? "많이 걸어요" : p.walk === 2 ? "걷는 양 보통" : "걷는 양 적음"];

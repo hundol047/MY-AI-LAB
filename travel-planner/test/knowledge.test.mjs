@@ -9,7 +9,7 @@ import { NICKS, TIPS, THEMES, normalize } from "../public/knowledge.js";
 const fees = JSON.parse(readFileSync(new URL("../public/fees.json", import.meta.url)));
 const ids = new Set(PLACES.map((p) => p.id));
 for (const id of [...Object.keys(NICKS), ...Object.keys(TIPS), ...Object.values(THEMES).flat()]) assert.ok(ids.has(id), `없는 장소 id: ${id}`);
-for (const p of PLACES.filter((x) => x.region === "gangneung")) assert.ok(TIPS[p.id], `강릉 권역 팁 없음: ${p.name}`);
+for (const p of PLACES) assert.ok(TIPS[p.id], `팁 없음: ${p.name}`);
 for (const t of Object.values(TIPS)) assert.ok(!/\d{2,3}-\d{3,4}-\d{4}|\d,\d{3}원/.test(t), `팁에 전화번호·가격을 적지 않는다: ${t}`);
 
 assert.equal(normalize("엄빠랑 뚜벅이"), "부모님랑대중교통");
@@ -63,4 +63,10 @@ for (const q of ["비 오면 어떡해?", "아이랑 가도 괜찮을까?", "일
 
 const s = startLocal("토요일에 엄빠랑 뚜벅이로 강릉 1박, 맛집 위주", "2026-11-05");
 assert.deepEqual([s.who, s.move, s.days, s.date], ["parents", "transit", 2, "2026-11-07"]);
+// "닭갈비"의 "비"는 비가 아니다
+r = ask("닭갈비 먹고 싶어");
+assert.equal(r.changed, false);
+assert.doesNotMatch(r.answer, /실내 위주/);
+r = ask("비 오면 어떡해?");
+assert.equal(r.indoor, "on");
 console.log("ok - 무료 간단 모드 가이드");

@@ -477,11 +477,13 @@ export function summarize(days, lodging = null) {
 }
 
 // 자연어 요청 → 조건 (AI 서버가 없을 때 쓰는 규칙 기반 해석)
+export const RAIN = /(?<![가-힣])비(?![빔교슷싸행밀용])|우천|장마|소나기|태풍/;
 export function parseRequestLocally(text) {
   const t = text.replace(/\s/g, "");
   const out = { prefer: [], avoid: [] };
   const has = (...w) => w.some((x) => t.includes(x));
-  if (has("비", "우천", "실내", "추워", "더워", "바람")) out.indoor = true;
+  // "비"는 낱말일 때만 (닭갈비·비용·비빔밥은 비가 아님)
+  if (RAIN.test(text) || has("우천", "실내", "추워", "더워", "바람")) out.indoor = true;
   if (has("덜걷", "걷기싫", "걷기힘", "다리", "힘들", "지쳐", "지쳤", "피곤", "무릎", "유모차", "어르신")) out.lessWalk = true;
   if (has("여유", "천천히", "느긋")) out.pace = "relaxed";
   if (has("알차", "많이", "빡빡", "더많")) out.pace = "packed";
