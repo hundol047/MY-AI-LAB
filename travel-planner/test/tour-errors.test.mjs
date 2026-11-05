@@ -7,5 +7,7 @@ try{
  assert.equal(calls,1,'400 요청은 동일하게 재시도하지 않는다');
  globalThis.fetch=async()=>new Response(JSON.stringify({unexpected:[]}));
  await assert.rejects(()=>tour('KorService2','areaCode2',{}, {key:'fixture-secret'}),/응답 구조/);
+ globalThis.fetch=async url=>{assert.equal(new URL(url).searchParams.get('serviceKey'),'a+b/c=');return new Response(JSON.stringify({response:{header:{resultCode:'0000'},body:{items:{item:[]}}}}));};
+ await tour('KorService2','areaCode2',{}, {key:' a%2Bb%2Fc%3D '});
  console.log('ok - 관광공사 게이트웨이 오류 분류·키 미출력·400 재시도 방지·응답 구조 검증');
 }finally{globalThis.fetch=original;}

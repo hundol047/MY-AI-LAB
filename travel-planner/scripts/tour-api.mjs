@@ -16,6 +16,10 @@ export function km(a, b) {
 // service: "KorService2" | "EngService2", op: "searchKeyword2" | "locationBasedList2" | "detailCommon2"
 export async function tour(service, op, params, { key = process.env.TOUR_API_KEY, cache = false } = {}) {
   if (!key) throw new Error("TOUR_API_KEY가 없습니다");
+  key=String(key).trim();
+  // Accept either portal key format; URLSearchParams performs the one transport encoding.
+  if (/%[0-9a-f]{2}/i.test(key)) {try{key=decodeURIComponent(key);}catch{throw new Error("TOUR_API_KEY 인코딩 형식을 확인하세요");}}
+
   const pub = new URLSearchParams({ MobileOS: "ETC", MobileApp: "ohneul-gangwon", _type: "json", ...params });
   const file = cache && new URL(createHash("sha1").update(`${service}/${op}?${pub}`).digest("hex") + ".json", CACHE_DIR);
   if (file) {
@@ -37,7 +41,10 @@ export async function tour(service, op, params, { key = process.env.TOUR_API_KEY
   if (!res.ok || gateway || (code && code !== "0000")) {
     // 외부 메시지·URL·키는 로그에 넣지 않는다. 오류 분류 코드만 표시한다.
     const safe = String(code || res.status).replace(/[^a-zA-Z0-9_-]/g, '').slice(0,40);
-    throw new Error(`${service}/${op}: HTTP ${res.status}, 오류 코드 ${safe}`);
+    throw Object.assign(new Error(`${service}/${op}: HTTP ${res.status}, 오류 코드 ${safe}`),{
+      status:res.status,code:safe,
+      hint:safe==='10'?'승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다.':safe==='12'?'없거나 폐기된 서비스 경로입니다.':'공공데이터포털 서비스 승인·할당량·호출 예제를 확인하세요.'
+    });
   }
   if (!j?.response?.body) throw new Error(`${service}/${op}: 응답 구조를 확인할 수 없습니다`);
   let items = j?.response?.body?.items?.item || [];

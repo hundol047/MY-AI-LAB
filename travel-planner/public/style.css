@@ -462,3 +462,11 @@ body.offline .top::after {
 .booking-reason { font-size: 12px; color: var(--sub); line-height: 1.6; }
 .stay-acts { flex-wrap: wrap; align-items: flex-start; }
 .booking-choice .ghost { white-space: normal; }
+.booking-options {display:flex;flex-wrap:wrap;gap:12px;margin:10px 0;}
+.booking-options label {display:grid;gap:4px;max-width:150px;}
+.booking-options p {flex-basis:100%;font-size:12px;color:var(--sub);}
+.offer-form {display:grid;gap:8px;max-width:280px;padding:10px;border:1px solid var(--line);}
+.offer-form label {display:block;white-space:normal;}
+.offer-form input[type=number],.offer-form input[type=text] {width:100%;}
+.offer-form p {font-size:12px;}
+.service-language {display:block;max-width:160px;margin:0 0 16px auto;}

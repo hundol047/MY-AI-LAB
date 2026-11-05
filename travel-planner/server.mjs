@@ -1,21 +1,27 @@
+import {createPushSender,startPushWorker} from './web-push.mjs';
+import { scheduleMaintenance } from "./maintenance.mjs";
 import { serviceAPI } from "./service-api.mjs";
 // 정적 파일 + 공식 사진 + 가게 등록. 대화와 숙소 문구 점검은 브라우저의 내장 가이드가 처리한다.
 // 장소 선택·시간 계산은 내장 데이터 기반 엔진이 한다.
 // 그래서 존재하지 않는 장소나 문 닫은 곳이 일정에 들어갈 수 없다.
 import http from "node:http";
-import { readFile, writeFile, stat } from "node:fs/promises";
-import { randomBytes } from "node:crypto";
+import { readFile, stat } from "node:fs/promises";
 import QRCode from "qrcode";
 import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
-import { REGIONS, PLACES, FESTIVALS } from "./public/data.js";
+import { PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(here, "public");
 const PORT = Number(process.env.PORT || 8080);
-const services = serviceAPI({file:process.env.APP_DB_PATH || path.join(here,".local","app.sqlite"),adminToken:process.env.ADMIN_API_TOKEN});
+let pushSender=null;
+try {pushSender=await createPushSender({keyFile:path.join(path.dirname(process.env.APP_DB_PATH || path.join(here,'.local','app.sqlite')),'vapid.json'),appURL:process.env.PUBLIC_APP_URL});}catch{console.error('웹 푸시 키를 초기화하지 못했습니다.');}
+const services = serviceAPI({file:process.env.APP_DB_PATH || path.join(here,".local","app.sqlite"),adminToken:process.env.ADMIN_API_TOKEN,pushSender});
+if(pushSender)startPushWorker(services.store,pushSender);
+try { const legacy=JSON.parse(await readFile(path.join(here,"data","shops.json"),"utf8")); if(Array.isArray(legacy))services.store.importShops(legacy); } catch { /* 기존 파일 없음: 새 승인 목록을 사용 */ }
+scheduleMaintenance(services.store,process.env.APP_BACKUP_DIR || path.join(path.dirname(process.env.APP_DB_PATH || path.join(here,".local","app.sqlite")),"backups"));
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -31,33 +37,7 @@ const MIME = {
 const photoCache = new Map();
 const gzipCache = new Map();
 
-const SHOPS_FILE = path.join(here, "data", "shops.json");
-async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
-
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
-const clean = (v, max) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
-
-// 요청 본문 읽기: 너무 크거나 중간에 끊기면 기다리지 않고 실패
-function readBody(req, limit = 60_000) {
-  return new Promise((resolve, reject) => {
-    let data = "", done = false;
-    req.on("data", (c) => { data += c; if (data.length > limit) { done = true; reject(new Error("too large")); req.destroy(); } });
-    req.on("end", () => { done = true; resolve(data); });
-    req.on("error", (e) => { done = true; reject(e); });
-    req.on("close", () => { if (!done) reject(new Error("aborted")); });
-  });
-}
-
-// 가게 등록 파일은 한 번에 하나씩 쓴다 (동시에 등록해도 서로 덮어쓰지 않게)
-let shopWrite = Promise.resolve();
-function saveShop(shop) {
-  shopWrite = shopWrite.then(async () => {
-    const shops = await loadShops();
-    shops.push(shop);
-    await writeFile(SHOPS_FILE, JSON.stringify(shops, null, 2));
-  });
-  return shopWrite;
-}
 
 // 요청 하나에서 오류가 나도 서버 전체가 꺼지지 않게 감싼다
 const server = http.createServer((req, res) => {
@@ -75,33 +55,6 @@ async function handle(req, res) {
   // 내장 가이드만 사용한다. 예전 클라이언트 요청도 유료 모델로 전달하지 않는다.
   if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {
     return json(res, 410, {error:"LOCAL_GUIDE_ONLY", message:"Use the built-in travel guide. Menu entry is manual."});
-  }
-
-  // 가게 등록·조회
-  if (url.pathname === "/api/shops") {
-    if (req.method === "GET") {
-      const shops = await loadShops();
-      const id = url.searchParams.get("id"), region = url.searchParams.get("region");
-      if (id) { const shop = shops.find((x) => x.id === id); return shop ? json(res, 200, shop) : json(res, 404, {}); }
-      return json(res, 200, shops.filter((x) => !region || x.region === region).map(({ id, name, region, address, hours, items }) => ({ id, name, region, address, hours, count: items.length })));
-    }
-    if (req.method === "POST") {
-      try {
-        const b = JSON.parse(await readBody(req, 200_000));
-        const items = (Array.isArray(b.items) ? b.items : []).slice(0, 80)
-          .map((i) => ({ ko: clean(i.ko, 60), price: clean(i.price, 30), en: clean(i.en, 120), ja: clean(i.ja, 120), zh: clean(i.zh, 120), note: clean(i.note, 120) }))
-          .filter((i) => i.ko);
-        const shop = {
-          id: randomBytes(5).toString("hex"),
-          name: clean(b.name, 40), region: REGIONS[b.region] ? b.region : null,
-          address: clean(b.address, 100), phone: clean(b.phone, 20), hours: clean(b.hours, 60),
-          card: !!b.card, items, createdAt: new Date().toISOString(),
-        };
-        if (!shop.name || !shop.region || !items.length) return json(res, 400, { error: "가게 이름, 권역, 메뉴 1개 이상이 필요해요" });
-        await saveShop(shop);
-        return json(res, 200, { id: shop.id });
-      } catch { return json(res, 400, {}); }
-    }
   }
 
   // 다국어 메뉴 QR 코드

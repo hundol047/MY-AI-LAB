@@ -1,3 +1,4 @@
+import { EXTRA_PLACES } from "./extra-places.js";
 // 강릉 장소 데이터 (운영정보 확인: 2026년 11월)
 // hours: [열림, 닫힘], lastEntry: 입장·주문 마감, breaks: 브레이크타임 목록
 // closed: 정기 휴무 요일 (0=일 ... 6=토)
@@ -259,6 +260,7 @@ const WONJU = [
 ];
 
 export const PLACES = [
+  ...EXTRA_PLACES,
   ...GANGNEUNG.map((p) => ({ region: "gangneung", ...p })),
   ...DONGHAE.map((p) => ({ region: "gangneung", ...p })),
   ...SEORAK.map((p) => ({ region: "seorak", ...p })),

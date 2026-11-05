@@ -1,10 +1,11 @@
 import assert from 'node:assert/strict';
 import http from 'node:http';
+import {createECDH} from 'node:crypto';
 import {mkdtemp,rm} from 'node:fs/promises';
 import {tmpdir} from 'node:os';
 import {serviceAPI} from '../service-api.mjs';
 const dir=await mkdtemp(`${tmpdir()}/api-test-`), admin='a'.repeat(48), token='t'.repeat(48);
-const handle=serviceAPI({file:dir+'/db.sqlite',adminToken:admin});
+const handle=serviceAPI({file:dir+'/db.sqlite',adminToken:admin,pushSender:{publicKey:"test-only"}});
 const server=http.createServer((req,res)=>handle(req,res,new URL(req.url,'http://localhost')));
 await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
 const call=async(path,method='GET',body,auth,extra={})=>{const r=await fetch(base+path,{method,headers:{'content-type':'application/json',...(auth?{authorization:`Bearer ${auth}`} : {}),...extra},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,data:await r.json()};};
@@ -24,6 +25,12 @@ try{
  assert.equal((await call('/api/reviews?place=ojukheon')).data.length,1);
  assert.equal((await call(`/api/reviews/${review.data.id}/report`,'POST',{reason:'검토 필요합니다.'})).status,201);
  assert.equal((await call('/api/admin/reports','GET',null,admin)).data.length,1);
+ const curve=createECDH('prime256v1');curve.generateKeys();const sub={endpoint:'https://fcm.googleapis.com/fcm/send/test-only',keys:{p256dh:curve.getPublicKey().toString('base64url'),auth:Buffer.alloc(16,1).toString('base64url')}};
+ assert.equal((await call('/api/push-config')).data.enabled,true);
+ assert.equal((await call(`/api/bookings/${b.data.id}/push`,'POST',{subscription:sub})).status,404);
+ assert.equal((await call(`/api/bookings/${b.data.id}/push`,'POST',{subscription:sub,lang:'ja'},token)).status,200);
+ assert.equal((await call('/api/admin/push','GET',null,admin)).data.subscriptions,1);
+ assert.equal((await call(`/api/bookings/${b.data.id}/push`,'DELETE',{endpoint:sub.endpoint},token)).status,200);
  assert.equal((await call(`/api/bookings/${b.data.id}/cancel`,'POST',null,token)).data.status,'cancelled');
  assert.equal((await call('/api/reviews','POST',{},null,{origin:'https://other.example'})).status,403);
  console.log('ok - HTTP 인증·신청·상태 변경·견적·결제 차단·후기 공개·신고·취소·교차 출처 차단');

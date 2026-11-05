@@ -381,6 +381,30 @@ export function swapItem(trip, input, opts, dayIdx, itemIdx, replacementId = nul
   return finalize(days, trip.lodging);
 }
 
+// Explicit additions are transactional and confined to the requested day.
+export function addPlacesToDay(trip, input, opts, dayIdx, ids) {
+  if (!trip.days[dayIdx] || !ids.length) return trip;
+  const wanted = [...new Set(ids)];
+  const original = trip.days[dayIdx];
+  const others = trip.days.filter((_, i) => i !== dayIdx);
+  if (others.some(d => d.items.some(i => wanted.includes(i.id)))) return trip;
+  const missing = wanted.filter(id => !original.items.some(i => i.id === id));
+  if (!missing.length) return trip;
+  let best = null, bestScore = -Infinity;
+  for (let at = 0; at <= original.items.length; at++) {
+    const keep = [...original.items.slice(0, at).map(i => i.id), ...missing];
+    const used = new Set(others.flatMap(d => d.items.map(i => i.id)));
+    const day = planDay(input, {...opts, must:[...wanted, ...original.items.map(i=>i.id)]}, dayIdx, used, others.map(d=>d.area), keep, new Set(opts.exclude || []), false, original.start);
+    if (!wanted.every(id => day.items.some(i=>i.id===id)) || verify([day])) continue;
+    const score = day.items.filter(i => original.items.some(o=>o.id===i.id)).length * 100 - day.items.reduce((n,i)=>n+i.travelMin,0);
+    if (score > bestScore) { best=day; bestScore=score; }
+  }
+  if (!best) return trip;
+  if (trip.lodging && dayIdx < input.days - 1) markReturn(best, trip.lodging);
+  const days=trip.days.slice(); days[dayIdx]=best;
+  return finalize(days, trip.lodging);
+}
+
 // 맞춤 숙소: 그날 마지막 장소에서 가깝고, 동행·취향·이동수단에 맞는 숙소 지역과 종류
 const WHO_TYPES = {
   solo: ["guesthouse", "business"],

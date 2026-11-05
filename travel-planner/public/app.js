@@ -1,5 +1,5 @@
-import { recommendBooking } from "./booking-links.js";
-import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
+import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
+import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -263,7 +263,7 @@ function itemHTML(it, i, day) {
         <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
-        <a class="ghost small" href="reviews.html?place=${encodeURIComponent(p.id)}">후기</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
+        <a class="ghost small" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
       </div>
       </div>
     </article>
@@ -470,16 +470,25 @@ function staysFor(l) {
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
 function priceLinks(query) {
-  const choice = recommendBooking(query, state.input, peopleNow(), getLang());
+  const choice = recommendBooking(query, state.input, peopleNow(), getLang(), store.get("offers:"+query));
   return `<div class="booking-choice">
-    <a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t("추천 · {platform}에서 예약 찾기", {platform:esc(choice.primary.name)})}</a>
+    <a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
       `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
+    <details><summary>${t("확인한 요금 비교")}</summary>
+    <form class="offer-form" data-query="${esc(query)}">
+      <label>${t("같은 객실 유형")}<input name="roomType" required maxlength="100"></label>
+      ${['Booking.com','Agoda'].map((platform,i)=>`<label>${platform} · ${t("세금 포함 전체 숙박 총액 (원)")}<input name="total${i}" type="number" min="1" max="100000000" step="1" required></label><label><input name="refund${i}" type="checkbox">${t("무료 취소 가능")}</label>`).join("")}
+      <label><input name="sameTerms" type="checkbox" required>${t("같은 날짜·인원·객실·식사 조건을 확인했어요")}</label>
+      <label><input name="refundableOnly" type="checkbox">${t("무료 취소 상품만 비교")}</label>
+      <button type="submit">${t("비교 적용")}</button>
+      <p>${t("직접 확인한 요금만 비교하며, 날짜·인원이 바뀌거나 24시간이 지나면 다시 확인해야 해요.")}</p>
+    </form></details>
   </div>`;
 }
 function bookingReason(query) {
-  const choice = recommendBooking(query, state.input, peopleNow(), getLang());
-  return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 1개로 검색", {adults:choice.adults,kids:choice.kids})}</p>`;
+  const choice = recommendBooking(query, state.input, peopleNow(), getLang(), store.get("offers:"+query));
+  return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
 const STAY_ART = (() => {
@@ -523,6 +532,9 @@ function renderLodging() {
       <p>${esc(lodgingDesc(l))}</p>
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
+    <div class="booking-options"><label>${t("객실 수")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
+    ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}
+    <p>${t("아동 나이를 모두 선택하면 예약 검색에 전달합니다. 플랫폼에서 최종 조건을 확인하세요.")}</p></div>
     ${bookingReason(l.query)}
     ${staysHTML(l)}
     <div class="acts">
@@ -535,6 +547,19 @@ function renderLodging() {
       <div class="safe-result" id="safeResult"></div>
     </form>`;
 }
+
+document.addEventListener("change",e=>{
+  if(e.target.id!=="bookingRooms" && !e.target.matches('[data-child-age]'))return;
+  const p=bookingPeople(peopleNow());
+  if(e.target.id==='bookingRooms')p.rooms=Number(e.target.value);else p.ages[Number(e.target.dataset.childAge)]=e.target.value===''?null:Number(e.target.value);
+  state.opts.people=bookingPeople(p);renderLodging();renderCosts();persist();
+});
+document.addEventListener("submit",e=>{
+  if(!e.target.matches('.offer-form'))return;e.preventDefault();
+  const form=e.target, f=new FormData(form),query=form.dataset.query;
+  store.set('offers:'+query,{scope:bookingScope(query,state.input,peopleNow()),checkedAt:Date.now(),roomType:f.get('roomType'),sameTerms:f.has('sameTerms'),refundableOnly:f.has('refundableOnly'),offers:['Booking.com','Agoda'].map((platform,i)=>({platform,total:Number(f.get('total'+i)),refundable:f.has('refund'+i)}))});
+  renderLodging();
+});
 
 /* ---------- 숙소 안심 체크 ---------- */
 document.addEventListener("click", (e) => {
@@ -938,6 +963,11 @@ async function runGuide(question, shown) {
           state.opts.exclude=[...new Set([...(state.opts.exclude||[]),old.id])];trip=changed;dayIdx=di;applied=true;render();persist();applyRoad(di);
         }
       }
+    } else if (Number.isInteger(r.targetDay) && r.add?.length) {
+      const changed = addPlacesToDay(trip, state.input, state.opts, r.targetDay, r.add);
+      applied = changed !== trip;
+      if (applied) { trip=changed; dayIdx=r.targetDay; render(); persist(); applyRoad(dayIdx); }
+      missed = r.add.filter(id=>!trip.days[r.targetDay]?.items.some(i=>i.id===id));
     } else {
       const o=state.opts,uniq=a=>[...new Set(a)];
       o.exclude=uniq([...(o.exclude||[]),...(r.remove||[])]).filter(id=>!(r.add||[]).includes(id));
@@ -1108,3 +1138,16 @@ fetchT("api/shops?region=gangneung", {}, 3000)
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 // 첫 화면을 그린 뒤 한가할 때 무료 간단 모드를 미리 받아 둔다 (질문할 때 바로 답하게)
 (window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => localAI().catch(() => {}));
+
+// Directory links use the same validated planner IDs and current itinerary.
+const directoryPlace = new URLSearchParams(location.search).get('addPlace');
+if(directoryPlace && PLACES.some(p=>p.id===directoryPlace)) {
+  const p=PLACES.find(p=>p.id===directoryPlace);
+  if(!state || !trip) {
+    const last=store.get('lastTrip');
+    if(last?.input) {state={input:{...last.input,date:last.input.date<tomorrow()?tomorrow():last.input.date},opts:{rainDays:[],exclude:[],...last.opts}};trip=planTrip(state.input,state.opts);show('result');render();}
+    else {fillForm({region:p.region,date:tomorrow(),days:2,who:'couple',likes:[p.cat],move:'car'});$('#form').requestSubmit();}
+  }
+  history.replaceState(null,'',location.pathname+location.hash);
+  askGuide(`${p.name} 넣어줘`);
+}

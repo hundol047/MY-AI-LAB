@@ -101,7 +101,7 @@ export function estimateTrip(trip, input, people, fees = {}) {
   if (nights && trip.lodging) {
     const type = trip.lodging.type;
     const range = ASSUME.room[type] || ASSUME.room.pension;
-    const units = type === "guesthouse" ? n : Math.ceil(n / 4);
+    const units = type === "guesthouse" ? n : (Number.isInteger(people.rooms) && people.rooms > 0 ? people.rooms : Math.ceil(n / 4));
     rows.push({ key: "stay", low: range[0] * units * nights, high: range[1] * units * nights, detail: { nights, units, type } });
   }
 

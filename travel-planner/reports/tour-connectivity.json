@@ -1,0 +1,51 @@
+{
+  "checkedAt": "2026-11-05T07:52:30.016Z",
+  "transport": "HTTPS",
+  "results": [
+    {
+      "name": "regional-list",
+      "service": "KorService2",
+      "operation": "areaBasedList2",
+      "ok": false,
+      "status": 400,
+      "code": "10",
+      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+    },
+    {
+      "name": "legacy-area-parameter",
+      "service": "KorService2",
+      "operation": "areaBasedList2",
+      "ok": false,
+      "status": 400,
+      "code": "10",
+      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+    },
+    {
+      "name": "minimal-list",
+      "service": "KorService2",
+      "operation": "areaBasedList2",
+      "ok": false,
+      "status": 400,
+      "code": "10",
+      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+    },
+    {
+      "name": "area-codes",
+      "service": "KorService2",
+      "operation": "areaCode2",
+      "ok": false,
+      "status": 400,
+      "code": "10",
+      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+    },
+    {
+      "name": "legacy-service",
+      "service": "KorService1",
+      "operation": "areaBasedList1",
+      "ok": false,
+      "status": 400,
+      "code": "12",
+      "hint": "없거나 폐기된 서비스 경로입니다."
+    }
+  ]
+}

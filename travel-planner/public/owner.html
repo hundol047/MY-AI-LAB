@@ -27,9 +27,9 @@
             <option value="chuncheon">춘천·철원</option><option value="pyeongchang">평창·정선</option><option value="wonju">원주</option>
           </select>
         </label>
-        <label>주소<input id="address" maxlength="100"></label>
+        <label>주소<input id="address" required maxlength="100"></label>
         <label>영업시간<input id="hours" maxlength="60" placeholder="예) 매일 11:00–20:00, 화 휴무"></label>
-        <label>전화<input id="phone" maxlength="20" inputmode="tel"></label>
+        <label>전화<input id="phone" required maxlength="20" inputmode="tel"></label>
         <label class="check-row"><input type="checkbox" id="card"> 해외 카드 결제 가능</label>
       </div>
       <div class="menu-edit">
@@ -42,8 +42,8 @@
 
     <section class="card step" id="step3" hidden>
       <span class="step-no">2</span>
-      <h2>등록됐어요</h2>
-      <p>이 QR을 계산대나 테이블에 붙이면 손님이 한국어·English·日本語·中文 메뉴를 볼 수 있어요.</p>
+      <h2>검토 요청을 접수했어요</h2>
+      <p>운영자가 업체 연락처와 메뉴를 확인한 후 공개합니다. 승인 전에는 QR 메뉴가 열리지 않습니다.</p>
       <img id="qr" alt="다국어 메뉴 QR" class="qr">
       <div class="acts center">
         <a class="ghost small" id="menuLink" target="_blank" rel="noopener">메뉴 화면 보기</a>

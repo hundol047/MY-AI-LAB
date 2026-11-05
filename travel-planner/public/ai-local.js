@@ -249,7 +249,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     const far = add.some((p) => !regions.has(p.region));
     const farNote = far ? L(" 이번 여행 권역에서 멀어 이동이 길어질 수 있어요.", " It's outside this trip's area, so travel time may be long.", " 今回の旅のエリアから遠いので、移動が長くなるかもしれません。", " 离这次行程的区域较远，路上可能要很久。") : "";
     const names = add.map(nmK).join(sep);
-    return change("add", L(`${J(add, ["을", "를"])} 넣어 볼게요.`, `I'll try adding ${names}.`, `${names}を入れてみます。`, `我试着加上${names}。`) + farNote, { add: add.map((p) => p.id) });
+    return change("add", L(`${J(add, ["을", "를"])} 넣어 볼게요.`, `I'll try adding ${names}.`, `${names}を入れてみます。`, `我试着加上${names}。`) + farNote, { add: add.map((p) => p.id), targetDay: di });
   }
   // "2일차에 바다 한 곳 더" → 그날 동선 근처에서 그 종류의 장소를 하나 고른다
   const askedCat = Object.entries(CAT_WORDS).find(([, ws]) => ws.some((w) => n.includes(w)))?.[0];
@@ -261,7 +261,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
       .sort((a, b) => (center ? dist(a, center) - dist(b, center) : (b.pop || 0) - (a.pop || 0)))[0];
     if (!pick) return info("addCat", L(`${dayLabel}에 더 넣을 만한 ${josa(cat, ["을", "를"])} 찾지 못했어요. 이번 권역의 ${josa(cat, ["은", "는"])} 이미 일정에 있거나 그날 쉬어요.`, `I couldn't find another ${cat} for ${dayLabel}. The ones in this area are already in your plan or closed that day.`, `${dayLabel}に追加できる${cat}が見つかりませんでした。このエリアの${cat}はもうプランにあるか、その日は休みです。`, `没找到${dayLabel}还能加的${cat}。这个区域的${cat}已经在行程里，或者当天休息。`));
     const tip = tipOf(pick) ? ` ${firstSentence(tipOf(pick))}` : "";
-    return change("addCat", L(`${dayLabel} 동선 근처의 ${josa(nm(pick), ["을", "를"])} 넣어 볼게요.`, `I'll try adding ${nm(pick)}, near your ${dayLabel} route.`, `${dayLabel}のルートの近くにある${nmK(pick)}を入れてみます。`, `我试着加上${dayLabel}路线附近的${nmK(pick)}。`) + tip, { add: [pick.id] });
+    return change("addCat", L(`${dayLabel} 동선 근처의 ${josa(nm(pick), ["을", "를"])} 넣어 볼게요.`, `I'll try adding ${nm(pick)}, near your ${dayLabel} route.`, `${dayLabel}のルートの近くにある${nmK(pick)}を入れてみます。`, `我试着加上${dayLabel}路线附近的${nmK(pick)}。`) + tip, { add: [pick.id], targetDay: di });
   }
 
   /* 2) 정보 질문 ("카페 빼줘", "바다 말고"처럼 빼 달라는 말이면 건너뛰고 3)으로) */
