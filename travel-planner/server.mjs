@@ -9,8 +9,9 @@ import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import OpenAI from "openai";
+import Anthropic from "@anthropic-ai/sdk";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
-import { startFromText, guide, lodgingCheck, menuScan, AI_MODEL } from "./ai.mjs";
+import { startFromText, guide, lodgingCheck, menuScan, AI_MODEL, AI_PROVIDER } from "./ai.mjs";
 import { REGIONS, PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -35,7 +36,11 @@ const SHOPS_FILE = path.join(here, "data", "shops.json");
 async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
 
 function logAIError(err) {
-  if (err instanceof OpenAI.AuthenticationError) console.error("AI 인증 실패: AI_API_KEY를 확인하세요.");
+  if (err instanceof Anthropic.AuthenticationError) console.error("Claude 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
+  else if (err instanceof Anthropic.NotFoundError) console.error(`Claude 모델을 찾을 수 없음: CLAUDE_AI_MODEL(${AI_MODEL})을 확인하세요.`);
+  else if (err instanceof Anthropic.RateLimitError) console.error("Claude 요청 한도 초과");
+  else if (err instanceof Anthropic.APIError) console.error(`Claude API 오류 ${err.status}: ${err.message}`);
+  else if (err instanceof OpenAI.AuthenticationError) console.error("AI 인증 실패: AI_API_KEY를 확인하세요.");
   else if (err instanceof OpenAI.NotFoundError) console.error(`모델을 찾을 수 없음: AI_MODEL(${AI_MODEL})을 확인하세요.`);
   else if (err instanceof OpenAI.RateLimitError) console.error("요청 한도 초과");
   else if (err instanceof OpenAI.APIError) console.error(`AI API 오류 ${err.status}: ${err.message}`);
@@ -202,5 +207,5 @@ process.on("unhandledRejection", (err) => console.error("처리되지 않은 오
 
 server.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
-  console.log(AI_MODEL ? `AI 모델: ${AI_MODEL}` : "AI_MODEL 미설정: AI 기능은 규칙 기반으로 대체됩니다");
+  console.log(AI_MODEL ? `AI: ${AI_PROVIDER === "claude" ? "Claude" : "OpenAI 호환"} · ${AI_MODEL}` : "AI 키 미설정: AI 기능은 규칙 기반으로 대체됩니다");
 });

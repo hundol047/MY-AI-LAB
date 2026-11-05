@@ -34,7 +34,10 @@ AI·가게 등록까지 쓰려면 Node를 실행할 수 있는 호스팅(Render,
 - 서명 키: 저장소 Secrets에 `ANDROID_KEYSTORE_B64`·`ANDROID_KEYSTORE_PASS`가 없으면 빌드마다 새 키로 서명한다. 이 경우 새 버전을 설치하려면 기존 앱을 지우고 설치해야 한다. 키는 공개 저장소에 넣지 않는다.
 - 설치: 폰에서 파일을 받아 열고, 처음 한 번 "출처를 알 수 없는 앱 설치"를 허용한다.
 
-## AI 기능 (OpenAI 호환 API)
+## AI 기능 (Claude)
+
+AI는 기본으로 Anthropic의 **Claude**(`claude-opus-5-5`)를 쓴다. `ANTHROPIC_API_KEY`만 넣으면 켜진다. OpenAI 호환 API를 쓰려면 `AI_PROVIDER=openai`와 `AI_API_KEY`·`AI_MODEL`을 넣는다.
+
 
 - **한 줄로 시작**: "이번 주말 부모님이랑 속초 1박, 차로" → 5개 선택값을 채우고 바로 일정 생성 (`/api/start`)
 - **AI 가이드**: 일정을 보며 묻고 고치기. "비 오면 어떡해?", "2일차에 바다 한 곳 더 넣어줘" → 답변 + 일정 변경 (`/api/guide`)
@@ -62,15 +65,19 @@ AI·가게 등록까지 쓰려면 Node를 실행할 수 있는 호스팅(Render,
 ```bash
 cd travel-planner
 npm install
-AI_API_KEY=발급키 AI_MODEL=모델ID TOUR_API_KEY=공공데이터포털_Decoding키 npm start
+ANTHROPIC_API_KEY=발급키 TOUR_API_KEY=공공데이터포털_Decoding키 npm start
 ```
 
 `http://localhost:8080` 접속. 키가 없어도 동작한다(AI 기능은 규칙 기반으로 대체).
 
 | 환경변수 | 필요한 곳 | 설명 |
 |---|---|---|
-| `AI_API_KEY` | AI 4개 기능 | AI 제공사 API 키 (`OPENAI_API_KEY`도 인식) |
-| `AI_MODEL` | AI 4개 기능 | 제공사 콘솔에 적힌 모델 ID 그대로 |
+| `ANTHROPIC_API_KEY` | AI 4개 기능 | Claude API 키 ([Claude Console](https://platform.claude.com)에서 발급). 있으면 Claude를 쓴다 |
+| `CLAUDE_AI_MODEL` | 선택 | Claude 모델 ID. 기본 `claude-opus-5-5` |
+| `CLAUDE_AI_EFFORT` | 선택 | `low`/`medium`/`high`. 기본 `low`(화면에서 기다리는 기능이라 빠르게) |
+| `AI_PROVIDER` | 선택 | `claude` 또는 `openai`. 비우면 `ANTHROPIC_API_KEY`가 있을 때 Claude |
+| `AI_API_KEY` | OpenAI 호환일 때 | AI 제공사 API 키 (`OPENAI_API_KEY`도 인식) |
+| `AI_MODEL` | OpenAI 호환일 때 | 제공사 콘솔에 적힌 모델 ID 그대로 |
 | `AI_BASE_URL` | OpenAI가 아닌 제공사 | OpenAI 호환 API 주소 (예: `https://제공사주소/v1`). OpenAI면 비워 둔다 |
 | `AI_REASONING_EFFORT` | 선택 | 추론 모델이면 `low`/`medium`/`high` (응답 속도에는 `low`) |
 | `TOUR_API_KEY` | 장소 사진·영문 이름 | 공공데이터포털 한국관광공사 국문(KorService2)·영문(EngService2) 관광정보 서비스 인증키 (Decoding) |
