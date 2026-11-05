@@ -67,10 +67,10 @@ const GANGNEUNG = [
   { id: "hyangho-beach", name: "향호해변 버스정류장", cat: "sea", area: "north", lat: 37.9135, lng: 128.8105, hours: ["06:00", "21:00"], closed: [], stay: 30, indoor: false, walk: 1, pop: 2, tags: [], wiki: "향호해수욕장", desc: "앨범 촬영지 정류장 세트" },
   { id: "jeongdongjin", name: "정동진해변", cat: "sea", area: "south", lat: 37.6905, lng: 129.0340, hours: ["05:00", "22:00"], closed: [], stay: 50, indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "정동진역", desc: "바다와 가장 가까운 기차역" },
   {
-    id: "sea-trail", name: "정동심곡 바다부채길", cat: "nature", area: "south", lat: 37.6866, lng: 129.0446, trailKm: 2.9,
+    id: "sea-trail", name: "정동심곡 바다부채길", cat: "nature", area: "south", lat: 37.6866, lng: 129.0446, trailKm: 3,
     hours: ["09:00", "17:30"], lastEntry: "16:30",
     seasons: [{ months: WINTER, hours: ["09:00", "16:30"], lastEntry: "15:30" }],
-    closed: [], stay: 70, indoor: false, walk: 3, pop: 3, tags: [], wiki: "정동심곡바다부채길", desc: "해안 절벽 2.9km 탐방로 · 풍랑특보 시 통제",
+    closed: [], stay: 70, indoor: false, walk: 3, pop: 3, tags: [], wiki: "정동심곡바다부채길", desc: "해안 절벽 약 3km 탐방로 · 풍랑특보 시 통제",
   },
 
   // 카페
@@ -170,7 +170,7 @@ const SEORAK = [
   {
     id: "birch", name: "원대리 자작나무숲", cat: "nature", area: "inje", lat: 38.0092, lng: 128.1943,
     hours: ["09:00", "18:00"], lastEntry: "15:00", seasons: [{ months: WINTER, hours: ["09:00", "17:00"], lastEntry: "14:00" }],
-    closed: [1, 2], stay: 150, indoor: false, walk: 3, pop: 3, tags: [], wiki: "원대리 자작나무숲", desc: "69만 그루 자작나무 · 주차장에서 1시간 걸어 올라감",
+    closed: [1, 2], closedRanges: [["2027-03-02", "2027-04-30"], ["2028-03-02", "2028-04-30"]], /* 봄철 산불조심기간 입산통제 3/2~4/30 (운영 안내·매일신문 2025-11). 해마다 바뀔 수 있음 */ stay: 150, indoor: false, walk: 3, pop: 3, tags: [], wiki: "원대리 자작나무숲", desc: "69만 그루 자작나무 · 주차장에서 1시간 걸어 올라감",
   },
   { id: "daepo", souvenir: "속초 건어물", name: "대포항", cat: "food", area: "sokcho", lat: 38.1750, lng: 128.6070, hours: ["10:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "대포항", desc: "튀김골목과 활어 횟집" },
   { id: "dongmyeong", souvenir: "속초 건어물", name: "동명항 활어센터", alias: ["동명활어센터"], cat: "food", area: "sokcho", lat: 38.2120, lng: 128.5990, hours: ["09:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동명항", desc: "영금정 옆 회센터" },
@@ -247,7 +247,7 @@ const WONJU = [
     hours: ["09:00", "18:00"], lastEntry: "16:30", seasons: [{ months: WINTER, hours: ["09:00", "17:00"], lastEntry: "15:30" }],
     closed: [1], stay: 120, indoor: false, walk: 3, pop: 3, tags: [], wiki: "소금산", desc: "출렁다리·울렁다리·스카이타워",
   },
-  { id: "museum-san", name: "뮤지엄 산", cat: "culture", area: "ganhyeon", lat: 37.4140, lng: 127.8170, hours: ["10:00", "17:00"], lastEntry: "16:00", closed: [1], stay: 120, indoor: true, walk: 2, pop: 3, tags: ["senior"], wiki: "뮤지엄 산", desc: "안도 다다오 설계 미술관 · 제임스 터렐관은 예약 필요" },
+  { id: "museum-san", name: "뮤지엄 산", cat: "culture", area: "ganhyeon", lat: 37.4140, lng: 127.8170, hours: ["10:00", "17:00"], lastEntry: "16:00", closed: [1], stay: 120, indoor: true, walk: 2, pop: 3, tags: ["senior"], wiki: "뮤지엄 산", desc: "안도 다다오 설계 미술관 · 제임스 터렐관은 전용 패스권" },
   { id: "bangyeri", group: "ginkgo", name: "반계리 은행나무", cat: "nature", area: "ganhyeon", lat: 37.2939, lng: 127.7879, hours: ["06:00", "20:00"], closed: [], stay: 30, indoor: false, walk: 1, pop: 2, tags: ["senior"], wiki: "원주 반계리 은행나무", desc: "800년 된 천연기념물 은행나무" },
   { id: "guryongsa", name: "치악산 구룡사", alias: ["구룡사"], cat: "nature", area: "chiaksan", lat: 37.4040, lng: 128.0480, hours: ["09:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "구룡사 (원주)", desc: "금강소나무 숲길 끝의 천년 고찰" },
   { id: "wj-market", name: "원주 중앙시장·자유시장", cat: "food", area: "wj_city", lat: 37.3480, lng: 127.9500, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "원주시", desc: "칼국수·만두·전" },

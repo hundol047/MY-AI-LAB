@@ -472,7 +472,7 @@ function staysFor(l) {
 // 한국어 화면은 네이버(야놀자·여기어때 등 국내 사이트 포함), 영어 화면은 구글 호텔을 먼저
 const priceUrl = {
   naver: (q) => `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`,
-  google: (q) => `https://www.google.com/travel/search?q=${encodeURIComponent(q)}`,
+  google: (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`, // 구글 검색의 숙소 정보에 여러 예약 사이트 가격이 함께 나온다
 };
 function priceLinks(query, compact) {
   const [main, other] = isEN() ? ["google", "naver"] : ["naver", "google"];
@@ -872,7 +872,7 @@ async function askGuide(question, shown = question) {
   const wait = bubble("ai pending", t("생각 중"));
   let r = null;
   try {
-    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 20000);
+    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 9000); // 서버 8초 + 1초
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
@@ -915,7 +915,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
   const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
   let r = null;
   try {
-    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 12000);
+    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 7000); // 서버 6초 + 1초
     if (res.ok) r = await res.json();
   } catch {}
   if (!r) { r = startLocal(text, todayStr()); notifyNoAI(); }

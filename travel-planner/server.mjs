@@ -36,7 +36,8 @@ const SHOPS_FILE = path.join(here, "data", "shops.json");
 async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
 
 function logAIError(err) {
-  if (err instanceof Anthropic.AuthenticationError) console.error("Claude 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
+  if (err instanceof Anthropic.APIConnectionTimeoutError) console.error("Claude 응답이 대기 상한을 넘어 무료 간단 모드로 답했어요");
+  else if (err instanceof Anthropic.AuthenticationError) console.error("Claude 인증 실패: ANTHROPIC_API_KEY를 확인하세요.");
   else if (err instanceof Anthropic.NotFoundError) console.error(`Claude 모델을 찾을 수 없음: CLAUDE_AI_MODEL(${AI_MODEL})을 확인하세요.`);
   else if (err instanceof Anthropic.RateLimitError) console.error("Claude 요청 한도 초과");
   else if (err instanceof Anthropic.APIError) console.error(`Claude API 오류 ${err.status}: ${err.message}`);
@@ -87,9 +88,11 @@ async function handle(req, res) {
       const body = JSON.parse(await readBody(req));
       const text = url.pathname === "/api/start" ? body.text : body.question;
       if (typeof text !== "string" || !text.trim() || text.length > 300) { res.writeHead(400).end(); return; }
+      const t0 = Date.now();
       const result = url.pathname === "/api/start"
         ? await startFromText(text.trim(), body.today, body.lang)
         : await guide({ question: text.trim(), history: body.history, trip: body.trip, lang: body.lang });
+      console.log(`AI ${url.pathname} ${Date.now() - t0}ms`); // 실제 응답 속도 확인용
       res.writeHead(200, { "content-type": MIME[".json"] }).end(JSON.stringify(result));
     } catch (err) { logAIError(err); res.writeHead(503).end(); }
     return;

@@ -16,6 +16,8 @@ export const AI_MODEL = AI_PROVIDER === "claude"
   ? process.env.CLAUDE_AI_MODEL || "claude-opus-5-5"
   : process.env.AI_MODEL || "";
 const CLAUDE_AI_EFFORT = process.env.CLAUDE_AI_EFFORT || "low"; // 화면에서 기다리는 기능이라 빠른 쪽이 기본
+// 기다리는 최대 시간. 넘으면 서버가 실패를 돌려주고 화면은 바로 무료 간단 모드로 답한다 (화면 쪽은 이보다 1초 길게 기다림)
+export const START_MS = 6_000, GUIDE_MS = 8_000;
 const CATS = ["sea", "cafe", "food", "culture", "nature"];
 const REGION_KEYS = Object.keys(REGIONS);
 const NEIGHBORS = {
@@ -146,7 +148,7 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 const replyIn = (lang) => (lang === "en" ? "\n\n(사용자 화면이 영어다. 사람에게 보이는 문장은 모두 영어로 쓴다.)" : "");
 
 export async function startFromText(text, today, lang) {
-  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}${replyIn(lang)}`, schema: START_SCHEMA, name: "trip_choices", timeout: 10_000 });
+  const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}${replyIn(lang)}`, schema: START_SCHEMA, name: "trip_choices", timeout: START_MS });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date) || r.date < today) r.date = addDays(today, 1);
   r.likes = [...new Set(r.likes)].slice(0, 3);
   return r;
@@ -181,8 +183,9 @@ export async function guide({ question, history, trip, lang }) {
     properties: {
       answer: { type: "string" },
       changed: { type: "boolean" },
-      remove: { type: "array", items: { type: "string", enum: tripIds.length ? tripIds : ["none"] } },
-      add: { type: "array", items: { type: "string", enum: allIds } },
+      // 장소 id는 enum으로 묶지 않는다: 여행마다 스키마가 바뀌면 매번 형식 준비 시간이 더 든다. 없는 id는 sanitize가 버린다
+      remove: { type: "array", items: { type: "string" } },
+      add: { type: "array", items: { type: "string" } },
       prefer: { type: "array", items: { type: "string", enum: CATS } },
       avoid: { type: "array", items: { type: "string", enum: CATS } },
       indoor: { type: "string", enum: ["on", "off", "keep"] },
@@ -223,7 +226,7 @@ ${hist ? `\n이전 대화:\n${hist}\n` : ""}
     remove: Array.isArray(o?.remove) ? o.remove.filter((id) => tripIds.includes(id)) : [],
     add: Array.isArray(o?.add) ? o.add.filter((id) => allIds.includes(id)) : [],
   });
-  const r = await askJSON({ system, user, schema, name: "guide_reply", sanitize });
+  const r = await askJSON({ system, user, schema, name: "guide_reply", sanitize, timeout: GUIDE_MS });
   return r;
 }
 
