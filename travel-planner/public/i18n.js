@@ -160,6 +160,11 @@ const EN = {
   "바다·호수 전망": "Sea/lake view",
   "{km}km": "{km} km away",
   "네이버": "Naver",
+  "구글": "Google",
+  "지도": "Map",
+  "최저가 비교": "Compare prices",
+  "이 지역 숙소 최저가 비교": "Compare lodging prices here",
+  "한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 최저가 비교는 여러 예약 사이트의 가격을 한 화면에 보여 줘요. 날짜를 고르면 그날 가장 싼 곳을 찾을 수 있어요": "From Korea Tourism Organization lodging data · views marked only when its description says so · Compare prices shows several booking sites side by side. Pick your dates to find the cheapest one",
   "카카오": "Kakao",
   "한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 가격과 빈 방은 예약 사이트에서 확인하세요": "From Korea Tourism Organization lodging data · views marked only when its description says so · check prices and availability on booking sites",
   "숙소({name})": "Stay ({name})",
@@ -335,6 +340,8 @@ export function loadDataEn(fetcher = fetch) {
   return (dataEnReady ??= fetcher("data-en.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (dataEn = j || {})));
 }
 export const placeName = (p) => (lang === "en" && dataEn[p.id]?.name) || p.name;
+// 무료 간단 모드 가이드가 영어 질문 속 장소 이름을 알아듣도록
+export const namesEn = () => Object.fromEntries(Object.entries(dataEn).map(([id, v]) => [id, v.name]));
 export const placeDesc = (p) => (lang === "en" && dataEn[p.id]?.desc) || p.desc;
 
 /* ---------- index.html의 고정 문구 ----------

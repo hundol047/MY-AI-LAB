@@ -4,12 +4,12 @@ import { readFileSync } from "node:fs";
 import { planTrip } from "../public/planner.js";
 import { PLACES } from "../public/data.js";
 import { guideLocal, startLocal } from "../public/ai-local.js";
-import { NICKS, TIPS, THEMES, normalize } from "../public/knowledge.js";
+import { NICKS, NICKS_EN, TIPS, TIPS_EN, THEMES, normalize } from "../public/knowledge.js";
 
 const fees = JSON.parse(readFileSync(new URL("../public/fees.json", import.meta.url)));
 const ids = new Set(PLACES.map((p) => p.id));
-for (const id of [...Object.keys(NICKS), ...Object.keys(TIPS), ...Object.values(THEMES).flat()]) assert.ok(ids.has(id), `없는 장소 id: ${id}`);
-for (const p of PLACES) assert.ok(TIPS[p.id], `팁 없음: ${p.name}`);
+for (const id of [...Object.keys(NICKS), ...Object.keys(NICKS_EN), ...Object.keys(TIPS), ...Object.keys(TIPS_EN), ...Object.values(THEMES).flat()]) assert.ok(ids.has(id), `없는 장소 id: ${id}`);
+for (const p of PLACES) assert.ok(TIPS[p.id] && TIPS_EN[p.id], `팁 없음: ${p.name}`);
 for (const t of Object.values(TIPS)) assert.ok(!/\d{2,3}-\d{3,4}-\d{4}|\d,\d{3}원/.test(t), `팁에 전화번호·가격을 적지 않는다: ${t}`);
 
 assert.equal(normalize("엄빠랑 뚜벅이"), "부모님랑대중교통");
@@ -69,4 +69,23 @@ assert.equal(r.changed, false);
 assert.doesNotMatch(r.answer, /실내 위주/);
 r = ask("비 오면 어떡해?");
 assert.equal(r.indoor, "on");
+// 영어 화면: 영어 질문을 알아듣고 영어로 답한다
+const namesEn = Object.fromEntries(Object.entries(JSON.parse(readFileSync(new URL("../public/data-en.json", import.meta.url)))).map(([k, v]) => [k, v.name]));
+const askEn = (q) => guideLocal(q, trip, 0, { input, opts, fees, lang: "en", namesEn });
+r = askEn("How much is Ojukheon?");
+assert.match(r.answer, /adults ₩3,000/);
+r = askEn("Add Hwanseon cave");
+assert.deepEqual(r.add, ["hwanseon"]);
+r = askEn("Is there a lot of walking at the sea trail?");
+assert.match(r.answer, /Badabuchae-gil.*stairs/);
+r = askEn("Add one more beach on day 2");
+assert.equal(PLACES.find((p) => p.id === r.add[0]).cat, "sea");
+r = askEn("No cafes please");
+assert.ok(r.avoid.includes("cafe"));
+r = askEn("What if it rains?");
+assert.equal(r.indoor, "on");
+for (const q of ["비 오면 어떡해?", "아이랑 가도 괜찮을까?", "오늘 운영시간 알려줘", "Parking?", "blah"]) {
+  r = askEn(q);
+  assert.doesNotMatch(r.answer, /[가-힣]/, `영어 화면인데 한국어 답: ${q} → ${r.answer}`);
+}
 console.log("ok - 무료 간단 모드 가이드");

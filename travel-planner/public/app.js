@@ -3,7 +3,7 @@ import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { checkLodgingLocal } from "./ai-local.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
-import { t, isEN, getLang, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
+import { t, isEN, getLang, namesEn, setLang, applyStatic, loadDataEn, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 import { startLocal, guideLocal } from "./ai-local.js";
 
 const $ = (s) => document.querySelector(s);
@@ -468,6 +468,18 @@ function staysFor(l) {
   const byType = lodgingPlaces?.[l.id] || {};
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
+// 숙소 예약: 앱이 실시간 가격을 알 수는 없으므로, 여러 예약 사이트 가격을 한 화면에 모아 보여 주는 비교 검색으로 보낸다
+// 한국어 화면은 네이버(야놀자·여기어때 등 국내 사이트 포함), 영어 화면은 구글 호텔을 먼저
+const priceUrl = {
+  naver: (q) => `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`,
+  google: (q) => `https://www.google.com/travel/search?q=${encodeURIComponent(q)}`,
+};
+function priceLinks(query, compact) {
+  const [main, other] = isEN() ? ["google", "naver"] : ["naver", "google"];
+  const otherLabel = other === "naver" ? t("네이버") : t("구글");
+  return `<a class="ghost small price" href="${priceUrl[main](query)}" target="_blank" rel="noopener">${compact ? t("최저가 비교") : t("이 지역 숙소 최저가 비교")}</a>`
+    + `<a class="ghost small" href="${priceUrl[other](query)}" target="_blank" rel="noopener">${otherLabel}</a>`;
+}
 function staysHTML(l) {
   const list = staysFor(l);
   if (!list.length) return "";
@@ -477,9 +489,9 @@ function staysHTML(l) {
       <div class="stay-img"${h.photo ? ` style="background-image:url('${h.photo}')"` : ""}></div>
       <div class="stay-info"><strong>${esc(h.name)}</strong>
         <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
-      <div class="stay-acts"><a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("네이버")}</a><a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">${t("카카오")}</a></div>
+      <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
     </li>`;
-  }).join("")}</ul><p class="stay-note">${t("한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 가격과 빈 방은 예약 사이트에서 확인하세요")}</p></div>`;
+  }).join("")}</ul><p class="stay-note">${t("한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 최저가 비교는 여러 예약 사이트의 가격을 한 화면에 보여 줘요. 날짜를 고르면 그날 가장 싼 곳을 찾을 수 있어요")}</p></div>`;
 }
 function renderLodging() {
   const box = $("#lodgingCard"), l = trip.lodging;
@@ -495,8 +507,7 @@ function renderLodging() {
     </div>
     ${staysHTML(l)}
     <div class="acts">
-      <a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("네이버에서 찾기")}</a>
-      <a class="ghost small" href="https://map.kakao.com/?q=${q}" target="_blank" rel="noopener">${t("카카오맵")}</a>
+      ${priceLinks(l.query, false)}
       <button class="ghost small" type="button" id="safeOpen">${t("예약 전 안심 체크")}</button>
     </div>
     <form class="safe" id="safeForm" hidden>
@@ -864,7 +875,7 @@ async function askGuide(question, shown = question) {
     const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 20000);
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData });
+  if (!r) r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
   let note = "";
   if (r.changed) {
     const o = state.opts, uniq = (a) => [...new Set(a)];
