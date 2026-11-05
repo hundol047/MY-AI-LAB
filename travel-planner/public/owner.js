@@ -1,4 +1,4 @@
-// 사장님: 메뉴판 사진 → AI가 읽고 번역 → 사장님이 확인·수정 → 등록 → 다국어 QR 메뉴
+// 사장님이 메뉴와 번역을 직접 입력 → 등록 → 다국어 QR 메뉴
 const $ = (s) => document.querySelector(s);
 const esc = (t) => String(t ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 등록할 수 없다는 것을 처음부터 알린다
@@ -12,22 +12,6 @@ fetch("api/shops?region=gangneung").then((r) => r.ok).catch(() => false).then((o
 });
 let toastTimer;
 function toast(msg) { const el = $("#toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2400); }
-
-function shrink(file, max = 1600) {
-  return new Promise((resolve, reject) => {
-    const img = new Image();
-    img.onload = () => {
-      const k = Math.min(1, max / Math.max(img.width, img.height));
-      const c = document.createElement("canvas");
-      c.width = Math.round(img.width * k); c.height = Math.round(img.height * k);
-      c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(img.src);
-      resolve(c.toDataURL("image/jpeg", 0.85));
-    };
-    img.onerror = reject;
-    img.src = URL.createObjectURL(file);
-  });
-}
 
 function row(i = {}) {
   const el = document.createElement("div");
@@ -44,31 +28,7 @@ function row(i = {}) {
   $("#rows").append(el);
 }
 
-$("#photo").addEventListener("change", async (e) => {
-  const file = e.target.files[0]; if (!file) return;
-  const dataUrl = await shrink(file);
-  $("#preview").src = dataUrl; $("#preview").hidden = false; $("#shotLabel").textContent = "다시 찍기";
-  $("#scanState").textContent = "메뉴판을 읽고 있어요…";
-  let r = null;
-  try {
-    const c = new AbortController(); const t = setTimeout(() => c.abort(), 45000);
-    const res = await fetch("api/menu-scan", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ image: dataUrl.split(",")[1], mediaType: "image/jpeg" }), signal: c.signal });
-    clearTimeout(t);
-    if (res.ok) r = await res.json();
-  } catch {}
-  $("#rows").innerHTML = "";
-  if (r) {
-    $("#scanState").textContent = `메뉴 ${r.items.length}개를 읽었어요. 틀린 곳을 고쳐 주세요.`;
-    if (r.shopName && !$("#name").value) $("#name").value = r.shopName;
-    r.items.forEach(row);
-    $("#unclear").textContent = r.unclear.length ? `잘 안 보인 부분: ${r.unclear.join(", ")}` : "";
-  } else {
-    $("#scanState").textContent = "지금은 AI로 읽을 수 없어요. 메뉴를 직접 입력해 주세요. (번역 칸은 비워도 돼요)";
-    row(); row(); row();
-  }
-  $("#step2").hidden = false;
-  $("#step2").scrollIntoView({ behavior: "smooth" });
-});
+row(); row(); row();
 
 $("#addRow").onclick = () => row();
 

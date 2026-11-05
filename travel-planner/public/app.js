@@ -1,3 +1,4 @@
+import { recommendBooking } from "./booking-links.js";
 import { planTrip, swapItem, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
@@ -262,7 +263,7 @@ function itemHTML(it, i, day) {
         <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
-        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
+        <a class="ghost small" href="reviews.html?place=${encodeURIComponent(p.id)}">후기</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
       </div>
       </div>
     </article>
@@ -468,17 +469,17 @@ function staysFor(l) {
   const byType = lodgingPlaces?.[l.id] || {};
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
-// 숙소 예약: 앱이 실시간 가격을 알 수는 없으므로, 여러 예약 사이트 가격을 한 화면에 모아 보여 주는 비교 검색으로 보낸다
-// 한국어 화면은 네이버(야놀자·여기어때 등 국내 사이트 포함), 영어 화면은 구글 호텔을 먼저
-const priceUrl = {
-  naver: (q) => `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`,
-  google: (q) => `https://www.google.com/search?q=${encodeURIComponent(q)}`, // 구글 검색의 숙소 정보에 여러 예약 사이트 가격이 함께 나온다
-};
-function priceLinks(query, compact) {
-  const [main, other] = isForeign() ? ["google", "naver"] : ["naver", "google"];
-  const otherLabel = other === "naver" ? t("네이버") : t("구글");
-  return `<a class="ghost small price" href="${priceUrl[main](query)}" target="_blank" rel="noopener">${compact ? t("최저가 비교") : t("이 지역 숙소 최저가 비교")}</a>`
-    + `<a class="ghost small" href="${priceUrl[other](query)}" target="_blank" rel="noopener">${otherLabel}</a>`;
+function priceLinks(query) {
+  const choice = recommendBooking(query, state.input, peopleNow(), getLang());
+  return `<div class="booking-choice">
+    <a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t("추천 · {platform}에서 예약 찾기", {platform:esc(choice.primary.name)})}</a>
+    <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
+      `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
+  </div>`;
+}
+function bookingReason(query) {
+  const choice = recommendBooking(query, state.input, peopleNow(), getLang());
+  return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 1개로 검색", {adults:choice.adults,kids:choice.kids})}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
 const STAY_ART = (() => {
@@ -508,7 +509,7 @@ function staysHTML(l) {
         <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
       <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
     </li>`;
-  }).join("")}</ul><p class="stay-note">${t("한국관광공사 숙박 정보 기준 · 전망 표시는 관광공사 소개글에 적힌 곳만 · 최저가 비교는 여러 예약 사이트의 가격을 한 화면에 보여 줘요. 날짜를 고르면 그날 가장 싼 곳을 찾을 수 있어요")}</p></div>`;
+  }).join("")}</ul><p class="stay-note">${t("여행 날짜와 인원으로 예약 플랫폼을 엽니다. 객실·아동 나이·세금·취소 조건과 최종 금액을 확인하세요. 최저가는 보장하지 않습니다.")}</p></div>`;
 }
 function renderLodging() {
   const box = $("#lodgingCard"), l = trip.lodging;
@@ -522,6 +523,7 @@ function renderLodging() {
       <p>${esc(lodgingDesc(l))}</p>
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
+    ${bookingReason(l.query)}
     ${staysHTML(l)}
     <div class="acts">
       ${priceLinks(l.query, false)}
@@ -543,12 +545,7 @@ document.addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = $("#safeText").value.trim(); if (text.length < 20) return toast(t("숙소 페이지 내용을 조금 더 붙여넣어 주세요"));
   const btn = e.target.querySelector("button"); btn.disabled = true; btn.textContent = t("확인 중…");
-  let r = null;
-  try {
-    const res = await fetchT("api/lodging-check", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, nights: state.input.days - 1, date: state.input.date, lang: getLang() }) }, 20000);
-    if (res.ok) r = await res.json();
-  } catch {}
-  if (!r) r = (await localAI()).checkLodgingLocal(text, getLang());
+  const r = (await localAI()).checkLodgingLocal(text, getLang());
   btn.disabled = false; btn.textContent = t("확인");
   const level = { low: t("안심"), mid: t("주의"), high: t("위험") };
   $("#safeResult").innerHTML = `
@@ -724,7 +721,7 @@ document.addEventListener("click", (e) => {
   const p = { ...peopleNow() };
   p[k] = Math.max(k === "adults" ? 1 : 0, Math.min(10, p[k] + Number(d)));
   state.opts.people = p;
-  renderCosts(); persist();
+  renderCosts(); renderLodging(); persist();
 });
 
 /* ---------- 특산물 재주문 ---------- */
@@ -761,6 +758,8 @@ function renderPast() {
 /* ---------- 지도 ---------- */
 // 지도 라이브러리는 일정 화면을 처음 열 때 받는다 (첫 화면을 가볍게)
 let leafletLoading = null;
+let lastMapViewKey = null;
+let mapInteractive = false;
 function loadLeaflet() {
   if (window.L) return Promise.resolve();
   return (leafletLoading ??= new Promise((resolve, reject) => {
@@ -779,7 +778,7 @@ function drawMap(day) {
     return;
   }
   if (!map) {
-    map = L.map("map", { zoomControl: false });
+    map = L.map("map", { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false });
     map.attributionControl.setPrefix(false);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -805,11 +804,23 @@ function drawMap(day) {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
     L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${esc(placeName(it.place))}`);
   });
-  map.invalidateSize();
+  map.invalidateSize({ pan: false });
   const extra = trip.lodging ? [[trip.lodging.lat, trip.lodging.lng]] : [];
-  map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14 });
+  const viewKey = routeKey(day);
+  if (lastMapViewKey !== viewKey) {
+    map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14, animate: false });
+    lastMapViewKey = viewKey;
+  }
 }
 
+$("#mapInteract").addEventListener("click", () => {
+  if (!map) return;
+  mapInteractive = !mapInteractive;
+  for (const handler of [map.dragging, map.touchZoom, map.keyboard]) handler[mapInteractive ? "enable" : "disable"]();
+  document.querySelector(".map-wrap").classList.toggle("map-active", mapInteractive);
+  $("#mapInteract").setAttribute("aria-pressed", String(mapInteractive));
+  $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
+});
 let meMarker = null;
 function addLocateControl() {
   const Ctl = L.Control.extend({
@@ -875,52 +886,75 @@ function bubble(who, text) {
   $("#guideLog").scrollTop = $("#guideLog").scrollHeight;
   return el;
 }
-function compactTrip() {
-  const o = state.opts;
-  return {
-    input: state.input,
-    opts: { pace: o.pace, lessWalk: !!o.lessWalk, indoor: !!o.indoor, prefer: o.prefer || [], avoid: o.avoid || [] },
-    lodging: trip.lodging && { name: trip.lodging.name, typeLabel: trip.lodging.typeLabel },
-    days: trip.days.map((d) => ({ date: d.date, areaName: d.areaName, items: d.items.map((i) => ({ id: i.id, name: i.place.name, start: fmt(i.start) })) })),
-  };
+let guideQueue = Promise.resolve();
+let guideRenderVersion = 0;
+function askGuide(question, shown = question) {
+  guideQueue = guideQueue.then(() => runGuide(question, shown)).catch(() => toast(t("조건에 맞는 대안을 찾지 못해 기존 일정을 유지했어요.")));
+  return guideQueue;
 }
-async function askGuide(question, shown = question) {
+function resultNote(entry) {
+  if (!entry.result.changed) return "";
+  if (!entry.applied) return " " + t("조건에 맞는 대안을 찾지 못해 기존 일정을 유지했어요.");
+  const missed = entry.missed || [];
+  return missed.length ? t(" ({names}은(는) 영업시간이나 동선이 맞지 않아 넣지 못했어요)", {names:missed.map(id=>{const p=PLACES.find(p=>p.id===id);return p?placeName(p):id;}).join(", ")}) : t(" 영업시간을 다시 확인해 일정에 반영했어요.");
+}
+async function renderGuideHistory() {
+  const version = ++guideRenderVersion, lang = getLang();
+  for (const entry of guideHistory) {
+    if (!entry.translations[lang]) {
+      entry.translations[lang] = (await localAI()).guideLocal(entry.q, entry.trip, entry.dayIdx, {...entry.ctx, namesEn:namesEn(), forceLang:lang}).answer;
+    }
+    if (version !== guideRenderVersion || lang !== getLang()) return;
+    entry.node.textContent = (entry.translations[lang] || t("대화 번역을 불러오지 못했어요. 원문을 표시합니다.") + " " + entry.a) + resultNote(entry);
+  }
+}
+async function runGuide(question, shown) {
+  const activeState = state;
+  const before = structuredClone(trip), beforeOpts = structuredClone(state.opts), input = {...state.input};
+  const currentDay = dayIdx, requestLang = getLang();
+  const history = guideHistory.map(({q,a})=>({q,a}));
+  if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000));
+  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history};
   bubble("me", shown);
   const wait = bubble("ai pending", t("생각 중"));
-  let r = null;
-  try {
-    const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 9000); // 서버 8초 + 1초
-    if (res.ok) r = await res.json();
-  } catch {}
-  if (!r) {
-    if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000)); // 한국어 화면에서도 영어 질문의 장소 이름을 알아듣게
-    r = (await localAI()).guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
-  }
-  let note = "";
+  const module = await localAI();
+  const local = true, r = module.guideLocal(question, before, currentDay, ctx);
+  if(state !== activeState) {wait.remove();return;}
+  let applied = false, missed = [];
   if (r.changed) {
-    const o = state.opts, uniq = (a) => [...new Set(a)];
-    o.exclude = uniq([...(o.exclude || []), ...(r.remove || [])]).filter((id) => !(r.add || []).includes(id));
-    o.must = uniq([...(o.must || []), ...(r.add || [])]);
-    if (r.prefer) o.prefer = r.prefer;
-    if (r.avoid) o.avoid = r.avoid;
-    if (r.indoor === "on") o.indoor = true; else if (r.indoor === "off") { o.indoor = false; o.rainDays = []; }
-    if (r.lessWalk === "on") o.lessWalk = true; else if (r.lessWalk === "off") o.lessWalk = false;
-    if (r.pace && r.pace !== "keep") o.pace = r.pace;
-    rebuild();
-    // 엔진이 다시 확인한 결과를 그대로 알려준다
-    const placed = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
-    // 못 넣은 곳: 이번 여행 권역 밖이라 먼 곳과, 영업시간·휴무가 안 맞는 곳을 나눠 이유를 알려 준다
-    const regions = new Set(trip.days.flatMap((d) => d.items.map((i) => i.place.region)).concat(state.input.region));
-    const notPlaced = (r.add || []).filter((id) => !placed.has(id)).map(placeById).filter(Boolean);
-    const far = notPlaced.filter((p) => !regions.has(p.region)).map(placeName);
-    const hours = notPlaced.filter((p) => regions.has(p.region)).map(placeName);
-    note = (await localAI()).changeNote(r.lang, hours, far) ?? (!notPlaced.length ? t(" 영업시간을 다시 확인해 일정에 반영했어요.")
-      : (hours.length ? t(" ({names}은(는) 영업시간이나 동선이 맞지 않아 넣지 못했어요)", { names: hours.join(", ") }) : "")
-        + (far.length ? t(" ({names}은(는) 이번 여행 지역에서 멀어 넣지 못했어요)", { names: far.join(", ") }) : ""));
+    if (r.swap) {
+      const {dayIdx:di,itemIdx:ii}=r.swap;
+      const old=trip.days[di]?.items[ii];
+      if(old) {
+        let changed=trip;
+        if(r.swap.replacementId) changed=swapItem(trip,state.input,state.opts,di,ii,r.swap.replacementId);
+        else if(r.swap.cat) {
+          const used=new Set(trip.days.flatMap(d=>d.items.map(i=>i.id)));
+          const alternatives=PLACES.filter(p=>p.cat===r.swap.cat && !used.has(p.id) && !(state.opts.exclude||[]).includes(p.id) && p.region===old.place.region)
+            .sort((a,b)=>distKm(a,old.place)-distKm(b,old.place));
+          for(const p of alternatives) {changed=swapItem(trip,state.input,state.opts,di,ii,p.id);if(changed!==trip)break;}
+        } else changed=swapItem(trip,state.input,state.opts,di,ii);
+        if(changed.days[di]?.items[ii] && changed.days[di].items[ii].id!==old.id) {
+          state.opts.exclude=[...new Set([...(state.opts.exclude||[]),old.id])];trip=changed;dayIdx=di;applied=true;render();persist();applyRoad(di);
+        }
+      }
+    } else {
+      const o=state.opts,uniq=a=>[...new Set(a)];
+      o.exclude=uniq([...(o.exclude||[]),...(r.remove||[])]).filter(id=>!(r.add||[]).includes(id));
+      o.must=uniq([...(o.must||[]),...(r.add||[])]);
+      if(r.prefer)o.prefer=r.prefer;if(r.avoid)o.avoid=r.avoid;
+      if(r.indoor==="on")o.indoor=true;else if(r.indoor==="off"){o.indoor=false;o.rainDays=[];}
+      if(r.lessWalk==="on")o.lessWalk=true;else if(r.lessWalk==="off")o.lessWalk=false;
+      if(r.pace&&r.pace!=="keep")o.pace=r.pace;
+      rebuild();
+      applied=JSON.stringify(before.days.map(d=>d.items.map(i=>[i.id,i.start,i.end])))!==JSON.stringify(trip.days.map(d=>d.items.map(i=>[i.id,i.start,i.end])));
+      const placed=new Set(trip.days.flatMap(d=>d.items.map(i=>i.id)));
+      missed=(r.add||[]).filter(id=>!placed.has(id));
+    }
   }
   wait.classList.remove("pending");
-  wait.innerHTML = esc(r.answer + note);
-  guideHistory.push({ q: question, a: r.answer });
+  guideHistory.push({q:question,a:r.answer,local,trip:before,dayIdx:currentDay,ctx,result:r,applied,missed,node:wait,translations:{[requestLang]:r.answer}});
+  await renderGuideHistory();
 }
 $("#askForm").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -939,12 +973,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = $("#aiStartInput").value.trim(); if (!text) return;
   const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
-  let r = null;
-  try {
-    const res = await fetchT("api/start", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 7000); // 서버 6초 + 1초
-    if (res.ok) r = await res.json();
-  } catch {}
-  if (!r) { r = (await localAI()).startLocal(text, todayStr()); notifyNoAI(); }
+  const r = (await localAI()).startLocal(text, todayStr());
   btn.disabled = false; btn.textContent = t("만들기");
   fillForm({ ...r, days: Number(r.days) });
   $("#form").requestSubmit();
@@ -1025,12 +1054,7 @@ function toast(msg) {
 
 /* ---------- 시작: 공유 링크 / 지난 일정 복원 ---------- */
 let restoredFromLink = false;
-let noAINotified = false;
-function notifyNoAI() {
-  if (noAINotified) return;
-  noAINotified = true;
-  setTimeout(() => toast(t("AI에 연결되지 않아 간단 모드로 처리했어요")), 2400);
-}
+
 
 // 오프라인 표시
 function updateOnline() { document.body.classList.toggle("offline", !navigator.onLine); }
@@ -1045,6 +1069,8 @@ async function switchLang(l) {
   renderStartRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
+  $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
+  await renderGuideHistory();
 }
 document.querySelector(".lang").addEventListener("click", (e) => {
   const b = e.target.closest("[data-lang]");

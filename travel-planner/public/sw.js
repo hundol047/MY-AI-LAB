@@ -2,8 +2,8 @@
 // - 앱 파일: 캐시에서 바로 보여주고 뒤에서 새 버전으로 갱신 (stale-while-revalidate)
 // - 지도 타일·사진: 한 번 받으면 캐시에서 (cache-first)
 // - AI·날씨·경로 등 API: 항상 네트워크
-const CACHE = "ohneul-gangwon-v25";
-const SHELL = ["./", "index.html", "style.css", "app.js", "planner.js", "data.js", "i18n.js", "data-en.json", "photos.json", "lodging-places.json", "fees.json", "costs.js", "origins.js", "ai-local.js", "knowledge.js", "knowledge-intl.js", "i18n-cjk.js", "icon.svg", "icon-192.png", "apple-touch-icon.png", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
+const CACHE = "ohneul-gangwon-v28";
+const SHELL = ["./", "index.html", "style.css", "app.js", "booking-links.js", "planner.js", "data.js", "i18n.js", "data-en.json", "photos.json", "lodging-places.json", "fees.json", "costs.js", "origins.js", "ai-local.js", "guide-topics.js", "knowledge.js", "knowledge-intl.js", "i18n-cjk.js", "icon.svg", "icon-192.png", "apple-touch-icon.png", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
 const MEDIA = /tile\.openstreetmap\.org|upload\.wikimedia\.org|tong\.visitkorea\.or\.kr|\.woff2$/;
 const LIVE = /\/api\/|open-meteo|project-osrm|wikipedia\.org\/api/;
 
@@ -17,6 +17,7 @@ self.addEventListener("fetch", (e) => {
   const req = e.request;
   if (req.method !== "GET") return;
   const url = req.url;
+  if (/\/(booking|booking-status|admin|reviews)\.(html|js)(\?|$)/.test(url) || /\/service-ui\.js/.test(url)) return;
   if (LIVE.test(url)) return; // 브라우저 기본 동작(네트워크)
   if (MEDIA.test(url)) {
     e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {

@@ -4,11 +4,16 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "start": "node server.mjs",
-    "test": "node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/i18n.test.mjs && node scripts/bake-static-i18n.mjs --check && node test/guide-eval.mjs --check && node test/planner.test.mjs"
+    "start": "node --use-env-proxy server.mjs",
+    "test": "node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/i18n.test.mjs && node scripts/bake-static-i18n.mjs --check && node test/guide-eval.mjs --check && node test/travel-ux.test.mjs && node test/local-guide.test.mjs && node test/planner.test.mjs",
+    "test:services": "node test/bookings.test.mjs && node test/directory.test.mjs && node test/services.test.mjs && node test/service-api.test.mjs && node test/tour-errors.test.mjs",
+    "sync:directory": "node --use-env-proxy scripts/sync-directory.mjs"
   },
   "dependencies": {
     "openai": "^7.50.0",
     "qrcode": "^1.5.4"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

@@ -1,5 +1,6 @@
-// 정적 파일 + AI(/api/start, /api/guide, /api/lodging-check, /api/menu-scan) + 사진(/api/photo) + 가게 등록(/api/shops, /api/qr)
-// AI(OpenAI 호환 API)는 말을 이해하고 설명만 하고, 장소 선택·시간 계산은 검증된 데이터 기반 엔진이 한다.
+import { serviceAPI } from "./service-api.mjs";
+// 정적 파일 + 공식 사진 + 가게 등록. 대화와 숙소 문구 점검은 브라우저의 내장 가이드가 처리한다.
+// 장소 선택·시간 계산은 내장 데이터 기반 엔진이 한다.
 // 그래서 존재하지 않는 장소나 문 닫은 곳이 일정에 들어갈 수 없다.
 import http from "node:http";
 import { readFile, writeFile, stat } from "node:fs/promises";
@@ -8,14 +9,13 @@ import QRCode from "qrcode";
 import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import OpenAI from "openai";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
-import { startFromText, guide, lodgingCheck, menuScan, AI_MODEL } from "./ai.mjs";
 import { REGIONS, PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const PUBLIC = path.join(here, "public");
 const PORT = Number(process.env.PORT || 8080);
+const services = serviceAPI({file:process.env.APP_DB_PATH || path.join(here,".local","app.sqlite"),adminToken:process.env.ADMIN_API_TOKEN});
 
 const MIME = {
   ".html": "text/html; charset=utf-8",
@@ -34,14 +34,6 @@ const gzipCache = new Map();
 const SHOPS_FILE = path.join(here, "data", "shops.json");
 async function loadShops() { try { return JSON.parse(await readFile(SHOPS_FILE, "utf8")); } catch { return []; } }
 
-function logAIError(err) {
-  if (err instanceof OpenAI.APIConnectionTimeoutError) console.error("AI 응답이 대기 상한을 넘어 무료 간단 모드로 답했어요");
-  else if (err instanceof OpenAI.AuthenticationError) console.error("AI 인증 실패: AI_API_KEY를 확인하세요.");
-  else if (err instanceof OpenAI.NotFoundError) console.error(`모델을 찾을 수 없음: AI_MODEL(${AI_MODEL})을 확인하세요.`);
-  else if (err instanceof OpenAI.RateLimitError) console.error("요청 한도 초과");
-  else if (err instanceof OpenAI.APIError) console.error(`AI API 오류 ${err.status}: ${err.message}`);
-  else console.error(err.message);
-}
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
 const clean = (v, max) => String(v ?? "").replace(/[<>]/g, "").trim().slice(0, max);
 
@@ -78,39 +70,11 @@ const server = http.createServer((req, res) => {
 async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
 
-  if (req.method === "POST" && (url.pathname === "/api/start" || url.pathname === "/api/guide")) {
-    try {
-      const body = JSON.parse(await readBody(req));
-      const text = url.pathname === "/api/start" ? body.text : body.question;
-      if (typeof text !== "string" || !text.trim() || text.length > 300) { res.writeHead(400).end(); return; }
-      const t0 = Date.now();
-      const result = url.pathname === "/api/start"
-        ? await startFromText(text.trim(), body.today, body.lang)
-        : await guide({ question: text.trim(), history: body.history, trip: body.trip, lang: body.lang });
-      console.log(`AI ${url.pathname} ${Date.now() - t0}ms`); // 실제 응답 속도 확인용
-      res.writeHead(200, { "content-type": MIME[".json"] }).end(JSON.stringify(result));
-    } catch (err) { logAIError(err); res.writeHead(503).end(); }
-    return;
-  }
+  if (await services(req,res,url)) return;
 
-  // 숙소 안심 체크 (붙여넣은 숙소 페이지 글 분석)
-  if (req.method === "POST" && url.pathname === "/api/lodging-check") {
-    try {
-      const body = JSON.parse(await readBody(req, 20_000));
-      if (typeof body.text !== "string" || body.text.trim().length < 20) return json(res, 400, {});
-      json(res, 200, await lodgingCheck(body));
-    } catch (err) { logAIError(err); res.writeHead(503).end(); }
-    return;
-  }
-
-  // 메뉴판 사진 → 다국어 메뉴 (사진은 저장하지 않음)
-  if (req.method === "POST" && url.pathname === "/api/menu-scan") {
-    try {
-      const body = JSON.parse(await readBody(req, 6_000_000));
-      if (!/^image\/(jpeg|png|webp)$/.test(body.mediaType || "") || typeof body.image !== "string") return json(res, 400, {});
-      json(res, 200, await menuScan(body));
-    } catch (err) { logAIError(err); res.writeHead(503).end(); }
-    return;
+  // 내장 가이드만 사용한다. 예전 클라이언트 요청도 유료 모델로 전달하지 않는다.
+  if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {
+    return json(res, 410, {error:"LOCAL_GUIDE_ONLY", message:"Use the built-in travel guide. Menu entry is manual."});
   }
 
   // 가게 등록·조회
@@ -173,7 +137,7 @@ async function handle(req, res) {
   try { rel = decodeURIComponent(url.pathname === "/" ? "/index.html" : url.pathname); }
   catch { res.writeHead(400).end(); return; } // 잘못된 주소
   const file = path.normalize(path.join(PUBLIC, rel));
-  if (!file.startsWith(PUBLIC)) { res.writeHead(403).end(); return; }
+  if (!file.startsWith(PUBLIC + path.sep)) { res.writeHead(403).end(); return; }
   try {
     const ext = path.extname(file);
     let body = await readFile(file);
@@ -205,5 +169,5 @@ process.on("unhandledRejection", (err) => console.error("처리되지 않은 오
 
 server.listen(PORT, () => {
   console.log(`http://localhost:${PORT}`);
-  console.log(AI_MODEL ? `AI 모델: ${AI_MODEL}` : "AI 키 미설정: 무료 간단 모드로 답합니다");
+  console.log("내장 여행 가이드: 유료 AI API를 호출하지 않습니다");
 });

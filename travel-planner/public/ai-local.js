@@ -1,4 +1,5 @@
-// AI 서버에 연결되지 않았을 때 쓰는 간단한 규칙 기반 대체
+import { GUIDE_TOPICS } from "./guide-topics.js";
+// 내장 여행 지식과 일정 엔진으로 답하는 무료 가이드
 import { addDays, parseRequestLocally, hoursFor, fmt, RAIN } from "./planner.js";
 import { PLACES } from "./data.js";
 import { normalize, detectLang, NICKS, NICKS_EN, TIPS, TIPS_EN, THEMES, FAQ, FAQ_EN } from "./knowledge.js";
@@ -143,7 +144,7 @@ export function changeNote(lang, hours = [], far = []) {
 }
 
 export function guideLocal(question, trip, dayIdx, ctx = {}) {
-  const lang = detectLang(question, ctx.lang || "ko");
+  const lang = ctx.forceLang || detectLang(question, ctx.lang || "ko");
   const en = lang === "en", cjk = lang === "ja" || lang === "zh";
   const L = (ko, e, ja, zh) => ({ ko, en: e, ja, zh })[lang];
   const nm = (p) => ({ en: ctx.namesEn?.[p.id], ja: NAMES_JA[p.id], zh: NAMES_ZH[p.id] })[lang] || p.name;
@@ -175,7 +176,16 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   const dayLabel = multi ? L(`${di + 1}일차`, `Day ${di + 1}`, `${di + 1}日目`, `第${di + 1}天`) : L("오늘", "Today", "今日", "今天");
   const dayPlaces = day.items.map((i) => i.place).filter(Boolean);
 
-  const mentioned = findPlaces(n, regions, ctx.namesEn, question);
+  let mentioned = findPlaces(n, regions, ctx.namesEn, question);
+  const previous = ctx.history?.at(-1);
+  const ordinal = question.match(/(첫\s*번째|두\s*번째|세\s*번째|first|second|third|1番|2番|3番|第一个|第二个|第三个)/i);
+  const refer = /거기|그곳|그거|그걸|그쪽|there|that place|that one|そこ|それ|那里|那个/i.test(question);
+  if (!mentioned.length && previous && (refer || ordinal || /^(운영|입장료|소요시간)[?？은는요알려줘]*$/.test(n))) {
+    const refs = findPlaces(normalize(previous.a || ""), regions, ctx.namesEn, previous.a || "")
+      .sort((a,b)=>(previous.a.indexOf(nm(a))<0?previous.a.indexOf(a.name):previous.a.indexOf(nm(a)))-(previous.a.indexOf(nm(b))<0?previous.a.indexOf(b.name):previous.a.indexOf(nm(b))));
+    const index = ordinal ? (/두|second|2|二/i.test(ordinal[0]) ? 1 : /세|third|3|三/i.test(ordinal[0]) ? 2 : 0) : 0;
+    if (refs[index]) mentioned = [refs[index]];
+  }
   const targets = mentioned.length ? mentioned : dayPlaces.filter((p) => p.cat || p.start);
 
   const hoursLine = (p, date) => {
@@ -193,6 +203,37 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     const kid = f.child ? L(`·어린이 ${won(f.child)}원`, `, children ₩${won(f.child)}`, `・子ども${won(f.child)}ウォン`, `、儿童${won(f.child)}韩元`) : "";
     return `${nm(p)} ${L(`어른 ${won(f.adult)}원`, `adults ₩${won(f.adult)}`, `大人${won(f.adult)}ウォン`, `成人${won(f.adult)}韩元`)}${kid}`;
   };
+
+  // 짧은 후속 요청은 직전 대화의 조건을 사용한다. 재표시 시에도 변경은 실행하지 않는다.
+  const wantsChange = /바꿔|바꾸|변경|교체|다시짜|change|replace|switch|変え|変更|换|更换/i.test(question);
+  const deniesChange = /바꾸지|바꿔주지|변경하지|교체하지|don't|do not|変えない|変更しない|不要.*换/i.test(question);
+  if (deniesChange) return info("keep", L("현재 일정을 유지할게요.", "I'll keep the current plan.", "今のプランをそのままにします。", "保持当前行程不变。"));
+  if (wantsChange) {
+    const previous = ctx.history?.at(-1);
+    const context = mentioned.length || n.length > 14 ? question : `${previous?.q || ""} ${question}`;
+    const normalized = normalize(context);
+    const preferences = parseRequestLocally(normalized);
+    if (/계단|덜걷|걷기힘|부모님|아이/.test(normalized)) preferences.lessWalk = true;
+    if (preferences.indoor || preferences.lessWalk || preferences.pace) {
+      return change("followupPrefs", L("말씀하신 조건으로 일정을 바로 조정할게요.", "I'll adjust the plan to those needs now.", "その条件に合わせてプランを調整します。", "现在按这些条件调整行程。"), {indoor:preferences.indoor?"on":"keep",lessWalk:preferences.lessWalk?"on":"keep",pace:preferences.pace||"keep"});
+    }
+    const old = mentioned.find(p => inTrip.has(p.id));
+    const referenced = !mentioned.length && /그걸|그렇게|그곳|그쪽|that|それ|そこ|那个|那/i.test(question) && previous
+      ? findPlaces(normalize(previous.a || ""), regions, ctx.namesEn, previous.a || "").find(p=>!inTrip.has(p.id)) : null;
+    const replacement = mentioned.find(p => !inTrip.has(p.id)) || referenced;
+    if (old && replacement) return change("replace", L(`${old.name} 대신 ${replacement.name}을 넣어 볼게요.`, `I'll replace ${nm(old)} with ${nm(replacement)}.`, `${nm(old)}を${nm(replacement)}に変えてみます。`, `尝试将${nm(old)}换成${nm(replacement)}。`), {remove:[old.id],add:[replacement.id]});
+    const cat = Object.entries(CAT_WORDS).find(([,ws])=>ws.some(w=>normalized.includes(w)))?.[0];
+    const targetDay = old ? trip.days.findIndex(d=>d.items.some(i=>i.id===old.id)) : di;
+    const items = trip.days[targetDay].items;
+    let index = old ? items.findIndex(i=>i.id===old.id) : items.findIndex(i=>cat ? i.place.cat===cat : i.place.cat!=='food');
+    if(index<0) index=0;
+    if(items[index]) return change("swap", L(`${items[index].place.name}을 다른 장소로 바꿔 볼게요.`, `I'll replace ${nm(items[index].place)} with another place.`, `${nm(items[index].place)}を別の場所に変えてみます。`, `尝试将${nm(items[index].place)}换成其他地点。`), {swap:{dayIdx:targetDay,itemIdx:index,cat:cat || null,replacementId:replacement?.id || null}});
+    return info("empty", L("바꿀 장소가 없습니다. 먼저 일정을 만들어 주세요.", "Create a plan first so I can change a place.", "先にプランを作成してください。", "请先生成行程。"));
+  }
+
+  // General guidance never invents current prices, availability or access guarantees.
+  const topic = GUIDE_TOPICS.find(t => t.match.test(question));
+  if (topic) return info(topic.kind, topic.answers[lang] || topic.answers.ko);
 
   /* 1) 일정 바꾸기: 장소를 빼거나 넣기 */
   const wantsRemove = /(빼|제외|취소|안갈|안가|건너뛰|지워)/.test(n);
@@ -348,10 +389,10 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     return change("prefs", L("요청하신 대로 바꿔 볼게요.", "I'll change the plan as you asked.", "ご希望どおりに変えてみます。", "我按你的要求改一下。"), { prefer, avoid, indoor: c.indoor ? "on" : "keep", lessWalk: lessWalk ? "on" : "keep", pace: c.pace || "keep" });
   }
   return info("help", L(
-    "AI 서버 없이 답하는 간단 모드예요. 장소 이름과 함께 운영시간·입장료·아이/부모님·계단·소요시간을 묻거나, \"오죽헌 넣어줘\", \"2일차에 바다 한 곳 더\", \"카페 빼줘\", \"덜 걷게 해줘\"처럼 말해 주세요.",
-    "This is the simple mode that works without an AI server. Ask about a place's hours, price, kids/parents, stairs or how long to stay, or say things like \"add Ojukheon\", \"one more beach on day 2\", \"no cafes\" or \"less walking\".",
-    "AIサーバーなしで答える簡易モードです。場所の名前と一緒に営業時間・入場料・子ども/ご両親・階段・所要時間を聞くか、「烏竹軒を追加」「2日目に海をもう一つ」「カフェなし」「歩きたくない」のように言ってください。",
-    "这是不用AI服务器的简易模式。可以带上地点名问营业时间、门票、带孩子/父母、台阶、要待多久，或者说“加上乌竹轩”“第2天再加一个海边”“不要咖啡”“少走路”。"));
+    "앱에 저장된 여행 정보로 안내해요. 장소 이름과 함께 운영시간·입장료·아이/부모님·계단·소요시간을 묻거나, \"오죽헌 넣어줘\", \"2일차에 바다 한 곳 더\", \"카페 빼줘\", \"덜 걷게 해줘\"처럼 말해 주세요.",
+    "I use the travel information stored in this app. Ask about a place's hours, price, kids/parents, stairs or how long to stay, or say things like \"add Ojukheon\", \"one more beach on day 2\", \"no cafes\" or \"less walking\".",
+    "アプリ内の旅行情報でご案内します。場所の名前と一緒に営業時間・入場料・子ども/ご両親・階段・所要時間を聞くか、「烏竹軒を追加」「2日目に海をもう一つ」「カフェなし」「歩きたくない」のように言ってください。",
+    "我使用应用内的旅行资料回答。可以带上地点名问营业时间、门票、带孩子/父母、台阶、要待多久，或者说“加上乌竹轩”“第2天再加一个海边”“不要咖啡”“少走路”。"));
 }
 
 // 숙소 안심 체크 (AI 없이): 붙여넣은 글에서 위험한 표현을 찾는다. 결과 문장은 화면 언어로
@@ -371,7 +412,7 @@ const LC = {
   zh: { noRule: "没找到取消规定的内容。预订前请一定确认。", noRefund: "有不可退款的条件。行程变了可能拿不回钱。", late: "临近取消不退款。请确认提前几天可以免费取消。", fee: "根据取消时间会收手续费。", free: "可以免费取消。只要确认截止时间。",
     extra: "有加人、烧烤、现场付款等额外费用。请确认总价。", noCompare: "没有平时价格可以比较。请和同一天的其他住宿比比看。",
     rv: ["评价提到发霉、潮湿", "有评价说出现了虫子", "评价提到噪音", "评价提到异味", "有评价说卫生有问题", "有评价说和照片不一样", "有评价说服务态度不好", "有评价说停车不方便"],
-    ask: ["免费取消截止时间", "含额外费用的总价", "可停车数量"], sum: { low: "没看到大的风险信号。", mid: "预订前有需要确认的地方。", high: "退款条件很严格。请谨慎预订。" }, note: " (未连接AI，只检查了文字)" },
+    ask: ["免费取消截止时间", "含额外费用的总价", "可停车数量"], sum: { low: "没看到大的风险信号。", mid: "预订前有需要确认的地方。", high: "退款条件很严格。请谨慎预订。" }, note: " (使用内置规则，只检查了文字)" },
 };
 export function checkLodgingLocal(text, lang = "ko") {
   const M = LC[lang] || LC.ko;

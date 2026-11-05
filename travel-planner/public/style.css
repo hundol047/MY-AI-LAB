@@ -135,7 +135,9 @@ button { cursor: pointer; }
 .ask button { padding: 0 18px; border-radius: 12px; border: 0; background: var(--text); color: var(--bg); font-weight: 700; }
 
 .layout { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; align-items: start; }
-.map-wrap { position: sticky; top: 76px; }
+.map-wrap { position: sticky; top: 76px; z-index: 0; isolation: isolate; }
+.map-wrap:not(.map-active) #map { touch-action: pan-y !important; }
+.map-hint { font-size: 12px; color: var(--muted); margin: 6px 0; }
 #map { height: calc(100vh - 110px); min-height: 420px; border-radius: var(--radius); border: 1px solid var(--line); background: #dfe8ea; }
 
 .timeline { list-style: none; margin: 0; padding: 0; }
@@ -453,3 +455,10 @@ body.offline .top::after {
 .start-time { display: flex; align-items: center; justify-content: space-between; gap: 8px; font-size: 13px; }
 .start-time select { padding: 6px 8px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; }
 .start-note { margin: 0; font-size: 11.5px; color: var(--sub); line-height: 1.5; }
+
+.booking-choice { display: grid; gap: 5px; min-width: 0; }
+.booking-alternatives { font-size: 12px; color: var(--sub); }
+.booking-alternatives summary { cursor: pointer; padding: 5px 0; }
+.booking-reason { font-size: 12px; color: var(--sub); line-height: 1.6; }
+.stay-acts { flex-wrap: wrap; align-items: flex-start; }
+.booking-choice .ghost { white-space: normal; }

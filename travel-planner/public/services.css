@@ -1,0 +1,7 @@
+.service, main.owner { max-width: 780px; margin: 24px auto; padding: 16px; }
+.service label, #booking label {display:block;margin:16px 0;}
+.service input,.service select,.service textarea,#booking input:not([type=checkbox]),#booking select {display:block;width:100%;box-sizing:border-box;padding:12px;margin:8px 0;border:1px solid #888;border-radius:8px;background:var(--bg,#fff);color:inherit;}
+.service button,#booking button {padding:12px 16px;margin:6px;border-radius:8px;cursor:pointer;}
+.service .card {padding:18px;margin:16px 0;overflow-wrap:anywhere;}
+.service p,.service li {white-space:pre-wrap;overflow-wrap:anywhere;}
+.service textarea {min-height:120px;}

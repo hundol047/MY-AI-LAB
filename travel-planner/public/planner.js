@@ -365,14 +365,16 @@ function markReturn(day, lodging) {
 }
 
 // 특정 장소만 교체: 그 앞은 유지, 다른 날은 그대로, 뒤쪽만 다시 계산
-export function swapItem(trip, input, opts, dayIdx, itemIdx) {
+export function swapItem(trip, input, opts, dayIdx, itemIdx, replacementId = null) {
   const day = trip.days[dayIdx];
   const keep = day.items.slice(0, itemIdx).map((i) => i.id);
+  if (replacementId) keep.push(replacementId);
   const used = new Set();
   trip.days.forEach((d, i) => { if (i !== dayIdx) d.items.forEach((it) => used.add(it.id)); });
   const exclude = new Set([...(opts.exclude || []), day.items[itemIdx].id]);
   const usedAreas = trip.days.filter((_, i) => i !== dayIdx).map((d) => d.area);
   const newDay = planDay(input, opts, dayIdx, used, usedAreas, keep, exclude, false, day.start);
+  if (replacementId && newDay.items[itemIdx]?.id !== replacementId) return trip;
   if (trip.lodging && dayIdx < input.days - 1) markReturn(newDay, trip.lodging); // 숙소는 그대로
   const days = trip.days.slice();
   days[dayIdx] = newDay;

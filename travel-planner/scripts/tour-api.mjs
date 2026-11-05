@@ -25,16 +25,21 @@ export async function tour(service, op, params, { key = process.env.TOUR_API_KEY
   const q = new URLSearchParams({ serviceKey: key, ...Object.fromEntries(pub) });
   let res;
   for (let i = 0; i < 3; i++) {
-    res = await fetch(`${BASE}/${service}/${op}?${q}`, { headers: { "User-Agent": "ohneul-gangwon/1.0" } }).catch(() => null);
-    if (res?.ok) break;
-    await new Promise((r) => setTimeout(r, 1000 * (i + 1)));
+    res = await fetch(`${BASE}/${service}/${op}?${q}`, { headers: { "User-Agent": "ohneul-gangwon/1.0" }, signal: AbortSignal.timeout(15000) }).catch(() => null);
+    if (res && (res.ok || (res.status >= 400 && res.status < 500 && res.status !== 429))) break;
+    if (i < 2) await new Promise(r => setTimeout(r, 1000 * (i + 1)));
   }
-  if (!res?.ok) throw new Error(`${service}/${op} HTTP ${res?.status ?? "연결 실패"}`);
-  const text = await res.text();
+  if (!res) throw new Error(`${service}/${op}: 연결 실패`);
   let j;
-  try { j = JSON.parse(text); } catch { throw new Error(`${service}/${op} JSON 아님: ${text.slice(0, 80).replaceAll(key, "***")}`); }
-  const code = j?.response?.header?.resultCode;
-  if (code && code !== "0000") throw new Error(`${service}/${op} 오류 ${code} ${j.response.header.resultMsg}`);
+  try { j = await res.json(); } catch { throw new Error(`${service}/${op}: HTTP ${res.status}, JSON 응답이 아닙니다`); }
+  const gateway = j?.OpenAPI_ServiceResponse?.cmmMsgHeader;
+  const code = gateway?.returnReasonCode || j?.response?.header?.resultCode;
+  if (!res.ok || gateway || (code && code !== "0000")) {
+    // 외부 메시지·URL·키는 로그에 넣지 않는다. 오류 분류 코드만 표시한다.
+    const safe = String(code || res.status).replace(/[^a-zA-Z0-9_-]/g, '').slice(0,40);
+    throw new Error(`${service}/${op}: HTTP ${res.status}, 오류 코드 ${safe}`);
+  }
+  if (!j?.response?.body) throw new Error(`${service}/${op}: 응답 구조를 확인할 수 없습니다`);
   let items = j?.response?.body?.items?.item || [];
   if (!Array.isArray(items)) items = [items];
   if (file) {

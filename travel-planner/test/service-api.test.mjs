@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';
+import http from 'node:http';
+import {mkdtemp,rm} from 'node:fs/promises';
+import {tmpdir} from 'node:os';
+import {serviceAPI} from '../service-api.mjs';
+const dir=await mkdtemp(`${tmpdir()}/api-test-`), admin='a'.repeat(48), token='t'.repeat(48);
+const handle=serviceAPI({file:dir+'/db.sqlite',adminToken:admin});
+const server=http.createServer((req,res)=>handle(req,res,new URL(req.url,'http://localhost')));
+await new Promise(r=>server.listen(0,'127.0.0.1',r));const base=`http://127.0.0.1:${server.address().port}`;
+const call=async(path,method='GET',body,auth,extra={})=>{const r=await fetch(base+path,{method,headers:{'content-type':'application/json',...(auth?{authorization:`Bearer ${auth}`} : {}),...extra},...(body?{body:JSON.stringify(body)}:{})});return {status:r.status,data:await r.json()};};
+try{
+ assert.equal((await call('/api/admin/bookings')).status,401);
+ const body={kind:'tour',product:'HTTP test',date:'2099-01-01',people:2,name:'Test',contact:'test@example.com',consent:true};
+ const b=await call('/api/bookings','POST',body,token,{'idempotency-key':'k'.repeat(48)});assert.equal(b.status,201);
+ assert.equal((await call(`/api/bookings/${b.data.id}`)).status,404);
+ assert.equal((await call(`/api/bookings/${b.data.id}`,'GET',null,token)).data.status,'received');
+ assert.equal((await call(`/api/admin/bookings/${b.data.id}/status`,'POST',{status:'reviewing'},admin)).status,200);
+ assert.equal((await call(`/api/admin/bookings/${b.data.id}/quote`,'POST',{amount:20000,description:'투어'},admin)).data.quote.amount,20000);
+ assert.equal((await call('/api/payments/checkout','POST',{bookingId:b.data.id},token)).status,503);
+ assert.equal((await call('/api/reviews','POST',{place:'unknown',nickname:'X',rating:5,text:'테스트 후기 내용입니다.'})).status,400);
+ const review=await call('/api/reviews','POST',{place:'ojukheon',nickname:'Test',rating:5,text:'테스트 후기 내용입니다.'});assert.equal(review.status,201);
+ assert.equal((await call('/api/reviews?place=ojukheon')).data.length,0);
+ assert.equal((await call(`/api/admin/reviews/${review.data.id}`,'POST',{state:'published'},admin)).status,200);
+ assert.equal((await call('/api/reviews?place=ojukheon')).data.length,1);
+ assert.equal((await call(`/api/reviews/${review.data.id}/report`,'POST',{reason:'검토 필요합니다.'})).status,201);
+ assert.equal((await call('/api/admin/reports','GET',null,admin)).data.length,1);
+ assert.equal((await call(`/api/bookings/${b.data.id}/cancel`,'POST',null,token)).data.status,'cancelled');
+ assert.equal((await call('/api/reviews','POST',{},null,{origin:'https://other.example'})).status,403);
+ console.log('ok - HTTP 인증·신청·상태 변경·견적·결제 차단·후기 공개·신고·취소·교차 출처 차단');
+}finally{await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});}

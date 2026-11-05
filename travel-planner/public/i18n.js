@@ -33,6 +33,19 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "추천 · {platform}에서 예약 찾기": "Recommended · Find stays on {platform}",
+  "다른 플랫폼 보기": "Other platforms",
+  "낮은 가격순 검색과 화면 언어를 함께 전달할 수 있어 먼저 추천해요.": "Recommended first because this link requests lowest-price sorting and your selected language.",
+  "어른 {adults}명 · 어린이 {kids}명 · 객실 1개로 검색": "{adults} adults · {kids} children · Search for 1 room",
+  "한 줄로 시작": "Start in one sentence",
+  "가격·예약": "Prices & booking",
+  "지도 이동 켜기": "Enable map movement",
+  "지도 이동 끄기": "Disable map movement",
+  "기본은 페이지 스크롤입니다. 지도 이동을 켜면 지도를 움직일 수 있어요.": "Scroll the page normally. Enable map movement to pan the map.",
+  "여행 날짜와 인원으로 예약 플랫폼을 엽니다. 객실·아동 나이·세금·취소 조건과 최종 금액을 확인하세요. 최저가는 보장하지 않습니다.": "Opens booking platforms with your dates and guests. Check rooms, child ages, taxes, cancellation terms and the final price. Lowest prices are not guaranteed.",
+  "조건에 맞는 대안을 찾지 못해 기존 일정을 유지했어요.": "No suitable alternative was found, so your plan is unchanged.",
+  "대화 번역을 불러오지 못했어요. 원문을 표시합니다.": "Translation unavailable. Showing the original message.",
+
   // 머리글·첫 화면
   "오늘강원": "Oneul Gangwon",
   "링크 공유": "Share",
@@ -69,14 +82,14 @@ export const EN = {
   "자동차": "Car",
   "대중교통·도보": "Transit · walking",
   "일정 만들기": "Make my plan",
-  "사장님이세요? 메뉴판 사진 한 장으로 가게 등록": "Own a shop? Register it with one photo of your menu (Korean)",
+  "사장님이세요? 메뉴 입력으로 가게 등록": "Own a shop? Enter your menu to register (Korean)",
   // 결과 화면
   "조건 변경": "Edit choices",
   "비가 와요": "It's raining",
   "덜 걷고 싶어요": "Less walking",
   "여유롭게": "Relaxed",
   "더 알차게": "Pack more in",
-  "AI 가이드": "AI guide",
+  "무료 여행 가이드": "Free travel guide",
   "비 오면 어떡해?": "What if it rains?",
   "아이랑 가도 괜찮을까?": "Is it OK with kids?",
   "오늘 운영시간 알려줘": "Today's opening hours?",

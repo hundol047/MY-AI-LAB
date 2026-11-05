@@ -1,0 +1,39 @@
+name: 공식 장소·운영정보 갱신
+on:
+  schedule:
+    - cron: '30 19 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+  pull-requests: write
+concurrency:
+  group: update-directory
+  cancel-in-progress: false
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: 공식 데이터 수집
+        working-directory: travel-planner
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/sync-directory.mjs
+      - name: 운영시간 차이 확인
+        working-directory: travel-planner
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/check-hours.mjs
+      - uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/update-directory
+          title: 공식 장소 및 운영정보 갱신
+          commit-message: Refresh official tourism directory and operating information
+          body: 관광공사 원문을 갱신합니다. 일정 엔진의 계절별 운영시간과 임시 휴장은 리포트를 검토한 뒤 반영하세요.
+          add-paths: |
+            travel-planner/public/directory.json
+            travel-planner/reports/hours.md
