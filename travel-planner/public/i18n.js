@@ -235,6 +235,12 @@ export const EN = {
   "링크를 복사했어요": "Link copied",
   "비 예보가 있는 날은 실내 위주로 바꿨어요": "Rain is forecast, so those days now focus on indoor places",
   "AI에 연결되지 않아 간단 모드로 처리했어요": "AI is unavailable, so simple mode was used",
+  "캘린더에 일정 {n}개를 넣었어요": "Added {n} events to your calendar",
+  "이미 캘린더에 있는 일정이에요": "These events are already in your calendar",
+  "캘린더 권한을 허용해 주세요": "Please allow calendar access",
+  "일정을 넣을 캘린더가 없어요": "No calendar found to add events to",
+  "캘린더에 넣지 못했어요": "Couldn't add to your calendar",
+  "캘린더 파일을 받았어요. 파일을 열면 캘린더에 추가돼요": "Calendar file downloaded. Open it to add the events",
 };
 
 export function t(ko, vars) {

@@ -939,25 +939,57 @@ $("#shareBtn").addEventListener("click", async () => {
 
 // 캘린더 파일 규칙: 쉼표·세미콜론·역슬래시는 앞에 역슬래시
 const icsText = (t) => String(t).replace(/[\\;,]/g, (c) => "\\" + c);
-$("#icsBtn").addEventListener("click", () => {
-  const stamp = (ds, min) => ds.replace(/-/g, "") + "T" + fmt(min).replace(":", "") + "00";
-  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ohneul-gangneung//KO", "CALSCALE:GREGORIAN"];
-  trip.days.forEach((d) => d.items.forEach((it, i) => {
-    lines.push("BEGIN:VEVENT",
-      `UID:${d.date}-${i}-${it.id}@ohneul-gangneung`,
-      `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").slice(0, 15)}Z`,
-      `DTSTART;TZID=Asia/Seoul:${stamp(d.date, it.start)}`,
-      `DTEND;TZID=Asia/Seoul:${stamp(d.date, it.end)}`,
-      `SUMMARY:${icsText(placeName(it.place))}`,
-      `LOCATION:${icsText(it.place.name)}`,
-      `GEO:${it.place.lat};${it.place.lng}`,
-      "END:VEVENT");
-  }));
+/* ---------- 캘린더 저장 ----------
+   - 안드로이드 앱: 앱이 휴대폰 캘린더에 바로 넣는다 (window.OhneulApp, MainActivity.java)
+   - 브라우저: .ics 파일을 받는다 (열면 캘린더 앱이 "추가"를 띄운다. 아이폰은 다운로드에서 열기)
+   파일 이름은 영문: 크롬은 한글 파일 이름을 버리고 "download"(확장자 없음)로 저장해 캘린더 파일로 열리지 않았다
+   시각은 UTC로 적는다: 한국 시간대(TZID) 정의를 모르는 캘린더도 시간이 어긋나지 않게 */
+const kstMs = (ds, min) => { const [y, m, d] = ds.split("-").map(Number); return Date.UTC(y, m - 1, d, 0, min) - 9 * 3600e3; };
+function calendarEvents() {
+  return trip.days.flatMap((d) => d.items.map((it, i) => ({
+    uid: `${d.date}-${i}-${it.id}@ohneul-gangwon`,
+    title: placeName(it.place),
+    location: it.place.name,
+    description: t("강원 여행 일정"),
+    start: kstMs(d.date, it.start), end: kstMs(d.date, it.end),
+    lat: it.place.lat, lng: it.place.lng,
+  })));
+}
+function buildICS(events) {
+  const utc = (ms) => new Date(ms).toISOString().replace(/[-:]/g, "").slice(0, 15) + "Z";
+  // 한 줄은 75바이트까지 (RFC 5545). 한글은 3바이트라 이름이 길면 줄을 접는다
+  const fold = (line) => {
+    const out = []; let cur = "", bytes = 0;
+    for (const ch of line) {
+      const b = new TextEncoder().encode(ch).length;
+      if (bytes + b > (out.length ? 74 : 75)) { out.push(cur); cur = ""; bytes = 0; }
+      cur += ch; bytes += b;
+    }
+    out.push(cur);
+    return out.join("\r\n ");
+  };
+  const now = utc(Date.now());
+  const lines = ["BEGIN:VCALENDAR", "VERSION:2.0", "PRODID:-//ohneul-gangwon//KO", "CALSCALE:GREGORIAN", "METHOD:PUBLISH"];
+  for (const e of events) lines.push("BEGIN:VEVENT", `UID:${e.uid}`, `DTSTAMP:${now}`, `DTSTART:${utc(e.start)}`, `DTEND:${utc(e.end)}`,
+    `SUMMARY:${icsText(e.title)}`, `LOCATION:${icsText(e.location)}`, `DESCRIPTION:${icsText(e.description)}`, `GEO:${e.lat};${e.lng}`, "END:VEVENT");
   lines.push("END:VCALENDAR");
-  const blob = new Blob([lines.join("\r\n")], { type: "text/calendar" });
+  return lines.map(fold).join("\r\n") + "\r\n";
+}
+window.__calendarDone = (res) => {
+  const [kind, added, total] = String(res).split(":");
+  if (kind === "ok") toast(Number(added) ? t("캘린더에 일정 {n}개를 넣었어요", { n: added }) : Number(total) ? t("이미 캘린더에 있는 일정이에요") : t("캘린더에 넣지 못했어요"));
+  else toast({ denied: t("캘린더 권한을 허용해 주세요"), nocal: t("일정을 넣을 캘린더가 없어요") }[kind] || t("캘린더에 넣지 못했어요"));
+};
+$("#icsBtn").addEventListener("click", () => {
+  const events = calendarEvents();
+  if (window.OhneulApp?.addToCalendar) { window.OhneulApp.addToCalendar(JSON.stringify(events)); return; }
+  const ics = buildICS(events);
   const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob); a.download = `${isForeign() ? "gangwon-trip" : "강원여행"}_${state.input.date}.ics`; a.click();
-  setTimeout(() => URL.revokeObjectURL(a.href), 1000);
+  a.href = URL.createObjectURL(new Blob([ics], { type: "text/calendar;charset=utf-8" }));
+  a.download = `gangwon-trip_${state.input.date}.ics`;
+  document.body.append(a); a.click();
+  setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 4000);
+  toast(t("캘린더 파일을 받았어요. 파일을 열면 캘린더에 추가돼요"));
 });
 
 /* ---------- 알림 ---------- */
