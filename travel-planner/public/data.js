@@ -170,7 +170,7 @@ const SEORAK = [
   {
     id: "birch", name: "원대리 자작나무숲", cat: "nature", area: "inje", lat: 38.0092, lng: 128.1943,
     hours: ["09:00", "18:00"], lastEntry: "15:00", seasons: [{ months: WINTER, hours: ["09:00", "17:00"], lastEntry: "14:00" }],
-    closed: [1, 2], closedRanges: [["2027-03-02", "2027-04-30"], ["2028-03-02", "2028-04-30"]], /* 봄철 산불조심기간 입산통제 3/2~4/30 (운영 안내·매일신문 2025-11). 해마다 바뀔 수 있음 */ stay: 150, indoor: false, walk: 3, pop: 3, tags: [], wiki: "원대리 자작나무숲", desc: "69만 그루 자작나무 · 주차장에서 1시간 걸어 올라감",
+    closed: [1, 2], closedYearly: [["03-02", "04-30"]], /* 봄철 산불조심기간 입산통제 3/2~4/30 (운영 안내·매일신문 2025-11). 해마다 조금씩 바뀔 수 있음 */ stay: 150, indoor: false, walk: 3, pop: 3, tags: [], wiki: "원대리 자작나무숲", desc: "69만 그루 자작나무 · 주차장에서 1시간 걸어 올라감",
   },
   { id: "daepo", souvenir: "속초 건어물", name: "대포항", cat: "food", area: "sokcho", lat: 38.1750, lng: 128.6070, hours: ["10:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "대포항", desc: "튀김골목과 활어 횟집" },
   { id: "dongmyeong", souvenir: "속초 건어물", name: "동명항 활어센터", alias: ["동명활어센터"], cat: "food", area: "sokcho", lat: 38.2120, lng: 128.5990, hours: ["09:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동명항", desc: "영금정 옆 회센터" },

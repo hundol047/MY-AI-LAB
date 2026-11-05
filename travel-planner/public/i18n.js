@@ -359,7 +359,7 @@ export function startName(start, lodging) {
 let dataEn = {};
 let dataEnReady = null;
 export function loadDataEn(fetcher = fetch) {
-  return (dataEnReady ??= fetcher("data-en.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (dataEn = j || {})));
+  return (dataEnReady ??= fetcher("data-en.json").then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { dataEn = j || {}; namesEnCache = null; }));
 }
 // 일본어·중국어: 장소는 knowledge-intl.js의 이름, 축제는 i18n-cjk.js의 이름 (없으면 영어, 그다음 한국어)
 const NAMES = { ja: NAMES_JA, zh: NAMES_ZH };
@@ -369,7 +369,8 @@ export const placeName = (p) => {
   return NAMES[lang][p.id] || FEST[lang][p.id] || dataEn[p.id]?.name || p.name;
 };
 // 무료 간단 모드 가이드가 영어 질문 속 장소 이름을 알아듣도록
-export const namesEn = () => Object.fromEntries(Object.entries(dataEn).map(([id, v]) => [id, v.name]));
+let namesEnCache = null; // 같은 객체를 돌려줘야 가이드가 영어 이름 색인을 다시 만들지 않는다
+export const namesEn = () => (namesEnCache ??= Object.fromEntries(Object.entries(dataEn).map(([id, v]) => [id, v.name])));
 const TIPS_CJK = { ja: TIPS_JA, zh: TIPS_ZH };
 const firstSentence = (s) => (s.match(/^.*?。/) || [s])[0];
 export const placeDesc = (p) => {

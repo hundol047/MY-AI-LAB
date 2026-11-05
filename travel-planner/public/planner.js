@@ -64,6 +64,8 @@ function closedOn(p, dateStr) {
   if ((p.closedMonthDays || []).includes(day)) return true;
   if ((p.closedNth || []).some(([w, n]) => w === wd && Math.ceil(day / 7) === n)) return true;
   if ((p.closedRanges || []).some(([a, b]) => dateStr >= a && dateStr <= b)) return true;
+  const md = dateStr.slice(5); // 해마다 같은 기간 휴장 ["MM-DD", "MM-DD"]
+  if ((p.closedYearly || []).some(([a, b]) => md >= a && md <= b)) return true;
   if (p.start && (dateStr < p.start || dateStr > p.end)) return true; // 축제 기간 밖
   return false;
 }
@@ -477,7 +479,8 @@ export function summarize(days, lodging = null) {
 }
 
 // 자연어 요청 → 조건 (AI 서버가 없을 때 쓰는 규칙 기반 해석)
-export const RAIN = /(?<![가-힣])비(?![빔교슷싸행밀용])|우천|장마|소나기|태풍/;
+// "비"는 낱말이거나, 띄어 쓰지 않아도 "비가·비와·비오면…"처럼 날씨로 쓰일 때 (갈비가·회비가·교통비 같은 낱말 끝은 제외)
+export const RAIN = /(?<![가-힣])비(?![빔교슷싸행밀용])|(?<![갈국소경준노회간방여요실교학통박식입차선기무대정연관투설])비(?=가|와|오|올|온|내리|소식|예보|\s*[?？]|$)|우천|장마|소나기|태풍/;
 export function parseRequestLocally(text) {
   const t = text.replace(/\s/g, "");
   const out = { prefer: [], avoid: [] };

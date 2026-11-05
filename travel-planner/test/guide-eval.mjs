@@ -253,8 +253,6 @@ for (const [lang, cases] of Object.entries(SETS)) {
     if (want.avoid && !(r.avoid || []).includes(want.avoid)) problems.push(`피하기 ${r.avoid}`);
     if (want.pace && r.pace !== want.pace) problems.push(`속도 ${r.pace}`);
     if (want.place && !["add", "remove"].includes(want.kind)) {
-      const all = { ko: "", en: namesEn[want.place] || "" };
-      void all;
       if (!r.answer.includes(want.place) && !mentionsPlace(r.answer, want.place, lang)) problems.push("장소 없음");
     }
     if (problems.length) bad.push(`  ✗ ${q} → ${problems.join(", ")} · "${r.answer.slice(0, 70)}"`);

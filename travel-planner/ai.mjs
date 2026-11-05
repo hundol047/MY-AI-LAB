@@ -7,11 +7,13 @@
 import OpenAI from "openai";
 import { PLACES, FESTIVALS, REGIONS } from "./public/data.js";
 import { hoursFor, addDays, fmt } from "./public/planner.js";
+import { detectLang } from "./public/knowledge.js";
 
 export const AI_MODEL = process.env.AI_MODEL || "";
 // 기다리는 최대 시간. 넘으면 서버가 실패를 돌려주고 화면은 바로 무료 간단 모드로 답한다 (화면 쪽은 이보다 1초 길게 기다림)
 export const START_MS = 6_000, GUIDE_MS = 8_000;
 const CATS = ["sea", "cafe", "food", "culture", "nature"];
+const ALL_IDS = [...PLACES, ...FESTIVALS].map((p) => p.id);
 const REGION_KEYS = Object.keys(REGIONS);
 const NEIGHBORS = {
   gangneung: ["pyeongchang", "seorak"], seorak: ["gangneung", "chuncheon"], chuncheon: ["wonju", "seorak"],
@@ -102,11 +104,12 @@ const START_SYSTEM = `강원도 여행 일정 앱의 입력 도우미다. 사용
 - move: 자동차·렌터카=car, 택시=taxi, 기차·버스·뚜벅이=transit. 언급이 없으면 car.
 - summary: 고른 내용을 20자 안팎 한국어로. 예) "속초 1박 2일 · 부모님과 · 자동차"`;
 
-// 화면이 영어(lang="en")면 사람에게 보이는 글(summary·answer·plain 등)만 영어로 받는다. 선택값·id는 그대로.
+// 질문(숙소 체크는 화면)이 영어·일본어·중국어면 사람에게 보이는 글(summary·answer·plain 등)만 그 언어로 받는다. 선택값·id는 그대로.
 const REPLY_LANG = { en: "영어", ja: "일본어", zh: "중국어(간체)" };
 const replyIn = (lang) => (REPLY_LANG[lang] ? `\n\n(사용자 화면이 ${REPLY_LANG[lang]}다. 사람에게 보이는 문장은 모두 ${REPLY_LANG[lang]}로 쓴다.)` : "");
 
-export async function startFromText(text, today, lang) {
+export async function startFromText(text, today, uiLang) {
+  const lang = detectLang(text, uiLang); // 질문한 언어로 답한다 (무료 간단 모드와 같게)
   const r = await askJSON({ system: START_SYSTEM, user: `오늘: ${today}\n사용자: ${text}${replyIn(lang)}`, schema: START_SCHEMA, name: "trip_choices", timeout: START_MS });
   if (!/^\d{4}-\d{2}-\d{2}$/.test(r.date) || r.date < today) r.date = addDays(today, 1);
   r.likes = [...new Set(r.likes)].slice(0, 3);
@@ -133,7 +136,8 @@ function candidatesFor(trip) {
   return { list, dates };
 }
 
-export async function guide({ question, history, trip, lang }) {
+export async function guide({ question, history, trip, lang: uiLang }) {
+  const lang = detectLang(question, uiLang);
   const { list, dates } = candidatesFor(trip);
   const tripIds = trip.days.flatMap((d) => d.items.map((i) => i.id)).filter((id) => list.some((p) => p.id === id));
   const allIds = list.map((p) => p.id);
@@ -142,9 +146,9 @@ export async function guide({ question, history, trip, lang }) {
     properties: {
       answer: { type: "string" },
       changed: { type: "boolean" },
-      // 장소 id는 enum으로 묶지 않는다: 여행마다 스키마가 바뀌면 매번 형식 준비 시간이 더 든다. 없는 id는 sanitize가 버린다
-      remove: { type: "array", items: { type: "string" } },
-      add: { type: "array", items: { type: "string" } },
+      // 장소 id는 앱 전체 id로 묶는다: 여행마다 같은 스키마라 형식 준비 시간이 다시 들지 않고, 없는 id는 아예 못 고른다. 이번 여행 밖의 id는 sanitize가 버린다
+      remove: { type: "array", items: { type: "string", enum: ALL_IDS } },
+      add: { type: "array", items: { type: "string", enum: ALL_IDS } },
       prefer: { type: "array", items: { type: "string", enum: CATS } },
       avoid: { type: "array", items: { type: "string", enum: CATS } },
       indoor: { type: "string", enum: ["on", "off", "keep"] },

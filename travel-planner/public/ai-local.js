@@ -93,6 +93,8 @@ const CITY_EN = /^(gangneung|donghae|sokcho|yangyang|inje|goseong|chuncheon|cheo
 const CITY_CJK = /^(江陵|束草|春川|原州|三陟|高城|襄陽|襄阳|鉄原|铁原|華川|华川|寧越|宁越|太白|旌善|横城|平昌|大関嶺|大关岭|雉岳山|正東津|正东津|墨湖|注文津|麟蹄)|(江陵|江陵本店|江陵总店)$/g;
 // 한자 두 글자(許筠)도 한 장소에만 나오면 이름으로 쓴다
 const cjkParts = (name) => (name ? name.replace(/[（(].*?[)）]/g, "").split(/[\s・·]/).map((x) => x.toLowerCase()).filter((x) => x.length >= 3 || /^[\u4e00-\u9fff]{2}$/.test(x)) : []);
+const cjkCache = new Map(); // 장소 id → 일본어·중국어 이름 줄임들 (한 번만 만든다)
+const cjkTokensOf = (id) => { if (!cjkCache.has(id)) cjkCache.set(id, [...cjkTokens(NAMES_JA[id]), ...cjkTokens(NAMES_ZH[id])]); return cjkCache.get(id); };
 let partCount = null; // 띄어 쓴 낱말이 몇 장소의 이름에 나오는지 (한 곳에만 나오는 낱말만 이름으로 쓴다: "カフェ"는 안 됨)
 function cjkTokens(name) {
   if (!name) return [];
@@ -113,7 +115,7 @@ function findPlaces(norm, regions, namesEn, question = "") {
   for (const [id, toks] of en) for (const tok of toks.slice(3)) for (const w of qWords) if (tok !== w && !enWords.has(w) && tok.startsWith(w)) hits.push({ id, at: n.indexOf(w), len: w.length });
   for (const p of PLACES) {
     const full = [p.name, ...(p.alias || [])].flatMap((x) => [x.replace(/\s/g, "").toLowerCase(), stripName(x)])
-      .concat(cjkTokens(NAMES_JA[p.id]), cjkTokens(NAMES_ZH[p.id]));
+      .concat(cjkTokensOf(p.id));
     // 별명은 이 여행 권역의 장소만 (예: "케이블카"가 다른 권역 케이블카를 가리키지 않게)
     const nick = regions.has(p.region) ? [...(NICKS[p.id] || []), ...(NICKS_EN[p.id] || []), ...(NICKS_JA[p.id] || []), ...(NICKS_ZH[p.id] || [])] : [];
     for (const tok of [...new Set([...full, ...(en.get(p.id) || []), ...nick])]) {
@@ -140,7 +142,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   const L = (ko, e, ja, zh) => ({ ko, en: e, ja, zh })[lang];
   const nm = (p) => ({ en: ctx.namesEn?.[p.id], ja: NAMES_JA[p.id], zh: NAMES_ZH[p.id] })[lang] || p.name;
   // 일본어·중국어는 번역한 이름이라 한 장소를 말할 때는 한국어 이름(간판)을 함께
-  const nmK = (p) => (cjk && nm(p) !== p.name ? `${nm(p)}(${p.name})` : nm(p));
+  const nmK = (p) => (cjk && nm(p) !== p.name ? (/[(（]/.test(nm(p)) ? `${nm(p)}［${p.name}］` : `${nm(p)}(${p.name})`) : nm(p)); // 이름에 이미 괄호가 있으면 ［한국어］
   const sep = cjk ? "、" : ", ";
   const list = (ps) => ps.map(nm).join(sep);
   const J = (ps, pair) => (lang === "ko" ? josa(list(ps), pair) : list(ps)); // 이름 목록 + 한국어 조사
@@ -218,7 +220,8 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   /* 2) 정보 질문 ("카페 빼줘", "바다 말고"처럼 빼 달라는 말이면 건너뛰고 3)으로) */
   const negate = wantsRemove || /(말고|싫|없이|그만)/.test(n);
   if (!negate) {
-    const rain = lang === "ko" ? RAIN.test(question) : n.includes("비");
+    // 한국어로 쓴 질문은 원문으로 판단 (화면 언어로 답하더라도 "닭갈비"의 비는 비가 아님), 다른 언어는 "rain·雨"가 바뀐 "비"로
+    const rain = /[가-힣]/.test(question) ? RAIN.test(question) : n.includes("비");
     if ((has("일출") || has("사진")) && mentioned.length) {
       const sun = has("일출"), p = mentioned[0];
       const listed = THEMES[sun ? "일출" : "사진"].includes(p.id);
@@ -331,7 +334,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   }
 
   /* 3) 조건 바꾸기: 덜 걷기·여유롭게·카페 빼기 등 (다른 언어는 핵심어로 바꾼 문장으로 판단) */
-  const c = parseRequestLocally(lang === "ko" ? question : n);
+  const c = parseRequestLocally(/[가-힣]/.test(question) ? question : n);
   const lessWalk = c.lessWalk || (has("계단") && /(해줘|바꿔|줄여)/.test(n));
   if (c.indoor || lessWalk || c.pace || c.prefer.length || c.avoid.length) {
     const avoid = [...new Set([...(opts.avoid || []), ...c.avoid])].filter((x) => !c.prefer.includes(x));
@@ -377,7 +380,7 @@ export function checkLodgingLocal(text, lang = "ko") {
     ? { risk: "mid", plain: M.extra }
     : { risk: "low", plain: M.noCompare };
   const words = [/곰팡이|습기|눅눅|mold|damp|カビ|发霉/i, /벌레|바퀴|bugs?|cockroach|虫|蟑螂/i, /소음|시끄|방음|noisy|noise|うるさ|騒音|噪音|吵/i, /냄새|악취|smell|におい|臭/i,
-    /더럽|청소.{0,4}안|머리카락|위생|dirty|unclean|汚|不干净|脏/i, /사진과\s*(다|달)|사진이랑|not like the photos|写真と違|和照片不一样/i, /불친절|응대|rude|不親切|态度差/i, /주차.{0,6}(어렵|불가|좁|없)|parking (is )?(hard|difficult)|駐車.{0,4}(難|不便)|停车.{0,4}(难|不便)/i];
+    /더럽|청소.{0,4}안|머리카락|위생|dirty|unclean|汚|不干净|脏/i, /사진과\s*(다|달)|사진이랑|not like the photos|写真と違|和照片不一样/i, /불친절|응대|rude|不親切|态度差/i, /주차.{0,6}(어렵|어려|불가|좁|없|힘들)|parking (is )?(hard|difficult)|駐車.{0,4}(難|不便)|停车.{0,4}(难|不便)/i];
   const reviews = words.map((re, i) => (find(re) ? { risk: "mid", plain: M.rv[i] } : null)).filter(Boolean);
   const ask = [];
   if (cancel.risk !== "low") ask.push(M.ask[0]);

@@ -372,7 +372,7 @@ export const EN_PHRASES = [
   [/\b(souvenirs?|gifts?|local specialt(?:y|ies)|bring home|take home|famous for)\b/g, " 특산물 "],
   [/\b(get there|from seoul|how to go|how do i get|how can i get)\b/g, " 가는법 "],
   [/\b(hotels?|accommodation|lodging|where to sleep|where (?:are|do|will|should) (?:we|i) stay|staying)\b/g, " 숙소 "],
-  [/\b(add|include|put in|want to go|wanna go|visit|go to)\b/g, " 넣어 "],
+  [/\b(add|include|put in|want to go|wanna go|want to visit|wanna visit|like to visit|let'?s visit|let'?s go to)\b/g, " 넣어 "],
   [/\b(crowded|busy|wait|waiting|queue|line up)\b/g, " 혼잡 "],
   [/\b(too (?:packed|busy|rushed|much|tight|tiring)|hectic|exhausting|overloaded)\b/g, " 너무빡빡해 "],
   [/\b(relaxed|slow|slowly|easy pace|take it easy|lighter)\b/g, " 여유 "],

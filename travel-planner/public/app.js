@@ -875,7 +875,10 @@ async function askGuide(question, shown = question) {
     const res = await fetchT("api/guide", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ question, history: guideHistory, trip: compactTrip(), lang: getLang() }) }, 9000); // 서버 8초 + 1초
     if (res.ok) r = await res.json();
   } catch {}
-  if (!r) r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
+  if (!r) {
+    if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000)); // 한국어 화면에서도 영어 질문의 장소 이름을 알아듣게
+    r = guideLocal(question, trip, dayIdx, { input: state.input, opts: state.opts, fees: feesData, lang: getLang(), namesEn: namesEn() });
+  }
   let note = "";
   if (r.changed) {
     const o = state.opts, uniq = (a) => [...new Set(a)];

@@ -100,4 +100,10 @@ for (const [q, want] of [
   const got = startLocal(q, "2026-11-05");
   for (const [k, v] of Object.entries(want)) assert.equal(got[k], v, `${q} → ${k}`);
 }
+// 검토에서 찾은 버그: 띄어 쓰지 않은 비 질문, 영어 화면의 한국어 "닭갈비", "visit"은 추가 요청이 아님
+assert.equal(ask("내일비오면어떡해").indoor, "on");
+assert.equal(ask("닭갈비가 먹고싶어").kind, "food");
+assert.notEqual(guideLocal("닭갈비 맛집 알려줘", trip, 0, { input, opts, fees, lang: "en", namesEn }).kind, "rain");
+assert.equal(askEn("Is Ojukheon worth a visit?").changed, false);
+assert.deepEqual(askEn("I'd like to visit Ojukheon").add, ["ojukheon"]);
 console.log("ok - 무료 간단 모드 가이드");
