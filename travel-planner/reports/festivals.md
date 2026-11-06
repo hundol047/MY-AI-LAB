@@ -1,6 +1,6 @@
 # 축제 날짜 갱신 리포트
 
-생성: node scripts/update-festivals.mjs (2026-11-06 기준, 한국관광공사 행사정보). 확인만 함 (--write로 반영)
+생성: node scripts/update-festivals.mjs (2026-11-06 기준, 한국관광공사 행사정보). data.js에 반영함
 
 - 오늘 이후 강원 행사 4건 · 바꿀 축제 0개 · 확인 필요 0개 · 목록에 없는 행사 0건
 
