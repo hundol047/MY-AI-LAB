@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { alertsFor, inFireSeason, GUST_WARN } from "../public/alerts.js";
+import { PLACES } from "../public/data.js";
+const cable = PLACES.find((p) => p.id === "seorak-cable"), beach = PLACES.find((p) => p.id === "gyeongpo-beach"), trail = PLACES.find((p) => p.id === "sea-trail");
+assert.deepEqual(alertsFor(cable, "2026-11-10", { gust: GUST_WARN + 2, snow: 0 }).map((a) => a.kind), ["wind"]);
+assert.deepEqual(alertsFor(cable, "2026-11-10", { gust: 8, snow: 0 }), []);
+assert.deepEqual(alertsFor(cable, "2026-11-10", null), [], "예보 없으면 경고 없음");
+assert.deepEqual(alertsFor(beach, "2026-11-10", { gust: 25, snow: 10 }), [], "위험 표시 없는 곳은 경고 없음");
+assert.equal(alertsFor(trail, "2026-11-10", { gust: 16 })[0].kind, "wind", "바람·바다 둘 다면 바람 경고 하나만");
+assert.ok(inFireSeason("2027-03-10") && inFireSeason("2026-11-20") && !inFireSeason("2026-07-01"));
+for (const p of PLACES) for (const r of p.risk || []) assert.ok(["wind", "sea", "snow", "fire", "ski"].includes(r), `${p.id}: ${r}`);
+console.log("ok - 통제·운휴 경고 (돌풍·풍랑·적설·산불조심기간·스키 시즌)");

@@ -53,4 +53,17 @@ for (const move of ["car", "taxi", "transit"]) for (const days of [1, 2, 5]) for
   const bad = planTrip({ region: "gangneung", date: "2026-11-10", days: 1, who: "solo", likes: [], move: "car" }, { start: { name: "x", lat: "a" } });
   assert.equal(bad.days[0].start.name, "강릉역");
 }
-console.log("ok - 예상 비용·출발지");
+// 환급: 장소 환급은 인원수만큼 빼고, 신청형 지원 사업은 빼지 않고 따로
+{
+  const tr = planTrip({ region: "gangneung", date: "2026-11-10", days: 1, who: "couple", likes: [], move: "car" }, {});
+  const base = estimateTrip(tr, { region: "gangneung", days: 1, move: "car" }, { adults: 2, kids: 0 }, {});
+  const e = estimateTrip(tr, { region: "gangneung", days: 1, move: "car" }, { adults: 2, kids: 0 }, {}, [
+    { id: "b-x", kind: "place", status: "auto", title: "x", amount: 2000 },
+    { id: "b-p", kind: "program", status: "open", title: "p", amount: 40000 },
+    { id: "b-c", kind: "program", status: "closed", title: "c", amount: 9 },
+  ]);
+  assert.equal(e.refund.back, 4000);
+  assert.equal(e.net.low, base.total.low - 4000);
+  assert.deepEqual(e.refund.maybe.map((b) => b.id), ["b-p"]);
+}
+console.log("ok - 예상 비용·출발지·환급");

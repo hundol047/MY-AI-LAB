@@ -484,3 +484,21 @@ body.offline .top::after {
 
 /* 앱 서버가 있을 때만 보이는 링크 (예약·후기·가게 등록) */
 body:not(.has-server) .needs-server { display: none !important; }
+
+/* 통제·운휴 경고 (alerts.js) */
+.alert { margin-top: 4px; font-size: 12px; line-height: 1.5; padding: 6px 8px; border-radius: 8px; }
+.alert.warn { background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--text); border: 1px solid color-mix(in srgb, var(--warn) 40%, transparent); }
+.alert.info { background: var(--brand-soft); color: var(--text); }
+.checks h3 { margin: 0 0 4px; font-size: 15px; }
+.checks .sub { margin: 0 0 8px; font-size: 12px; color: var(--sub); }
+.checks .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+.cost-refund { margin: 4px 0 0; font-size: 12px; color: var(--ok, #15803d); line-height: 1.5; }
+.cost-refund.maybe { color: var(--sub); }
+
+/* 여행 중 모드 (today.js) */
+.today { border: 2px solid var(--brand); }
+.today h3 { margin: 0 0 6px; font-size: 15px; color: var(--brand); }
+.today p { margin: 2px 0; font-size: 14px; line-height: 1.5; }
+.today p.warn { color: var(--warn); font-weight: 600; }
+.today .acts { margin-top: 8px; display: flex; flex-wrap: wrap; gap: 6px; }
+.ghost.small.icon { padding: 5px 9px; min-width: 32px; }

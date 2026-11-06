@@ -1,0 +1,21 @@
+import assert from "node:assert/strict";
+import { parseKtoHours, parseKtoClosed, toPlannerPlace } from "../public/directory-place.js";
+import { planTrip, addPlacesToDay } from "../public/planner.js";
+import { PLACES } from "../public/data.js";
+assert.deepEqual(parseKtoHours("09:00~18:00 (입장마감 17:00)"), { hours: ["09:00", "18:00"], lastEntry: "17:00" });
+assert.deepEqual(parseKtoHours("상시 개방"), { hours: ["00:00", "23:59"], lastEntry: null });
+assert.deepEqual(parseKtoHours("11:00~02:00").hours, ["11:00", "23:59"]);
+assert.equal(parseKtoHours("문의 필요"), null);
+assert.deepEqual(parseKtoClosed("매주 월요일, 화요일 / 설날"), [1, 2]);
+assert.deepEqual(parseKtoClosed("연중무휴"), []);
+const p = toPlannerPlace({ id: "999", type: "12", name: "테스트 폭포", address: "강원 강릉시", lat: 37.80, lng: 128.90, hours: "09:00~17:00", closed: "매주 월요일" });
+assert.equal(p.id, "dir-999"); assert.equal(p.region, "gangneung"); assert.deepEqual(p.closed, [1]); assert.ok(p.unverified);
+assert.equal(toPlannerPlace({ id: "1", type: "32", name: "호텔", lat: 37.8, lng: 128.9 }), null, "숙박은 일정에 넣지 않음");
+// 일정에 넣기: 화요일 날짜에 넣을 수 있어야 한다
+PLACES.push(p);
+const input = { region: "gangneung", date: "2026-11-10", days: 1, who: "couple", likes: [], move: "car" };
+const trip = planTrip(input, {});
+const added = addPlacesToDay(trip, input, {}, 0, [p.id]);
+assert.ok(added.days[0].items.some((i) => i.id === p.id), "탐색 장소가 일정에 들어감");
+PLACES.pop();
+console.log("ok - 탐색 목록 장소를 일정에 넣기 (운영시간·휴무 읽기, 권역 연결)");

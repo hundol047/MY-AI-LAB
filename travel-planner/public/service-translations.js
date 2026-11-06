@@ -409,6 +409,11 @@ export const SERVICE_TEXT = {
     "ja": "まだ集計がありません。",
     "zh": "暂无统计。"
   },
+  "일정에 넣기 (앱 검토 전)": {
+    "en": "Add to plan (not reviewed by the app)",
+    "ja": "日程に追加（アプリ未確認）",
+    "zh": "加入行程（应用未审核）"
+  },
   "다음 갱신 때 확인": {
     "en": "Checking at next update",
     "ja": "次回更新で確認",

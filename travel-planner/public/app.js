@@ -3,6 +3,9 @@ import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestL
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
+import { alertsFor, OFFICIAL_CHECKS } from "./alerts.js";
+import { todayStatus, kstNow } from "./today.js";
+import { toPlannerPlace } from "./directory-place.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -181,11 +184,38 @@ function show(which) {
 $("#home").addEventListener("click", () => { if (state) fillForm(state.input); show("setup"); });
 $("#editBtn").addEventListener("click", () => { fillForm(state.input); show("setup"); });
 
+/* ---------- 직접 넣은 장소 (탐색 목록) ----------
+   앱이 검토하지 않은 관광공사 장소를 사람이 일정에 넣으면 opts.custom에 장소 정보를 함께 저장한다(공유 링크에도 들어감).
+   일정을 다시 만들 때 PLACES에 다시 올려 둔다 */
+function registerCustom(opts) {
+  for (const p of opts?.custom || []) if (p?.id?.startsWith("dir-") && !PLACES.some((x) => x.id === p.id)) PLACES.push(p);
+}
+
+/* ---------- 순서 바꾸기 ----------
+   그날 장소 순서를 바꾸고, 바뀐 순서로 시간을 다시 계산한다. 영업시간에 안 맞으면 바꾸지 않고 알려 준다 */
+function moveItem(i, dir) {
+  const j = i + dir, day = trip.days[dayIdx];
+  if (j < 0 || j >= day.items.length) return;
+  const keep = trip.days.map((d) => d.items.map((it) => it.id));
+  [keep[dayIdx][i], keep[dayIdx][j]] = [keep[dayIdx][j], keep[dayIdx][i]];
+  const trial = planTrip(state.input, { ...state.opts, keep });
+  const got = trial.days[dayIdx].items.map((it) => it.id);
+  if (got.join() !== keep[dayIdx].join()) { toast(t("그 순서로는 영업시간이 맞지 않아요")); return; }
+  state.opts.keep = keep; trip = trial;
+  render(); persist(); applyRoad(dayIdx); track("reorder");
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-move]"); if (!b || !trip) return;
+  const [i, d] = b.dataset.move.split(":").map(Number);
+  moveItem(i, d);
+});
+
 /* ---------- 일정 생성 ---------- */
 function rebuild(keepLayout = false) {
   const opts = { ...state.opts };
   if (!keepLayout) delete opts.keep;
   state.opts = opts;
+  registerCustom(opts);
   trip = planTrip(state.input, opts);
   if (trip.lodging) state.opts.lodgingId = trip.lodging.id; // 조건을 조금 바꿔도 숙소는 그대로
   render();
@@ -197,7 +227,7 @@ function rebuild(keepLayout = false) {
 async function loadWeather() {
   const { date, days } = state.input;
   const end = addDays(date, days - 1);
-  const url = `https://api.open-meteo.com/v1/forecast?latitude=${baseOf(state.input).lat}&longitude=${baseOf(state.input).lng}&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min&timezone=Asia%2FSeoul&start_date=${date}&end_date=${end}`;
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${baseOf(state.input).lat}&longitude=${baseOf(state.input).lng}&daily=precipitation_probability_max,temperature_2m_max,temperature_2m_min,wind_gusts_10m_max,snowfall_sum&wind_speed_unit=ms&timezone=Asia%2FSeoul&start_date=${date}&end_date=${end}`;
   try {
     const res = await fetchT(url, {}, 4000);
     if (!res.ok) return;
@@ -206,7 +236,7 @@ async function loadWeather() {
     let changed = false;
     j.daily.time.forEach((t, i) => {
       const rain = j.daily.precipitation_probability_max[i];
-      weather[t] = { rain, max: Math.round(j.daily.temperature_2m_max[i]), min: Math.round(j.daily.temperature_2m_min[i]) };
+      weather[t] = { rain, max: Math.round(j.daily.temperature_2m_max[i]), min: Math.round(j.daily.temperature_2m_min[i]), gust: j.daily.wind_gusts_10m_max?.[i] ?? null, snow: j.daily.snowfall_sum?.[i] ?? null };
       // 공유받은 일정은 그대로 보여 주고, 직접 만든 일정만 비 예보에 맞춰 바꾼다
       if (rain >= 60 && !state.opts.rainDays[i] && !restoredFromLink) { state.opts.rainDays[i] = true; changed = true; }
     });
@@ -230,7 +260,7 @@ function render() {
   $("#tabs").innerHTML = trip.days.map((d, i) => {
     const w = weather[d.date];
     return `<button type="button" data-i="${i}" class="${i === dayIdx ? "on" : ""}">
-      <strong>${t("{n}일차", { n: i + 1 })}</strong><span>${esc(areaName(d.areaName))}${w ? ` · ${w.min}°/${w.max}°${w.rain >= 40 ? t(" · 비 {p}%", { p: w.rain }) : ""}` : ""}</span>
+      <strong>${t("{n}일차", { n: i + 1 })}${d.items.some((it) => alertsFor(it.place, d.date, weather[d.date]).some((a) => a.level === "warn")) ? " ⚠" : ""}</strong><span>${esc(areaName(d.areaName))}${w ? ` · ${w.min}°/${w.max}°${w.rain >= 40 ? t(" · 비 {p}%", { p: w.rain }) : ""}` : ""}</span>
     </button>`;
   }).join("");
 
@@ -246,6 +276,8 @@ function render() {
   renderOvernight();
   renderSouvenirs();
   renderCosts();
+  renderChecks();
+  renderToday();
   renderShops();
   loadImages();
   drawMap(day);
@@ -267,14 +299,64 @@ function itemHTML(it, i, day) {
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
-        <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
+        ${p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
+        ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
-        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
+        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
       </div>
     </article>
   </li>`;
+}
+
+// 통제·운휴 경고 문구 (alerts.js). 예보로 본 가능성이라 "멈출 수 있어요"로 말하고, 다른 곳으로 바꿀 수 있게 한다
+function alertText(a) {
+  if (a.kind === "wind") return t("⚠ 돌풍 최대 {g}m/s 예보 · 운휴·통제될 수 있어요. 출발 전 운영 여부를 확인하거나 '바꾸기'로 다른 곳을 고르세요", { g: a.gust });
+  if (a.kind === "sea") return t("⚠ 바람이 센 날(돌풍 {g}m/s) · 풍랑특보가 나면 통제돼요. 출발 전 확인하세요", { g: a.gust });
+  if (a.kind === "snow") return t("⚠ 눈 {s}cm 예보 · 고갯길이 막히거나 체인이 필요할 수 있어요", { s: a.snow });
+  if (a.kind === "fire") return t("산불조심기간: 국립공원 일부 탐방로가 통제될 수 있어요. 국립공원 누리집에서 확인하세요");
+  if (a.kind === "ski") return t("스키장 개장·폐장일은 해마다 달라요. 리조트 공지를 확인하세요");
+  return "";
+}
+// 여행 중 모드: 오늘이 여행 날이면 맨 위에 "지금 할 일"을 보여 준다. 1분마다 다시 계산, 위치는 버튼을 눌렀을 때만 쓴다
+let todayHere = null;
+function renderToday() {
+  const box = $("#today"); if (!box || !trip) return;
+  const s = todayStatus(trip, kstNow(), todayHere, state.input.move);
+  if (!s) { box.hidden = true; return; }
+  box.hidden = false;
+  const name = (it) => esc(placeName(it.place));
+  let body;
+  if (s.state === "done") body = `<p>${t("오늘 일정은 모두 끝났어요. 편히 쉬세요!")}</p>`;
+  else if (s.state === "at") body = `<p>${t("지금 {place} 일정 중 · {time}까지", { place: `<b>${name(s.item)}</b>`, time: fmt(s.leaveAt) })}</p>`;
+  else {
+    const left = s.leaveBy - kstNow().min;
+    body = `<p>${t("다음: {place} {time}", { place: `<b>${name(s.item)}</b>`, time: fmt(s.item.start) })}</p>
+      <p class="${s.late ? "warn" : ""}">${s.late ? t("⚠ 지금 출발해도 {arrive} 도착 · 입장 마감 {deadline}에 늦어요. '바꾸기'로 다른 곳을 고르세요", { arrive: fmt(s.arrive), deadline: fmt(s.deadline) })
+        : left > 0 ? t("{leave}까지 출발하면 돼요 ({min}분 남음 · 이동 약 {travel}분)", { leave: fmt(s.leaveBy), min: left, travel: s.travelMin })
+        : t("지금 출발하세요 · 이동 약 {travel}분, {arrive} 도착", { travel: s.travelMin, arrive: fmt(s.arrive) })}</p>`;
+  }
+  box.innerHTML = `<h3>${t("오늘 여행 중")}</h3>${body}
+    <div class="acts"><button type="button" class="ghost small" id="todayGps">${todayHere ? t("내 위치 기준 · 다시 계산") : t("내 위치로 다시 계산")}</button>
+    ${s.dayIdx !== dayIdx ? `<button type="button" class="ghost small" data-goday="${s.dayIdx}">${t("오늘 일정 보기")}</button>` : ""}</div>`;
+}
+setInterval(() => { if (trip && !$("#result").hidden) renderToday(); }, 60000);
+document.addEventListener("click", (e) => {
+  if (e.target.closest("#todayGps")) {
+    if (!navigator.geolocation) return toast(t("이 기기에서는 위치를 쓸 수 없어요"));
+    navigator.geolocation.getCurrentPosition((p) => { todayHere = { lat: p.coords.latitude, lng: p.coords.longitude }; renderToday(); track("trip_today"); },
+      () => toast(t("위치를 가져오지 못했어요")), { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 });
+  }
+  const g = e.target.closest("[data-goday]");
+  if (g) { dayIdx = Number(g.dataset.goday); render(); }
+});
+
+function renderChecks() {
+  const el = $("#checks"); if (!el) return;
+  el.hidden = false;
+  el.innerHTML = `<h3>${t("출발 전 확인")}</h3><p class="sub">${t("임시 휴장·통제는 미리 알 수 없어요. 출발 전날 공식 안내를 한 번 확인하세요.")}</p>
+    <div class="acts">${OFFICIAL_CHECKS.map((c) => `<a class="ghost small" href="${c.url}" target="_blank" rel="noopener">${t(c.label)}</a>`).join("")}</div>`;
 }
 
 // 길찾기는 카카오맵 장소 검색으로: 지도 서비스의 정확한 위치로 안내된다
@@ -723,7 +805,7 @@ function renderCosts() {
   if (!trip?.days?.length) { box.hidden = true; return; }
   box.hidden = false;
   const people = peopleNow();
-  const e = estimateTrip(trip, state.input, people, feesData);
+  const e = estimateTrip(trip, state.input, people, feesData, benefitsFor(trip, state.input));
   const label = {
     taxi: t("택시"), fuel: t("자동차 연료"), bus: t("버스"), fees: t("입장료"), meals: t("식사·카페"), stay: t("숙박"),
   };
@@ -739,7 +821,9 @@ function renderCosts() {
   };
   box.innerHTML = `
     <h3>${t("예상 비용")}</h3>
-    <div class="cost-total"><b>${range(e.total.low, e.total.high)}</b><span>${t("1인당 {r}", { r: range(e.perPerson.low, e.perPerson.high) })}</span></div>
+    <div class="cost-total"><b>${range(e.net.low, e.net.high)}</b><span>${t("1인당 {r}", { r: range(e.perPerson.low, e.perPerson.high) })}</span></div>
+    ${e.refund.back ? `<p class="cost-refund">${t("환급 {won} 뺀 금액 (돌려받는 지역 상품권: {list})", { won: won(e.refund.back), list: e.refund.sure.map((b) => esc(benefitText(b, "title"))).join(", ") })}</p>` : ""}
+    ${e.refund.maybe.length ? `<p class="cost-refund maybe">${t("신청하면 더 돌려받을 수 있어요: {list}", { list: e.refund.maybe.map((b) => t("{title} 최대 {won}", { title: esc(benefitText(b, "title")), won: won(b.amount) }) + (b.unconfirmed ? t(" (공고 확인 필요)") : "")).join(" · ") })}</p>` : ""}
     <div class="cost-people">
       <span>${t("어른")}</span><button type="button" class="ghost small" data-ppl="adults:-1" aria-label="-">−</button><b>${people.adults}</b><button type="button" class="ghost small" data-ppl="adults:1" aria-label="+">+</button>
       <span>${t("어린이")}</span><button type="button" class="ghost small" data-ppl="kids:-1" aria-label="-">−</button><b>${people.kids}</b><button type="button" class="ghost small" data-ppl="kids:1" aria-label="+">+</button>
@@ -1129,6 +1213,7 @@ if (getLang() === "ja" || getLang() === "zh") applyStatic();
   if (saved && saved.input && PLACES.length) {
     restoredFromLink = true;
     state = { input: saved.input, opts: { rainDays: [], exclude: [], prefer: [], avoid: [], ...saved.opts } };
+    registerCustom(state.opts);
     trip = planTrip(state.input, state.opts);
     show("result"); render();
     trip.days.forEach((_, i) => applyRoad(i));
@@ -1159,9 +1244,35 @@ if(directoryPlace && PLACES.some(p=>p.id===directoryPlace)) {
   const p=PLACES.find(p=>p.id===directoryPlace);
   if(!state || !trip) {
     const last=store.get('lastTrip');
-    if(last?.input) {state={input:{...last.input,date:last.input.date<tomorrow()?tomorrow():last.input.date},opts:{rainDays:[],exclude:[],...last.opts}};trip=planTrip(state.input,state.opts);show('result');render();}
+    if(last?.input) {state={input:{...last.input,date:last.input.date<tomorrow()?tomorrow():last.input.date},opts:{rainDays:[],exclude:[],...last.opts}};registerCustom(state.opts);trip=planTrip(state.input,state.opts);show('result');render();}
     else {fillForm({region:p.region,date:tomorrow(),days:2,who:'couple',likes:[p.cat],move:'car'});$('#form').requestSubmit();}
   }
   history.replaceState(null,'',location.pathname+location.hash);
   askGuide(`${p.name} 넣어줘`);
+}
+
+// 탐색 목록의 관광공사 장소 넣기 (앱이 검토하지 않은 곳): 가장 가까운 날에 넣고, 못 넣으면 이유를 알려 준다
+const directoryAdd = new URLSearchParams(location.search).get("addDir");
+if (directoryAdd) {
+  history.replaceState(null, "", location.pathname + location.hash);
+  fetchT("directory.json", {}, 8000).then((r) => r.json()).then((d) => {
+    const raw = d.places.find((x) => String(x.id) === directoryAdd);
+    // 앱이 이미 검토한 같은 장소(이름 같고 1.5km 안)가 있으면 그것을 쓴다
+    const same = raw && PLACES.find((x) => !x.unverified && x.name.replace(/\s/g, "") === raw.name.replace(/\s/g, "") && distKm(x, raw) < 1.5);
+    const p = same || toPlannerPlace(raw);
+    if (!p) return toast(t("이 장소는 일정에 넣을 수 없어요 (숙박이거나 앱 지역에서 너무 멀어요)"));
+    if (!state || !trip) {
+      fillForm({ region: p.region, date: tomorrow(), days: 2, who: "couple", likes: [p.cat === "food" ? "food" : p.cat], move: "car" });
+      $("#form").requestSubmit();
+    }
+    if (p.unverified) state.opts.custom = [...(state.opts.custom || []).filter((x) => x.id !== p.id), p];
+    registerCustom(state.opts);
+    // 그 장소와 가장 가까운 날부터 넣어 본다
+    const order = trip.days.map((dd, i) => [i, Math.min(...dd.items.map((it) => distKm(it.place, p)), 999)]).sort((a, b) => a[1] - b[1]).map(([i]) => i);
+    for (const di of order) {
+      const changed = addPlacesToDay(trip, state.input, state.opts, di, [p.id]);
+      if (changed !== trip) { trip = changed; dayIdx = di; state.opts.keep = trip.days.map((dd) => dd.items.map((it) => it.id)); render(); persist(); applyRoad(di); track("add_place"); return toast(t("{name}을(를) {n}일차에 넣었어요", { name: p.name, n: di + 1 })); }
+    }
+    toast(t("{name}은(는) 이번 일정의 권역·영업시간에 맞지 않아 넣지 못했어요", { name: p.name }));
+  }).catch(() => toast(t("탐색 목록을 불러오지 못했어요")));
 }
