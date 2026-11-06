@@ -35,6 +35,8 @@ jobs:
         run: node scripts/sync-directory.mjs
       - name: 운영시간 차이 확인
         if: steps.key.outputs.ok == 'true'
+        # 하루 호출 한도를 넘으면 리포트를 바꾸지 않고 실패한다. 그래도 장소 목록 PR은 만든다
+        continue-on-error: true
         working-directory: travel-planner
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}

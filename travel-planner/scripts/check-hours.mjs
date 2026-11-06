@@ -24,12 +24,15 @@ const toMin = (s) => { const [h, m] = s.split(":").map(Number); return h * 60 + 
 const clean = (s) => String(s || "").replace(/<br\s*\/?>/gi, " / ").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
 const fmtClosed = (c) => (c?.length ? c.map((d) => DAYS[d]).join("·") : "없음");
 
-const rows = [];
+const rows = [], failures = [];
 for (const p of PLACES.filter((x) => !x.multi)) {
   const list = await candidates("KorService2", p, { cache: true });
   const m = list.find((c) => c.ok && c.km <= maxKmFor(p) && FIELDS[c.contenttypeid]);
   if (!m) { rows.push({ p, none: true }); continue; }
-  const [d] = await tour("KorService2", "detailIntro2", { contentId: String(m.contentid), contentTypeId: String(m.contenttypeid) }, { cache: true }).catch(() => []);
+  // 소개정보를 못 받으면(하루 호출 한도 초과 등) 빈 칸으로 비교하지 않는다: 빈 리포트가 "확인 필요 0곳"처럼 보이기 때문
+  let d;
+  try { [d] = await tour("KorService2", "detailIntro2", { contentId: String(m.contentid), contentTypeId: String(m.contenttypeid) }, { cache: true }); }
+  catch (e) { failures.push(`${p.id}: ${e.message}`); if (e.code === "22") break; continue; }
   const [tf, rf] = FIELDS[m.contenttypeid];
   const use = clean(d?.[tf]), rest = clean(d?.[rf]);
   const flags = [];
@@ -63,5 +66,9 @@ const md = [
   ...rows.filter((r) => !r.none).map((r) => `| ${r.p.id} | ${esc(r.p.name)} | ${r.p.hours.join("–")} | ${fmtClosed(r.p.closed)} | ${esc(r.use || "-")} | ${esc(r.rest || "-")} |`), "",
 ];
 await mkdir(new URL("../reports/", import.meta.url), { recursive: true });
+if (failures.length) {
+  console.error(`\n관광공사 소개정보를 ${failures.length}곳 받지 못해 리포트를 바꾸지 않았습니다 (하루 호출 한도는 한국 시간 자정에 초기화):\n${failures.slice(0, 5).join("\n")}`);
+  process.exit(1);
+}
 await writeFile(new URL("../reports/hours.md", import.meta.url), md.join("\n"));
 console.log(`\n확인 필요 ${flagged.length}곳 → reports/hours.md`);

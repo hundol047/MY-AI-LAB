@@ -44,11 +44,17 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/update-festivals.mjs --write
-      - name: 일정 엔진 테스트 (바뀐 데이터로)
+      - name: 축제 데이터가 바뀌었는지 확인
+        id: diff
         if: steps.key.outputs.ok == 'true'
+        run: |
+          # 리포트 날짜만 바뀐 경우에는 PR을 만들지 않는다
+          if git diff --quiet -- public/data.js; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+      - name: 일정 엔진 테스트 (바뀐 데이터로)
+        if: steps.diff.outputs.changed == 'true'
         run: npm test
       - name: 검토용 PR 만들기 (바뀐 게 있을 때만)
-        if: steps.key.outputs.ok == 'true'
+        if: steps.diff.outputs.changed == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: auto/update-festivals

@@ -190,7 +190,8 @@ screenshots/              화면 확인 (360·390·1280px × 라이트/다크 ×
 목록 수집이 끝나야 기존 파일을 교체합니다. 키 누락·빈 목록이면 기존 파일을 보존합니다.
 `node test/directory.test.mjs`로 모의 응답 기반 수집·보존, 나눠 받기·이어 받기·수정일 같으면 생략·한도 초과 시 중단을 검증합니다.
 
-`update-directory.yml`은 매일 한국 시간 04:30에 목록과 운영시간 차이 리포트의 검토용 PR을 만듭니다.
+`update-directory.yml`은 매일 한국 시간 04:30에 목록과 운영시간 차이 리포트의 검토용 PR을 만듭니다. 운영시간 대조(`check-hours.mjs`)가 관광공사 소개정보를 받지 못하면(하루 호출 한도 등) 빈 리포트를 쓰지 않고 실패하며, 장소 목록 PR은 그대로 만듭니다.
+두 갱신 작업이 PR을 만들려면 저장소 Settings → Actions → General → Workflow permissions에서 **Allow GitHub Actions to create and approve pull requests**를 켜야 합니다. 축제 작업은 축제 데이터(`data.js`)가 실제로 바뀐 경우에만 PR을 만듭니다.
 예약 실행에는 기본 브랜치 반영과 GitHub 저장소 Settings → Secrets and variables → Actions의 `TOUR_API_KEY` secret이 필요합니다. Claude 클라우드 환경 설정에 넣은 키는 GitHub Actions에 전달되지 않습니다. secret이 없으면 두 갱신 작업(장소·축제)은 실패하지 않고 경고를 남긴 채 건너뜁니다.
 관광공사 수집 시점은 시설의 실제 운영 확인 시점이 아닙니다. 임시 휴장은 누락될 수 있습니다.
 새 장소의 운영 원문은 일정 엔진에 자동 적용하지 않습니다. 계절·마감·휴장 규칙의 검토가 필요합니다.
