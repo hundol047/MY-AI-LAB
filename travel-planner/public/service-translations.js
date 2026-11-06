@@ -399,6 +399,11 @@ export const SERVICE_TEXT = {
     "ja": "情報なし",
     "zh": "未提供"
   },
+  "다음 갱신 때 확인": {
+    "en": "Checking at next update",
+    "ja": "次回更新で確認",
+    "zh": "下次更新时确认"
+  },
   "운영: {value}": {
     "en": "Hours: {value}",
     "ja": "営業時間: {value}",

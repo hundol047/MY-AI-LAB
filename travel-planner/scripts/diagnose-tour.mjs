@@ -3,7 +3,7 @@ import {tour} from './tour-api.mjs';
 import {mkdir,writeFile} from 'node:fs/promises';
 const cases=[
  ['regional-list','KorService2','areaBasedList2',{lDongRegnCd:'51',numOfRows:'1',pageNo:'1',arrange:'C'}],
- ['legacy-area-parameter','KorService2','areaBasedList2',{areaCode:'32',numOfRows:'1',pageNo:'1',listYN:'Y',arrange:'A'}],
+ ['legacy-area-parameter','KorService2','areaBasedList2',{areaCode:'32',numOfRows:'1',pageNo:'1',arrange:'A'}],
  ['minimal-list','KorService2','areaBasedList2',{numOfRows:'1',pageNo:'1'}],
  ['area-codes','KorService2','areaCode2',{numOfRows:'1',pageNo:'1'}],
  ['legacy-service','KorService1','areaBasedList1',{numOfRows:'1',pageNo:'1'}],

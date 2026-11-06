@@ -7,7 +7,7 @@ function draw() {
   $('count').textContent = `${rows.length}곳 · ${Math.min(limit, rows.length)}곳 표시`;
   $('places').replaceChildren(...rows.slice(0, limit).map(p => {
     const li = document.createElement('li'); li.className = 'card';
-    for (const [tag, text] of [['h2', p.name], ['p', p.address], ['p', `운영: ${p.hours || '제공 정보 없음'}`], ['p', `${p.type === '32' ? '체크아웃' : '휴무'}: ${p.closed || '제공 정보 없음'}`]]) {
+    for (const [tag, text] of [['h2', p.name], ['p', p.address], ['p', `운영: ${p.hours || (p.detailPending ? '다음 갱신 때 확인' : '제공 정보 없음')}`], ['p', `${p.type === '32' ? '체크아웃' : '휴무'}: ${p.closed || (p.detailPending ? '다음 갱신 때 확인' : '제공 정보 없음')}`]]) {
       const el = document.createElement(tag); el.textContent = text; if(tag==='h2')el.className='user-content'; li.append(el);
     }
     const planned=PLACES.find(x=>x.id===(p.plannerId||p.id) || (x.name===p.name && Math.abs(x.lat-p.lat)<0.001 && Math.abs(x.lng-p.lng)<0.001));

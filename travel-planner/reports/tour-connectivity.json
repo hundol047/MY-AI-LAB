@@ -1,42 +1,34 @@
 {
-  "checkedAt": "2026-11-05T07:52:30.016Z",
+  "checkedAt": "2026-11-06T13:24:45.312Z",
   "transport": "HTTPS",
   "results": [
     {
       "name": "regional-list",
       "service": "KorService2",
       "operation": "areaBasedList2",
-      "ok": false,
-      "status": 400,
-      "code": "10",
-      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+      "ok": true,
+      "count": 1
     },
     {
       "name": "legacy-area-parameter",
       "service": "KorService2",
       "operation": "areaBasedList2",
-      "ok": false,
-      "status": 400,
-      "code": "10",
-      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+      "ok": true,
+      "count": 1
     },
     {
       "name": "minimal-list",
       "service": "KorService2",
       "operation": "areaBasedList2",
-      "ok": false,
-      "status": 400,
-      "code": "10",
-      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+      "ok": true,
+      "count": 1
     },
     {
       "name": "area-codes",
       "service": "KorService2",
       "operation": "areaCode2",
-      "ok": false,
-      "status": 400,
-      "code": "10",
-      "hint": "승인 서비스와 필수 파라미터를 공식 호출 예제와 대조하세요. 키 무효로 단정하지 않습니다."
+      "ok": true,
+      "count": 1
     },
     {
       "name": "legacy-service",
