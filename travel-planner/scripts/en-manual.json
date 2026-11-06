@@ -473,5 +473,181 @@
   "k-wj-rooftop": {
     "name": "Wonju Rooftop Film Festival",
     "desc": "Rooftop of the Korea Tourism Organization HQ"
+  },
+  "sutasa": {
+    "name": "Sutasa Temple",
+    "desc": "Thousand-year-old temple at the foot of Gongjaksan, with a valley walking trail"
+  },
+  "hc-mugunghwa": {
+    "name": "Hongcheon Mugunghwa Arboretum",
+    "desc": "Arboretum of rose of Sharon (mugunghwa) varieties"
+  },
+  "hc-market": {
+    "name": "Hongcheon Central Market",
+    "desc": "Market with food stalls; market days on dates ending in 1 and 6 · hours vary by shop"
+  },
+  "dutayeon": {
+    "name": "Dutayeon Valley",
+    "desc": "Valley and waterfall inside the Civilian Control Line · fixed entry times, ID required"
+  },
+  "yanggu-observatory": {
+    "name": "Yanggu Gukto Jeongjungang Observatory",
+    "desc": "Sun and star observing at the geographic center of Korea"
+  },
+  "eulji-observatory": {
+    "name": "Eulji Observatory",
+    "desc": "Front-line observatory over the Punchbowl basin and North Korea · tours at set times, ID required"
+  },
+  "bisugumi": {
+    "name": "Bisugumi Village, Hwacheon",
+    "desc": "Forest walk to a remote village at the end of Paroho Lake · mountain-vegetable bibimbap"
+  },
+  "peace-dam": {
+    "name": "Peace Dam",
+    "desc": "World Peace Bell and a huge mural on the dam wall"
+  },
+  "jogyeongcheol": {
+    "name": "Jo Gyeong-cheol Observatory",
+    "desc": "Stargazing observatory on Gwangdeoksan at 1,010 m"
+  },
+  "kkeomeok-bridge": {
+    "name": "Kkeomeok Bridge, Hwacheon",
+    "desc": "Black concrete bridge built in 1945 · registered heritage"
+  },
+  "ttansan": {
+    "name": "Ttansan, Hwacheon",
+    "desc": "Artificial waterfall and riverside park on the Bukhangang"
+  },
+  "baegamsan-cable": {
+    "name": "Baegamsan Cable Car, Hwacheon",
+    "desc": "Cable car to Baegamsan peak inside the Civilian Control Line · booking and ID required"
+  },
+  "parkinhwan": {
+    "name": "Park In-hwan Literary Museum",
+    "desc": "Poet Park In-hwan and a recreated 1950s Myeongdong street"
+  },
+  "inje-folk": {
+    "name": "Inje Mountain Village Folk Museum",
+    "desc": "Tools and customs of deep-mountain villages"
+  },
+  "manhae-village": {
+    "name": "Manhae Village",
+    "desc": "Village and museum honoring the poet and monk Han Yong-un"
+  },
+  "pungsuwon": {
+    "name": "Pungsuwon Catholic Church",
+    "desc": "Gangwon's first Catholic church (1907), red brick"
+  },
+  "birch-museum": {
+    "name": "Birch Forest Museum",
+    "desc": "Photo gallery in a birch forest · closed Tue–Thu"
+  },
+  "jangneung": {
+    "name": "Jangneung Royal Tomb, Yeongwol",
+    "desc": "Tomb of King Danjong · UNESCO World Heritage royal tomb"
+  },
+  "gossigul": {
+    "name": "Gossigul Cave",
+    "desc": "400-million-year-old limestone cave · some narrow, low passages"
+  },
+  "byeongbangchi": {
+    "desc": "Glass skywalk over the Korean-peninsula-shaped bend of the Donggang River"
+  },
+  "manhangjae": {
+    "name": "Manhangjae Pass",
+    "desc": "Highest paved pass you can drive (1,330 m) · wildflowers and snow views"
+  },
+  "coal-museum": {
+    "name": "Taebaek Coal Museum",
+    "desc": "Mine tunnel experience and the story of coal mining"
+  },
+  "geomnyongso": {
+    "name": "Geomnyongso Spring",
+    "desc": "Source of the Hangang River · 1.3 km forest walk from the parking lot"
+  },
+  "gumunso": {
+    "name": "Gumunso",
+    "desc": "River tunnel through a rock hill and Paleozoic rock layers"
+  },
+  "yongyeon-cave": {
+    "name": "Yongyeon Cave",
+    "desc": "Limestone cave at 920 m · a small train takes you to the entrance"
+  },
+  "taebaeksan": {
+    "name": "Taebaeksan (Yuilsa Trail)",
+    "desc": "National park hike to the Cheonjedan altar · famous winter frost flowers"
+  },
+  "cheoram": {
+    "name": "Cheoram Coal Mining History Village",
+    "desc": "Life-history museum in a mining town's stilt houses"
+  },
+  "jukseoru": {
+    "desc": "Pavilion on a cliff above the Osipcheon · first of the Eight Views of Gwandong"
+  },
+  "isabu-park": {
+    "name": "Isabu Lion Park",
+    "desc": "Seaside theme park and picture-book gallery (gallery closed Mondays)"
+  },
+  "sc-coast-road": {
+    "name": "Isabu-gil (Saecheonnyeon Coastal Road), Samcheok",
+    "desc": "4.6 km coastal drive from Samcheok Port to Samcheok Beach"
+  },
+  "mureung": {
+    "name": "Mureung Valley",
+    "desc": "Wide rock slabs, twin falls and Yongchu Falls"
+  },
+  "yongpyong-ski": {
+    "name": "Mona Yongpyong Ski Resort",
+    "desc": "Korea's flagship ski resort, usually first to open and last to close"
+  },
+  "phoenix-ski": {
+    "desc": "Ski resort in Bongpyeong, Pyeongchang · day and night skiing (grooming 16:00–18:00)"
+  },
+  "cw-peace-observatory": {
+    "name": "Cheorwon Peace Observatory",
+    "desc": "Civilian Control Line security tour · set departure times, ID required"
+  },
+  "sambuyeon": {
+    "name": "Sambuyeon Falls",
+    "desc": "20 m waterfall that drops in three bends"
+  },
+  "soisan": {
+    "name": "Soisan, Cheorwon",
+    "desc": "Low hill overlooking the Cheorwon Plain · underground bunker exhibit (closed Tuesdays)"
+  },
+  "crane-center": {
+    "name": "Cheorwon Migratory Bird Site (Cranes)",
+    "desc": "Cheorwon Plain where cranes winter (Nov–Mar)"
+  },
+  "geonbongsa": {
+    "name": "Geonbongsa Temple",
+    "desc": "Old great temple near the Civilian Control Line · enshrines Buddha relics"
+  },
+  "namae-port": {
+    "desc": "Small harbor and lighthouse, counted among Gangwon's three most beautiful ports"
+  },
+  "biseondae": {
+    "name": "Biseondae, Seoraksan",
+    "desc": "3 km valley walk from Sogongwon to a great rock slab at the mouth of Cheonbuldong"
+  },
+  "gwangchi-forest": {
+    "name": "Gwangchi Recreational Forest",
+    "desc": "Waterfalls and old-growth forest along the Gwangchi Valley at 800 m"
+  },
+  "yanggu-goral": {
+    "name": "Yanggu Goral and Musk Deer Center",
+    "desc": "Center protecting the long-tailed goral and musk deer (natural monuments)"
+  },
+  "taebaek-food": {
+    "name": "Hwangji Restaurant Area, Taebaek",
+    "desc": "Spicy chicken stew (mul-dakgalbi) and Korean meals around Hwangji Pond"
+  },
+  "yanggu-food": {
+    "name": "Yanggu Town Restaurants",
+    "desc": "Dried radish greens (siraegi) meals and buckwheat noodles"
+  },
+  "inje-food": {
+    "name": "Inje Town Restaurants",
+    "desc": "Buckwheat noodles and dried pollack dishes"
   }
 }

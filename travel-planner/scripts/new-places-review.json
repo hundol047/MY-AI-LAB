@@ -1,0 +1,1818 @@
+{
+ "_note": "사람이 관광공사 원문(reports/new-places.md)을 보고 정한 일정 규칙. build-new-places.mjs가 좌표·관광공사 제목과 합쳐 public/places-more.js를 만든다. '상시 개방'인 절·공원·해변은 낮 시간으로 잡았다. 스키장은 관광공사에 시간이 없거나 '시즌별 상이'라 보통 주간 운영 시간과 12월 초~3월 중순 시즌으로 가정하고 risk ski로 '개장일 확인'을 띄운다.",
+ "sutasa": {
+  "name": "수타사",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "공작산 자락의 천년 고찰과 계곡 산소길"
+ },
+ "alpaca-world": {
+  "name": "알파카월드",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "16:30",
+  "closed": [],
+  "stay": 120,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "kids"
+  ],
+  "desc": "알파카와 함께 걷는 숲속 동물 체험장"
+ },
+ "palbongsan": {
+  "name": "팔봉산",
+  "hours": [
+   "07:00",
+   "18:00"
+  ],
+  "lastEntry": "15:00",
+  "closed": [],
+  "closedYearly": [
+   [
+    "12-15",
+    "12-31"
+   ],
+   [
+    "01-01",
+    "03-15"
+   ]
+  ],
+  "stay": 180,
+  "indoor": false,
+  "walk": 3,
+  "pop": 1,
+  "tags": [],
+  "desc": "홍천강을 끼고 여덟 봉우리를 넘는 바위 산행 · 겨울(결빙)~3월 중순 등산로 폐쇄"
+ },
+ "hc-mugunghwa": {
+  "name": "홍천 무궁화수목원",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "무궁화 품종을 모은 수목원 산책"
+ },
+ "garisan-forest": {
+  "name": "가리산 자연휴양림",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 90,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "낙엽송 숲길과 계곡의 휴양림"
+ },
+ "hc-ginkgo": {
+  "name": "홍천 은행나무숲",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "01-01",
+    "09-30"
+   ],
+   [
+    "11-01",
+    "12-31"
+   ]
+  ],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "senior"
+  ],
+  "desc": "개인 농장의 은행나무 2천 그루 · 해마다 10월에만 개방"
+ },
+ "hc-hwaro": {
+  "name": "홍천 양지말 화로구이",
+  "cat": "food",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "lastEntry": "20:30",
+  "closed": [],
+  "stay": 70,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "숯불 화로에 굽는 홍천 돼지 화로구이"
+ },
+ "hc-market": {
+  "name": "홍천 중앙시장",
+  "cat": "food",
+  "multi": true,
+  "hours": [
+   "09:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "홍천 장날(1·6일) 먹거리 시장 · 가게마다 영업시간 다름"
+ },
+ "vivaldi-ski": {
+  "name": "비발디파크 스키월드",
+  "hours": [
+   "09:00",
+   "16:30"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 240,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "kids"
+  ],
+  "desc": "수도권에서 가까운 대형 스키장 · 야간 스키 운영"
+ },
+ "dutayeon": {
+  "name": "두타연",
+  "hours": [
+   "09:00",
+   "16:20"
+  ],
+  "lastEntry": "15:00",
+  "closed": [
+   1
+  ],
+  "stay": 90,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "민통선 안 계곡과 폭포 · 정해진 입장 시간, 신분증 필요"
+ },
+ "yanggu-observatory": {
+  "name": "양구 국토정중앙천문대",
+  "hours": [
+   "14:00",
+   "23:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     10,
+     11,
+     12,
+     1,
+     2,
+     3
+    ],
+    "hours": [
+     "14:00",
+     "22:00"
+    ]
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "night"
+  ],
+  "desc": "국토 정중앙에서 보는 별과 태양 관측"
+ },
+ "parksookeun": {
+  "name": "박수근미술관",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "화가 박수근의 고향에 세운 미술관"
+ },
+ "eulji-observatory": {
+  "name": "을지전망대",
+  "hours": [
+   "09:30",
+   "16:15"
+  ],
+  "lastEntry": "15:10",
+  "closed": [
+   1
+  ],
+  "stay": 70,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "펀치볼과 북녘 땅이 보이는 최전방 전망대 · 회차 출발, 신분증 필요, 군 상황에 따라 통제"
+ },
+ "yanggu-porcelain": {
+  "name": "양구백자박물관",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "조선 백자 원료의 고장 양구의 백자 이야기"
+ },
+ "hanbando-island": {
+  "name": "파로호 한반도섬",
+  "hours": [
+   "06:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "파로호 상류 습지 위 한반도 모양 섬 산책"
+ },
+ "yanggu-modern": {
+  "name": "양구근현대사박물관",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "전쟁과 근현대 양구 사람들의 생활사"
+ },
+ "bisugumi": {
+  "name": "화천 비수구미 마을",
+  "hours": [
+   "08:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 120,
+  "indoor": false,
+  "walk": 3,
+  "pop": 1,
+  "tags": [],
+  "desc": "파로호 끝 오지 마을까지 걷는 숲길 · 산채비빔밥"
+ },
+ "peace-dam": {
+  "name": "평화의 댐",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "10:00",
+     "16:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "세계평화의 종과 거대한 댐 벽화"
+ },
+ "jogyeongcheol": {
+  "name": "조경철천문대",
+  "hours": [
+   "14:00",
+   "22:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "night"
+  ],
+  "desc": "해발 1,010m 광덕산 정상의 별 관측 천문대"
+ },
+ "kkeomeok-bridge": {
+  "name": "화천 꺼먹다리",
+  "hours": [
+   "06:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 20,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "1945년 놓인 검은 콘크리트 다리 · 등록문화유산"
+ },
+ "ttansan": {
+  "name": "화천 딴산",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "북한강 가 인공폭포와 강변 유원지"
+ },
+ "baegamsan-cable": {
+  "name": "화천 백암산 케이블카",
+  "risk": [
+   "wind"
+  ],
+  "hours": [
+   "09:00",
+   "16:00"
+  ],
+  "lastEntry": "13:30",
+  "closed": [
+   1
+  ],
+  "stay": 120,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "민통선 안 백암산 정상까지 가는 케이블카 · 사전 예약, 신분증 필요"
+ },
+ "baekdamsa": {
+  "name": "백담사",
+  "hours": [
+   "08:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 120,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "senior"
+  ],
+  "desc": "설악산 백담계곡 깊은 곳의 절 · 용대리에서 마을버스로 들어감"
+ },
+ "parkinhwan": {
+  "name": "박인환문학관",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [
+   1
+  ],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "시인 박인환과 1950년대 명동 거리 재현"
+ },
+ "inje-folk": {
+  "name": "인제 산촌민속박물관",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [
+   1
+  ],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "깊은 산골 사람들의 생활 도구와 풍습"
+ },
+ "naerincheon-rafting": {
+  "name": "내린천 래프팅",
+  "hours": [
+   "09:00",
+   "17:00"
+  ],
+  "lastEntry": "15:00",
+  "closed": [],
+  "closedYearly": [
+   [
+    "01-01",
+    "04-30"
+   ],
+   [
+    "10-16",
+    "12-31"
+   ]
+  ],
+  "stay": 150,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [],
+  "desc": "급류를 타는 래프팅 · 5~10월, 업체 예약 필요"
+ },
+ "bangtaesan-forest": {
+  "name": "방태산 자연휴양림",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 120,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "2단 폭포와 원시림 계곡의 국립휴양림"
+ },
+ "manhae-village": {
+  "name": "만해마을",
+  "hours": [
+   "07:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "한용운의 문학과 사상을 기리는 마을과 문학관"
+ },
+ "pungsuwon": {
+  "name": "풍수원성당",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "1907년 지은 강원도 첫 성당 · 붉은 벽돌 건물"
+ },
+ "birch-museum": {
+  "name": "미술관 자작나무숲",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": [
+   2,
+   3,
+   4
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "자작나무 숲 속 사진 갤러리 · 화~목 휴관"
+ },
+ "anheung-bread": {
+  "name": "안흥찐빵마을",
+  "cat": "food",
+  "multi": true,
+  "hours": [
+   "09:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "손으로 빚는 안흥찐빵 가게들 · 가게마다 영업시간 다름"
+ },
+ "cheongtaesan": {
+  "name": "청태산 자연휴양림",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 90,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "잣나무 숲 데크길이 있는 국립휴양림"
+ },
+ "hs-luge": {
+  "name": "횡성 루지체험장",
+  "hours": [
+   "09:30",
+   "17:30"
+  ],
+  "lastEntry": "17:00",
+  "closed": [],
+  "closedYearly": [
+   [
+    "01-01",
+    "03-31"
+   ],
+   [
+    "12-01",
+    "12-31"
+   ]
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "2.4km 내리막 루지 · 12~3월 휴장"
+ },
+ "welli-ski": {
+  "name": "웰리힐리파크 스키장",
+  "hours": [
+   "09:00",
+   "16:30"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 240,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "횡성 둔내 고원의 스키장"
+ },
+ "jangneung": {
+  "name": "영월 장릉",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "단종의 능 · 유네스코 세계유산 조선왕릉"
+ },
+ "gossigul": {
+  "name": "고씨굴",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "4억 년 된 석회동굴 · 좁고 낮은 구간 있음"
+ },
+ "byeolmaro": {
+  "name": "별마로천문대",
+  "hours": [
+   "15:00",
+   "23:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     10,
+     11,
+     12,
+     1,
+     2,
+     3
+    ],
+    "hours": [
+     "14:00",
+     "22:00"
+    ]
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "kids",
+   "night"
+  ],
+  "desc": "봉래산 정상 천문대와 영월 야경 · 사전 예약"
+ },
+ "seondol": {
+  "name": "영월 선돌",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 20,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "서강 절벽 위로 솟은 70m 바위"
+ },
+ "yoseonam": {
+  "name": "요선정·요선암",
+  "hours": [
+   "06:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [],
+  "desc": "물살이 깎은 구멍 바위 돌개구멍과 정자"
+ },
+ "kimsatgat": {
+  "name": "김삿갓 유적지",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "방랑 시인 김삿갓의 묘와 문학관"
+ },
+ "young-dal": {
+  "name": "젊은달 와이파크",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [],
+  "desc": "붉은 대나무 설치미술로 꾸민 복합 미술관"
+ },
+ "hwaam-cave": {
+  "name": "화암동굴",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "lastEntry": "16:00",
+  "closed": [
+   3
+  ],
+  "stay": 90,
+  "indoor": true,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "금광 갱도와 종유굴을 잇는 동굴 · 모노레일 있음"
+ },
+ "js-railbike": {
+  "name": "정선 레일바이크",
+  "hours": [
+   "09:00",
+   "17:00"
+  ],
+  "lastEntry": "15:30",
+  "closed": [],
+  "stay": 90,
+  "indoor": false,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "구절리~아우라지 옛 철길 7.2km · 회차 예약제"
+ },
+ "byeongbangchi": {
+  "name": "병방치 스카이워크",
+  "risk": [
+   "wind"
+  ],
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "10:00",
+     "17:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [],
+  "desc": "동강 한반도 지형을 내려다보는 유리 전망대"
+ },
+ "auraji": {
+  "name": "아우라지",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "두 물줄기가 만나는 정선아리랑의 강변"
+ },
+ "manhangjae": {
+  "name": "만항재",
+  "risk": [
+   "snow"
+  ],
+  "hours": [
+   "06:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "차로 오르는 가장 높은 포장 고갯길(1,330m) · 야생화·설경"
+ },
+ "high1-ski": {
+  "name": "하이원 스키장",
+  "hours": [
+   "09:00",
+   "16:00"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 240,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "kids"
+  ],
+  "desc": "백운산 정상부터 내려오는 긴 슬로프"
+ },
+ "mindungsan": {
+  "name": "민둥산",
+  "hours": [
+   "06:00",
+   "17:00"
+  ],
+  "lastEntry": "13:00",
+  "closed": [],
+  "stay": 180,
+  "indoor": false,
+  "walk": 3,
+  "pop": 2,
+  "tags": [],
+  "desc": "정상 일대 억새 평원 · 9~10월 억새 절정"
+ },
+ "coal-museum": {
+  "name": "태백석탄박물관",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "탄광 갱도 체험과 석탄 산업 이야기"
+ },
+ "geomnyongso": {
+  "name": "검룡소",
+  "hours": [
+   "06:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [],
+  "desc": "한강 발원지 · 주차장에서 숲길 1.3km"
+ },
+ "gumunso": {
+  "name": "구문소",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 20,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "강물이 바위산을 뚫어 만든 굴과 고생대 지층"
+ },
+ "yongyeon-cave": {
+  "name": "용연동굴",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "해발 920m 고지대 석회동굴 · 열차 타고 입구까지"
+ },
+ "taebaeksan": {
+  "name": "태백산 (유일사 코스)",
+  "risk": [
+   "fire",
+   "snow"
+  ],
+  "hours": [
+   "06:00",
+   "17:00"
+  ],
+  "lastEntry": "12:00",
+  "closed": [],
+  "stay": 240,
+  "indoor": false,
+  "walk": 3,
+  "pop": 2,
+  "tags": [],
+  "desc": "천제단까지 오르는 국립공원 산행 · 겨울 눈꽃"
+ },
+ "cheoram": {
+  "name": "철암탄광역사촌",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [],
+  "closedNth": [
+   [
+    1,
+    1
+   ],
+   [
+    1,
+    3
+   ]
+  ],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "탄광촌 까치발 건물을 그대로 살린 생활사 박물관"
+ },
+ "daegeumgul": {
+  "name": "대금굴",
+  "hours": [
+   "09:00",
+   "17:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:30",
+     "16:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "closedMonthDays": [
+   18
+  ],
+  "stay": 100,
+  "indoor": true,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "모노레일로 들어가는 석회동굴 · 인터넷 사전 예약"
+ },
+ "sc-railbike": {
+  "name": "삼척 해양레일바이크",
+  "risk": [
+   "wind",
+   "sea"
+  ],
+  "hours": [
+   "09:00",
+   "17:00"
+  ],
+  "lastEntry": "16:00",
+  "closed": [],
+  "closedNth": [
+   [
+    3,
+    2
+   ],
+   [
+    3,
+    4
+   ]
+  ],
+  "stay": 70,
+  "indoor": false,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "궁촌~용화 바닷가 5.4km 레일바이크 · 둘째·넷째 수요일 휴무"
+ },
+ "jukseoru": {
+  "name": "삼척 죽서루",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "오십천 절벽 위 누각 · 관동팔경 첫째"
+ },
+ "isabu-park": {
+  "name": "이사부사자공원",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "바다 전망 테마공원과 그림책 전시관(월요일 휴관)"
+ },
+ "sc-coast-road": {
+  "name": "삼척 이사부길 (새천년해안도로)",
+  "cat": "sea",
+  "hours": [
+   "06:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "삼척항~삼척해변 4.6km 해안 드라이브"
+ },
+ "mureung": {
+  "name": "무릉계곡",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:00",
+     "18:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "stay": 120,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [],
+  "desc": "너른 반석과 쌍폭포, 용추폭포 계곡길"
+ },
+ "cheongok-cave": {
+  "name": "천곡황금박쥐동굴",
+  "hours": [
+   "08:30",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "동해 시내 한가운데 있는 석회동굴"
+ },
+ "hyoseok-village": {
+  "name": "봉평 이효석문화마을",
+  "hours": [
+   "09:00",
+   "18:30"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "'메밀꽃 필 무렵'의 무대와 이효석문학관"
+ },
+ "herbnara": {
+  "name": "허브나라농원",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2,
+     3,
+     4
+    ],
+    "hours": [
+     "09:00",
+     "17:30"
+    ],
+    "lastEntry": "16:30"
+   }
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "흥정계곡 옆 허브 정원 · 11~4월 화요일 휴무"
+ },
+ "yongpyong-ski": {
+  "name": "모나용평 스키장",
+  "hours": [
+   "09:00",
+   "16:30"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "04-01",
+    "11-24"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 240,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "kids"
+  ],
+  "desc": "국내에서 가장 일찍 열고 늦게 닫는 대표 스키장"
+ },
+ "phoenix-ski": {
+  "name": "휘닉스 평창 스키장",
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "breaks": [
+   [
+    "16:00",
+    "18:00"
+   ]
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 240,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "kids"
+  ],
+  "desc": "평창 봉평의 스키장 · 주간·야간 운영(16~18시 정설)"
+ },
+ "alpensia-ski": {
+  "name": "알펜시아 스키장",
+  "hours": [
+   "09:00",
+   "21:30"
+  ],
+  "breaks": [
+   [
+    "17:00",
+    "18:30"
+   ]
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 180,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "초보자 슬로프 위주의 아담한 스키장 · 눈썰매장 함께 운영"
+ },
+ "cw-peace-observatory": {
+  "name": "철원 평화전망대",
+  "hours": [
+   "09:30",
+   "16:30"
+  ],
+  "lastEntry": "14:30",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:30",
+     "16:00"
+    ],
+    "lastEntry": "14:00"
+   }
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 90,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "민통선 안보관광 · 정해진 회차 출발, 신분증 필요"
+ },
+ "sambuyeon": {
+  "name": "삼부연폭포",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "세 번 꺾여 떨어지는 20m 폭포"
+ },
+ "soisan": {
+  "name": "소이산",
+  "hours": [
+   "06:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [],
+  "desc": "철원평야가 한눈에 보이는 낮은 산 · 지하벙커 전시(화요일 휴무)"
+ },
+ "crane-center": {
+  "name": "철원 철새도래지 (두루미)",
+  "hours": [
+   "08:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "겨울(11~3월) 두루미가 찾아오는 철원평야"
+ },
+ "wanggok": {
+  "name": "고성 왕곡마을",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "북방식 한옥이 모인 전통마을 · 국가민속문화유산"
+ },
+ "geonbongsa": {
+  "name": "건봉사",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "민통선 가까운 옛 대찰 · 부처님 진신사리"
+ },
+ "cheonggan": {
+  "name": "청간정",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "바닷가 언덕 위 관동팔경 정자"
+ },
+ "songjiho": {
+  "name": "송지호해변",
+  "hours": [
+   "06:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "석호 송지호와 맞닿은 고요한 해변"
+ },
+ "naksansa": {
+  "name": "낙산사",
+  "hours": [
+   "06:00",
+   "18:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "06:00",
+     "17:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "stay": 70,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [
+   "senior"
+  ],
+  "desc": "바다 절벽 위 홍련암과 해수관음상"
+ },
+ "hyuhyuam": {
+  "name": "휴휴암",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "바닷가 너럭바위와 황어 떼가 모이는 절"
+ },
+ "namae-port": {
+  "name": "남애항",
+  "hours": [
+   "06:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "강원 3대 미항으로 꼽히는 작은 항구와 등대"
+ },
+ "jujeongol": {
+  "name": "설악산 오색 주전골",
+  "risk": [
+   "fire"
+  ],
+  "hours": [
+   "06:00",
+   "17:30"
+  ],
+  "lastEntry": "15:00",
+  "closed": [],
+  "stay": 150,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [],
+  "desc": "오색약수에서 용소폭포까지 단풍 계곡길 · 기상 악화 시 통제"
+ },
+ "oak-valley-ski": {
+  "name": "오크밸리 스키장",
+  "hours": [
+   "09:00",
+   "16:30"
+  ],
+  "closed": [],
+  "closedYearly": [
+   [
+    "03-16",
+    "12-04"
+   ]
+  ],
+  "risk": [
+   "ski"
+  ],
+  "stay": 180,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "원주 오크밸리 리조트 안 스키장"
+ },
+ "sinheungsa": {
+  "name": "설악산 신흥사",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "senior"
+  ],
+  "desc": "설악동 소공원 안 천년 고찰과 청동대불"
+ },
+ "biseondae": {
+  "name": "설악산 비선대",
+  "risk": [
+   "fire"
+  ],
+  "hours": [
+   "07:00",
+   "17:00"
+  ],
+  "lastEntry": "14:00",
+  "closed": [],
+  "stay": 150,
+  "indoor": false,
+  "walk": 2,
+  "pop": 3,
+  "tags": [],
+  "desc": "소공원에서 계곡 따라 3km · 천불동 입구 암반"
+ },
+ "ulsanbawi": {
+  "name": "설악산 울산바위",
+  "risk": [
+   "fire",
+   "wind"
+  ],
+  "hours": [
+   "07:00",
+   "17:00"
+  ],
+  "lastEntry": "12:00",
+  "closed": [],
+  "stay": 240,
+  "indoor": false,
+  "walk": 3,
+  "pop": 3,
+  "tags": [],
+  "desc": "계단 800여 개를 올라 서는 거대한 바위 봉우리"
+ },
+ "gwangchi-forest": {
+  "name": "광치 자연휴양림",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 90,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "해발 800m 광치계곡의 폭포와 원시림 휴양림"
+ },
+ "yanggu-goral": {
+  "name": "양구 산양·사향노루센터",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "breaks": [
+   [
+    "12:00",
+    "13:00"
+   ]
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "천연기념물 산양과 사향노루를 보호하는 생태 전시관"
+ },
+ "taebaek-food": {
+  "name": "태백 황지 식당가",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1665,
+  "lng": 128.988,
+  "multi": true,
+  "photoAt": "황지연못",
+  "hours": [
+   "10:30",
+   "20:30"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "황지연못 둘레 물닭갈비·한식 밥집"
+ },
+ "yanggu-food": {
+  "name": "양구읍 식당가",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "yanggu",
+  "lat": 38.106,
+  "lng": 127.9895,
+  "multi": true,
+  "photoAt": "양구 해시계",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "시래기 밥상·막국수 밥집"
+ },
+ "inje-food": {
+  "name": "인제읍 식당가",
+  "cat": "food",
+  "region": "seorak",
+  "area": "inje",
+  "lat": 38.069,
+  "lng": 128.17,
+  "multi": true,
+  "photoAt": "박인환문학관",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "막국수·황태 요리 밥집"
+ }
+}

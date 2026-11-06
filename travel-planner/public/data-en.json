@@ -1,4 +1,438 @@
 {
+  "sutasa": {
+    "name": "Sutasa Temple",
+    "nameSrc": "app",
+    "desc": "Thousand-year-old temple at the foot of Gongjaksan, with a valley walking trail",
+    "descSrc": "app"
+  },
+  "alpaca-world": {
+    "name": "Alpaca World",
+    "desc": "Alpaca World is located in the clean, green forests of Hongcheon, Gangwon State, and is an alpaca-themed travel destination where one can meet animals enjoying natural lives up close."
+  },
+  "palbongsan": {
+    "name": "Hongcheon Palbongsan Mountain",
+    "desc": "Hongcheon's Palbongsan Mountain, reaching an elevation of 328 meters, is distinctive for its profile resembling eight peaks aligned side by side."
+  },
+  "hc-mugunghwa": {
+    "name": "Hongcheon Mugunghwa Arboretum",
+    "nameSrc": "app",
+    "desc": "Arboretum of rose of Sharon (mugunghwa) varieties",
+    "descSrc": "app"
+  },
+  "garisan-forest": {
+    "name": "Garisan Recreational Forest",
+    "desc": "Located on Garisan Mountain, the Garisan Recreational Forest offers marvelous scenery of a rich forest, old pine trees, and uniquely shaped rocks."
+  },
+  "hc-ginkgo": {
+    "name": "Hongcheon Ginkgo Forest",
+    "desc": "Hongcheon Ginkgo Forest, adorned with over 2,000 ginkgo trees planted at intervals of every five meters, is a private sanctuary that opens its gates to the public exclusively in October."
+  },
+  "hc-hwaro": {
+    "name": "Yangjimal Hwaro Gui",
+    "desc": "Hwaro Gui Restaurant in Hongcheon This is a popular charcoal grill restaurant in Hongcheon that is always full."
+  },
+  "hc-market": {
+    "name": "Hongcheon Central Market",
+    "nameSrc": "app",
+    "desc": "Market with food stalls; market days on dates ending in 1 and 6 · hours vary by shop",
+    "descSrc": "app"
+  },
+  "vivaldi-ski": {
+    "name": "Vivaldi Park Ski World",
+    "desc": "Vivaldi Park Ski World attracts ski lovers with their one-day skiing and nighttime skiing options as well as offering large accommodation facilities."
+  },
+  "dutayeon": {
+    "name": "Dutayeon Valley",
+    "nameSrc": "app",
+    "desc": "Valley and waterfall inside the Civilian Control Line · fixed entry times, ID required",
+    "descSrc": "app"
+  },
+  "yanggu-observatory": {
+    "name": "Yanggu Gukto Jeongjungang Observatory",
+    "nameSrc": "app",
+    "desc": "Sun and star observing at the geographic center of Korea",
+    "descSrc": "app"
+  },
+  "parksookeun": {
+    "name": "Park Soo Keun Museum",
+    "desc": "Park Soo Keun (1914-1965) was an artist who devoted his life to drawing the lives of ordinary people with a warm gaze."
+  },
+  "eulji-observatory": {
+    "name": "Eulji Observatory",
+    "nameSrc": "app",
+    "desc": "Front-line observatory over the Punchbowl basin and North Korea · tours at set times, ID required",
+    "descSrc": "app"
+  },
+  "yanggu-porcelain": {
+    "name": "Yanggu Porcelain Museum",
+    "desc": "Yanggu Porcelain Museum exhibits white porcelain from the Bangsan area, along with its collection and tools."
+  },
+  "hanbando-island": {
+    "name": "Paroho Lake (Yanggu)",
+    "desc": "Paroho Lake is a manmade lake that was completed in 1943."
+  },
+  "yanggu-modern": {
+    "name": "Yanggu History Museum",
+    "desc": "Yanggu History Museum displays artifacts from the Paleolithic Age found in Sangmuryong-ri, Yanggu-eup and the Neolith Age discovered in Hyeon-ri, Haean-myeon."
+  },
+  "bisugumi": {
+    "name": "Bisugumi Village, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Forest walk to a remote village at the end of Paroho Lake · mountain-vegetable bibimbap",
+    "descSrc": "app"
+  },
+  "peace-dam": {
+    "name": "Peace Dam",
+    "nameSrc": "app",
+    "desc": "World Peace Bell and a huge mural on the dam wall",
+    "descSrc": "app"
+  },
+  "jogyeongcheol": {
+    "name": "Jo Gyeong-cheol Observatory",
+    "nameSrc": "app",
+    "desc": "Stargazing observatory on Gwangdeoksan at 1,010 m",
+    "descSrc": "app"
+  },
+  "kkeomeok-bridge": {
+    "name": "Kkeomeok Bridge, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Black concrete bridge built in 1945 · registered heritage",
+    "descSrc": "app"
+  },
+  "ttansan": {
+    "name": "Ttansan, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Artificial waterfall and riverside park on the Bukhangang",
+    "descSrc": "app"
+  },
+  "baegamsan-cable": {
+    "name": "Baegamsan Cable Car, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Cable car to Baegamsan peak inside the Civilian Control Line · booking and ID required",
+    "descSrc": "app"
+  },
+  "baekdamsa": {
+    "name": "Baekdamsa Temple",
+    "desc": "Baekdamsa Temple is a representative temple of Seoraksan Mountain."
+  },
+  "parkinhwan": {
+    "name": "Park In-hwan Literary Museum",
+    "nameSrc": "app",
+    "desc": "Poet Park In-hwan and a recreated 1950s Myeongdong street",
+    "descSrc": "app"
+  },
+  "inje-folk": {
+    "name": "Inje Mountain Village Folk Museum",
+    "nameSrc": "app",
+    "desc": "Tools and customs of deep-mountain villages",
+    "descSrc": "app"
+  },
+  "naerincheon-rafting": {
+    "name": "Naerincheon Stream Rafting",
+    "desc": "Rafting is a challenging recreational activity in which a team of six to eight people navigates fast-flowing rivers."
+  },
+  "bangtaesan-forest": {
+    "name": "Bangtaesan National Recreational Forest",
+    "desc": "Bangtaesan National Recreational Forest is mostly comprised of natural forests, with some man-made sections included."
+  },
+  "manhae-village": {
+    "name": "Manhae Village",
+    "nameSrc": "app",
+    "desc": "Village and museum honoring the poet and monk Han Yong-un",
+    "descSrc": "app"
+  },
+  "pungsuwon": {
+    "name": "Pungsuwon Catholic Church",
+    "nameSrc": "app",
+    "desc": "Gangwon's first Catholic church (1907), red brick",
+    "descSrc": "app"
+  },
+  "birch-museum": {
+    "name": "Birch Forest Museum",
+    "nameSrc": "app",
+    "desc": "Photo gallery in a birch forest · closed Tue–Thu",
+    "descSrc": "app"
+  },
+  "anheung-bread": {
+    "name": "Anheung Jjinppang Village",
+    "desc": "Anheung Jjinppang Village is a charming rural village famous for its steamed buns made using traditional methods."
+  },
+  "cheongtaesan": {
+    "name": "Cheongtaesan National Recreational Forest",
+    "desc": "The 1,200-meter-high Cheongtaesan Mountain is a mountain where planted and naturally growing trees flourish in harmony, creating dense forests that provide a habitat for woodland creatures."
+  },
+  "hs-luge": {
+    "name": "Hoengseong Luge",
+    "desc": "The Hoengseong Luge offers visitors the chance to ride a luge, descending a sloped course powered by gravity while controlling speed and direction with a handle and brakes."
+  },
+  "welli-ski": {
+    "name": "Welli Hilli Park Snow Park",
+    "desc": "Opened in December 1995, Welli Hilli Park is a resort complex located over 48.6 million square meters around Sulibong Peak in Hoengseong-gun, Gangwon-do."
+  },
+  "jangneung": {
+    "name": "Jangneung Royal Tomb, Yeongwol",
+    "nameSrc": "app",
+    "desc": "Tomb of King Danjong · UNESCO World Heritage royal tomb",
+    "descSrc": "app"
+  },
+  "gossigul": {
+    "name": "Gossigul Cave",
+    "nameSrc": "app",
+    "desc": "400-million-year-old limestone cave · some narrow, low passages",
+    "descSrc": "app"
+  },
+  "byeolmaro": {
+    "name": "Byeolmaro Observatory",
+    "desc": "Byeolmaro is a public astronomical observatory built on the peak of Bongnaesan Mountain (alt. 799.8 m) in Yeongwol."
+  },
+  "seondol": {
+    "name": "Seondol Cliff [National Geopark]",
+    "desc": "Seondol Cliff features a large split rock standing over the curving river below."
+  },
+  "yoseonam": {
+    "name": "Yoseonjeong Pavilion & Yoseonam Rock",
+    "desc": "Yoseonjeong Pavilion is located in a valley with a clear stream water flowing below."
+  },
+  "kimsatgat": {
+    "name": "Kim Satgat Historic Site",
+    "desc": "Nango Kim Satgat (1807-1863) was a prominent literary figure who traveled extensively across the Korean Peninsula, leaving behind a rich legacy of literary works."
+  },
+  "young-dal": {
+    "name": "Youngwol Y Park",
+    "desc": "Youngwol Y Park is a complex art space that recreated the Sulsaem Museum, which opened in 2014, into a regeneration space that combines contemporary works of art, museums, and workshops."
+  },
+  "hwaam-cave": {
+    "name": "Hwaamdonggul Cave [Gangwon Paleozoic Geopark]",
+    "desc": "Hwaamdonggul Cave, located in the Hwaam Tourist Complex in Jeongseon-gun, Gangwon-do, is Korea's first themed cave that combines a gold mine and a natural limestone cave."
+  },
+  "js-railbike": {
+    "name": "Jeongseon Railbike",
+    "desc": "Jeongseon Railbike was the first railbike location to open in Korea."
+  },
+  "byeongbangchi": {
+    "name": "Byeongbangchi Skywalk",
+    "desc": "Glass skywalk over the Korean-peninsula-shaped bend of the Donggang River",
+    "descSrc": "app"
+  },
+  "auraji": {
+    "name": "Auraji Lake",
+    "desc": "Auraji is the name of a lake located in Yeoryang-myeon in Jeongseon-gun."
+  },
+  "manhangjae": {
+    "name": "Manhangjae Pass",
+    "nameSrc": "app",
+    "desc": "Highest paved pass you can drive (1,330 m) · wildflowers and snow views",
+    "descSrc": "app"
+  },
+  "high1-ski": {
+    "name": "High1 Ski Resort",
+    "desc": "High1 Ski Resort is equipped with lifts and ski slopes for beginners as well as intermediate and advanced skiers, providing an enjoyable environment for the whole family."
+  },
+  "mindungsan": {
+    "name": "Mindungsan Mountain",
+    "desc": "Situated in Jeongseon, Gangwon-do, Mindungsan Mountain (1,118.8 meters) is an unusual site when compared to other national peaks."
+  },
+  "coal-museum": {
+    "name": "Taebaek Coal Museum",
+    "nameSrc": "app",
+    "desc": "Mine tunnel experience and the story of coal mining",
+    "descSrc": "app"
+  },
+  "geomnyongso": {
+    "name": "Geomnyongso Spring",
+    "nameSrc": "app",
+    "desc": "Source of the Hangang River · 1.3 km forest walk from the parking lot",
+    "descSrc": "app"
+  },
+  "gumunso": {
+    "name": "Gumunso",
+    "nameSrc": "app",
+    "desc": "River tunnel through a rock hill and Paleozoic rock layers",
+    "descSrc": "app"
+  },
+  "yongyeon-cave": {
+    "name": "Yongyeon Cave",
+    "nameSrc": "app",
+    "desc": "Limestone cave at 920 m · a small train takes you to the entrance",
+    "descSrc": "app"
+  },
+  "taebaeksan": {
+    "name": "Taebaeksan (Yuilsa Trail)",
+    "nameSrc": "app",
+    "desc": "National park hike to the Cheonjedan altar · famous winter frost flowers",
+    "descSrc": "app"
+  },
+  "cheoram": {
+    "name": "Cheoram Coal Mining History Village",
+    "nameSrc": "app",
+    "desc": "Life-history museum in a mining town's stilt houses",
+    "descSrc": "app"
+  },
+  "daegeumgul": {
+    "name": "Daegeumgul Cave - Daei-ri Cave Area",
+    "desc": "Daegeumgul Cave is believed to be as old as Hwanseongul and Gwaneumgul Caves located nearby."
+  },
+  "sc-railbike": {
+    "name": "Samcheok Ocean Railbike",
+    "desc": "Samcheok Ocean Railbike is Korea's one and only ocean rai lbike facility that offers a landscape view of black pines and bizarre rocks merged together."
+  },
+  "jukseoru": {
+    "name": "Jukseoru Pavilion",
+    "desc": "Pavilion on a cliff above the Osipcheon · first of the Eight Views of Gwandong",
+    "descSrc": "app"
+  },
+  "isabu-park": {
+    "name": "Isabu Lion Park",
+    "nameSrc": "app",
+    "desc": "Seaside theme park and picture-book gallery (gallery closed Mondays)",
+    "descSrc": "app"
+  },
+  "sc-coast-road": {
+    "name": "Isabu-gil (Saecheonnyeon Coastal Road), Samcheok",
+    "nameSrc": "app",
+    "desc": "4.6 km coastal drive from Samcheok Port to Samcheok Beach",
+    "descSrc": "app"
+  },
+  "mureung": {
+    "name": "Mureung Valley",
+    "nameSrc": "app",
+    "desc": "Wide rock slabs, twin falls and Yongchu Falls",
+    "descSrc": "app"
+  },
+  "cheongok-cave": {
+    "name": "Cheongok Golden Bat Cave",
+    "desc": "Cheongok Golden Bat Cave in Donghae is the only natural cave in Korea located in a downtown area."
+  },
+  "hyoseok-village": {
+    "name": "Lee Hyo-seok Culture Village",
+    "desc": "Lee Hyo-seok Culture Village is the place where the author Lee Hyo-seok (pen name “Gasan”) was born and raised."
+  },
+  "herbnara": {
+    "name": "Herbnara Farm",
+    "desc": "Herbnara Farm opened in 1996 as the first herb-themed farm in Korea."
+  },
+  "yongpyong-ski": {
+    "name": "Mona Yongpyong Ski Resort",
+    "nameSrc": "app",
+    "desc": "Korea's flagship ski resort, usually first to open and last to close",
+    "descSrc": "app"
+  },
+  "phoenix-ski": {
+    "name": "Phoenix Snow Park",
+    "desc": "Ski resort in Bongpyeong, Pyeongchang · day and night skiing (grooming 16:00–18:00)",
+    "descSrc": "app"
+  },
+  "alpensia-ski": {
+    "name": "Alpensia Ski Resort",
+    "desc": "Alpensia Ski Resort has six slopes for skiers and snowboarders to enjoy."
+  },
+  "cw-peace-observatory": {
+    "name": "Cheorwon Peace Observatory",
+    "nameSrc": "app",
+    "desc": "Civilian Control Line security tour · set departure times, ID required",
+    "descSrc": "app"
+  },
+  "sambuyeon": {
+    "name": "Sambuyeon Falls",
+    "nameSrc": "app",
+    "desc": "20 m waterfall that drops in three bends",
+    "descSrc": "app"
+  },
+  "soisan": {
+    "name": "Soisan, Cheorwon",
+    "nameSrc": "app",
+    "desc": "Low hill overlooking the Cheorwon Plain · underground bunker exhibit (closed Tuesdays)",
+    "descSrc": "app"
+  },
+  "crane-center": {
+    "name": "Cheorwon Migratory Bird Site (Cranes)",
+    "nameSrc": "app",
+    "desc": "Cheorwon Plain where cranes winter (Nov–Mar)",
+    "descSrc": "app"
+  },
+  "wanggok": {
+    "name": "Goseong Wanggok Village",
+    "desc": "Goseong Wanggok Village is a traditional village located about 1.5 kilometers away from the East Sea."
+  },
+  "geonbongsa": {
+    "name": "Geonbongsa Temple",
+    "nameSrc": "app",
+    "desc": "Old great temple near the Civilian Control Line · enshrines Buddha relics",
+    "descSrc": "app"
+  },
+  "cheonggan": {
+    "name": "Cheongganjeong Pavilion",
+    "desc": "Cheongganjeong Pavilion, located atop a cliff, was built during the mid-Joseon period."
+  },
+  "songjiho": {
+    "name": "Songjiho Beach",
+    "desc": "Located near Songjiho Lake, one of the most famous lagoons on the eastern coast of Korea, Songjiho Beach stretches 2 kilometers in length and is 100 meters wide."
+  },
+  "naksansa": {
+    "name": "Naksansa Temple",
+    "desc": "This ancient temple was built in the 11th year of King Munmu&rsquo;s reign of Silla (671) by the Buddhist monk Uisang."
+  },
+  "hyuhyuam": {
+    "name": "Gangwon Hyuhyuam Hermitage",
+    "desc": "This hermitage is located by the sea at Hyeonnam-myeon, Yangyang-gun, Gangwon-do."
+  },
+  "namae-port": {
+    "name": "Namaehang Port",
+    "desc": "Small harbor and lighthouse, counted among Gangwon's three most beautiful ports",
+    "descSrc": "app"
+  },
+  "jujeongol": {
+    "name": "Seoraksan Osaek Jujeongol Valley",
+    "desc": "Osaek Jujeongol Valley in Seoraksan Mountain is renowned for its vibrant autumn maple leaves."
+  },
+  "oak-valley-ski": {
+    "name": "Oak Valley Snow Park",
+    "desc": "Oak Valley Snow Park is a premium ski resort that everyone in the family can enjoy."
+  },
+  "sinheungsa": {
+    "name": "Sinheungsa Temple (Seoraksan Mountain)",
+    "desc": "Sinheungsa Temple is a temple located in Seoraksan Mountain near Sokcho."
+  },
+  "biseondae": {
+    "name": "Biseondae, Seoraksan",
+    "nameSrc": "app",
+    "desc": "3 km valley walk from Sogongwon to a great rock slab at the mouth of Cheonbuldong",
+    "descSrc": "app"
+  },
+  "ulsanbawi": {
+    "name": "Seoraksan Ulsanbawi Rock",
+    "desc": "Ulsanbawi is a rock formation in Seoraksan Mountain that consists of six massive peaks, each reaching 900 meters above sea level."
+  },
+  "gwangchi-forest": {
+    "name": "Gwangchi Recreational Forest",
+    "nameSrc": "app",
+    "desc": "Waterfalls and old-growth forest along the Gwangchi Valley at 800 m",
+    "descSrc": "app"
+  },
+  "yanggu-goral": {
+    "name": "Yanggu Goral and Musk Deer Center",
+    "nameSrc": "app",
+    "desc": "Center protecting the long-tailed goral and musk deer (natural monuments)",
+    "descSrc": "app"
+  },
+  "taebaek-food": {
+    "name": "Hwangji Restaurant Area, Taebaek",
+    "nameSrc": "app",
+    "desc": "Spicy chicken stew (mul-dakgalbi) and Korean meals around Hwangji Pond",
+    "descSrc": "app"
+  },
+  "yanggu-food": {
+    "name": "Yanggu Town Restaurants",
+    "nameSrc": "app",
+    "desc": "Dried radish greens (siraegi) meals and buckwheat noodles",
+    "descSrc": "app"
+  },
+  "inje-food": {
+    "name": "Inje Town Restaurants",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and dried pollack dishes",
+    "descSrc": "app"
+  },
   "gyeongpo-beach": {
     "name": "Gangneung Gyeongpo Beach",
     "desc": "Located 1 kilometer away from Gyeongpodae Pavilion and 6 kilometers from downtown Gangneung, Gyeongpo Beach is a sand bank formed between Gyeongpoho Lake and the ocean."
@@ -284,10 +718,8 @@
     "desc": "Located on the southernmost point of Sokcho, Daephohang Port is known as a place to find quality fish with the rise of Seoraksan Mountain as a popular tourist destination."
   },
   "dongmyeong": {
-    "name": "Dongmyeong Port Live Fish Center",
-    "nameSrc": "app",
-    "desc": "Raw fish center next to Yeonggeumjeong",
-    "descSrc": "app"
+    "name": "Dongmyeong Live Fish Center",
+    "desc": "Dongmyeong Live Fish Center, operated by the Sokcho Fisheries Cooperative, is located at Dongmyeong Port in Sokcho."
   },
   "yongdae": {
     "name": "Inje Hwangtae Village",

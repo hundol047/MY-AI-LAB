@@ -1,4 +1,5 @@
 import { EXTRA_PLACES } from "./extra-places.js";
+import { MORE_PLACES } from "./places-more.js";
 // 강릉 장소 데이터 (운영정보 확인: 2026년 11월)
 // hours: [열림, 닫힘], lastEntry: 입장·주문 마감, breaks: 브레이크타임 목록
 // closed: 정기 휴무 요일 (0=일 ... 6=토)
@@ -53,6 +54,9 @@ export const AREAS = {
   wj_city: { region: "wonju", name: "원주 시내", lat: 37.345, lng: 127.940 },
   ganhyeon: { region: "wonju", name: "간현·지정", lat: 37.385, lng: 127.820 },
   chiaksan: { region: "wonju", name: "치악산", lat: 37.404, lng: 128.048 },
+  hoengseong: { region: "wonju", name: "횡성", lat: 37.490, lng: 127.985 },
+  hongcheon: { region: "chuncheon", name: "홍천", lat: 37.697, lng: 127.888 },
+  yanggu: { region: "chuncheon", name: "양구", lat: 38.106, lng: 127.990 },
 };
 
 const WINTER = [11, 12, 1, 2, 3];
@@ -252,15 +256,16 @@ const WONJU = [
   { id: "bangyeri", group: "ginkgo", name: "반계리 은행나무", cat: "nature", area: "ganhyeon", lat: 37.2939, lng: 127.7879, hours: ["06:00", "20:00"], closed: [], stay: 30, indoor: false, walk: 1, pop: 2, tags: ["senior"], wiki: "원주 반계리 은행나무", desc: "800년 된 천연기념물 은행나무" },
   { id: "guryongsa", name: "치악산 구룡사", alias: ["구룡사"], cat: "nature", area: "chiaksan", lat: 37.4040, lng: 128.0480, hours: ["09:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "구룡사 (원주)", desc: "금강소나무 숲길 끝의 천년 고찰" },
   { id: "wj-market", name: "원주 중앙시장·자유시장", cat: "food", area: "wj_city", lat: 37.3480, lng: 127.9500, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["kids", "senior"], wiki: "원주시", desc: "칼국수·만두·전" },
-  { id: "hanwoo", souvenir: "횡성 한우", name: "횡성 한우 먹거리", photoAt: "횡성축협 한우프라자 본점", cat: "food", area: "wj_city", lat: 37.4860, lng: 127.9850, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡성 한우", desc: "횡성읍 한우 식당가" },
+  { id: "hanwoo", souvenir: "횡성 한우", name: "횡성 한우 먹거리", photoAt: "횡성축협 한우프라자 본점", cat: "food", area: "hoengseong", lat: 37.4860, lng: 127.9850, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡성 한우", desc: "횡성읍 한우 식당가" },
   { id: "guryong-food", name: "구룡사 입구 식당가", photoAt: "구룡사", cat: "food", area: "chiaksan", lat: 37.3980, lng: 128.0430, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "치악산", desc: "산채비빔밥·도토리묵" },
   { id: "ganhyeon-food", name: "간현관광지 식당가", photoAt: "간현관광지", cat: "food", area: "ganhyeon", lat: 37.3646, lng: 127.8340, hours: ["10:00", "19:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "간현관광지", desc: "소금산 아래 식당가" },
-  { id: "hoengseong-lake", name: "횡성호수길", alias: ["횡성호수길 5구간"], cat: "nature", area: "chiaksan", lat: 37.5456, lng: 128.0670, hours: ["09:00", "18:00"], lastEntry: "17:00", seasons: [{ months: [11, 12, 1, 2], hours: ["09:00", "17:00"], lastEntry: "16:00" }], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "횡성호", desc: "호수 둘레 숲길" },
+  { id: "hoengseong-lake", name: "횡성호수길", alias: ["횡성호수길 5구간"], cat: "nature", area: "hoengseong", lat: 37.5456, lng: 128.0670, hours: ["09:00", "18:00"], lastEntry: "17:00", seasons: [{ months: [11, 12, 1, 2], hours: ["09:00", "17:00"], lastEntry: "16:00" }], closed: [], stay: 70, indoor: false, walk: 2, pop: 2, tags: ["senior"], wiki: "횡성호", desc: "호수 둘레 숲길" },
   { id: "ganhyeon-park", name: "간현유원지", alias: ["간현관광지"], cat: "nature", area: "ganhyeon", lat: 37.3646, lng: 127.8340, hours: ["00:00", "23:59"], closed: [], stay: 30, indoor: false, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "간현관광지", desc: "섬강 강변 산책로" },
 ];
 
 export const PLACES = [
   ...EXTRA_PLACES,
+  ...MORE_PLACES,
   ...GANGNEUNG.map((p) => ({ region: "gangneung", ...p })),
   ...DONGHAE.map((p) => ({ region: "gangneung", ...p })),
   ...SEORAK.map((p) => ({ region: "seorak", ...p })),

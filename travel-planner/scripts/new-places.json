@@ -790,6 +790,23 @@
    "region": "seorak",
    "area": "seoraksan",
    "cat": "nature"
+  },
+  {
+   "id": "gwangchi-forest",
+   "q": "광치자연휴양림",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "nature"
+  },
+  {
+   "id": "yanggu-goral",
+   "q": "양구 산양·사향노루센터",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "nature",
+   "title": "양구 산양·사향노루센터"
   }
  ]
 }

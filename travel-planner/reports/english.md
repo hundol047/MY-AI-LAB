@@ -4,13 +4,59 @@
 
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
-- 대상 178곳 (장소 107 + 축제 71)
-- 영문 이름 찾음 69곳 (소개 포함 58곳) · 못 찾음 109곳
+- 대상 265곳 (장소 194 + 축제 71)
+- 영문 이름 찾음 116곳 (소개 포함 101곳) · 못 찾음 149곳
 
 ## 찾은 곳
 
 | id | 우리 이름 | 관광공사 영문 제목 | 거리(km) | 판정 | 소개 |
 |---|---|---|---|---|---|
+| alpaca-world | 알파카월드 | Alpaca World (알파카월드) | 0.01 | 이름 같음 | 있음 |
+| palbongsan | 팔봉산 | Hongcheon Palbongsan Mountain (팔봉산(홍천)) | 0.02 | 이름 같음 | 있음 |
+| garisan-forest | 가리산 자연휴양림 | Garisan Recreational Forest (가리산자연휴양림) | 0.35 | 이름 같음 | 있음 |
+| hc-ginkgo | 홍천 은행나무숲 | Hongcheon Ginkgo Forest (홍천 은행나무숲) | 0.01 | 이름 같음 | 있음 |
+| hc-hwaro | 홍천 양지말 화로구이 | Yangjimal Hwaro Gui (양지말 화로구이) | 0.01 | 이름 같음 | 있음 |
+| vivaldi-ski | 비발디파크 스키월드 | Vivaldi Park Ski World (비발디 파크 스키월드) | 0.00 | 이름 같음 | 있음 |
+| parksookeun | 박수근미술관 | Park Soo Keun Museum (박수근미술관) | 0.02 | 이름 같음 | 있음 |
+| yanggu-porcelain | 양구백자박물관 | Yanggu Porcelain Museum (양구백자박물관) | 0.00 | 이름 같음 | 있음 |
+| hanbando-island | 파로호 한반도섬 | Paroho Lake (Yanggu) (파로호(양구)) | 0.36 | 앞 이름 같음 | 있음 |
+| yanggu-modern | 양구근현대사박물관 | Yanggu History Museum (양구선사근현대사박물관) | 0.00 | 이름 같음 | 있음 |
+| baekdamsa | 백담사 | Baekdamsa Temple (백담사) | 0.00 | 이름 같음 | 있음 |
+| naerincheon-rafting | 내린천 래프팅 | Naerincheon Stream Rafting (내린천 래프팅) | 0.01 | 이름 같음 | 있음 |
+| bangtaesan-forest | 방태산 자연휴양림 | Bangtaesan National Recreational Forest (국립 방태산자연휴양림) | 1.31 | 이름 같음 | 있음 |
+| anheung-bread | 안흥찐빵마을 | Anheung Jjinppang Village (안흥찐빵마을) | 0.00 | 이름 같음 | 있음 |
+| cheongtaesan | 청태산 자연휴양림 | Cheongtaesan National Recreational Forest (국립 청태산자연휴양림) | 0.00 | 이름 같음 | 있음 |
+| hs-luge | 횡성 루지체험장 | Hoengseong Luge (횡성루지체험장) | 0.00 | 이름 같음 | 있음 |
+| welli-ski | 웰리힐리파크 스키장 | Welli Hilli Park Snow Park (웰리힐리파크 스노우파크) | 0.00 | 이름 같음 | 있음 |
+| byeolmaro | 별마로천문대 | Byeolmaro Observatory (별마로천문대) | 0.05 | 이름 같음 | 있음 |
+| seondol | 영월 선돌 | Seondol Cliff [National Geopark] (선돌 (강원고생대 국가지질공원)) | 0.01 | 이름 같음 | 있음 |
+| yoseonam | 요선정·요선암 | Yoseonjeong Pavilion & Yoseonam Rock (요선정·요선암) | 0.17 | 이름 같음 | 있음 |
+| kimsatgat | 김삿갓 유적지 | Kim Satgat Historic Site (난고 김삿갓 유적지) | 0.01 | 이름 같음 | 있음 |
+| young-dal | 젊은달 와이파크 | Youngwol Y Park (젊은달와이파크) | 0.00 | 이름 같음 | 있음 |
+| hwaam-cave | 화암동굴 | Hwaamdonggul Cave [Gangwon Paleozoic Geopark] (화암동굴 (강원고생대 국가지질공원)) | 0.00 | 이름 같음 | 있음 |
+| js-railbike | 정선 레일바이크 | Jeongseon Railbike (정선레일바이크) | 0.28 | 이름 같음 | 있음 |
+| byeongbangchi | 병방치 스카이워크 | Byeongbangchi Skywalk (병방치 스카이워크) | 0.03 | 이름 같음 | - |
+| auraji | 아우라지 | Auraji Lake (아우라지) | 0.00 | 이름 같음 | 있음 |
+| high1-ski | 하이원 스키장 | High1 Ski Resort (하이원리조트 스키장) | 0.00 | 이름 같음 | 있음 |
+| mindungsan | 민둥산 | Mindungsan Mountain (민둥산) | 0.01 | 이름 같음 | 있음 |
+| daegeumgul | 대금굴 | Daegeumgul Cave - Daei-ri Cave Area (대금굴 (대이리 동굴지대)) | 0.01 | 이름 같음 | 있음 |
+| sc-railbike | 삼척 해양레일바이크 | Samcheok Ocean Railbike (삼척 해양레일바이크) | 0.01 | 이름 같음 | 있음 |
+| jukseoru | 삼척 죽서루 | Jukseoru Pavilion (삼척 죽서루) | 0.00 | 이름 같음 | - |
+| cheongok-cave | 천곡황금박쥐동굴 | Cheongok Golden Bat Cave (천곡황금박쥐동굴) | 0.01 | 이름 같음 | 있음 |
+| hyoseok-village | 봉평 이효석문화마을 | Lee Hyo-seok Culture Village (이효석문화마을) | 0.16 | 이름 같음 | 있음 |
+| herbnara | 허브나라농원 | Herbnara Farm (허브나라농원) | 0.01 | 이름 같음 | 있음 |
+| phoenix-ski | 휘닉스 평창 스키장 | Phoenix Snow Park (휘닉스 스노우파크) | 0.34 | 이름 같음 | - |
+| alpensia-ski | 알펜시아 스키장 | Alpensia Ski Resort (알펜시아리조트 스키장) | 0.01 | 이름 같음 | 있음 |
+| wanggok | 고성 왕곡마을 | Goseong Wanggok Village (고성왕곡마을) | 0.01 | 이름 같음 | 있음 |
+| cheonggan | 청간정 | Cheongganjeong Pavilion (청간정) | 0.01 | 이름 같음 | 있음 |
+| songjiho | 송지호해변 | Songjiho Beach (송지호 해수욕장) | 0.15 | 이름 같음 | 있음 |
+| naksansa | 낙산사 | Naksansa Temple (낙산사) | 0.01 | 이름 같음 | 있음 |
+| hyuhyuam | 휴휴암 | Gangwon Hyuhyuam Hermitage (휴휴암(강원)) | 0.03 | 이름 같음 | 있음 |
+| namae-port | 남애항 | Namaehang Port (남애항) | 0.05 | 이름 같음 | - |
+| jujeongol | 설악산 오색 주전골 | Seoraksan Osaek Jujeongol Valley (설악산 오색주전골) | 0.29 | 이름 같음 | 있음 |
+| oak-valley-ski | 오크밸리 스키장 | Oak Valley Snow Park (오크밸리 스키장) | 0.00 | 이름 같음 | 있음 |
+| sinheungsa | 설악산 신흥사 | Sinheungsa Temple (Seoraksan Mountain) (신흥사(설악산)) | 0.06 | 이름 같음 | 있음 |
+| ulsanbawi | 설악산 울산바위 | Seoraksan Ulsanbawi Rock (설악산 울산바위) | 1.01 | 이름 같음 | 있음 |
 | gyeongpo-beach | 경포해변 | Gangneung Gyeongpo Beach (강릉 경포해수욕장) | 0.11 | 이름 같음 | 있음 |
 | gangmun-beach | 강문해변 | Gangmun Beach (강문해변) | 0.11 | 이름 같음 | 있음 |
 | anmok-beach | 안목해변 | Anmokhaebyeon Beach (안목해변) | 0.08 | 이름 같음 | 있음 |
@@ -48,6 +94,7 @@
 | hajodae | 하조대 | Hajodae Scenic Point (하조대) | 0.01 | 이름 같음 | 있음 |
 | birch | 원대리 자작나무숲 | Wondae-ri Birch Forest (Whispering Birch Forest) (원대리 자작나무 숲(속삭이는 자작나무 숲)) | 0.00 | 이름 같음 | 있음 |
 | daepo | 대포항 | Daepohang Port (대포항) | 0.04 | 이름 같음 | 있음 |
+| dongmyeong | 동명항 활어센터 | Dongmyeong Live Fish Center (동명활어센터) | 0.26 | 이름 같음 | 있음 |
 | yongdae | 용대리 황태구이 마을 | Inje Hwangtae Village (인제 황태마을) | 0.01 | 이름 같음 | 있음 |
 | yangyang-market | 양양전통시장 | Yangyang Traditional Market (양양전통시장 (4, 9일)) | 0.38 | 이름 같음 | 있음 |
 | nami | 남이섬 | Nami Island (남이섬) | 0.53 | 이름 같음 | - |
@@ -85,6 +132,47 @@
 
 | id | 우리 이름 | 이유 | 앱 번역 |
 |---|---|---|---|
+| sutasa | 수타사 | 2km 안에 이름이 맞는 영문 결과 없음 | Sutasa Temple — Thousand-year-old temple at the foot of Gongjaksan, with a valley walking trail |
+| hc-mugunghwa | 홍천 무궁화수목원 | 영문 결과 없음 | Hongcheon Mugunghwa Arboretum — Arboretum of rose of Sharon (mugunghwa) varieties |
+| hc-market | 홍천 중앙시장 | 2km 안에 이름이 맞는 영문 결과 없음 | Hongcheon Central Market — Market with food stalls; market days on dates ending in 1 and 6 · hours vary by shop |
+| dutayeon | 두타연 | 영문 결과 없음 | Dutayeon Valley — Valley and waterfall inside the Civilian Control Line · fixed entry times, ID required |
+| yanggu-observatory | 양구 국토정중앙천문대 | 영문 결과 없음 | Yanggu Gukto Jeongjungang Observatory — Sun and star observing at the geographic center of Korea |
+| eulji-observatory | 을지전망대 | 2km 안에 이름이 맞는 영문 결과 없음 | Eulji Observatory — Front-line observatory over the Punchbowl basin and North Korea · tours at set times, ID required |
+| bisugumi | 화천 비수구미 마을 | 영문 결과 없음 | Bisugumi Village, Hwacheon — Forest walk to a remote village at the end of Paroho Lake · mountain-vegetable bibimbap |
+| peace-dam | 평화의 댐 | 2km 안에 이름이 맞는 영문 결과 없음 | Peace Dam — World Peace Bell and a huge mural on the dam wall |
+| jogyeongcheol | 조경철천문대 | 영문 결과 없음 | Jo Gyeong-cheol Observatory — Stargazing observatory on Gwangdeoksan at 1,010 m |
+| kkeomeok-bridge | 화천 꺼먹다리 | 2km 안에 이름이 맞는 영문 결과 없음 | Kkeomeok Bridge, Hwacheon — Black concrete bridge built in 1945 · registered heritage |
+| ttansan | 화천 딴산 | 영문 결과 없음 | Ttansan, Hwacheon — Artificial waterfall and riverside park on the Bukhangang |
+| baegamsan-cable | 화천 백암산 케이블카 | 2km 안에 이름이 맞는 영문 결과 없음 | Baegamsan Cable Car, Hwacheon — Cable car to Baegamsan peak inside the Civilian Control Line · booking and ID required |
+| parkinhwan | 박인환문학관 | 영문 결과 없음 | Park In-hwan Literary Museum — Poet Park In-hwan and a recreated 1950s Myeongdong street |
+| inje-folk | 인제 산촌민속박물관 | 영문 결과 없음 | Inje Mountain Village Folk Museum — Tools and customs of deep-mountain villages |
+| manhae-village | 만해마을 | 2km 안에 이름이 맞는 영문 결과 없음 | Manhae Village — Village and museum honoring the poet and monk Han Yong-un |
+| pungsuwon | 풍수원성당 | 2km 안에 이름이 맞는 영문 결과 없음 | Pungsuwon Catholic Church — Gangwon's first Catholic church (1907), red brick |
+| birch-museum | 미술관 자작나무숲 | 2km 안에 이름이 맞는 영문 결과 없음 | Birch Forest Museum — Photo gallery in a birch forest · closed Tue–Thu |
+| jangneung | 영월 장릉 | 2km 안에 이름이 맞는 영문 결과 없음 | Jangneung Royal Tomb, Yeongwol — Tomb of King Danjong · UNESCO World Heritage royal tomb |
+| gossigul | 고씨굴 | 영문 결과 없음 | Gossigul Cave — 400-million-year-old limestone cave · some narrow, low passages |
+| manhangjae | 만항재 | 영문 결과 없음 | Manhangjae Pass — Highest paved pass you can drive (1,330 m) · wildflowers and snow views |
+| coal-museum | 태백석탄박물관 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Coal Museum — Mine tunnel experience and the story of coal mining |
+| geomnyongso | 검룡소 | 영문 결과 없음 | Geomnyongso Spring — Source of the Hangang River · 1.3 km forest walk from the parking lot |
+| gumunso | 구문소 | 2km 안에 이름이 맞는 영문 결과 없음 | Gumunso — River tunnel through a rock hill and Paleozoic rock layers |
+| yongyeon-cave | 용연동굴 | 영문 결과 없음 | Yongyeon Cave — Limestone cave at 920 m · a small train takes you to the entrance |
+| taebaeksan | 태백산 (유일사 코스) | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaeksan (Yuilsa Trail) — National park hike to the Cheonjedan altar · famous winter frost flowers |
+| cheoram | 철암탄광역사촌 | 2km 안에 이름이 맞는 영문 결과 없음 | Cheoram Coal Mining History Village — Life-history museum in a mining town's stilt houses |
+| isabu-park | 이사부사자공원 | 2km 안에 이름이 맞는 영문 결과 없음 | Isabu Lion Park — Seaside theme park and picture-book gallery (gallery closed Mondays) |
+| sc-coast-road | 삼척 이사부길 (새천년해안도로) | 영문 결과 없음 | Isabu-gil (Saecheonnyeon Coastal Road), Samcheok — 4.6 km coastal drive from Samcheok Port to Samcheok Beach |
+| mureung | 무릉계곡 | 2km 안에 이름이 맞는 영문 결과 없음 | Mureung Valley — Wide rock slabs, twin falls and Yongchu Falls |
+| yongpyong-ski | 모나용평 스키장 | 2km 안에 이름이 맞는 영문 결과 없음 | Mona Yongpyong Ski Resort — Korea's flagship ski resort, usually first to open and last to close |
+| cw-peace-observatory | 철원 평화전망대 | 2km 안에 이름이 맞는 영문 결과 없음 | Cheorwon Peace Observatory — Civilian Control Line security tour · set departure times, ID required |
+| sambuyeon | 삼부연폭포 | 2km 안에 이름이 맞는 영문 결과 없음 | Sambuyeon Falls — 20 m waterfall that drops in three bends |
+| soisan | 소이산 | 2km 안에 이름이 맞는 영문 결과 없음 | Soisan, Cheorwon — Low hill overlooking the Cheorwon Plain · underground bunker exhibit (closed Tuesdays) |
+| crane-center | 철원 철새도래지 (두루미) | 2km 안에 이름이 맞는 영문 결과 없음 | Cheorwon Migratory Bird Site (Cranes) — Cheorwon Plain where cranes winter (Nov–Mar) |
+| geonbongsa | 건봉사 | 영문 결과 없음 | Geonbongsa Temple — Old great temple near the Civilian Control Line · enshrines Buddha relics |
+| biseondae | 설악산 비선대 | 2km 안에 이름이 맞는 영문 결과 없음 | Biseondae, Seoraksan — 3 km valley walk from Sogongwon to a great rock slab at the mouth of Cheonbuldong |
+| gwangchi-forest | 광치 자연휴양림 | 영문 결과 없음 | Gwangchi Recreational Forest — Waterfalls and old-growth forest along the Gwangchi Valley at 800 m |
+| yanggu-goral | 양구 산양·사향노루센터 | 영문 결과 없음 | Yanggu Goral and Musk Deer Center — Center protecting the long-tailed goral and musk deer (natural monuments) |
+| taebaek-food | 태백 황지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Hwangji Restaurant Area, Taebaek — Spicy chicken stew (mul-dakgalbi) and Korean meals around Hwangji Pond |
+| yanggu-food | 양구읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Yanggu Town Restaurants — Dried radish greens (siraegi) meals and buckwheat noodles |
+| inje-food | 인제읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Inje Town Restaurants — Buckwheat noodles and dried pollack dishes |
 | namhangjin-beach | 남항진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Namhangjin Beach — Quiet beach with the Solbaram Bridge |
 | sea-trail | 정동심곡 바다부채길 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdong-Simgok Badabuchae-gil Trail — 2.9 km clifftop coastal trail · closed during high-wave warnings |
 | terarosa | 테라로사 커피공장 강릉본점 | 영문 결과 없음 | Terarosa Coffee Factory (Gangneung Main Store) — Roastery and coffee museum |
@@ -107,7 +195,6 @@
 | sokcho-market | 속초관광수산시장 | 2km 안에 이름이 맞는 영문 결과 없음 | Sokcho Tourist & Fishery Market — Dakgangjeong fried chicken, squid sundae and raw fish |
 | ayajin | 아야진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Ayajin Beach — Rocks and emerald water |
 | jukdo | 죽도해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Jukdo Beach — Surf village with a street of cafes |
-| dongmyeong | 동명항 활어센터 | 2km 안에 이름이 맞는 영문 결과 없음 | Dongmyeong Port Live Fish Center — Raw fish center next to Yeonggeumjeong |
 | geojin | 거진항 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Geojin Port Restaurant Street — Gomchi-guk (snailfish soup) and braised fish |
 | chilsung | 칠성조선소 | 2km 안에 이름이 맞는 영문 결과 없음 | Chilsung Shipyard — Lakeside cafe in a converted old shipyard |
 | goseokjeong | 고석정 | 2km 안에 이름이 맞는 영문 결과 없음 | Goseokjeong Pavilion — Rock pavilion in the Hantangang River gorge |
@@ -199,6 +286,10 @@
 
 | id | 영문 이름 | 앱 번역 소개 |
 |---|---|---|
+| byeongbangchi | Byeongbangchi Skywalk | Glass skywalk over the Korean-peninsula-shaped bend of the Donggang River |
+| jukseoru | Jukseoru Pavilion | Pavilion on a cliff above the Osipcheon · first of the Eight Views of Gwandong |
+| phoenix-ski | Phoenix Snow Park | Ski resort in Bongpyeong, Pyeongchang · day and night skiing (grooming 16:00–18:00) |
+| namae-port | Namaehang Port | Small harbor and lighthouse, counted among Gangwon's three most beautiful ports |
 | anmok-coffee | Gangneung Coffee Street | About 30 ocean-view cafes |
 | chodang-tofu | Chodang Halmeoni Sundubu | Chodang tofu set with seawater |
 | heo-park | Heo Gyun and Heo Nanseolheon Memorial Park | Birthplace site and memorial hall in a pine forest |
@@ -215,6 +306,22 @@
 
 | id | 우리 이름 | 관광공사 영문 제목 | 거리(km) | 이유 |
 |---|---|---|---|---|
+| hc-market | 홍천 중앙시장 | Chuncheon Jungang Market (춘천 중앙시장) | 25.14 | 이름 같지만 2km 밖 |
+| hc-market | 홍천 중앙시장 | Wonju Jungang Market (원주 중앙시장) | 38.33 | 이름 같지만 2km 밖 |
+| vivaldi-ski | 비발디파크 스키월드 | Luge World – Vivaldi Park (루지월드–대명비발디파크) | 0.00 | 이름 다름 |
+| vivaldi-ski | 비발디파크 스키월드 | Sono Felice Village Vivaldi Park (소노펠리체 빌리지 비발디파크) | 0.04 | 이름 다름 |
+| vivaldi-ski | 비발디파크 스키월드 | Sono Felice Vivaldi Park (소노펠리체 비발디파크) | 0.04 | 이름 다름 |
+| eulji-observatory | 을지전망대 | Eulji Observatory (을지전망대) | 3.90 | 이름 같지만 2km 밖 |
+| hanbando-island | 파로호 한반도섬 | Paroho Lake (Hwacheon) (파로호(화천)) | 18.26 | 이름 같지만 2km 밖 |
+| pungsuwon | 풍수원성당 | Pungsuwon Museum (풍수원유물전시관) | 0.21 | 이름 다름 |
+| birch-museum | 미술관 자작나무숲 | Chuncheon Art Gallery (춘천미술관) | 51.63 | 이름 같지만 2km 밖 |
+| jangneung | 영월 장릉 | Yeongwol Jangneung Royal Tomb [UNESCO World Heritage] (영월 장릉(단종) [유네스코 세계유산]) | 0.00 | 이름 다름 |
+| coal-museum | 태백석탄박물관 | Cheonjedan Altar on Taebaeksan Mountain (태백산 천제단) | 0.27 | 이름 다름 |
+| mureung | 무릉계곡 | Gangwon Yongchupokpo Falls (무릉계곡 용추폭포(강원)) | 0.04 | 이름 다름 |
+| yongpyong-ski | 모나용평 스키장 | Yongpyong Water Park (용평워터파크 ) | 0.01 | 이름 다름 |
+| cw-peace-observatory | 철원 평화전망대 | Cheorwon Peace Observatory (철원평화전망대) | 5.54 | 이름 같지만 2km 밖 |
+| crane-center | 철원 철새도래지 (두루미) | Yeongamho Lake (migratory bird habitat) (영암호 - 철새도래지) | 403.50 | 이름 같지만 2km 밖 |
+| crane-center | 철원 철새도래지 (두루미) | Cheorwon Plain (Migratory Bird Habitat) (철원평야(철새도래지)) | 0.00 | 이름 다름 |
 | namhangjin-beach | 남항진해변 | Aranaby Zipline (아라나비(스카이 어촌체험)) | 0.17 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Gangneung Jjamppong Sundubu Donghwa Garden (강릉짬뽕순두부 동화가든 본점) | 0.11 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Chodang Dubu Village (초당두부마을) | 0.11 | 이름 다름 |
@@ -235,8 +342,6 @@
 | jukdo | 죽도해변 | LE ONDA (르온다) | 0.08 | 이름 다름 |
 | jukdo | 죽도해변 | Ingu Beach (인구 해수욕장) | 0.22 | 이름 다름 |
 | daepo | 대포항 | Daepo Port Original Fried Food Alley (대포항 원조튀김골목) | 0.20 | 이름 다름 |
-| dongmyeong | 동명항 활어센터 | Sokcho Lighthouse Observatory (속초등대전망대) | 0.21 | 이름 다름 |
-| dongmyeong | 동명항 활어센터 | Yeonggeumjeong (영금정) | 0.25 | 이름 다름 |
 | geojin | 거진항 식당가 | Geojin Port (거진항) | 0.23 | 이름 다름 |
 | goseokjeong | 고석정 | Goseokjeong National Tourist Area (고석정국민관광지) | 0.00 | 이름 다름 |
 | goseokjeong | 고석정 | Cheorwon Facilities Management Office (Formerly, Iron Triangle Battlefield (철원 시설물관리사업소 (구 철의삼각전적관)) | 0.00 | 이름 다름 |

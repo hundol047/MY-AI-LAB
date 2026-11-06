@@ -353,7 +353,7 @@ const AREA_EN = {
   "속초 시내": "Downtown Sokcho", "설악산": "Seoraksan", "고성": "Goseong", "양양": "Yangyang", "인제": "Inje",
   "춘천 시내": "Downtown Chuncheon", "남이섬·김유정": "Nami Island·Kim Yu-jeong", "철원": "Cheorwon", "화천": "Hwacheon",
   "대관령": "Daegwallyeong", "오대산·진부": "Odaesan·Jinbu", "정선": "Jeongseon", "영월": "Yeongwol", "태백": "Taebaek",
-  "원주 시내": "Downtown Wonju", "간현·지정": "Ganhyeon·Jijeong", "치악산": "Chiaksan",
+  "원주 시내": "Downtown Wonju", "간현·지정": "Ganhyeon·Jijeong", "치악산": "Chiaksan", "횡성": "Hoengseong", "홍천": "Hongcheon", "양구": "Yanggu",
 };
 const BASE_EN = { "강릉역": "Gangneung Station", "속초시외버스터미널": "Sokcho Intercity Bus Terminal", "춘천역": "Chuncheon Station", "진부역": "Jinbu Station", "원주역": "Wonju Station" };
 const LODGING_EN = {

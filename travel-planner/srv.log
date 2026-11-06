@@ -1,0 +1,4 @@
+(node:1565) ExperimentalWarning: SQLite is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+http://localhost:8791
+내장 여행 가이드: 유료 AI API를 호출하지 않습니다
