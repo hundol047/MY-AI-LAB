@@ -14,7 +14,7 @@ function draw() {
     const source=document.createElement("small");source.className="user-content";source.textContent=p.source||"한국관광공사 TourAPI";li.append(source);
     if(planned){const link=document.createElement('a');link.href=`index.html?addPlace=${encodeURIComponent(planned.id)}`;link.textContent='일정에 넣기';li.append(link);}
     else {const note=document.createElement('p');note.textContent=p.type==='32'?'숙박 시설: 숙소 검색에서 확인하세요.':'일정 반영 전 운영정보 검토가 필요합니다.';li.append(note);}
-    const reviews = document.createElement('a'); reviews.href = `reviews.html?place=${encodeURIComponent(p.id)}`; reviews.textContent = '후기'; li.append(reviews);
+    const reviews = document.createElement('a'); reviews.className = 'needs-server'; reviews.href = `reviews.html?place=${encodeURIComponent(p.id)}`; reviews.textContent = '후기'; li.append(reviews);
     return li;
   }));
   $('more').hidden = rows.length <= limit;
@@ -30,3 +30,6 @@ try {
   $('status').textContent = data.fetchedAt ? `출처: ${data.source} · 수집: ${new Date(data.fetchedAt).toLocaleString('ko-KR')}` : '새 API 수집 전: 기존 검토 자료를 표시합니다.';
   draw();
 } catch { $('status').textContent = '관광정보를 불러오지 못했습니다. 연결을 확인하고 다시 열어 주세요.'; }
+
+// 후기는 앱 서버가 있을 때만 (GitHub Pages·안드로이드 앱에서는 숨김)
+fetch('api/shops?region=gangneung', { signal: AbortSignal.timeout(3000) }).then((r) => { if (r.ok) document.body.classList.add('has-server'); }).catch(() => {});

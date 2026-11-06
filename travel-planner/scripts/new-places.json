@@ -1,0 +1,795 @@
+{
+ "_note": "장소 확대 후보 (2026-11). q: 관광공사 검색어, sigun: 주소 확인용. draft-places.mjs가 관광공사에서 좌표·운영시간·소개를 받아 reports/new-places.md 초안을 만들고, 사람이 검토해 data.js에 넣는다.",
+ "areas": {
+  "hongcheon": {
+   "region": "chuncheon",
+   "name": "홍천",
+   "lat": 37.697,
+   "lng": 127.888
+  },
+  "yanggu": {
+   "region": "chuncheon",
+   "name": "양구",
+   "lat": 38.106,
+   "lng": 127.99
+  },
+  "hoengseong": {
+   "region": "wonju",
+   "name": "횡성",
+   "lat": 37.49,
+   "lng": 127.985
+  }
+ },
+ "places": [
+  {
+   "id": "sutasa",
+   "q": "수타사",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "culture"
+  },
+  {
+   "id": "alpaca-world",
+   "q": "알파카월드",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature"
+  },
+  {
+   "id": "palbongsan",
+   "q": "팔봉산",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature"
+  },
+  {
+   "id": "hc-mugunghwa",
+   "q": "무궁화수목원",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature"
+  },
+  {
+   "id": "garisan-forest",
+   "q": "가리산자연휴양림",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature"
+  },
+  {
+   "id": "hc-ginkgo",
+   "q": "홍천 은행나무숲",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature",
+   "qs": [
+    "은행나무숲",
+    "홍천은행나무숲"
+   ],
+   "title": "홍천 은행나무숲"
+  },
+  {
+   "id": "hc-hwaro",
+   "q": "양지말 화로구이",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "food"
+  },
+  {
+   "id": "hc-market",
+   "q": "홍천중앙시장",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "food",
+   "qs": [
+    "홍천중앙시장",
+    "홍천 중앙시장",
+    "홍천전통시장"
+   ]
+  },
+  {
+   "id": "vivaldi-ski",
+   "q": "비발디파크 스키월드",
+   "sigun": "홍천",
+   "region": "chuncheon",
+   "area": "hongcheon",
+   "cat": "nature",
+   "winter": true,
+   "title": "비발디파크 스키장"
+  },
+  {
+   "id": "dutayeon",
+   "q": "두타연",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "nature"
+  },
+  {
+   "id": "yanggu-observatory",
+   "q": "국토정중앙천문대",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "culture"
+  },
+  {
+   "id": "parksookeun",
+   "q": "박수근미술관",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "culture"
+  },
+  {
+   "id": "eulji-observatory",
+   "q": "을지전망대",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "culture"
+  },
+  {
+   "id": "yanggu-porcelain",
+   "q": "양구백자박물관",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "culture"
+  },
+  {
+   "id": "hanbando-island",
+   "q": "한반도섬",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "nature"
+  },
+  {
+   "id": "punchbowl",
+   "q": "펀치볼 둘레길",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "nature"
+  },
+  {
+   "id": "yanggu-modern",
+   "q": "양구근현대사박물관",
+   "sigun": "양구",
+   "region": "chuncheon",
+   "area": "yanggu",
+   "cat": "culture",
+   "qs": [
+    "근현대사박물관",
+    "양구 근현대사"
+   ]
+  },
+  {
+   "id": "bisugumi",
+   "q": "비수구미",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "nature",
+   "qs": [
+    "비수구미마을",
+    "비수구미"
+   ]
+  },
+  {
+   "id": "peace-dam",
+   "q": "평화의댐",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "culture",
+   "qs": [
+    "평화의 댐",
+    "평화의댐"
+   ]
+  },
+  {
+   "id": "jogyeongcheol",
+   "q": "조경철천문대",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "culture"
+  },
+  {
+   "id": "kkeomeok-bridge",
+   "q": "꺼먹다리",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "culture"
+  },
+  {
+   "id": "ttansan",
+   "q": "딴산",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "nature"
+  },
+  {
+   "id": "baegamsan-cable",
+   "q": "백암산 케이블카",
+   "sigun": "화천",
+   "region": "chuncheon",
+   "area": "hwacheon",
+   "cat": "nature"
+  },
+  {
+   "id": "baekdamsa",
+   "q": "백담사",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "culture"
+  },
+  {
+   "id": "parkinhwan",
+   "q": "박인환문학관",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "culture"
+  },
+  {
+   "id": "inje-folk",
+   "q": "인제산촌민속박물관",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "culture"
+  },
+  {
+   "id": "naerincheon-rafting",
+   "q": "내린천 래프팅",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "nature"
+  },
+  {
+   "id": "bangtaesan-forest",
+   "q": "방태산자연휴양림",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "nature"
+  },
+  {
+   "id": "manhae-village",
+   "q": "만해마을",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "culture"
+  },
+  {
+   "id": "inje-speedium",
+   "q": "인제스피디움",
+   "sigun": "인제",
+   "region": "seorak",
+   "area": "inje",
+   "cat": "culture",
+   "title": "인제스피디움 서킷"
+  },
+  {
+   "id": "pungsuwon",
+   "q": "풍수원성당",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "culture"
+  },
+  {
+   "id": "birch-museum",
+   "q": "미술관 자작나무숲",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "culture"
+  },
+  {
+   "id": "anheung-bread",
+   "q": "안흥찐빵마을",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "food"
+  },
+  {
+   "id": "cheongtaesan",
+   "q": "청태산자연휴양림",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature"
+  },
+  {
+   "id": "hs-luge",
+   "q": "횡성 루지",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature",
+   "qs": [
+    "루지",
+    "횡성루지"
+   ],
+   "title": "횡성루지체험장"
+  },
+  {
+   "id": "welli-ski",
+   "q": "웰리힐리파크",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "웰리힐리",
+    "웰리힐리파크 스키"
+   ],
+   "title": "웰리힐리파크 스노우파크"
+  },
+  {
+   "id": "jangneung",
+   "q": "영월 장릉",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "culture",
+   "qs": [
+    "장릉",
+    "영월장릉"
+   ],
+   "title": "영월 장릉(단종) [유네스코 세계유산]"
+  },
+  {
+   "id": "gossigul",
+   "q": "고씨굴",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "nature"
+  },
+  {
+   "id": "byeolmaro",
+   "q": "별마로천문대",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "culture"
+  },
+  {
+   "id": "seondol",
+   "q": "선돌",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "nature"
+  },
+  {
+   "id": "yoseonam",
+   "q": "요선암",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "nature"
+  },
+  {
+   "id": "kimsatgat",
+   "q": "김삿갓유적지",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "culture",
+   "qs": [
+    "김삿갓 유적지",
+    "김삿갓문학관",
+    "김삿갓"
+   ]
+  },
+  {
+   "id": "young-dal",
+   "q": "젊은달와이파크",
+   "sigun": "영월",
+   "region": "pyeongchang",
+   "area": "yeongwol",
+   "cat": "culture",
+   "qs": [
+    "젊은달",
+    "와이파크"
+   ]
+  },
+  {
+   "id": "hwaam-cave",
+   "q": "화암동굴",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "js-railbike",
+   "q": "정선레일바이크",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "byeongbangchi",
+   "q": "병방치 스카이워크",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "auraji",
+   "q": "아우라지",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "manhangjae",
+   "q": "만항재",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "high1-ski",
+   "q": "하이원리조트 스키",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "하이원 스키",
+    "하이원리조트 스키장",
+    "하이원스키"
+   ]
+  },
+  {
+   "id": "mindungsan",
+   "q": "민둥산",
+   "sigun": "정선",
+   "region": "pyeongchang",
+   "area": "jeongseon",
+   "cat": "nature"
+  },
+  {
+   "id": "coal-museum",
+   "q": "태백석탄박물관",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "culture"
+  },
+  {
+   "id": "geomnyongso",
+   "q": "검룡소",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "nature"
+  },
+  {
+   "id": "gumunso",
+   "q": "구문소",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "nature"
+  },
+  {
+   "id": "yongyeon-cave",
+   "q": "용연동굴",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "nature"
+  },
+  {
+   "id": "taebaeksan",
+   "q": "태백산국립공원",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "nature",
+   "qs": [
+    "태백산",
+    "유일사"
+   ]
+  },
+  {
+   "id": "cheoram",
+   "q": "철암탄광역사촌",
+   "sigun": "태백",
+   "region": "pyeongchang",
+   "area": "taebaek",
+   "cat": "culture"
+  },
+  {
+   "id": "daegeumgul",
+   "q": "대금굴",
+   "sigun": "삼척",
+   "region": "gangneung",
+   "area": "samcheok",
+   "cat": "nature"
+  },
+  {
+   "id": "sc-railbike",
+   "q": "삼척해양레일바이크",
+   "sigun": "삼척",
+   "region": "gangneung",
+   "area": "samcheok",
+   "cat": "sea"
+  },
+  {
+   "id": "jukseoru",
+   "q": "죽서루",
+   "sigun": "삼척",
+   "region": "gangneung",
+   "area": "samcheok",
+   "cat": "culture"
+  },
+  {
+   "id": "isabu-park",
+   "q": "이사부사자공원",
+   "sigun": "삼척",
+   "region": "gangneung",
+   "area": "samcheok",
+   "cat": "sea"
+  },
+  {
+   "id": "sc-coast-road",
+   "q": "새천년해안도로",
+   "sigun": "삼척",
+   "region": "gangneung",
+   "area": "samcheok",
+   "cat": "sea",
+   "title": "이사부길(새천년해안도로)"
+  },
+  {
+   "id": "mureung",
+   "q": "무릉계곡",
+   "sigun": "동해",
+   "region": "gangneung",
+   "area": "donghae",
+   "cat": "nature"
+  },
+  {
+   "id": "cheongok-cave",
+   "q": "천곡황금박쥐동굴",
+   "sigun": "동해",
+   "region": "gangneung",
+   "area": "donghae",
+   "cat": "nature"
+  },
+  {
+   "id": "hyoseok-village",
+   "q": "이효석문화마을",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "herbnara",
+   "q": "허브나라농원",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "yongpyong-ski",
+   "q": "용평리조트 스키",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "용평스키장",
+    "모나용평",
+    "용평리조트"
+   ],
+   "title": "모나용평 스키장"
+  },
+  {
+   "id": "phoenix-ski",
+   "q": "휘닉스 평창 스키",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "휘닉스",
+    "휘닉스파크",
+    "휘닉스 스노우파크"
+   ]
+  },
+  {
+   "id": "alpensia-ski",
+   "q": "알펜시아 스키",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "알펜시아",
+    "알펜시아 스키"
+   ],
+   "title": "알펜시아리조트 스키장"
+  },
+  {
+   "id": "cw-peace-observatory",
+   "q": "철원평화전망대",
+   "sigun": "철원",
+   "region": "chuncheon",
+   "area": "cheorwon",
+   "cat": "culture"
+  },
+  {
+   "id": "sambuyeon",
+   "q": "삼부연폭포",
+   "sigun": "철원",
+   "region": "chuncheon",
+   "area": "cheorwon",
+   "cat": "nature"
+  },
+  {
+   "id": "soisan",
+   "q": "소이산",
+   "sigun": "철원",
+   "region": "chuncheon",
+   "area": "cheorwon",
+   "cat": "nature"
+  },
+  {
+   "id": "crane-center",
+   "q": "철원 두루미",
+   "sigun": "철원",
+   "region": "chuncheon",
+   "area": "cheorwon",
+   "cat": "nature",
+   "qs": [
+    "두루미",
+    "철새도래지",
+    "철원 두루미"
+   ]
+  },
+  {
+   "id": "wanggok",
+   "q": "왕곡마을",
+   "sigun": "고성",
+   "region": "seorak",
+   "area": "goseong",
+   "cat": "culture"
+  },
+  {
+   "id": "geonbongsa",
+   "q": "건봉사",
+   "sigun": "고성",
+   "region": "seorak",
+   "area": "goseong",
+   "cat": "culture"
+  },
+  {
+   "id": "cheonggan",
+   "q": "청간정",
+   "sigun": "고성",
+   "region": "seorak",
+   "area": "goseong",
+   "cat": "culture"
+  },
+  {
+   "id": "songjiho",
+   "q": "송지호해변",
+   "sigun": "고성",
+   "region": "seorak",
+   "area": "goseong",
+   "cat": "sea",
+   "qs": [
+    "송지호",
+    "송지호해수욕장"
+   ],
+   "title": "송지호 해수욕장"
+  },
+  {
+   "id": "naksansa",
+   "q": "낙산사",
+   "sigun": "양양",
+   "region": "seorak",
+   "area": "yangyang",
+   "cat": "culture"
+  },
+  {
+   "id": "hyuhyuam",
+   "q": "휴휴암",
+   "sigun": "양양",
+   "region": "seorak",
+   "area": "yangyang",
+   "cat": "culture"
+  },
+  {
+   "id": "namae-port",
+   "q": "남애항",
+   "sigun": "양양",
+   "region": "seorak",
+   "area": "yangyang",
+   "cat": "sea"
+  },
+  {
+   "id": "jujeongol",
+   "q": "주전골",
+   "sigun": "양양",
+   "region": "seorak",
+   "area": "yangyang",
+   "cat": "nature",
+   "title": "설악산 오색주전골"
+  },
+  {
+   "id": "oak-valley-ski",
+   "q": "오크밸리 스키",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "nature",
+   "winter": true,
+   "qs": [
+    "오크밸리 스노우",
+    "오크밸리 스키장",
+    "스노우파크"
+   ],
+   "title": "오크밸리스키장"
+  },
+  {
+   "id": "sinheungsa",
+   "q": "신흥사",
+   "sigun": "속초",
+   "region": "seorak",
+   "area": "seoraksan",
+   "cat": "culture"
+  },
+  {
+   "id": "biseondae",
+   "q": "비선대",
+   "sigun": "속초",
+   "region": "seorak",
+   "area": "seoraksan",
+   "cat": "nature"
+  },
+  {
+   "id": "ulsanbawi",
+   "q": "울산바위",
+   "sigun": "속초",
+   "region": "seorak",
+   "area": "seoraksan",
+   "cat": "nature"
+  }
+ ]
+}

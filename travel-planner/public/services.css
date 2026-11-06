@@ -5,3 +5,5 @@
 .service .card {padding:18px;margin:16px 0;overflow-wrap:anywhere;}
 .service p,.service li {white-space:pre-wrap;overflow-wrap:anywhere;}
 .service textarea {min-height:120px;}
+
+body:not(.has-server) .needs-server { display: none !important; }

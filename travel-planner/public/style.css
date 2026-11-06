@@ -481,3 +481,6 @@ body.offline .top::after {
 .offer-form button {padding:8px 12px;border-radius:10px;border:0;background:var(--brand);color:var(--on-brand,#fff);font:inherit;font-weight:700;cursor:pointer;}
 .offer-form p {margin:0;font-size:11.5px;color:var(--sub);line-height:1.5;}
 .service-language {display:block;max-width:160px;margin:0 0 16px auto;}
+
+/* 앱 서버가 있을 때만 보이는 링크 (예약·후기·가게 등록) */
+body:not(.has-server) .needs-server { display: none !important; }

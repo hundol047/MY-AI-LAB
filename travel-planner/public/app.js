@@ -14,6 +14,11 @@ function fetchT(url, opts = {}, ms = 5000) {
   const timer = setTimeout(() => c.abort(), ms);
   return fetch(url, { ...opts, signal: c.signal }).finally(() => clearTimeout(timer));
 }
+// 사용 집계: 앱 서버가 있을 때만, 기능 이름과 고정된 선택지만 보낸다 (입력 내용·위치·기기 정보 없음). 브라우저의 "추적 안 함"을 따른다
+function track(event, value) {
+  if (!document.body.classList.contains("has-server") || navigator.doNotTrack === "1" || window.doNotTrack === "1") return;
+  fetch("api/stats", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ event, value }), keepalive: true }).catch(() => {});
+}
 // 분류 이름은 화면에 쓸 때 t()로 바꾼다
 const CAT = {
   sea: { label: "바다", color: "#0284c7" },
@@ -84,6 +89,8 @@ $("#form").addEventListener("submit", (e) => {
   rebuild();
   show("result");
   loadWeather();
+  track("plan"); track("plan_region", input.region); track("plan_days", String(input.days)); track("plan_move", input.move); track("plan_who", input.who);
+  if (state.opts.start) track("start_custom");
 });
 
 /* ---------- 출발지 (이 기기에 저장) ----------
@@ -263,7 +270,7 @@ function itemHTML(it, i, day) {
         <div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
-        <a class="ghost small" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
+        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>
       </div>
       </div>
     </article>
@@ -877,6 +884,7 @@ $("#tabs").addEventListener("click", (e) => {
 
 $("#timeline").addEventListener("click", (e) => {
   const b = e.target.closest("[data-swap]"); if (!b) return;
+  track("swap");
   const i = Number(b.dataset.swap);
   const old = trip.days[dayIdx].items[i].id;
   state.opts.exclude = [...new Set([...(state.opts.exclude || []), old])];
@@ -987,6 +995,7 @@ async function runGuide(question, shown) {
   await renderGuideHistory();
 }
 $("#askForm").addEventListener("submit", (e) => {
+  track("guide_ask");
   e.preventDefault();
   const text = $("#askInput").value.trim(); if (!text) return;
   $("#askInput").value = "";
@@ -1012,6 +1021,7 @@ $("#aiStart").addEventListener("submit", async (e) => {
 
 /* ---------- 공유 / 캘린더 ---------- */
 $("#shareBtn").addEventListener("click", async () => {
+  track("share");
   const url = location.href;
   try {
     if (navigator.share) await navigator.share({ title: t("강원 여행 일정"), url });
@@ -1063,6 +1073,7 @@ window.__calendarDone = (res) => {
   else toast({ denied: t("캘린더 권한을 허용해 주세요"), nocal: t("일정을 넣을 캘린더가 없어요") }[kind] || t("캘린더에 넣지 못했어요"));
 };
 $("#icsBtn").addEventListener("click", () => {
+  track("calendar");
   const events = calendarEvents();
   if (window.OhneulApp?.addToCalendar) { window.OhneulApp.addToCalendar(JSON.stringify(events)); return; }
   const ics = buildICS(events);
@@ -1093,6 +1104,7 @@ addEventListener("online", updateOnline); addEventListener("offline", updateOnli
 /* ---------- 언어 전환 (한국어 / EN / 日本語 / 中文) ---------- */
 async function switchLang(l) {
   setLang(l);
+  track("lang", l);
   await loadLang((u) => fetchT(u, {}, 4000));
   applyStatic();
   heroCaption();
@@ -1131,9 +1143,11 @@ renderPast();
 renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다
+// 예약·후기·가게 등록은 앱 서버(server.mjs)가 있어야 동작한다. GitHub Pages·안드로이드 앱처럼 서버가 없으면 그 버튼들을 숨긴다
+// (needs-server 클래스: 기본은 숨김, 서버가 응답하면 body.has-server로 보인다)
 fetchT("api/shops?region=gangneung", {}, 3000)
-  .then((r) => { if (!r.ok) $("#ownerLink").hidden = true; })
-  .catch(() => { $("#ownerLink").hidden = true; });
+  .then((r) => { if (r.ok) document.body.classList.add("has-server"); })
+  .catch(() => {});
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 // 첫 화면을 그린 뒤 한가할 때 무료 간단 모드를 미리 받아 둔다 (질문할 때 바로 답하게)

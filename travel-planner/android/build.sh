@@ -26,7 +26,7 @@ cp -r ../public/. "$B/assets/www/"
 echo "4) 리소스·매니페스트 → APK"
 "$BT/aapt2" compile --dir app/res -o "$B/res.zip"
 "$BT/aapt2" link -o "$B/base.apk" -I "$PLATFORM" --manifest app/AndroidManifest.xml -A "$B/assets" \
-  --min-sdk-version 24 --target-sdk-version 34 --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" "$B/res.zip"
+  --min-sdk-version 24 --target-sdk-version 34 --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" --replace-version "$B/res.zip"
 (cd "$B/dex" && zip -q -0 ../base.apk classes.dex)
 echo "5) 정렬 (resources.arsc 비압축·4바이트 정렬)"
 "$BT/zipalign" -f -p 4 "$B/base.apk" "$B/aligned.apk"
@@ -43,4 +43,6 @@ fi
   --out "$OUT/ohneul-gangwon.apk" "$B/aligned.apk"
 "$BT/apksigner" verify --min-sdk-version 24 --print-certs "$OUT/ohneul-gangwon.apk" | head -3
 "$BT/aapt2" dump badging "$OUT/ohneul-gangwon.apk" | grep -E "^package|sdkVersion|targetSdkVersion|application-label:|launchable-activity" || true
+# 빌드 번호가 versionCode에 들어갔는지 확인 (안 들어가면 같은 서명이어도 업데이트 설치가 막힌다)
+"$BT/aapt2" dump badging "$OUT/ohneul-gangwon.apk" | grep -q "versionCode='$VERSION_CODE'" || { echo "versionCode가 $VERSION_CODE가 아닙니다"; exit 1; }
 ls -la "$OUT/ohneul-gangwon.apk"

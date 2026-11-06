@@ -399,6 +399,16 @@ export const SERVICE_TEXT = {
     "ja": "情報なし",
     "zh": "未提供"
   },
+  "사용 집계 (최근 30일, 개인정보 없음)": {
+    "en": "Usage counts (last 30 days, no personal data)",
+    "ja": "利用集計（直近30日・個人情報なし）",
+    "zh": "使用统计（最近30天，不含个人信息）"
+  },
+  "아직 집계가 없습니다.": {
+    "en": "No usage counted yet.",
+    "ja": "まだ集計がありません。",
+    "zh": "暂无统计。"
+  },
   "다음 갱신 때 확인": {
     "en": "Checking at next update",
     "ja": "次回更新で確認",
