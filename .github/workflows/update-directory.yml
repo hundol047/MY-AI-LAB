@@ -14,21 +14,33 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 120
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
           node-version: 24
+      - name: 키 확인
+        id: key
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: |
+          if [ -n "$TOUR_API_KEY" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          msg="저장소 Secrets에 TOUR_API_KEY가 없어 이번 갱신을 건너뜁니다. GitHub 저장소 Settings → Secrets and variables → Actions → New repository secret에서 이름 TOUR_API_KEY로 Decoding 키를 넣어 주세요. (Claude 클라우드 환경 설정의 키는 GitHub Actions에 전달되지 않습니다.)"
+          echo "::warning::$msg"; echo "$msg" >> "$GITHUB_STEP_SUMMARY"
       - name: 공식 데이터 수집
+        if: steps.key.outputs.ok == 'true'
         working-directory: travel-planner
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/sync-directory.mjs
       - name: 운영시간 차이 확인
+        if: steps.key.outputs.ok == 'true'
         working-directory: travel-planner
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/check-hours.mjs
-      - uses: peter-evans/create-pull-request@v7
+      - if: steps.key.outputs.ok == 'true'
+        uses: peter-evans/create-pull-request@v7
         with:
           branch: auto/update-directory
           title: 공식 장소 및 운영정보 갱신

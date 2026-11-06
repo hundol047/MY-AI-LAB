@@ -21,22 +21,34 @@ jobs:
       run:
         working-directory: travel-planner
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
         with:
-          node-version: 20
+          node-version: 24
+          cache: npm
+          cache-dependency-path: travel-planner/package-lock.json
       - name: 키 확인
+        id: key
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: |
-          if [ -z "$TOUR_API_KEY" ]; then echo "::error::저장소 Secrets에 TOUR_API_KEY를 넣어 주세요"; exit 1; fi
+          if [ -n "$TOUR_API_KEY" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          echo "ok=false" >> "$GITHUB_OUTPUT"
+          msg="저장소 Secrets에 TOUR_API_KEY가 없어 이번 갱신을 건너뜁니다. GitHub 저장소 Settings → Secrets and variables → Actions → New repository secret에서 이름 TOUR_API_KEY로 Decoding 키를 넣어 주세요. (Claude 클라우드 환경 설정의 키는 GitHub Actions에 전달되지 않습니다.)"
+          echo "::warning::$msg"; echo "$msg" >> "$GITHUB_STEP_SUMMARY"
+      - name: 패키지 설치
+        if: steps.key.outputs.ok == 'true'
+        run: npm ci
       - name: 축제 날짜 갱신
+        if: steps.key.outputs.ok == 'true'
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/update-festivals.mjs --write
       - name: 일정 엔진 테스트 (바뀐 데이터로)
+        if: steps.key.outputs.ok == 'true'
         run: npm test
       - name: 검토용 PR 만들기 (바뀐 게 있을 때만)
+        if: steps.key.outputs.ok == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
           branch: auto/update-festivals

@@ -1,6 +1,9 @@
 import { createServices, equalSecret } from './services.mjs';
 import { PLACES } from './public/data.js';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
+// 탐색 목록(관광공사 4,000여 곳, 1MB 넘음)의 id 집합: 후기를 쓸 때마다 파일을 다시 읽지 않고, 파일이 바뀌었을 때만 다시 만든다
+const DIRECTORY=new URL('./public/directory.json',import.meta.url);let directoryIds=null,directoryStamp=0;
+async function directoryHas(id){const {mtimeMs}=await stat(DIRECTORY);if(!directoryIds||mtimeMs!==directoryStamp){directoryIds=new Set(JSON.parse(await readFile(DIRECTORY,'utf8')).places.map(p=>String(p.id)));directoryStamp=mtimeMs;}return directoryIds.has(String(id));}
 const reply = (res,status,data) => res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}).end(JSON.stringify(data));
 export function serviceAPI({file,adminToken,pushSender=null}) {
   const store=createServices(file), rates=new Map();
@@ -11,8 +14,7 @@ export function serviceAPI({file,adminToken,pushSender=null}) {
   }
   async function validPlace(id) {
     if (PLACES.some(p=>p.id===id)) return true;
-    const d=JSON.parse(await readFile(new URL('./public/directory.json',import.meta.url),'utf8'));
-    return d.places.some(p=>p.id===id);
+    return directoryHas(id);
   }
   const handler = async (req,res,url) => {
     const p=url.pathname;

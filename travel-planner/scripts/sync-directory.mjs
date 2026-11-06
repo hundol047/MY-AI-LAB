@@ -13,6 +13,8 @@ import { tour } from './tour-api.mjs';
 if (!process.env.TOUR_API_KEY) throw new Error('TOUR_API_KEY가 필요합니다. 기존 데이터는 변경하지 않았습니다.');
 const MAX_DETAIL = Math.max(0, Number(process.env.DIRECTORY_MAX_DETAIL ?? 500) || 0);
 const SOURCE = '한국관광공사 TourAPI KorService2';
+// 관광공사 원문에는 <br>·&nbsp; 같은 HTML이 섞여 온다. 화면은 글자로 보여 주므로 여기서 글자로 바꾼다
+const plain = (s) => String(s || '').replace(/<br\s*\/?>/gi, ' / ').replace(/<[^>]+>/g, ' ').replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&amp;/g, '&').replace(/\s+/g, ' ').replace(/^( \/ )+|( \/ )+$/g, '').trim();
 const file = new URL('../public/directory.json', import.meta.url);
 
 let current = {};
@@ -27,7 +29,7 @@ for (const type of ['12', '14', '28', '32', '38', '39']) {
     const rows = await tour('KorService2', 'areaBasedList2', { lDongRegnCd: '51', contentTypeId: type, numOfRows: '100', pageNo: String(page), arrange: 'C' });
     for (const p of rows) {
       if (!p.contentid || !p.title || !(Number(p.mapy) > 0 && Number(p.mapx) > 0)) continue;
-      listed.set(String(p.contentid), { id: String(p.contentid), type, name: p.title, address: p.addr1 || '', lat: Number(p.mapy), lng: Number(p.mapx), sourceModified: p.modifiedtime || null });
+      listed.set(String(p.contentid), { id: String(p.contentid), type, name: plain(p.title), address: plain(p.addr1), lat: Number(p.mapy), lng: Number(p.mapx), sourceModified: p.modifiedtime || null });
     }
     if (rows.length < 100) { complete = true; break; }
   }
@@ -57,7 +59,7 @@ for (const { p, old } of queue) {
     const [intro] = await tour('KorService2', 'detailIntro2', { contentId: p.id, contentTypeId: p.type });
     fetched++;
     const [hours, closed] = fields[p.type];
-    Object.assign(p, { hours: String(intro?.[hours] || ''), closed: String(intro?.[closed] || ''), source: SOURCE });
+    Object.assign(p, { hours: plain(intro?.[hours]), closed: plain(intro?.[closed]), source: SOURCE });
   } catch (e) {
     if (e.code === '22') stoppedBy = '하루 호출 한도 초과(오류 코드 22)';
     else failed++;
@@ -72,6 +74,8 @@ const pending = places.filter((p) => p.detailPending).length;
 
 await mkdir(new URL('../public/', import.meta.url), { recursive: true });
 const tmp = new URL('../public/directory.json.tmp', import.meta.url);
-await writeFile(tmp, JSON.stringify({ fetchedAt: new Date().toISOString(), source: SOURCE, places }, null, 2) + '\n');
+// 한 줄에 한 곳: 들여쓰기한 JSON보다 40% 작고, 갱신 PR에서 바뀐 장소만 줄 단위로 보인다
+const body = `{"fetchedAt":${JSON.stringify(new Date().toISOString())},"source":${JSON.stringify(SOURCE)},"places":[\n${places.map((p) => JSON.stringify(p)).join(',\n')}\n]}\n`;
+await writeFile(tmp, body);
 await rename(tmp, file);
 console.log(`공식 장소 ${listed.size}곳 저장 (상세 새로 받음 ${fetched}곳, 이전 값 재사용 ${listed.size - queue.length}곳, 다음에 이어 받을 곳 ${pending}곳${failed ? `, 실패 ${failed}곳` : ''})${stoppedBy ? ` — ${stoppedBy}로 멈춤` : ''}`);
