@@ -1,4 +1,4 @@
-{"fetchedAt":"2026-11-07T08:42:29.760Z","source":"한국관광공사 TourAPI KorService2","places":[
+{"fetchedAt":"2026-11-07T10:34:18.198Z","source":"한국관광공사 TourAPI KorService2","places":[
 {"id":"2716182","type":"12","name":"서광사","address":"강원특별자치도 태백시 오투로 216","lat":37.1725292831,"lng":128.9646772373,"sourceModified":"20261106184106","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"127020","type":"12","name":"삼화사","address":"강원특별자치도 동해시 삼화로 584","lat":37.463509009,"lng":129.0142246493,"sourceModified":"20261106173547","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"1954341","type":"12","name":"동해향교","address":"강원특별자치도 동해시 승지로 84-3","lat":37.5400623861,"lng":129.0915009547,"sourceModified":"20261106172451","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
