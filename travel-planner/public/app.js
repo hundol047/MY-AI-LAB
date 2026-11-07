@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor } from "./planner.js";
+import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -80,6 +80,34 @@ document.querySelector('.chips[data-name="likes"]').addEventListener("click", (e
   const b = e.target.closest("button"); if (b) b.classList.toggle("on");
 });
 const segValue = (name) => document.querySelector(`.seg[data-name="${name}"] .on`)?.dataset.v;
+// 이어서 갈 권역 (일정 엔진의 5가지 선택과 따로): 2일 이상일 때만 보이고, 고른 순서대로 최대 2곳(일수-1곳까지)
+const routeBox = document.querySelector('.chips[data-name="route"]');
+let routePicks = [];
+function renderRouteRow() {
+  const row = $("#routeRow"); if (!row) return;
+  const days = Number(segValue("days")), first = segValue("region");
+  row.hidden = days < 2;
+  routePicks = routePicks.filter((r) => r !== first).slice(0, Math.max(0, Math.min(2, days - 1)));
+  routeBox.querySelectorAll("button").forEach((b) => {
+    const i = routePicks.indexOf(b.dataset.v);
+    b.hidden = b.dataset.v === first;
+    b.classList.toggle("on", i >= 0);
+    b.setAttribute("aria-pressed", String(i >= 0));
+    b.dataset.order = i >= 0 ? String(i + 2) : "";
+  });
+  $("#routeNote").textContent = routePicks.length ? t("{route} 순서로 이어서 가요 · 날짜는 앞 권역부터 고르게 나눠요", { route: [first, ...routePicks].map((r) => regionLabel(r, REGIONS[r].label)).join(" → ") }) : t("고르지 않으면 한 권역에서만 다녀요");
+}
+routeBox?.addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const v = b.dataset.v, days = Number(segValue("days"));
+  if (routePicks.includes(v)) routePicks = routePicks.filter((x) => x !== v);
+  else if (routePicks.length < Math.min(2, days - 1)) routePicks.push(v);
+  else return toast(t("{n}일 일정에는 이어서 갈 권역을 {k}곳까지 고를 수 있어요", { n: days, k: Math.min(2, days - 1) }));
+  renderRouteRow();
+});
+document.querySelectorAll('.seg[data-name="region"], .seg[data-name="days"]').forEach((el) => el.addEventListener("click", () => setTimeout(renderRouteRow, 0)));
+const routeNow = (input) => (input.days >= 2 && routePicks.length ? [input.region, ...routePicks] : null);
+renderRouteRow();
 
 $("#form").addEventListener("submit", (e) => {
   e.preventDefault();
@@ -91,6 +119,8 @@ $("#form").addEventListener("submit", (e) => {
     likes: [...document.querySelectorAll('.chips[data-name="likes"] .on')].map((b) => b.dataset.v),
     move: segValue("move"),
   };
+  const route = routeNow(input);
+  if (route) input.route = route;
   const lessWalk = input.who === "parents";
   const access = accessNow();
   state = { input, opts: { pace: "normal", lessWalk: lessWalk || access.length > 0, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...startOpts(input) } };
@@ -156,7 +186,7 @@ function renderTransit() {
   if (a) {
     html += `<p>${t("가는 편: {from} {dep} → {hub} {arr}", { from: esc(isForeign() ? (ORIGINS.find((o) => o.name === a.from)?.nameEn || a.from) : a.from), dep: a.dep, hub: esc(hubLabel(a.hub)), arr: a.arr })} · ${t(MODE_NAME[a.mode])} ${esc(a.grade || "")}${a.fare ? ` · ${won(a.fare)}` : ""}</p>`;
     const last = trip.days.at(-1), end = last.items.length ? last.items.at(-1).end + 30 : 17 * 60;
-    const back = transitData ? returnTrips(transitData, a.from, state.input.region, last.date, end) : [];
+    const back = transitData ? returnTrips(transitData, a.from, regionForDay(state.input, state.input.days - 1), last.date, end) : [];
     html += back.length ? `<h4>${t("마지막 날 돌아오는 편 ({time} 이후)", { time: fmt(end) })}</h4><ul class="pet-list">${back.map(line).join("")}</ul>`
       : `<p class="sub warn">${t("마지막 일정 뒤에 돌아오는 편이 시간표에 없어요. 일정을 줄이거나 하루 더 머무세요.")}</p>`;
     html += `<p class="sub">${t("국토교통부 TAGO 시간표 기준 (기차 {t}, 버스 {b}). 예매·시간 변경은 코레일·버스 예매 사이트에서 확인하세요.", { t: refLabel(a.mode === "train" ? a.refDate : transitData?.trainDays?.[isWeekendDate(state.input.date) ? "weekend" : "weekday"]), b: refLabel(transitData?.busDate) })}</p>`;
@@ -233,6 +263,8 @@ function fillForm(input) {
     document.querySelectorAll(`.seg[data-name="${name}"] button`).forEach((b) => b.classList.toggle("on", b.dataset.v === String(input[name])));
   }
   document.querySelectorAll('.chips[data-name="likes"] button').forEach((b) => b.classList.toggle("on", input.likes.includes(b.dataset.v)));
+  routePicks = (input.route || []).slice(1);
+  renderRouteRow();
   const acc = state?.opts?.access || [];
   document.querySelectorAll('.chips[data-name="access"] button').forEach((b) => b.classList.toggle("on", acc.includes(b.dataset.v)));
 }
@@ -478,7 +510,7 @@ function renderPet() {
   const towns = [...new Set(trip.days.flatMap((d) => d.items.map((i) => petData.sigun[i.id]).filter(Boolean)))];
   // 숙소 시군: 추천 숙소 지역과 가장 가까운 장소의 시군
   const nearestTown = (pt) => { let best = null, bd = Infinity; for (const p of PLACES) { const sg = petData.sigun[p.id]; if (!sg) continue; const d = distKm(p, pt); if (d < bd) { bd = d; best = sg; } } return best; };
-  const stayTowns = trip.lodging ? [nearestTown(trip.lodging) || towns[0]].filter(Boolean) : [];
+  const stayTowns = trip.lodging ? [...new Set((trip.lodgings || [trip.lodging]).map((l) => nearestTown(l) || towns[0]).filter(Boolean))] : [];
   const link = (x) => `<li><a href="https://map.kakao.com/link/search/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">${esc(x.name)}</a>${x.tel ? ` · <a href="tel:${esc(x.tel)}">${esc(x.tel)}</a>` : ""}</li>`;
   const list = (title, map, ts, n) => { const rows = ts.flatMap((s) => (map[s] || []).slice(0, n).map((x) => ({ ...x, s }))); return rows.length ? `<h4>${title}</h4><ul class="pet-list">${rows.map(link).join("")}</ul>` : ""; };
   const noLunch = trip.days.map((d, i) => (d.items.some((it) => it.kind === "lunch") ? null : i + 1)).filter(Boolean);
@@ -550,7 +582,7 @@ async function applyRoad(i) {
     const re = retimeDay(day, state.input, state.opts, legMins);
     if (re) {
       const days = trip.days.slice(); days[i] = re;
-      trip = summarize(days, trip.lodging);
+      trip = summarize(days, trip.lodging, trip);
       if (i === dayIdx) render(); else renderStatsOnly();
       persist();
       return;
@@ -699,7 +731,7 @@ function staysFor(l) {
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
 function priceLinks(query) {
-  const choice = recommendBooking(query, state.input, peopleNow(), getLang(), store.get("offers:"+query));
+  const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
   return `<div class="booking-choice">
     <a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
@@ -716,7 +748,7 @@ function priceLinks(query) {
   </div>`;
 }
 function bookingReason(query) {
-  const choice = recommendBooking(query, state.input, peopleNow(), getLang(), store.get("offers:"+query));
+  const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
   return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
@@ -749,14 +781,24 @@ function staysHTML(l) {
     </li>`;
   }).join("")}</ul><p class="stay-note">${t("여행 날짜와 인원으로 예약 플랫폼을 엽니다. 객실·아동 나이·세금·취소 조건과 최종 금액을 확인하세요. 최저가는 보장하지 않습니다.")}</p></div>`;
 }
+// 여러 권역 여행: 보고 있는 날의 밤 숙소(마지막 날이면 마지막 숙소)를 보여 주고, 예약 검색 날짜도 그 숙소의 체크인·박수로 연다
+const currentLodging = () => (trip?.lodgings?.length ? lodgingForDay(trip, dayIdx) || trip.lodgings.at(-1) : trip?.lodging);
+function stayInput() {
+  const l = currentLodging();
+  return l && trip.lodgings?.length ? { ...state.input, date: addDays(state.input.date, l.from), days: l.nights + 1 } : state.input;
+}
 function renderLodging() {
-  const box = $("#lodgingCard"), l = trip.lodging;
+  const box = $("#lodgingCard"), l = currentLodging();
   if (!l) { box.hidden = true; return; }
   box.hidden = false;
   const q = encodeURIComponent(l.query);
+  const multi = trip.lodgings?.length > 1;
+  const tag = multi ? t("추천 숙소 · {d}일차 밤부터 {n}박", { d: l.from + 1, n: l.nights }) : l.nights === 1 ? t("추천 숙소 · 1박") : t("추천 숙소 · {n}박 내내", { n: l.nights });
+  const plan = multi ? `<ol class="stay-plan">${trip.lodgings.map((x) => `<li class="${x === l ? "on" : ""}"><button type="button" class="linkish" data-goday="${x.from}">${t("{d}일차 밤", { d: x.from + 1 })}</button> ${esc(lodgingName(x))} · ${t("{n}박", { n: x.nights })}</li>`).join("")}</ol>` : "";
   box.innerHTML = `
+    ${plan}
     <div class="info">
-      <div class="meta"><span class="tag" style="--c:var(--brand)">${l.nights === 1 ? t("추천 숙소 · 1박") : t("추천 숙소 · {n}박 내내", { n: l.nights })}</span></div>
+      <div class="meta"><span class="tag" style="--c:var(--brand)">${tag}</span></div>
       <h3>${esc(lodgingName(l))} · ${typeLabel(l.type, l.typeLabel)}</h3>
       <p>${esc(lodgingDesc(l))}</p>
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
@@ -786,7 +828,7 @@ document.addEventListener("change",e=>{
 document.addEventListener("submit",e=>{
   if(!e.target.matches('.offer-form'))return;e.preventDefault();
   const form=e.target, f=new FormData(form),query=form.dataset.query;
-  store.set('offers:'+query,{scope:bookingScope(query,state.input,peopleNow()),checkedAt:Date.now(),roomType:f.get('roomType'),sameTerms:f.has('sameTerms'),refundableOnly:f.has('refundableOnly'),offers:['Booking.com','Agoda'].map((platform,i)=>({platform,total:Number(f.get('total'+i)),refundable:f.has('refund'+i)}))});
+  store.set('offers:'+query,{scope:bookingScope(query,stayInput(),peopleNow()),checkedAt:Date.now(),roomType:f.get('roomType'),sameTerms:f.has('sameTerms'),refundableOnly:f.has('refundableOnly'),offers:['Booking.com','Agoda'].map((platform,i)=>({platform,total:Number(f.get('total'+i)),refundable:f.has('refund'+i)}))});
   renderLodging();
 });
 
@@ -812,10 +854,11 @@ document.addEventListener("submit", async (e) => {
     ${r.ask.length ? `<p class="safe-ask">${t("예약 전에 물어볼 것: ")}${r.ask.map(esc).join(" · ")}</p>` : ""}`;
 });
 function lodgingHTML(day) {
-  if (!trip.lodging || day.dayIdx >= state.input.days - 1) return "";
+  const night = lodgingForDay(trip, day.dayIdx);
+  if (!night || day.dayIdx >= state.input.days - 1) return "";
   const roadKm = (day.toLodgingKm ?? 0) * 1.35;
   const fare = state.input.move === "taxi" && roadKm > 1.2 ? t(" · 택시 약 {won}", { won: won(taxiFare(roadKm)) }) : "";
-  return `<li class="leg home">${t("숙소({name})로 · 약 {km}km", { name: esc(lodgingName(trip.lodging)), km: day.toLodgingKm ?? "-" })}${fare}</li>`;
+  return `<li class="leg home">${t("숙소({name})로 · 약 {km}km", { name: esc(lodgingName(night)), km: day.toLodgingKm ?? "-" })}${fare}</li>`;
 }
 
 /* ---------- 혜택 내비 + 증빙 보관함 ---------- */
@@ -949,7 +992,7 @@ function renderCosts() {
   let longFare = null;
   if (state.opts.arrival?.fare && transitData) {
     const last = trip.days.at(-1), end = last.items.length ? last.items.at(-1).end + 30 : 17 * 60;
-    const back = returnTrips(transitData, state.opts.arrival.from, state.input.region, last.date, end, 1)[0];
+    const back = returnTrips(transitData, state.opts.arrival.from, regionForDay(state.input, state.input.days - 1), last.date, end, 1)[0];
     longFare = { go: state.opts.arrival.fare, back: back?.fare || state.opts.arrival.fare };
   }
   const e = estimateTrip(trip, state.input, people, feesData, benefitsFor(trip, state.input), longFare);
@@ -1062,14 +1105,14 @@ function drawMap(day) {
   }
   const startLabel = t(day.start.name.startsWith("숙소") ? "숙" : "출");
   L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(esc(startName(day.start, trip.lodging)));
-  const L0 = trip.lodging;
+  const L0 = lodgingForDay(trip, day.dayIdx) || (day.dayIdx >= state.input.days - 1 ? null : trip.lodging);
   if (L0 && !day.start.name.startsWith("숙소")) L.marker([L0.lat, L0.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${t("숙")}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(t("숙소 · {name}", { name: esc(lodgingName(L0)) }));
   day.items.forEach((it, i) => {
     const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
     L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${esc(placeName(it.place))}`);
   });
   map.invalidateSize({ pan: false });
-  const extra = trip.lodging ? [[trip.lodging.lat, trip.lodging.lng]] : [];
+  const extra = L0 ? [[L0.lat, L0.lng]] : [];
   const viewKey = routeKey(day);
   if (lastMapViewKey !== viewKey) {
     map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14, animate: false });
@@ -1341,6 +1384,7 @@ async function switchLang(l) {
   applyStatic();
   heroCaption();
   renderStartRow();
+  renderRouteRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
   $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");

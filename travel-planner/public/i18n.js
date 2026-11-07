@@ -33,6 +33,13 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "이어서 갈 권역 <em>원할 때만</em>": "Continue to <em>optional</em>",
+  "{route} 순서로 이어서 가요 · 날짜는 앞 권역부터 고르게 나눠요": "Route: {route} · days are split evenly, earlier areas first",
+  "고르지 않으면 한 권역에서만 다녀요": "Leave empty to stay in one area",
+  "{n}일 일정에는 이어서 갈 권역을 {k}곳까지 고를 수 있어요": "A {n}-day trip can continue to up to {k} more area(s)",
+  "추천 숙소 · {d}일차 밤부터 {n}박": "Suggested stay · {n} night(s) from day {d}",
+  "{d}일차 밤": "Night of day {d}",
+  "{n}박": "{n} night(s)",
   "전화로 영업·동반 확인": "Call to check hours & pets",
   "{n}번": "Bus {n}",
   "{m}분 간격": "every {m} min",

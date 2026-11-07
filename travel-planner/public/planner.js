@@ -74,6 +74,23 @@ function isOpenDay(p, dateStr) {
 }
 
 const regionOf = (input) => input.region || "gangneung";
+const REGION_KEYS = ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"];
+// 여러 권역을 이어 가는 여행: input.route = ["chuncheon", "seorak", "gangneung"] (최대 3곳, 하루 이상씩)
+// 날짜를 앞 권역부터 고르게 나눈다 (5일·3곳 → 2·2·1일). 권역이 하나뿐이면 예전과 같다
+export function routeOf(input) {
+  const r = [...new Set((input.route || []).filter((x) => REGION_KEYS.includes(x)))].slice(0, Math.min(3, input.days || 1));
+  return r.length >= 2 ? r : null;
+}
+export function regionForDay(input, dayIdx) {
+  const r = routeOf(input);
+  if (!r) return regionOf(input);
+  const base = Math.floor(input.days / r.length), extra = input.days % r.length;
+  let d = 0;
+  for (let i = 0; i < r.length; i++) { d += base + (i < extra ? 1 : 0); if (dayIdx < d) return r[i]; }
+  return r.at(-1);
+}
+// 그날의 권역으로 바꾼 입력 (날짜·일수는 그대로라 하루 시간대·마지막 날 계산은 전체 여행 기준)
+const dayInput = (input, dayIdx) => (routeOf(input) ? { ...input, region: regionForDay(input, dayIdx) } : input);
 // 일정이 길어 권역 안 장소가 모자랄 때 이어서 갈 수 있는 이웃 권역
 const NEIGHBORS = {
   gangneung: ["pyeongchang", "seorak"],
@@ -222,6 +239,7 @@ function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
 
 // 하루 일정 생성. keep: 이미 확정된 앞부분 장소 id 목록
 export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude = new Set(), keepOnly = false, start = null) {
+  input = dayInput(input, dayIdx);
   const dateStr = addDays(input.date, dayIdx);
   const rain = !!(opts.rainDays || [])[dayIdx];
   const pool = candidates(input, opts);
@@ -242,6 +260,7 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
 }
 
 function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly, start) {
+  input = dayInput(input, dayIdx);
   const dateStr = addDays(input.date, dayIdx);
   const rain = !!(opts.rainDays || [])[dayIdx];
   const win = dayWindow(dayIdx, input.days), end = win.end;
@@ -339,12 +358,14 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
     commit(best.p, best.r, kind);
   }
 
-  return { date: dateStr, dayIdx, start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
+  return { date: dateStr, dayIdx, region: regionOf(input), start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
 }
 
 // 숙소는 여행 내내 한 곳: 짐을 옮기지 않도록 모든 밤을 같은 숙소에서 묵는다
 export function planTrip(input, opts = {}) {
   if (input.days < 2) return finalize(planDays(input, opts, null), null);
+  const route = routeOf(input);
+  if (route) return planRoute(input, opts, route);
   const fixed = opts.lodgingId && LODGING.find((l) => l.id === opts.lodgingId);
   // 1차: 출발지 기준으로 일정을 짜서 여행 동선을 파악 → 동선 전체에 가장 알맞은 숙소 선택
   const lodging = fixed ? lodgingInfo(input, fixed) : chooseLodging(input, planDays(input, opts, null));
@@ -352,22 +373,50 @@ export function planTrip(input, opts = {}) {
   return finalize(planDays(input, opts, lodging), lodging);
 }
 
-function planDays(input, opts, lodging) {
+// 여러 권역: 권역마다 숙소를 따로 정한다. 그 권역에서 보내는 밤(마지막 날 밤은 다음 권역 쪽도 허용)의
+// "그날 마지막 장소 → 숙소 → 다음 날 첫 장소" 거리가 가장 짧은 숙소
+function planRoute(input, opts, route) {
+  const first = planDays(input, opts, null);
+  const nightsOf = (r) => first.slice(0, -1).map((d, i) => i).filter((i) => regionForDay(input, i) === r);
+  const fixed = opts.lodgingIds || {};
+  const lodgings = [];
+  for (const [k, r] of route.entries()) {
+    const nights = nightsOf(r);
+    if (!nights.length) continue;
+    const next = route[k + 1];
+    const legDays = nights.flatMap((i) => [first[i], first[i + 1]]);
+    const stay = { ...input, region: r, days: nights.length + 1 };
+    const keep = fixed[r] && LODGING.find((l) => l.id === fixed[r]);
+    const l = keep ? lodgingInfo(stay, keep) : chooseLodging(stay, legDays, next ? [r, next] : [r]) /* 밤마다 (그날, 다음 날) 두 날씩 */;
+    lodgings.push({ ...l, region: r, nights: nights.length, from: nights[0] });
+  }
+  const at = (i) => lodgings.find((l) => i >= l.from && i < l.from + l.nights) || null;
+  const trip = finalize(planDays(input, opts, null, at), lodgings[0] || null);
+  trip.lodgings = lodgings;
+  trip.route = route;
+  return trip;
+}
+
+function planDays(input, opts, lodging, lodgingAt = null) {
   const used = new Set();
   const usedAreas = [];
   const days = [];
-  const home = lodging && { name: `숙소(${lodging.name})`, lat: lodging.lat, lng: lodging.lng };
+  const homeOf = (l) => l && { name: `숙소(${l.name})`, lat: l.lat, lng: l.lng };
+  const night = (i) => (lodgingAt ? lodgingAt(i) : lodging);
   for (let d = 0; d < input.days; d++) {
     const keep = (opts.keep || [])[d] || [];
     // 첫날은 사용자가 정한 출발지(opts.start: {name, lat, lng})에서, 없으면 권역 기준점(역·터미널)에서 출발
-    const start = d > 0 ? home : (validStart(opts.start) ? opts.start : null);
+    const start = d > 0 ? homeOf(night(d - 1)) : (validStart(opts.start) ? opts.start : null);
     const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, start);
     usedAreas.push(day.area);
-    if (lodging && d < input.days - 1) markReturn(day, lodging);
+    const l = night(d);
+    if (l && d < input.days - 1) { markReturn(day, l); if (lodgingAt) day.lodging = l; }
     days.push(day);
   }
   return days;
 }
+// 그날 밤 숙소 (여러 권역이면 밤마다 다를 수 있다)
+export const lodgingForDay = (trip, dayIdx) => (trip.lodgings ? trip.lodgings.find((l) => dayIdx >= l.from && dayIdx < l.from + l.nights) : trip.lodging) || null;
 
 const validStart = (s) => !!s && Number.isFinite(s.lat) && Number.isFinite(s.lng) && Math.abs(s.lat) <= 90 && Math.abs(s.lng) <= 180 && typeof s.name === "string";
 
@@ -387,10 +436,11 @@ export function swapItem(trip, input, opts, dayIdx, itemIdx, replacementId = nul
   const usedAreas = trip.days.filter((_, i) => i !== dayIdx).map((d) => d.area);
   const newDay = planDay(input, opts, dayIdx, used, usedAreas, keep, exclude, false, day.start);
   if (replacementId && newDay.items[itemIdx]?.id !== replacementId) return trip;
-  if (trip.lodging && dayIdx < input.days - 1) markReturn(newDay, trip.lodging); // 숙소는 그대로
+  const night = lodgingForDay(trip, dayIdx);
+  if (night && dayIdx < input.days - 1) { markReturn(newDay, night); if (trip.lodgings) newDay.lodging = night; } // 숙소는 그대로
   const days = trip.days.slice();
   days[dayIdx] = newDay;
-  return finalize(days, trip.lodging);
+  return keepRoute(finalize(days, trip.lodging), trip);
 }
 
 // Explicit additions are transactional and confined to the requested day.
@@ -412,9 +462,10 @@ export function addPlacesToDay(trip, input, opts, dayIdx, ids) {
     if (score > bestScore) { best=day; bestScore=score; }
   }
   if (!best) return trip;
-  if (trip.lodging && dayIdx < input.days - 1) markReturn(best, trip.lodging);
+  const night = lodgingForDay(trip, dayIdx);
+  if (night && dayIdx < input.days - 1) { markReturn(best, night); if (trip.lodgings) best.lodging = night; }
   const days=trip.days.slice(); days[dayIdx]=best;
-  return finalize(days, trip.lodging);
+  return keepRoute(finalize(days, trip.lodging), trip);
 }
 
 // 맞춤 숙소: 그날 마지막 장소에서 가깝고, 동행·취향·이동수단에 맞는 숙소 지역과 종류
@@ -434,18 +485,20 @@ const TYPE_REASON = {
   hanok: "조용하고 온돌방이라 편안해요",
 };
 // 모든 밤의 "그날 마지막 장소 → 숙소 → 다음 날 첫 장소" 거리 합이 가장 작고, 동행·취향에 맞는 숙소 지역
-export function chooseLodging(input, days) {
+export function chooseLodging(input, days, only = null) {
   const wanted = WHO_TYPES[input.who] || WHO_TYPES.solo;
   const legs = [];
   const regions = new Set([regionOf(input)]);
   for (let i = 0; i < days.length; i++) {
-    for (const it of days[i].items) regions.add(it.place.region);
-    if (i < days.length - 1) {
+    if (!only) for (const it of days[i].items) regions.add(it.place.region);
+    // 여러 권역의 밤 목록은 (그날, 다음 날) 두 날씩 묶여 있다
+    if (only ? i % 2 === 0 : i < days.length - 1) {
       const last = days[i].items.at(-1)?.place, next = days[i + 1].items[0]?.place;
       if (last) legs.push(last);
       if (next) legs.push(next);
     }
   }
+  if (only) only.forEach((r) => regions.add(r));
   if (!legs.length) legs.push(baseOf(input));
   let best = null;
   for (const l of LODGING) {
@@ -513,8 +566,13 @@ export function retimeDay(day, input, opts, legMins) {
   return { ...day, items, road: true };
 }
 
-export function summarize(days, lodging = null) {
-  return finalize(days, lodging);
+export function summarize(days, lodging = null, from = null) {
+  return from ? keepRoute(finalize(days, lodging), from) : finalize(days, lodging);
+}
+// 일정을 고쳐 다시 묶을 때 여러 권역 정보(권역별 숙소)를 그대로 넘긴다
+function keepRoute(trip, from) {
+  if (from?.lodgings) { trip.lodgings = from.lodgings; trip.route = from.route; }
+  return trip;
 }
 
 // 자연어 요청 → 조건 (AI 서버가 없을 때 쓰는 규칙 기반 해석)

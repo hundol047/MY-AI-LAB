@@ -105,10 +105,12 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = [], long
   // 4) 숙박 (가정값): 게스트하우스는 1인, 나머지는 방(4명까지 1실)
   const nights = Math.max(0, input.days - 1);
   if (nights && trip.lodging) {
-    const type = trip.lodging.type;
-    const range = ASSUME.room[type] || ASSUME.room.pension;
-    const units = type === "guesthouse" ? n : (Number.isInteger(people.rooms) && people.rooms > 0 ? people.rooms : Math.ceil(n / 4));
-    rows.push({ key: "stay", low: range[0] * units * nights, high: range[1] * units * nights, detail: { nights, units, type } });
+    // 여러 권역 여행은 권역마다 숙소 종류·박수가 다르다 → 구간별로 더한다
+    const stays = trip.lodgings?.length ? trip.lodgings : [{ ...trip.lodging, nights }];
+    const unitsOf = (type) => (type === "guesthouse" ? n : (Number.isInteger(people.rooms) && people.rooms > 0 ? people.rooms : Math.ceil(n / 4)));
+    const part = (l, i) => (ASSUME.room[l.type] || ASSUME.room.pension)[i] * unitsOf(l.type) * l.nights;
+    const type = stays[0].type;
+    rows.push({ key: "stay", low: stays.reduce((a, l) => a + part(l, 0), 0), high: stays.reduce((a, l) => a + part(l, 1), 0), detail: { nights, units: unitsOf(type), type } });
   }
 
   const total = { low: rows.reduce((s, r) => s + r.low, 0), high: rows.reduce((s, r) => s + r.high, 0) };

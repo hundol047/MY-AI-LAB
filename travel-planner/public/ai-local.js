@@ -38,6 +38,10 @@ export function startLocal(text, today) {
     const wd = new Date(today).getDay();
     r.date = addDays(today, (6 - wd + 7) % 7 || 7);
   }
+  // "춘천 들렀다 속초, 강릉까지 3박"처럼 권역이 여럿이면 말한 순서대로 이어 가는 여행 (2일 이상, 최대 3곳)
+  const at = Object.entries(REGION_WORDS).map(([k, words]) => [k, Math.min(...words.map((w) => (t.indexOf(w) + 1 || Infinity) - 1))]).filter(([, i]) => Number.isFinite(i)).sort((a, b) => a[1] - b[1]).map(([k]) => k);
+  if (at.length) r.region = at[0];
+  if (at.length >= 2 && r.days >= 2) r.route = at.slice(0, Math.min(3, r.days));
   const m = t.match(/(\d{1,2})월(\d{1,2})일/);
   if (m) {
     let y = Number(today.slice(0, 4));
