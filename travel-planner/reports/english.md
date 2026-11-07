@@ -4,8 +4,8 @@
 
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
-- 대상 265곳 (장소 194 + 축제 71)
-- 영문 이름 찾음 116곳 (소개 포함 101곳) · 못 찾음 149곳
+- 대상 293곳 (장소 222 + 축제 71)
+- 영문 이름 찾음 118곳 (소개 포함 102곳) · 못 찾음 175곳
 
 ## 찾은 곳
 
@@ -57,6 +57,8 @@
 | oak-valley-ski | 오크밸리 스키장 | Oak Valley Snow Park (오크밸리 스키장) | 0.00 | 이름 같음 | 있음 |
 | sinheungsa | 설악산 신흥사 | Sinheungsa Temple (Seoraksan Mountain) (신흥사(설악산)) | 0.06 | 이름 같음 | 있음 |
 | ulsanbawi | 설악산 울산바위 | Seoraksan Ulsanbawi Rock (설악산 울산바위) | 1.01 | 이름 같음 | 있음 |
+| hc-cafe | 러스틱라이프 | Rustic Life (러스틱라이프) | 0.00 | 이름 같음 | 있음 |
+| gs-makguksu | 송지호막국수 고성본점 | Songjiho Makguksu (송지호막국수) | 0.01 | 이름 같음 | - |
 | gyeongpo-beach | 경포해변 | Gangneung Gyeongpo Beach (강릉 경포해수욕장) | 0.11 | 이름 같음 | 있음 |
 | gangmun-beach | 강문해변 | Gangmun Beach (강문해변) | 0.11 | 이름 같음 | 있음 |
 | anmok-beach | 안목해변 | Anmokhaebyeon Beach (안목해변) | 0.08 | 이름 같음 | 있음 |
@@ -173,6 +175,32 @@
 | taebaek-food | 태백 황지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Hwangji Restaurant Area, Taebaek — Spicy chicken stew (mul-dakgalbi) and Korean meals around Hwangji Pond |
 | yanggu-food | 양구읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Yanggu Town Restaurants — Dried radish greens (siraegi) meals and buckwheat noodles |
 | inje-food | 인제읍 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Inje Town Restaurants — Buckwheat noodles and dried pollack dishes |
+| dh-jjolmyeon | 초당쫄면순두부 | 2km 안에 이름이 맞는 영문 결과 없음 | Chodang Jjolmyeon Sundubu, Donghae — Spicy soft tofu stew with chewy jjolmyeon noodles |
+| dh-bakery | 동해제빵소 | 2km 안에 이름이 맞는 영문 결과 없음 | Donghae Bakery — Bakery café known for its Donghae potato bread |
+| tb-dakgalbi | 태백닭갈비 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Dakgalbi — Taebaek-style mul-dakgalbi (spicy chicken in broth) |
+| tb-cafe | 카페건널목 | 2km 안에 이름이 맞는 영문 결과 없음 | Cafe Geonneolmok, Taebaek — Mining-town café with coal-briquette-shaped bread and lattes |
+| sc-makguksu | 봉평막국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Bongpyeong Makguksu, Samcheok — Buckwheat noodles and potato pancakes |
+| sc-cafe | 보보정 | 2km 안에 이름이 맞는 영문 결과 없음 | Bobojeong, Samcheok — Dessert café in Samcheok town |
+| hc-makguksu | 금수강산막국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Geumsugangsan Makguksu, Hongcheon — Buckwheat noodles and boiled pork |
+| hs-makguksu | 태기산막국수 | 영문 결과 없음 | Taegisan Makguksu, Hoengseong — Perilla buckwheat noodles and potato pancakes |
+| hs-cafe | 노랑공장 | 영문 결과 없음 | Norang Gongjang, Hoengseong — Brunch café with Hoengseong hanwoo dishes |
+| yw-gondre | 동강의아침 | 2km 안에 이름이 맞는 영문 결과 없음 | Donggang-ui Achim, Yeongwol — Gondre (thistle) rice set and smoked duck |
+| yw-cafe | 기분조은 베이커리카페 | 영문 결과 없음 | Gibunjoeun Bakery Cafe, Yeongwol — Bakery café with Yeongwol bread and millet desserts |
+| pc-makguksu | 유천막국수 본점 | 영문 결과 없음 | Yucheon Makguksu, Pyeongchang — Buckwheat noodles and pheasant dumpling soup |
+| pc-cafe | 수미카페 | 2km 안에 이름이 맞는 영문 결과 없음 | Sumi Cafe, Pyeongchang — Café known for Pyeongchang potato bread · closed Tuesdays |
+| js-kotdeung | 동광식당 | 영문 결과 없음 | Donggwang Sikdang, Jeongseon — Kotdeungchigi and olchaengi noodles, astragalus pork hocks |
+| js-cafe | 나전역카페 | 영문 결과 없음 | Najeon Station Cafe — Café in an old country railway station |
+| cw-tofu | 삼정콩마을가마솥두부집 | 2km 안에 이름이 맞는 영문 결과 없음 | Samjeong Kongmaeul Tofu House, Cheorwon — Kettle-made tofu hot pot and cheonggukjang |
+| cw-cafe | 카페은하수 | 2km 안에 이름이 맞는 영문 결과 없음 | Cafe Eunhasu, Cheorwon — Café in Cheorwon town |
+| hw-makguksu | 햇골막국수 | 영문 결과 없음 | Haetgol Makguksu, Hwacheon — Buckwheat noodles and handmade tofu |
+| hw-cafe | 광덕 별아래 | 영문 결과 없음 | Gwangdeok Byeolarae, Hwacheon — Fermented-coffee café below Gwangdeoksan · closed Mon, Tue, Thu |
+| yg-makguksu | 도촌막국수 | 영문 결과 없음 | Dochon Makguksu, Yanggu — Buckwheat noodles and buckwheat crepes |
+| yg-cafe | 양구농사꾼 | 2km 안에 이름이 맞는 영문 결과 없음 | Yanggu Nongsakkun — Café with Yanggu apple drinks and potato bread |
+| ij-makguksu | 원대막국수 | 영문 결과 없음 | Wondae Makguksu, Inje — Buckwheat noodles on the way to the birch forest |
+| ij-cafe | 카페 하추리 | 영문 결과 없음 | Cafe Hachuri, Inje — Café by the Naerincheon River |
+| gs-cafe | 커피고 | 2km 안에 이름이 맞는 영문 결과 없음 | Coffee Go, Goseong — Specialty coffee by the sea in Goseong |
+| yy-makguksu | 입암메밀타운 | 영문 결과 없음 | Ibam Memil Town, Yangyang — Buckwheat noodles and boiled pork |
+| yy-cafe | P.E.I coffee | 2km 안에 이름이 맞는 영문 결과 없음 | P.E.I Coffee, Yangyang — Yangyang café known for cream lattes |
 | namhangjin-beach | 남항진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Namhangjin Beach — Quiet beach with the Solbaram Bridge |
 | sea-trail | 정동심곡 바다부채길 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdong-Simgok Badabuchae-gil Trail — 2.9 km clifftop coastal trail · closed during high-wave warnings |
 | terarosa | 테라로사 커피공장 강릉본점 | 영문 결과 없음 | Terarosa Coffee Factory (Gangneung Main Store) — Roastery and coffee museum |
@@ -290,6 +318,7 @@
 | jukseoru | Jukseoru Pavilion | Pavilion on a cliff above the Osipcheon · first of the Eight Views of Gwandong |
 | phoenix-ski | Phoenix Snow Park | Ski resort in Bongpyeong, Pyeongchang · day and night skiing (grooming 16:00–18:00) |
 | namae-port | Namaehang Port | Small harbor and lighthouse, counted among Gangwon's three most beautiful ports |
+| gs-makguksu | Songjiho Makguksu | Buckwheat noodles with marinated pollack |
 | anmok-coffee | Gangneung Coffee Street | About 30 ocean-view cafes |
 | chodang-tofu | Chodang Halmeoni Sundubu | Chodang tofu set with seawater |
 | heo-park | Heo Gyun and Heo Nanseolheon Memorial Park | Birthplace site and memorial hall in a pine forest |
@@ -322,6 +351,11 @@
 | cw-peace-observatory | 철원 평화전망대 | Cheorwon Peace Observatory (철원평화전망대) | 5.54 | 이름 같지만 2km 밖 |
 | crane-center | 철원 철새도래지 (두루미) | Yeongamho Lake (migratory bird habitat) (영암호 - 철새도래지) | 403.50 | 이름 같지만 2km 밖 |
 | crane-center | 철원 철새도래지 (두루미) | Cheorwon Plain (Migratory Bird Habitat) (철원평야(철새도래지)) | 0.00 | 이름 다름 |
+| dh-jjolmyeon | 초당쫄면순두부 | Pencil Museum (연필뮤지엄) | 0.15 | 이름 다름 |
+| tb-dakgalbi | 태백닭갈비 | Hwangji Pond (황지연못) | 0.15 | 이름 다름 |
+| cw-tofu | 삼정콩마을가마솥두부집 | Hantangang River [National Geopark] (한탄강(국가지질공원, 고석정)) | 0.18 | 이름 다름 |
+| cw-tofu | 삼정콩마을가마솥두부집 | Goseokjeong National Tourist Area (고석정국민관광지) | 0.29 | 이름 다름 |
+| cw-tofu | 삼정콩마을가마솥두부집 | Cheorwon Facilities Management Office (Formerly, Iron Triangle Battlefield (철원 시설물관리사업소 (구 철의삼각전적관)) | 0.29 | 이름 다름 |
 | namhangjin-beach | 남항진해변 | Aranaby Zipline (아라나비(스카이 어촌체험)) | 0.17 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Gangneung Jjamppong Sundubu Donghwa Garden (강릉짬뽕순두부 동화가든 본점) | 0.11 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Chodang Dubu Village (초당두부마을) | 0.11 | 이름 다름 |

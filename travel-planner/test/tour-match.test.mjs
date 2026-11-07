@@ -31,4 +31,6 @@ assert.equal(englishInTitle("Hwanseongul Cave (Daei-ri Cave System) (환선굴 (
 assert.equal(englishInTitle("CU Gangneung Gyeongpo Hana Branch[Tax Refund Shop](CU 경포하나점)"), "CU Gangneung Gyeongpo Hana Branch");
 assert.equal(firstSentence("The 7.4-kilometer cable car is long. Second."), "The 7.4-kilometer cable car is long.");
 assert.equal(firstSentence("*The information below is based on 2026. Trout fishing on ice."), "Trout fishing on ice.");
+// 관광공사 제목의 [대괄호] 꼬리(유네스코 표시 등)는 이름 대조에서 뺀다
+assert.equal(judge({ name: "영월 장릉" }, "영월 장릉(단종) [유네스코 세계유산]", "12").ok, true);
 console.log("ok - 관광공사 대조 규칙");

@@ -87,7 +87,7 @@ export function englishInTitle(title) {
 }
 
 export function core(name) {
-  let s = String(name).replace(/\([^)]*\)/g, " ").replace(/[^가-힣A-Za-z0-9]/g, "");
+  let s = String(name).replace(/\([^)]*\)|\[[^\]]*\]/g, " ").replace(/[^가-힣A-Za-z0-9]/g, "");
   for (const [re, to] of SAME) s = s.replace(re, to);
   for (const w of REGION_WORDS) if (s.startsWith(w) && s.length - w.length >= 2) { s = s.slice(w.length); break; }
   return s;

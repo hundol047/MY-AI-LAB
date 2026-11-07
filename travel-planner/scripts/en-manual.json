@@ -649,5 +649,117 @@
   "inje-food": {
     "name": "Inje Town Restaurants",
     "desc": "Buckwheat noodles and dried pollack dishes"
+  },
+  "dh-jjolmyeon": {
+    "name": "Chodang Jjolmyeon Sundubu, Donghae",
+    "desc": "Spicy soft tofu stew with chewy jjolmyeon noodles"
+  },
+  "dh-bakery": {
+    "name": "Donghae Bakery",
+    "desc": "Bakery café known for its Donghae potato bread"
+  },
+  "tb-dakgalbi": {
+    "name": "Taebaek Dakgalbi",
+    "desc": "Taebaek-style mul-dakgalbi (spicy chicken in broth)"
+  },
+  "tb-cafe": {
+    "name": "Cafe Geonneolmok, Taebaek",
+    "desc": "Mining-town café with coal-briquette-shaped bread and lattes"
+  },
+  "sc-makguksu": {
+    "name": "Bongpyeong Makguksu, Samcheok",
+    "desc": "Buckwheat noodles and potato pancakes"
+  },
+  "sc-cafe": {
+    "name": "Bobojeong, Samcheok",
+    "desc": "Dessert café in Samcheok town"
+  },
+  "hc-makguksu": {
+    "name": "Geumsugangsan Makguksu, Hongcheon",
+    "desc": "Buckwheat noodles and boiled pork"
+  },
+  "hc-cafe": {
+    "name": "Rustic Life, Hongcheon",
+    "desc": "Hand-drip coffee in the forest · closed Mon–Tue"
+  },
+  "hs-makguksu": {
+    "name": "Taegisan Makguksu, Hoengseong",
+    "desc": "Perilla buckwheat noodles and potato pancakes"
+  },
+  "hs-cafe": {
+    "name": "Norang Gongjang, Hoengseong",
+    "desc": "Brunch café with Hoengseong hanwoo dishes"
+  },
+  "yw-gondre": {
+    "name": "Donggang-ui Achim, Yeongwol",
+    "desc": "Gondre (thistle) rice set and smoked duck"
+  },
+  "yw-cafe": {
+    "name": "Gibunjoeun Bakery Cafe, Yeongwol",
+    "desc": "Bakery café with Yeongwol bread and millet desserts"
+  },
+  "pc-makguksu": {
+    "name": "Yucheon Makguksu, Pyeongchang",
+    "desc": "Buckwheat noodles and pheasant dumpling soup"
+  },
+  "pc-cafe": {
+    "name": "Sumi Cafe, Pyeongchang",
+    "desc": "Café known for Pyeongchang potato bread · closed Tuesdays"
+  },
+  "js-kotdeung": {
+    "name": "Donggwang Sikdang, Jeongseon",
+    "desc": "Kotdeungchigi and olchaengi noodles, astragalus pork hocks"
+  },
+  "js-cafe": {
+    "name": "Najeon Station Cafe",
+    "desc": "Café in an old country railway station"
+  },
+  "cw-tofu": {
+    "name": "Samjeong Kongmaeul Tofu House, Cheorwon",
+    "desc": "Kettle-made tofu hot pot and cheonggukjang"
+  },
+  "cw-cafe": {
+    "name": "Cafe Eunhasu, Cheorwon",
+    "desc": "Café in Cheorwon town"
+  },
+  "hw-makguksu": {
+    "name": "Haetgol Makguksu, Hwacheon",
+    "desc": "Buckwheat noodles and handmade tofu"
+  },
+  "hw-cafe": {
+    "name": "Gwangdeok Byeolarae, Hwacheon",
+    "desc": "Fermented-coffee café below Gwangdeoksan · closed Mon, Tue, Thu"
+  },
+  "yg-makguksu": {
+    "name": "Dochon Makguksu, Yanggu",
+    "desc": "Buckwheat noodles and buckwheat crepes"
+  },
+  "yg-cafe": {
+    "name": "Yanggu Nongsakkun",
+    "desc": "Café with Yanggu apple drinks and potato bread"
+  },
+  "ij-makguksu": {
+    "name": "Wondae Makguksu, Inje",
+    "desc": "Buckwheat noodles on the way to the birch forest"
+  },
+  "ij-cafe": {
+    "name": "Cafe Hachuri, Inje",
+    "desc": "Café by the Naerincheon River"
+  },
+  "gs-makguksu": {
+    "name": "Songjiho Makguksu, Goseong",
+    "desc": "Buckwheat noodles with marinated pollack"
+  },
+  "gs-cafe": {
+    "name": "Coffee Go, Goseong",
+    "desc": "Specialty coffee by the sea in Goseong"
+  },
+  "yy-makguksu": {
+    "name": "Ibam Memil Town, Yangyang",
+    "desc": "Buckwheat noodles and boiled pork"
+  },
+  "yy-cafe": {
+    "name": "P.E.I Coffee, Yangyang",
+    "desc": "Yangyang café known for cream lattes"
   }
 }

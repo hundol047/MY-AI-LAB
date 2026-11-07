@@ -1,8 +1,10 @@
 // 오프라인 지원 + 빠른 재방문
 // - 앱 파일: 캐시에서 바로 보여주고 뒤에서 새 버전으로 갱신 (stale-while-revalidate)
-// - 지도 타일·사진: 한 번 받으면 캐시에서 (cache-first)
+// - 지도 타일·사진: 한 번 받으면 캐시에서 (cache-first). 앱을 업데이트해도 지우지 않는 별도 캐시에 두고(산간 지역 오프라인용), 너무 많아지면 오래된 것부터 지운다
 // - AI·날씨·경로 등 API: 항상 네트워크
-const CACHE = "ohneul-gangwon-v33";
+const CACHE = "ohneul-gangwon-v34";
+const MEDIA_CACHE = "ohneul-gangwon-media-v1"; // 앱 버전과 따로 유지
+const MEDIA_MAX = 1500; // 지도 조각·사진 최대 개수 (조각 1개 약 10~30KB)
 const SHELL = ["./", "index.html", "style.css", "app.js", "booking-links.js", "planner.js", "data.js", "extra-places.js", "places-more.js", "i18n.js", "data-en.json", "photos.json", "lodging-places.json", "fees.json", "costs.js", "alerts.js", "today.js", "directory-place.js", "origins.js", "ai-local.js", "guide-topics.js", "knowledge.js", "knowledge-intl.js", "i18n-cjk.js", "icon.svg", "icon-192.png", "apple-touch-icon.png", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
 const MEDIA = /tile\.openstreetmap\.org|upload\.wikimedia\.org|tong\.visitkorea\.or\.kr|\.woff2$/;
 const LIVE = /\/api\/|open-meteo|project-osrm|wikipedia\.org\/api/;
@@ -11,7 +13,7 @@ self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(SHELL)).then(() => self.skipWaiting()));
 });
 self.addEventListener("activate", (e) => {
-  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
+  e.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((k) => k !== CACHE && k !== MEDIA_CACHE).map((k) => caches.delete(k)))).then(() => self.clients.claim()));
 });
 self.addEventListener("fetch", (e) => {
   const req = e.request;
@@ -21,7 +23,7 @@ self.addEventListener("fetch", (e) => {
   if (LIVE.test(url)) return; // 브라우저 기본 동작(네트워크)
   if (MEDIA.test(url)) {
     e.respondWith(caches.match(req).then((hit) => hit || fetch(req).then((res) => {
-      if (res.ok || res.type === "opaque") { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)); }
+      if (res.ok || res.type === "opaque") { const copy = res.clone(); e.waitUntil(caches.open(MEDIA_CACHE).then((c) => c.put(req, copy)).then(trimMedia)); }
       return res;
     })));
     return;
@@ -33,6 +35,15 @@ self.addEventListener("fetch", (e) => {
     return hit || fresh;
   }));
 });
+
+// 지도·사진 캐시가 MEDIA_MAX를 넘으면 먼저 넣은 것부터 지운다 (Cache API의 keys()는 넣은 순서)
+let trimming = null;
+function trimMedia() {
+  return (trimming ??= caches.open(MEDIA_CACHE).then(async (c) => {
+    const keys = await c.keys();
+    for (const k of keys.slice(0, Math.max(0, keys.length - MEDIA_MAX))) await c.delete(k);
+  }).finally(() => { trimming = null; }));
+}
 
 // Generic notifications contain no booking IDs, lookup keys, names or contact details.
 self.addEventListener('push', event => {

@@ -1,0 +1,3190 @@
+[
+ {
+  "sigun": "동해",
+  "contentid": "2855471",
+  "title": "오뚜기칼국수",
+  "addr": "강원특별자치도 동해시 일출로 10-1 (발한동, 발한상가아파트)",
+  "lat": 37.5497,
+  "lng": 129.1102,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/60/2855460_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "장칼국수 비빔국수 / 잔치국수 / 장칼만둣국 등",
+  "opentime": "07:00~18:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "07:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "2874418",
+  "title": "동해러시아대게마을",
+  "addr": "강원특별자치도 동해시 추암택지길 2 (추암동)",
+  "lat": 37.4779,
+  "lng": 129.1563,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/98/2874398_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "러시안산 대게 찜 대게해물라면 / 돈가스 / 새우살볶음밥 등",
+  "opentime": "10:00~21:00 (마지막 주문 19:30)",
+  "restdate": "매주 화요일 (단, 명절연휴와 공휴일에는 정상영업)",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "133820",
+  "title": "굴뚝촌",
+  "addr": "강원특별자치도 동해시 삼화로 253-6",
+  "lat": 37.4747,
+  "lng": 129.0466,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/89/3070189_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "버섯불고기전골+대통밥 불낙전골 / 곱창전골 / 오리전골 등",
+  "opentime": "[평일]11:00~16:00 [주말]11:00~17:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "11:00",
+   "16:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "134329",
+  "title": "산야",
+  "addr": "강원특별자치도 동해시 임항로 36",
+  "lat": 37.5383,
+  "lng": 129.1061,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/81/3070381_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "자연식쌈밥 한방 생삼겹살 / 김치찌개 / 돼지갈비전골 등",
+  "opentime": "08:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "08:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "동해",
+  "contentid": "625920",
+  "title": "해왕해물탕",
+  "addr": "강원특별자치도 동해시 한섬로 113-1",
+  "lat": 37.5217,
+  "lng": 129.1161,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/56/590756_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "해물탕 낙지볶음 / 장치조림 / 가오리 조림 / 해물찜 등",
+  "opentime": "10:00~21:00 (준비시간 14:30~16:00)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "2925236",
+  "title": "거동탕수육",
+  "addr": "강원특별자치도 동해시 일출로 83",
+  "lat": 37.5523,
+  "lng": 129.1168,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/01/2925201_image2_1.jpg",
+  "cat3": "FD020100",
+  "cafe": false,
+  "local": false,
+  "menu": "거동탕수육 오리지날 리얼문어탕수육 / 거동 문어짬뽕 / 거동 문어쟁반짜장 등",
+  "opentime": "[월요일]- 10:30~15:00- 마지막 주문14:20[수요일~금요일]- 10:30~19:00- 준비시간 15:00~16:30- 마지막 주문 18:20[토요일]- 10:00~19:30- 준비시간 15:00~17:00- 마지막 주문 18:50[일요일]- 10:00~19:00- 준비시간 15:00~17:00- 마지막 주문 18:20",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:30",
+   "15:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "4084764",
+  "title": "내게와 묵호",
+  "addr": "강원특별자치도 동해시 해맞이길 286 (묵호진동)",
+  "lat": 37.5551,
+  "lng": 129.1179,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/49/4083749_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "당고화로구이 타르트3종 / 우베크림라떼 / 아메리카노 등",
+  "opentime": "11:00~18:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "11:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "2929520",
+  "title": "묵호287",
+  "addr": "강원특별자치도 동해시 해맞이길 287",
+  "lat": 37.5551,
+  "lng": 129.1181,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/06/2929506_image2_1.JPG",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "287크림라떼 수제매실에이드 / 수제자몽에이드 / 아메리카노 등",
+  "opentime": "[평일]- 10:00~21:00[주말]- 08:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "동해",
+  "contentid": "2928940",
+  "title": "베이커리카페 클램",
+  "addr": "강원특별자치도 동해시 동해대로 6270-37 (망상동)",
+  "lat": 37.5941,
+  "lng": 129.0886,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/00/2928700_image2_1.JPG",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "버터스카치크림라떼 더블초코바게트 / 자두에이드 / 꿀뚝뚝아이스크림라떼 등",
+  "opentime": "07:00~21:40 (마지막 주문 21:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "07:00",
+   "21:40"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "동해",
+  "contentid": "2929494",
+  "title": "동해제빵소",
+  "addr": "강원특별자치도 동해시 한섬로 126-1 (천곡동)",
+  "lat": 37.5214,
+  "lng": 129.118,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/86/2929486_image2_1.JPG",
+  "cat3": "FD030100",
+  "cafe": true,
+  "local": true,
+  "menu": "동해감자빵 아메리카노 / 꼭먹어야하는쿠키 / 크루아상 / 소금빵 등",
+  "opentime": "08:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "08:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "동해",
+  "contentid": "4056545",
+  "title": "초당쫄면순두부",
+  "addr": "강원특별자치도 동해시 해안로 515-1 (발한동)",
+  "lat": 37.5463,
+  "lng": 129.1071,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/34/4056534_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "초당쫄면순두부",
+  "opentime": "- 11:00~16:30- 마지막 주문 16:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "16:30"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "동해",
+  "contentid": "4020587",
+  "title": "한섬",
+  "addr": "강원특별자치도 동해시 감추1길 38 (천곡동)",
+  "lat": 37.5182,
+  "lng": 129.1211,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/89/4020589_image2_1.jpg",
+  "cat3": "FD020500",
+  "cafe": false,
+  "local": true,
+  "menu": "동해한상 감자로 만든 뇨끼 / 문어 카르파치오 / 보리새우무침",
+  "opentime": "- 11:00~20:00- 준비시간 14:00~17:00- 점심 마지막 주문 13:30 / 저녁 마지막 주문 19:30",
+  "restdate": "매주 월요일~수요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2892445",
+  "title": "광천막국수 본점",
+  "addr": "강원특별자치도 태백시 수아밭길 108 (화전동)",
+  "lat": 37.1803,
+  "lng": 128.9726,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/34/2892434_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "광천 막국수 감자부침 / 메밀전병 / 꿩만두찜 등",
+  "opentime": "11:00~16:00 (마지막 주문 15:30)",
+  "restdate": "매주 수요일",
+  "hours": [
+   "11:00",
+   "16:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2892457",
+  "title": "신가네식당",
+  "addr": "강원특별자치도 태백시 상장3길 26 (황지동)",
+  "lat": 37.154,
+  "lng": 128.9907,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/47/2892447_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "신가네쌈밥 생선구이 / 된장찌개",
+  "opentime": "[평일]- 10:00~14:30[주말]- 10:00~21:00- 준비시간 14:30~17:00",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:00",
+   "14:30"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2628988",
+  "title": "조선옥갈비",
+  "addr": "강원특별자치도 태백시 시장북2길 5-1 (황지동)",
+  "lat": 37.1735,
+  "lng": 128.9919,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/85/2629085_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 생갈비 한우 양념갈비 / 국내산 돼지갈비 / 한우 불고기 등",
+  "opentime": "11:00~21:00 (마지막 주문 19:50)",
+  "restdate": "매달 1, 2, 3번째 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "3422832",
+  "title": "초록뿔언덕카페",
+  "addr": "강원특별자치도 태백시 고원로 369",
+  "lat": 37.1778,
+  "lng": 128.9726,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/82/4098782_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "초록뿔라떼 아메리카노 / 수제딸기라떼 / 소보로 소금빵 등",
+  "opentime": "11:00~20:00 (마지막 주문 19:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2925194",
+  "title": "카페건널목",
+  "addr": "강원특별자치도 태백시 어깨동무길 10 (황지동)",
+  "lat": 37.16,
+  "lng": 128.9886,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/76/2925176_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "연탄빵 연탄라떼 / 아인슈페너 / 흑당버블라떼 / 스무디 등",
+  "opentime": "08:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "08:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "681547",
+  "title": "태백으뜸한우",
+  "addr": "강원특별자치도 태백시 번영로 208 (황지동)",
+  "lat": 37.1622,
+  "lng": 128.9853,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/17/3043717_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "육회 한우불고기 / 갈비살 / 등심 등",
+  "opentime": "10:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "681650",
+  "title": "너와집",
+  "addr": "강원특별자치도 태백시 고원로 35",
+  "lat": 37.1614,
+  "lng": 128.9856,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/32/685732_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "너와정식 소갈비찜정식 / 옹기솥나물밥 / 산채비빔밥 등",
+  "opentime": "11:00~20:30 (준비시간 15:00~17:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2925173",
+  "title": "구와우순두부식당",
+  "addr": "강원특별자치도 태백시 구와우길 49-1",
+  "lat": 37.2078,
+  "lng": 128.9866,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/70/2925170_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "순두부 감자전 / 음료수 등",
+  "opentime": "10:30~15:00",
+  "restdate": "매주 일요일",
+  "hours": [
+   "10:30",
+   "15:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "태백",
+  "contentid": "3469333",
+  "title": "페이스투페이스",
+  "addr": "강원특별자치도 태백시 황지로 157 (황지동)",
+  "lat": 37.1726,
+  "lng": 128.9919,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/26/3469326_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "모히또(무알콜) 팥빙수 / 밤식빵 / 육쪽마늘빵 등",
+  "opentime": "11:00~23:00",
+  "restdate": "매주 일요일",
+  "hours": [
+   "11:00",
+   "23:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2375375",
+  "title": "태백닭갈비",
+  "addr": "강원특별자치도 태백시 중앙남1길 10",
+  "lat": 37.1714,
+  "lng": 128.9907,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/21/1823821_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물닭갈비",
+  "opentime": "10:00~21:00",
+  "restdate": "연중 무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "태백",
+  "contentid": "2833868",
+  "title": "모녀떡볶이 부평남부역점",
+  "addr": "강원특별자치도 태백시 광장로 16 (황지동)",
+  "lat": 37.1774,
+  "lng": 128.9858,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/58/2833858_image2_1.jpg",
+  "cat3": "FD030400",
+  "cafe": false,
+  "local": false,
+  "menu": "떡볶이 순대 / 튀김만두 / 김말이 등",
+  "opentime": "11:00~22:30",
+  "restdate": "설·추석 당일",
+  "hours": [
+   "11:00",
+   "22:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2877990",
+  "title": "텃밭에노는닭",
+  "addr": "강원특별자치도 삼척시 도계읍 도계로 334",
+  "lat": 37.2387,
+  "lng": 129.0457,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/87/2877987_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "매운맛 물닭갈비 순한맛 물닭갈비",
+  "opentime": "11:00~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2877979",
+  "title": "일품해물탕",
+  "addr": "강원특별자치도 삼척시 진주로 30-26 (남양동)",
+  "lat": 37.4433,
+  "lng": 129.1646,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/75/2877975_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "문어 해물탕 문어비빔밥 / 문어무침 / 자연산해삼 등",
+  "opentime": "- 11:00~21:00- 준비시간 15:00~17:00- 마지막 주문 13:30 / 19:30※ 재료 소진 시 조기 마감하므로 전화 문의 후 방문 요망",
+  "restdate": "매주 월요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2892150",
+  "title": "동막막국수",
+  "addr": "강원특별자치도 삼척시 근덕면 문의재로 3777-12",
+  "lat": 37.3371,
+  "lng": 129.2398,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/45/2892145_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물 막국수 비빔막국수 / 수육",
+  "opentime": "10:00~14:00 (마지막 주문 13:30)",
+  "restdate": "매주 월요일",
+  "hours": [
+   "10:00",
+   "14:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2891293",
+  "title": "봉평막국수",
+  "addr": "강원특별자치도 삼척시 회강길 609-28 (자원동)",
+  "lat": 37.4381,
+  "lng": 129.1444,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/88/2891288_image2_1.jpeg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "막국수 수육 / 녹두부침 / 감자부침 등",
+  "opentime": "- 11:00~20:00- 준비시간 14:30~16:30",
+  "restdate": "매주 수요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2877972",
+  "title": "오복미가",
+  "addr": "강원특별자치도 삼척시 새천년도로 511 (교동)",
+  "lat": 37.4654,
+  "lng": 129.1722,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/63/2877963_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "돌솥특정식 특물회 / 전복물회 / 대게세트 3인 등",
+  "opentime": "- 11:00~22:00- 준비시간 15:30~16:30- 마지막 주문 21:30※ 재료 소진 시 조기 마감하므로 전화 문의 후 방문 요망",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2605877",
+  "title": "동승춘",
+  "addr": "강원특별자치도 삼척시 대학로 12",
+  "lat": 37.4422,
+  "lng": 129.1635,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/79/2606379_image2_1.jpg",
+  "cat3": "FD020100",
+  "cafe": false,
+  "local": false,
+  "menu": "탕수육 쟁반짜장 / 새우볶음밥 / 짬뽕 / 유산슬 / 양장피 / 콩국수 등",
+  "opentime": "- 11:00~21:00- 준비시간 16:00~17:00- 마지막 주문 20:00※ 주말은 준비시간 없이 운영",
+  "restdate": "매월 두번째·네번째 일요일매월 첫번째·세번째 월요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "134371",
+  "title": "부일막국수",
+  "addr": "강원특별자치도 삼척시 새천년도로 596",
+  "lat": 37.4671,
+  "lng": 129.1638,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/01/3039501_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물막국수 비빔막국수 / 수육 / 사리",
+  "opentime": "11:00~15:30",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "15:30"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "135814",
+  "title": "삼척횟집",
+  "addr": "강원특별자치도 삼척시 새천년도로 125",
+  "lat": 37.4422,
+  "lng": 129.1922,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/76/3070576_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "모둠회 스페셜 물회 / 회덮밥 / 물회 등",
+  "opentime": "10:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2925262",
+  "title": "만남의식당",
+  "addr": "강원특별자치도 삼척시 새천년도로 84 (정하동)",
+  "lat": 37.4391,
+  "lng": 129.1907,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/43/2925243_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "곰치해장국 대구해장국",
+  "opentime": "08:00~15:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "08:00",
+   "15:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "4070900",
+  "title": "보보정",
+  "addr": "강원특별자치도 삼척시 대학로 47-46 (당저동)",
+  "lat": 37.4454,
+  "lng": 129.1623,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/48/4069448_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "티라미수라떼 아보카도커피 / 플레인요거트 / 홍시 스무디 등",
+  "opentime": "11:00~21:30 (마지막 주문 21:00)",
+  "restdate": "매주 월요일",
+  "hours": [
+   "11:00",
+   "21:30"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "4070892",
+  "title": "아가파오",
+  "addr": "강원특별자치도 삼척시 중앙시장길 77 (남양동)",
+  "lat": 37.4436,
+  "lng": 129.1656,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/73/4069573_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "문어소금빵 잭올리브 치아바타 / 솔금빵 / 앙버터소금빵 등",
+  "opentime": "08:00~21:00",
+  "restdate": "매주 일요일",
+  "hours": [
+   "08:00",
+   "21:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "삼척",
+  "contentid": "2811522",
+  "title": "두레박고을",
+  "addr": "강원특별자치도 삼척시 대학로 93 (교동)",
+  "lat": 37.4487,
+  "lng": 129.1652,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/90/3555090_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "낙지보쌈 낙지비빔밥 / 녹두전 등",
+  "opentime": "- 11:30~20:50- 준비시간 14:40~17:00- 마지막 주문 20:00※ 재료 소진 시 조기마감",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:30",
+   "20:50"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2807694",
+  "title": "홍천한우사랑말식당",
+  "addr": "강원특별자치도 홍천군 홍천로 13-5",
+  "lat": 37.7012,
+  "lng": 127.8527,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/41/4145641_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 한우불고기 / 한우육회 / 우족탕 등",
+  "opentime": "10:30~20:50",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:30",
+   "20:50"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2838013",
+  "title": "홍천원조화로구이",
+  "addr": "강원특별자치도 홍천군 홍천읍 양지말길 17-8",
+  "lat": 37.6599,
+  "lng": 127.8312,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/34/4145434_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "흑돼지화로구이 흑돼지소금구이 / 횡성양송이더덕구이 / 막국수 등",
+  "opentime": "[평일] - 10:30~20:30 - 마지막 주문 19:30 [주말] - 10:00~20:30 - 마지막 주문 19:30",
+  "restdate": "매주 목요일",
+  "hours": [
+   "10:30",
+   "20:30"
+  ],
+  "closed": [
+   4
+  ]
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2892475",
+  "title": "홍천조박사화로구이",
+  "addr": "강원특별자치도 홍천군 서면 한서로 2080",
+  "lat": 37.6204,
+  "lng": 127.6671,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/65/2892465_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "고추장삼겹살화로구이 목살소금구이 / 돼지왕갈비 / 숯불닭갈비 등",
+  "opentime": "09:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2892319",
+  "title": "들꽃가든",
+  "addr": "강원특별자치도 홍천군 서면 한서로 2045",
+  "lat": 37.6233,
+  "lng": 127.6652,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/08/2892308_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우모듬 삼겹살 / 한우등심 / 한우안심 등",
+  "opentime": "10:30~22:00 (마지막 주문 20:50)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:30",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2892030",
+  "title": "홍천강한우타운",
+  "addr": "강원특별자치도 홍천군 서면 한치골길 912",
+  "lat": 37.6905,
+  "lng": 127.6998,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/07/2891707_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우국밥 등심 / 안창살 / 왕갈비탕 등",
+  "opentime": "10:00~20:00※ 전화 문의 후 방문 요망",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2892439",
+  "title": "약이되는밥상",
+  "addr": "강원특별자치도 홍천군 서면 한치골길 956",
+  "lat": 37.694,
+  "lng": 127.7023,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/28/2892428_image2_1.jpeg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한방닭백숙 돌솥곤드레밥 / 무청시래기밥 / 닭볶음탕 등",
+  "opentime": "08:00~21:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "08:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2946244",
+  "title": "양지말화로구이",
+  "addr": "강원특별자치도 홍천군 홍천읍 양지말길 17-4",
+  "lat": 37.6595,
+  "lng": 127.8313,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/31/2947631_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "고추장 화로구이 간장 화로구이 / 더덕구이 / 막국수 등",
+  "opentime": "[평일] - 11:00~21:00 - 마지막 주문 20:30 [주말] - 10:00~21:00 - 마지막 주문 20:30",
+  "restdate": "매월 마지막 화요일 / 설·추석",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "135282",
+  "title": "강가촌",
+  "addr": "강원특별자치도 홍천군 서면 한치골길 1122-54",
+  "lat": 37.7014,
+  "lng": 127.695,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/70/3043070_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 쏘가리매운탕 / 쏘가리회 / 토종닭백숙 / 냄비비빔밥 / 해물파전 등",
+  "opentime": "09:00~22:00※ 방문 전 전화 문의 요망",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2684634",
+  "title": "러스틱라이프",
+  "addr": "강원특별자치도 홍천군 영귀미면 속새길 70",
+  "lat": 37.6819,
+  "lng": 127.9527,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/26/3555326_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "숲 핸드드립 봄 핸드드립 / 허니 샤케라또 아포카토 / 블렌딩 꽃차 / 곶감말이와 호두정과 등",
+  "opentime": "- 평일 11:00~17:00 (마지막 주문 16:30)- 주말 11:00~18:30 (마지막 주문 18:00)",
+  "restdate": "매주 월요일~화요일",
+  "hours": [
+   "11:00",
+   "17:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "135573",
+  "title": "형곤하우스",
+  "addr": "강원특별자치도 홍천군 서면 한서로 1901",
+  "lat": 37.6251,
+  "lng": 127.6512,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/87/449687_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우등심 돼지왕갈비 / 숯불닭갈비 / 삼겹살 등",
+  "opentime": "06:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "06:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2837945",
+  "title": "금수강산막국수",
+  "addr": "강원특별자치도 홍천군 서면 한치골길 785",
+  "lat": 37.6806,
+  "lng": 127.6971,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/39/2837939_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "메밀물막국수 메밀비빔막국수 / 수육 / 감자전 등",
+  "opentime": "10:30~20:00 (마지막 주문 19:30)",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "홍천",
+  "contentid": "2837997",
+  "title": "홍천메밀가",
+  "addr": "강원특별자치도 홍천군 서면 한치골길 759",
+  "lat": 37.6783,
+  "lng": 127.6964,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/84/2837984_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "메밀가 참깨막국수 들기름 고사리 막국수 / 돼지고기수육 / 메밀싹 육회막국수 등",
+  "opentime": "10:00~20:00 (마지막 주문 19:30)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2875762",
+  "title": "용둔막국수",
+  "addr": "강원특별자치도 횡성군 우천면 경강로 2883",
+  "lat": 37.4879,
+  "lng": 128.0721,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/58/2875758_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물 막국수 비빔 막국수 / 감자전 / 메밀전 등",
+  "opentime": "10:30~18:00 (마지막 주문 17:30)",
+  "restdate": "매월 둘째, 넷째 주 월요일",
+  "hours": [
+   "10:30",
+   "18:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2875812",
+  "title": "진소매운탕",
+  "addr": "강원특별자치도 횡성군 주천강로안흥2길 19-10",
+  "lat": 37.4017,
+  "lng": 128.1485,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/99/2875799_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "진소어탕칼국수 어탕국수전골 / 매운탕 / 감자수제비 / 감자부침 / 도토리묵무침 등",
+  "opentime": "- 11:00~20:00- 준비시간 16:00~17:00- 마지막 주문 19:00※ 매월 둘째 주, 넷째 주 월요일은 15시까지 영업",
+  "restdate": "매월 둘째 주, 넷째 주 화요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2875712",
+  "title": "새말토종순대",
+  "addr": "강원특별자치도 횡성군 우천면 우항새말길 20-16",
+  "lat": 37.4495,
+  "lng": 128.0776,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/09/2875709_image2_1.jpeg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "장순대국밥 새말수제순대 / 모듬순대 / 오소리감투 등",
+  "opentime": "[월요일~화요일/토요일~일요일]- 09:00~20:00- 준비시간 15:00~17:00- 점심 마지막 주문 14:30 / 저녁 마지막 주문 19:30[목요일~금요일]- 11:00~20:00- 준비시간 15:00~17:00- 점심 마지막 주문 14:30 / 저녁 마지막 주문 19:30",
+  "restdate": "매주 수요일",
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "3451068",
+  "title": "조가네",
+  "addr": "강원특별자치도 횡성군 횡성읍 섬강로 347",
+  "lat": 37.5136,
+  "lng": 128.003,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/28/3451028_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "횡성한우 육회 육회막국수 / 횡성한우사골 우거지탕 / 소불고기 덮밥 등",
+  "opentime": "11:30~20:00 (마지막 주문 19:30)",
+  "restdate": "매달 둘째 주, 넷째 주 목요일",
+  "hours": [
+   "11:30",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "134355",
+  "title": "들꽃피는언덕",
+  "addr": "강원특별자치도 횡성군 둔내면 고원로 158-27",
+  "lat": 37.5097,
+  "lng": 128.2253,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/71/612471_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "제육볶음 쌈밥정식 불고기 쌈밥정식 / 삼겹살 쌈밥정식 / 토종 닭볶음탕 / 토종 한방백숙",
+  "opentime": "- 11:00~21:00- 준비시간 15:00~16:30- 점심 마지막 주문 14:00- 저녁 마지막 주문 20:00",
+  "restdate": "매주 월요일, 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   1,
+   2
+  ]
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2929650",
+  "title": "노랑공장",
+  "addr": "강원특별자치도 횡성군 태기로 488",
+  "lat": 37.5131,
+  "lng": 128.027,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/06/2929606_image2_1.JPG",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "노랑피자 해물 짬뽕 파이스 / 횡성 한우 함박스테이스 / 노랑공장 브런치 등",
+  "opentime": "10:00~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2923240",
+  "title": "상하이루",
+  "addr": "강원특별자치도 횡성군 한우로 1406",
+  "lat": 37.4493,
+  "lng": 128.0751,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/36/2923236_image2_1.jpg",
+  "cat3": "FD020100",
+  "cafe": false,
+  "local": false,
+  "menu": "문어쟁반짜장 문어짬뽕 / 문어우동 / 문어전골 / 짜장면 등",
+  "opentime": "- 동절기 10:30~19:30 (일요일은 19:00까지)- 하절기 10:30~20:00 (일요일은 19:30까지)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:30",
+   "19:30"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "134368",
+  "title": "금강산숯불구이",
+  "addr": "강원특별자치도 횡성군 횡성읍 문화체육로 54",
+  "lat": 37.4954,
+  "lng": 127.9884,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/42/1022542_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 모듬 한우 등심 / 육회 / 돼지 숯불갈비 등",
+  "opentime": "10:00~22:00",
+  "restdate": "매월 첫째, 셋째, 다섯째 월요일",
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "607556",
+  "title": "태기산막국수",
+  "addr": "강원특별자치도 횡성군 둔내면 둔내로 73",
+  "lat": 37.5116,
+  "lng": 128.2186,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/87/4098687_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물막국수 비빔막국수 / 들깨막국수 / 수육 / 감자전 등",
+  "opentime": "10:00~19:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "19:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2774536",
+  "title": "광암막국수",
+  "addr": "강원특별자치도 횡성군 우천면 경강로 2887",
+  "lat": 37.488,
+  "lng": 128.0724,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/13/4095213_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물막국수 메밀간장비빔 막국수 / 명태비빔막국수 / 수육 등",
+  "opentime": "11:00~20:00 (마지막 주문 19:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2923260",
+  "title": "저문강에삽을씻고",
+  "addr": "강원특별자치도 횡성군 화성로 104 저문강에삽을씻고",
+  "lat": 37.4995,
+  "lng": 127.992,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/56/2923256_image2_1.jpg",
+  "cat3": "FD020500",
+  "cafe": false,
+  "local": false,
+  "menu": "저문강 스페셜 정식 돈까스 / 찹스테이크 / 차돌박이 로제 파스타 등",
+  "opentime": "[평일]- 11:30~21:00 (쉬는시간 16:00~17:00 / 마지막 주문 20:00)[주말]- 11:00~21:00 (쉬는시간 16:00~17:00 / 마지막 주문 20:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:30",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "횡성",
+  "contentid": "2875629",
+  "title": "둔내뼈짬뽕",
+  "addr": "강원특별자치도 횡성군 경강로둔방10길 14-1",
+  "lat": 37.5133,
+  "lng": 128.2132,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/61/4068561_image2_1.jpg",
+  "cat3": "FD020100",
+  "cafe": false,
+  "local": false,
+  "menu": "뼈짬뽕 뼈짬뽕전골 / 짜장면 / 짬뽕 / 짜장밥 / 군만두 등",
+  "opentime": "11:00~20:00- 준비시간 14:30~17:00- 마지막 주문 19:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2892559",
+  "title": "동강의아침",
+  "addr": "강원특별자치도 영월군 영월읍 동강로 100",
+  "lat": 37.1916,
+  "lng": 128.502,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/55/2892555_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "곤드레정식 오리훈제 / 생고기 한접시 / 동강정식 등",
+  "opentime": "11:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2816670",
+  "title": "중부내륙",
+  "addr": "강원특별자치도 영월군 하송안길 89 영월맨션아파트",
+  "lat": 37.1826,
+  "lng": 128.4671,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/00/4128100_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "영월미숫가루 아메리카노 / 라떼 / 아이스밀크티 등",
+  "opentime": "12:00~17:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "12:00",
+   "17:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2925199",
+  "title": "육정가",
+  "addr": "강원특별자치도 영월군 봉래산로 95-1",
+  "lat": 37.1914,
+  "lng": 128.4737,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/85/2925185_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "육즙 꽃목살 고소 통삼겹 / 탱글 등심덧살 / 된장찌개 등",
+  "opentime": "16:30~21:30",
+  "restdate": "매주 월요일",
+  "hours": [
+   "16:30",
+   "21:30"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "4110231",
+  "title": "기분조은 베이커리카페",
+  "addr": "강원특별자치도 영월군 영월읍 덕포시장길 38",
+  "lat": 37.182,
+  "lng": 128.4784,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/11/4108811_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "영월애빵 수수눈꽃빙수 / 단종의 후식 상차림 / 수수아이스크림(여름) 등",
+  "opentime": "09:30~18:00 (마지막 주문 17:30)",
+  "restdate": "매주 월요일",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2745986",
+  "title": "에이플",
+  "addr": "강원특별자치도 영월군 영월읍 덕포시장길 9",
+  "lat": 37.1815,
+  "lng": 128.4768,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/21/4107921_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "애플밀크티 햄치즈 에그샌드위치 / 몽글몽글 에그샌드위치 / 아메리카노 / 카페라떼 등",
+  "opentime": "11:00~18:00 (마지막 주문 17:30)",
+  "restdate": "매주 금요일",
+  "hours": [
+   "11:00",
+   "18:00"
+  ],
+  "closed": [
+   5
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2914140",
+  "title": "영월동강한우",
+  "addr": "강원특별자치도 영월군 하송안길 65",
+  "lat": 37.1821,
+  "lng": 128.4664,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/33/2914133_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "꽃등심 살치살 / 부채살 / 안심 / 불고기백반 / 차돌된장찌개 등",
+  "opentime": "10:30~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:30",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2925342",
+  "title": "물바람버섯농장식당",
+  "addr": "강원특별자치도 영월군 영월로 3206-8",
+  "lat": 37.1907,
+  "lng": 128.5687,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/76/4075076_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "버섯정식 버섯전골 / 버섯강정 / 버섯불고기 등",
+  "opentime": "10:00~20:00 (마지막 주문 19:00)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2915567",
+  "title": "옥동양어장횟집",
+  "addr": "강원특별자치도 영월군 영월동로 1547",
+  "lat": 37.1218,
+  "lng": 128.5611,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/59/2915559_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 철갑상어회 / 회덮밥 / 송어튀김 등",
+  "opentime": "11:00~20:00 (마지막 주문 19:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "영월",
+  "contentid": "2855525",
+  "title": "오그란이 단팥빵",
+  "addr": "강원특별자치도 영월군 태화산로 234",
+  "lat": 37.1455,
+  "lng": 128.4894,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/12/2855512_image2_1.JPG",
+  "cat3": "FD030100",
+  "cafe": true,
+  "local": false,
+  "menu": "수제단팥빵 인절미크림단팥빵 / 생크림단팥빵 등",
+  "opentime": "10:00~20:00",
+  "restdate": "매주 월요일, 화요일, 수요일, 목요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   1,
+   2,
+   3,
+   4
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2789053",
+  "title": "카페921",
+  "addr": "강원특별자치도 평창군 용평면 안인평2길 29",
+  "lat": 37.563,
+  "lng": 128.4238,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/61/4143961_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "꿀메리카노 바닐라빈라떼 / 921스페셜 / 제주말차라떼 등",
+  "opentime": "10:00~20:00※ 자세한 사항은 전화 문의 요망",
+  "restdate": "매주 월요일~화요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2874552",
+  "title": "유천막국수 본점",
+  "addr": "강원특별자치도 평창군 대관령면 만과봉길 58",
+  "lat": 37.6706,
+  "lng": 128.6007,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/24/2874524_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "메밀막국수 비빔막국수 / 도토리묵사발 / 꿩만두국 등",
+  "opentime": "10:30~19:30 (마지막 주문 19:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:30",
+   "19:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2777908",
+  "title": "수미카페",
+  "addr": "강원특별자치도 평창군 대관령면 횡계길 24",
+  "lat": 37.6732,
+  "lng": 128.7087,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/88/4143888_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "수미감자빵 단호박빵 / 에스프레소 / 아메리카노 등",
+  "opentime": "10:00~21:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2783427",
+  "title": "방림추어탕",
+  "addr": "강원특별자치도 평창군 방림면 서동로 1334",
+  "lat": 37.4259,
+  "lng": 128.3933,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/99/4143799_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "추어탕 메기매운탕",
+  "opentime": "- 10:00~20:00 - 준비시간 15:00~16:30 ※ 명절 기간에는 영업시간이 상이할 수 있음",
+  "restdate": "매주 일요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2683896",
+  "title": "미락초밥",
+  "addr": "강원특별자치도 평창군 진부면 진부중앙로 77",
+  "lat": 37.6384,
+  "lng": 128.5593,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/49/4143749_image2_1.jpg",
+  "cat3": "FD020200",
+  "cafe": false,
+  "local": false,
+  "menu": "모듬초밥 연어초밥 / 새우초밥 / 날치알밥 / 미락우동 등",
+  "opentime": "- 11:00~20:00- 마지막 주문 19:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2789921",
+  "title": "동원막국수",
+  "addr": "강원특별자치도 평창군 미탄면 미탄중앙로 114",
+  "lat": 37.3398,
+  "lng": 128.5023,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/06/4143706_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물막국수 비빔막국수 / 수육 / 왕만두 등",
+  "opentime": "- 11:00~22:00- 준비시간 15:30~17:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "평창",
+  "contentid": "628661",
+  "title": "동대산식당",
+  "addr": "강원특별자치도 평창군 진부면 오대산로 152",
+  "lat": 37.7167,
+  "lng": 128.6019,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/80/590980_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "산채정식 떡갈비정식 / 황태구이정식 / 산채비빔밥 등",
+  "opentime": "매일 10:00~18:00 (마지막 주문 17:30)※ 계절 및 재료 소진에 따라 변동 가능",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "평창",
+  "contentid": "135532",
+  "title": "봉평메밀미가연",
+  "addr": "강원특별자치도 평창군 봉평면 기풍로 108",
+  "lat": 37.612,
+  "lng": 128.3783,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/78/3567978_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "이대팔 100% 육회 비빔국수 명품 메밀싹 육회 / 수제묵무침 / 이대팔 100% 메밀물국수 등",
+  "opentime": "10:00~17:00",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2787227",
+  "title": "강원수산횟집",
+  "addr": "강원특별자치도 평창군 미탄면 송어길 30-4",
+  "lat": 37.343,
+  "lng": 128.5031,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/79/2787179_image2_1.jpg",
+  "cat3": "FD020200",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 송어튀김 /송어구이 / 어린이 돈가스 등",
+  "opentime": "11:00~20:00 (마지막 주문 19:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "평창",
+  "contentid": "2779919",
+  "title": "봉평메밀 초가집옛골",
+  "addr": "강원특별자치도 평창군 봉평면 메밀꽃길 7",
+  "lat": 37.6148,
+  "lng": 128.3716,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/07/2779907_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "흑드레순메밀국수 순메밀 비빔국수 / 감자옹심이 / 순메밀 옛골모듬 등",
+  "opentime": "[월요일~토요일]- 10:00~19:00- 준비시간 16:00~17:00- 마지막 주문 18:50[일요일]- 10:00~16:00- 마지막 주문 15:50",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "134095",
+  "title": "고향이야기",
+  "addr": "강원특별자치도 평창군 대관령면 눈마을길 9",
+  "lat": 37.6691,
+  "lng": 128.71,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/76/816876_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우생등심 곤드레돌솥밥 / 김치찌개 / 황태 미역국 등",
+  "opentime": "- 영업시간 11:00~21:00- 준비시간 14:00~17:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "평창",
+  "contentid": "135079",
+  "title": "메밀꽃필무렵",
+  "addr": "강원특별자치도 평창군 봉평면 이효석길 33-13",
+  "lat": 37.6109,
+  "lng": 128.3603,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/20/3076920_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "간장나물메밀국수 (비빔) 메밀물국수 / 메밀비빔국수 / 수제메밀묵 등",
+  "opentime": "09:30~19:30 (마지막 주문 19:00)",
+  "restdate": "연중무휴 / 재료 소진 시 조기마감",
+  "hours": [
+   "09:30",
+   "19:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "631972",
+  "title": "동광식당",
+  "addr": "강원특별자치도 정선군 정선읍 녹송1길 27",
+  "lat": 37.3829,
+  "lng": 128.6716,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/79/3044979_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "황기족발 냉콧등치기 / 콧등치기 / 올챙이국수 등",
+  "opentime": "09:00~21:00 (마지막 주문 20:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "4106081",
+  "title": "단임길",
+  "addr": "강원특별자치도 정선군 정선읍 5일장길 20",
+  "lat": 37.3804,
+  "lng": 128.6637,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/98/4105398_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "고로쇠리카노 더덕밀크쉐이크 / 찰옥수수빵 / 메들렌 등",
+  "opentime": "09:30~17:30",
+  "restdate": "연중무휴※ 임시휴업은 네이버/인스타그램 공지 확인",
+  "hours": [
+   "09:30",
+   "17:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2774502",
+  "title": "함백산돌솥밥",
+  "addr": "강원특별자치도 정선군 고한읍 상갈래길 1",
+  "lat": 37.1942,
+  "lng": 128.868,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/64/2776964_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "곤드레돌솥정식 함백산돌솥밥",
+  "opentime": "11:00~16:00",
+  "restdate": "매주 수요일",
+  "hours": [
+   "11:00",
+   "16:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2923560",
+  "title": "백봉령쉼터1호 정희네",
+  "addr": "강원특별자치도 정선군 임계면 서동로 5938-1",
+  "lat": 37.5335,
+  "lng": 128.9447,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/55/2923555_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "감자옹심이 매밀냉국수 / 수수부꾸미 / 꿩만두국 등",
+  "opentime": "10:00~19:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2913319",
+  "title": "군언송어횟집",
+  "addr": "강원특별자치도 정선군 정선읍 애산로 171",
+  "lat": 37.3861,
+  "lng": 128.6727,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/34/4081334_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 송어튀김 / 장어구이 / 매운탕 등",
+  "opentime": "- 11:00~21:00- 마지막 주문 20:00",
+  "restdate": "매달 둘째 주, 넷째 주 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2922682",
+  "title": "넌 커피",
+  "addr": "강원특별자치도 정선군 남면 자뭇골길 272-16",
+  "lat": 37.2407,
+  "lng": 128.7577,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/60/3550060_image2_1.jpeg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "정선 사과주스 넌사과차 / 넌레몬차 / 소금빵 / 다과한상 등",
+  "opentime": "- 11:00~18:30- 마지막 주문 18:00",
+  "restdate": "매주 목요일",
+  "hours": [
+   "11:00",
+   "18:30"
+  ],
+  "closed": [
+   4
+  ]
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2925290",
+  "title": "대숲마을",
+  "addr": "강원특별자치도 정선군 함백산로 1675",
+  "lat": 37.1941,
+  "lng": 128.8681,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/82/2925282_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "생선구이+명품돌솥곤드레정식 명품돌솥곤드레정식 / 생선구이정식 등",
+  "opentime": "- 09:30~20:00- 쉬는시간 14:30~15:30- 마지막 주문 19:00",
+  "restdate": "매주 목요일",
+  "hours": [
+   "09:30",
+   "20:00"
+  ],
+  "closed": [
+   4
+  ]
+ },
+ {
+  "sigun": "정선",
+  "contentid": "2711377",
+  "title": "나전역카페",
+  "addr": "강원특별자치도 정선군 북평8길 38",
+  "lat": 37.4498,
+  "lng": 128.6684,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/97/2731297_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "나전역크림커피 나전역크림커피 / 곤드레아란치니 / 말렌카허니케이크 등",
+  "opentime": "10:00~19:00 (18:30 라스트오더)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "3467919",
+  "title": "정선애장어먹으러와요",
+  "addr": "강원특별자치도 정선군 북평면 장열길 13",
+  "lat": 37.4566,
+  "lng": 128.6753,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/12/3467912_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "장어구이 열무국수 / 수제비장어탕 / 누룽지탕 등",
+  "opentime": "- 11:00~21:00- 마지막 주문 19:30",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "정선",
+  "contentid": "3474425",
+  "title": "피고지고",
+  "addr": "강원특별자치도 정선군 고한읍 고한6길 9-13",
+  "lat": 37.2011,
+  "lng": 128.8542,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/03/3474403_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "뻥개탄 칩 구공탄빵 / 석탄빵 / 메리골드차 등",
+  "opentime": "- 10:30~20:00 - 마지막 주문 19:00",
+  "restdate": "매주 일요일",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "정선",
+  "contentid": "134241",
+  "title": "혜원가든",
+  "addr": "강원특별자치도 정선군 사북읍 사북중앙로 18-1",
+  "lat": 37.2268,
+  "lng": 128.8166,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/12/1822512_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우등심 갈비살 / 갈비탕 / 삼겹살",
+  "opentime": "09:00~23:00",
+  "restdate": "명절연휴",
+  "hours": [
+   "09:00",
+   "23:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "정선",
+  "contentid": "627999",
+  "title": "정선황기막국수",
+  "addr": "강원특별자치도 정선군 정선읍 5일장길 31-9",
+  "lat": 37.3808,
+  "lng": 128.6641,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/68/591168_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "정선황기막국수 비빔막국수 / 쟁반막국수 / 황기해장국 / 곤드레밥 등",
+  "opentime": "06:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "06:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2855566",
+  "title": "철원 솔향기",
+  "addr": "강원특별자치도 철원군 동송읍 금학로 31-10",
+  "lat": 38.1929,
+  "lng": 127.2267,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/59/2855559_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "복터진만두전골 솔향기오색냉채 / 육회 등",
+  "opentime": "[평일]- 10:30~20:00- 준비시간 14:30~16:30- 마지막 주문 19:00[주말]- 10:30~20:00- 준비시간 15:00~16:30- 마지막 주문 19:00",
+  "restdate": "매주 월요일",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2923166",
+  "title": "연사랑",
+  "addr": "강원특별자치도 철원군 갈말읍 갈말로 653-2",
+  "lat": 38.2037,
+  "lng": 127.2855,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/65/2923165_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "철원밥상 제육볶음 / 미나리수육 / 돌미나리 전 등",
+  "opentime": "- 11:00~20:00- 준비시간 15:00~17:00- 마지막 주문 18:45",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2925529",
+  "title": "카페은하수",
+  "addr": "강원특별자치도 철원군 한탄강길 112",
+  "lat": 38.1998,
+  "lng": 127.2775,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/24/2925524_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "리얼 딸기라떼 아인슈페너 / 뱅쇼 / 카페오렌지몬스터 / 아메리카노 등",
+  "opentime": "[평일]- 10:00~22:00 (마지막 주문 21:30)[주말]- 09:00~22:00 (마지막 주문 21:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2925495",
+  "title": "삼정콩마을가마솥두부집",
+  "addr": "강원특별자치도 철원군 태봉로 1834 삼정콩마을두부집",
+  "lat": 38.1885,
+  "lng": 127.2878,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/91/2925491_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "두부버섯전골 두부구이 / 두부 청국장 / 순두부 보리밥 등",
+  "opentime": "10:30~19:00 (마지막 주문 15:30~17:30)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:30",
+   "19:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2809927",
+  "title": "오대오리",
+  "addr": "강원특별자치도 철원군 창동로 2413",
+  "lat": 38.1874,
+  "lng": 127.2873,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/42/4094642_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "누룽지오리백숙 생오리로스 / 오대오리정식 / 훈제오리 / 오리탕 등",
+  "opentime": "11:00~20:00 (마지막 주문 19:00)",
+  "restdate": "매주 화요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2923176",
+  "title": "인경 화이트하우스",
+  "addr": "강원특별자치도 철원군 두루미로 118 인경 화이트하우스",
+  "lat": 38.1866,
+  "lng": 127.3194,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/71/2923171_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "소금빵 인경철원찹쌀떡 / 몽블랑 / 현무암빵 등",
+  "opentime": "10:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "철원",
+  "contentid": "3557484",
+  "title": "기와집 철원본점",
+  "addr": "강원특별자치도 철원군 갈말읍 갈말로 369",
+  "lat": 38.1859,
+  "lng": 127.3066,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/68/3557468_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "매콤제육쌈밥 간장제육쌈밥 / 소불고기쌈밥 / 소불고기전골 등",
+  "opentime": "- 11:00~20:00- 준비시간 15:00~17:00- 마지막 주문 19:00",
+  "restdate": "매주 목요일 / 설·추석 당일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   4
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "3572998",
+  "title": "철원한우마을",
+  "addr": "강원특별자치도 철원군 갈말읍 호국로 4535",
+  "lat": 38.1293,
+  "lng": 127.2987,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/87/3572987_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "불고기 무한리필 육회비빔밥 / 도가니탕 / 우거탕 등",
+  "opentime": "06:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "06:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "철원",
+  "contentid": "134048",
+  "title": "어랑손만두국",
+  "addr": "강원특별자치도 철원군 동송읍 태봉로 1831",
+  "lat": 38.1879,
+  "lng": 127.2877,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/79/1842779_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "어랑손만두국 어랑만두전골 / 어랑찐만두 / 황태해장국 등",
+  "opentime": "[평일]- 09:30~15:00[주말]- 09:30~19:30- 준비시간 15:00~17:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "09:30",
+   "15:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "철원",
+  "contentid": "134051",
+  "title": "운정가든",
+  "addr": "강원특별자치도 철원군 동송읍 이평로 76",
+  "lat": 38.2092,
+  "lng": 127.2151,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/32/1952732_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 암소 등심 한우생갈비 / 돼지갈비 등",
+  "opentime": "- 07:00~22:00 마지막 주문 21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "07:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "철원",
+  "contentid": "2855578",
+  "title": "한탄강빵명장",
+  "addr": "강원특별자치도 철원군 한탄강길 28",
+  "lat": 38.1938,
+  "lng": 127.2813,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/75/2855575_image2_1.JPG",
+  "cat3": "FD030100",
+  "cafe": true,
+  "local": false,
+  "menu": "블루베리베이글 삼색롤 / 호두롤 / 크림치즈카스테라 등",
+  "opentime": "09:30~18:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "화천",
+  "contentid": "133487",
+  "title": "강변횟집",
+  "addr": "강원특별자치도 화천군 간동면 배터길 45",
+  "lat": 38.0961,
+  "lng": 127.7756,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/30/1022530_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "쏘가리 매운탕 쏘가리회 / 산천어회 / 향어회 / 송어회 등",
+  "opentime": "10:00~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "화천",
+  "contentid": "2844130",
+  "title": "신풍루",
+  "addr": "강원특별자치도 화천군 상서면 영서로 6445",
+  "lat": 38.1202,
+  "lng": 127.6824,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/25/2844125_image2_1.JPG",
+  "cat3": "FD020100",
+  "cafe": false,
+  "local": false,
+  "menu": "짜장면 짬뽕 / 우동 / 고추잡채 등",
+  "opentime": "- 10:00~16:00 / - 마지막 주문 15:30",
+  "restdate": "매주 토요일",
+  "hours": [
+   "10:00",
+   "16:00"
+  ],
+  "closed": [
+   6
+  ]
+ },
+ {
+  "sigun": "화천",
+  "contentid": "2844141",
+  "title": "추억만들기",
+  "addr": "강원특별자치도 화천군 사내면 포화로 460",
+  "lat": 38.0767,
+  "lng": 127.4701,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/37/2844137_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "누룽지백숙 닭볶음탕 / 감자전 / 도토리묵 등",
+  "opentime": "10:00~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "화천",
+  "contentid": "2789510",
+  "title": "화천어죽탕",
+  "addr": "강원특별자치도 화천군 간동면 파로호로 91",
+  "lat": 38.0939,
+  "lng": 127.7602,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/55/2796055_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "잡고기 어죽탕 감자부침 / 두부구이 / 파전 등",
+  "opentime": "09:00~19:00",
+  "restdate": "비정기 휴무",
+  "hours": [
+   "09:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "화천",
+  "contentid": "2844119",
+  "title": "광덕 별아래",
+  "addr": "강원특별자치도 화천군 천문대길 8",
+  "lat": 38.103,
+  "lng": 127.4431,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/16/2844116_image2_1.JPG",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "달고나 케이크, 눈꽃 인절미 팥빙수 브루잉 발효커피, 에스프레소, 수제청 차, 에이드, 나무꾼 케이크",
+  "opentime": "12:00~19:00 (금, 토 10:30~21:00)",
+  "restdate": "매주 월요일, 화요일, 목요일",
+  "hours": [
+   "12:00",
+   "19:00"
+  ],
+  "closed": [
+   1,
+   2,
+   4
+  ]
+ },
+ {
+  "sigun": "화천",
+  "contentid": "2844154",
+  "title": "햇골막국수",
+  "addr": "강원특별자치도 화천군 햇골길 200",
+  "lat": 38.0629,
+  "lng": 127.5184,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/50/2844150_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "막국수 편육, 손두부, 도토리묵",
+  "opentime": "10:00 ~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2925454",
+  "title": "전주식당",
+  "addr": "강원특별자치도 양구군 비봉로 91-23",
+  "lat": 38.11,
+  "lng": 127.9863,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/52/2925452_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "촌두부전골 돼지고기 김치찌개 / 두부구이 / 주물럭 등",
+  "opentime": "09:00~20:00 (준비시간 15:00~17:00)",
+  "restdate": "매주 월요일",
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "양구",
+  "contentid": "133700",
+  "title": "석장골오골계숯불구이",
+  "addr": "강원특별자치도 양구군 양구읍 양록길23번길 16-7",
+  "lat": 38.1082,
+  "lng": 127.9857,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/13/1035713_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "오골계숯불구이 오골계백숙",
+  "opentime": "12:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "12:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "626786",
+  "title": "밤나무집",
+  "addr": "강원특별자치도 양구군 양구읍 소양석현길 34",
+  "lat": 38.046,
+  "lng": 127.9786,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/89/590889_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 향어회 / 매운탕 / 산채비빔밥 / 민물장어구이 / 감자전",
+  "opentime": "09:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2913429",
+  "title": "강원한우정육식당",
+  "addr": "강원특별자치도 양구군 정중앙로 202",
+  "lat": 38.0791,
+  "lng": 128.0179,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/14/2913414_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 부채살 한우 채끗등심 / 한우 갈비살 / 육사시미 등",
+  "opentime": "- 10:00~21:00- 준비시간 16:00~17:00- 마지막 주문 20:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2925313",
+  "title": "김용복횟집",
+  "addr": "강원특별자치도 양구군 양구읍 사명길 108",
+  "lat": 38.1071,
+  "lng": 127.9886,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/02/2925302_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "모듬회 물회 / 도미회 / 산낙지 등",
+  "opentime": "11:00~23:59",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "23:59"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "4081915",
+  "title": "양구농사꾼",
+  "addr": "강원특별자치도 양구군 양구읍 파로호로 937-30",
+  "lat": 38.117,
+  "lng": 127.9812,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/40/4081740_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "애플크림라떼 원조 감자빵 / 애플히비스커스티 / 애플시나몬티 등",
+  "opentime": "- 10:00~22:00 (마지막 주문 21:30)- 11월~2월 10:00~20:00 (마지막 주문 19:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2927000",
+  "title": "도촌막국수",
+  "addr": "강원특별자치도 양구군 국토정중앙로 6",
+  "lat": 38.0779,
+  "lng": 128.0222,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/90/2926990_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "막국수 메밀전병 / 편육 / 감자부침 등",
+  "opentime": "- 10:00~19:00- 마지막 주문 18:30",
+  "restdate": "매주 월요일",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2913456",
+  "title": "양구손냉면",
+  "addr": "강원특별자치도 양구군 국토정중앙면 정중앙로 183-6",
+  "lat": 38.0804,
+  "lng": 128.0161,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/40/2913440_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "회냉면 홍어무침 / 물냉면 / 비빔냉면 / 새우만두 / 메밀전병 등",
+  "opentime": "11:30~14:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:30",
+   "14:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2857117",
+  "title": "배꼽제빵소",
+  "addr": "강원특별자치도 양구군 양구읍 박수근로365번길 20-2",
+  "lat": 38.1053,
+  "lng": 127.9811,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/02/2857102_image2_1.JPG",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "아메리카노 카페라떼 / 유자티 / 캐모마일 등",
+  "opentime": "09:30~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:30",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양구",
+  "contentid": "2845738",
+  "title": "시래정",
+  "addr": "강원특별자치도 양구군 황강길 16-23",
+  "lat": 38.0898,
+  "lng": 127.9974,
+  "photo": "http://tong.visitkorea.or.kr/cms/resource/15/2845715_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "시래정 정식 웰빙 정식, 고등어구이, 숯불돼지갈비 등",
+  "opentime": "11:00~20:00 (주문 마감 19:00)",
+  "restdate": "매주 일요일",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "인제",
+  "contentid": "134492",
+  "title": "원대막국수",
+  "addr": "강원특별자치도 인제군 인제읍 자작나무숲길 1113",
+  "lat": 38.0023,
+  "lng": 128.2315,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/51/3042051_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "막국수 막국수 / 곱배기 / 곰취수육 / 감자전 / 도토리묵무침 등",
+  "opentime": "[평일]10:00~16:30 (마지막 주문 16:00)[주말]10:00~17:00 (마지막 주문 16:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "16:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "2923158",
+  "title": "카페 하추리",
+  "addr": "강원특별자치도 인제군 인제읍 하추로 187",
+  "lat": 38.0197,
+  "lng": 128.282,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/37/2923137_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "하추커피 하추크림라떼 / 아메리카노 / 돌체라떼 / 하추차 등",
+  "opentime": "10:00~18:00 (마지막 주문 17:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "134190",
+  "title": "두무대식당",
+  "addr": "강원특별자치도 인제군 기린면 조침령로 1233",
+  "lat": 37.9682,
+  "lng": 128.4165,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/04/1842504_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 송어튀김 / 매운탕 등",
+  "opentime": "11:30~20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:30",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "135113",
+  "title": "방태산황토펜션식당",
+  "addr": "강원특별자치도 인제군 기린면 방태산길 119",
+  "lat": 37.9389,
+  "lng": 128.3829,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/81/2489981_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "토종닭엄나무황기백숙 토종닭볶음탕 / 민물매운탕 / 생고기삼겹살 등",
+  "opentime": "08:00~22:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "08:00",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "133036",
+  "title": "일미장",
+  "addr": "강원특별자치도 인제군 인제읍 인제로188번길 1",
+  "lat": 38.0686,
+  "lng": 128.1717,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/00/1813700_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우 생갈비 / 꽃등심 / 한돈 등",
+  "opentime": "11:30~21:00 (준비시간 13:30~17:00)",
+  "restdate": "매주 일요일",
+  "hours": [
+   "11:30",
+   "21:00"
+  ],
+  "closed": [
+   0
+  ]
+ },
+ {
+  "sigun": "인제",
+  "contentid": "4095616",
+  "title": "하늘내린 막국수",
+  "addr": "강원특별자치도 인제군 인제읍 내린천로 6082-8",
+  "lat": 38.0344,
+  "lng": 128.2156,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/21/4095621_image2_1.jpg",
+  "cat3": "FD010200",
+  "cafe": false,
+  "local": true,
+  "menu": "들기름 막국수 동치미 막국수 / 명태회 막국수 / 감자전 등",
+  "opentime": "- 10:00~18:30 - 마지막 주문 18:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "18:30"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "인제",
+  "contentid": "135924",
+  "title": "백담산촌식당",
+  "addr": "강원특별자치도 인제군 미시령로 1197",
+  "lat": 38.2011,
+  "lng": 128.3467,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/34/219934_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "황태구이정식 황태해장국 / 더덕구이 / 산채비빔밥 등",
+  "opentime": "07:00~20:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "07:00",
+   "20:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "133224",
+  "title": "백담순두부",
+  "addr": "강원특별자치도 인제군 북면 백담로 19",
+  "lat": 38.1967,
+  "lng": 128.3449,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/28/1813728_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "순두부정식 산채비빔밥 / 황태구이정식 / 더덕구이정식 등",
+  "opentime": "[4월~11월]- 07:00~19:00[12월~3월]- 08:00~18:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "07:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "인제",
+  "contentid": "627593",
+  "title": "백담폭포송어횟집",
+  "addr": "강원특별자치도 인제군 북면 만해로 224-9",
+  "lat": 38.1919,
+  "lng": 128.3271,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/48/591948_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "송어회 송어매운탕 / 송어살튀김 / 송어강정 / 송어회덮밥 / 송어초밥 등",
+  "opentime": "11:00~21:00",
+  "restdate": "매월 첫째, 둘째, 셋째 화요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2774691",
+  "title": "영순네횟집",
+  "addr": "강원특별자치도 고성군 토성면 봉포해변길 99",
+  "lat": 38.2496,
+  "lng": 128.5676,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/72/4128872_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "회랑게랑 set 모둠회 / 물회 / 특물회 / 자연산 스페셜 / 멍게비빔밥 / 성게알 비빔밥 등",
+  "opentime": "- 10:00~21:30- 준비시간 15:00~16:00- 마지막 주문 20:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2839772",
+  "title": "커피고",
+  "addr": "강원특별자치도 고성군 토성로 84 해맞이하우스",
+  "lat": 38.2538,
+  "lng": 128.5636,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/05/4128905_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "시크니처 크림 코르타도 스페셜티 필터커피 / 비치크런치 / 오자몽주스 등",
+  "opentime": "- 09:00~19:30- 마지막 주문 19:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "19:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2929473",
+  "title": "오엔씨",
+  "addr": "강원특별자치도 고성군 천학정길 19 오엔씨",
+  "lat": 38.2901,
+  "lng": 128.5474,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/96/4128896_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "오엔씨 라떼 오엔씨 크림 라떼 / 흑임자 카페 라떼 / 아그작 라떼 등",
+  "opentime": "- 10:00~17:00- 마지막 주문 16:30",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2874281",
+  "title": "녹원식당",
+  "addr": "강원특별자치도 고성군 교암길 60 녹원식당",
+  "lat": 38.2905,
+  "lng": 128.5465,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/44/4127744_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "생선모듬찜 가오리찜, 오징어볶음, 제육볶음",
+  "opentime": "10:00~20:00 (마지막 주문 19:00)",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2514823",
+  "title": "해오름거진항생선찜",
+  "addr": "강원특별자치도 고성군 거진읍 반암길 38",
+  "lat": 38.4224,
+  "lng": 128.4625,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/32/3016332_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "코다리 조림 모듬생선조림",
+  "opentime": "- 11:00~21:00- 준비시간 15:00~17:00- 마지막 주문 19:00",
+  "restdate": "매주 수요일",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2514832",
+  "title": "청보횟집",
+  "addr": "강원특별자치도 고성군 죽왕면 공현진해변길 95-3",
+  "lat": 38.356,
+  "lng": 128.5099,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/90/3016290_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "망치·삼숙이 매운탕 모둠회 / 멍게비빔밥 / 회덮밥 등",
+  "opentime": "10:00~20:30 (준비시간 15:00~17:30)",
+  "restdate": "매달 1, 3번째 화요일",
+  "hours": [
+   "10:00",
+   "20:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "624962",
+  "title": "성진회관",
+  "addr": "강원특별자치도 고성군 거진읍 거탄진로 99",
+  "lat": 38.444,
+  "lng": 128.4533,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/94/3474994_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "생태찌개 생대구탕 / 된장찌개 / 김치찌개 / 제육볶음 / 북어국 등",
+  "opentime": "- 07:30~20:00- 준비시간 14:20~17:20- 마지막 주문 19:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "07:30",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2569453",
+  "title": "테일",
+  "addr": "강원특별자치도 고성군 죽왕면 가진길 40-5",
+  "lat": 38.3728,
+  "lng": 128.5087,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/57/3589657_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "테일라떼 핸드드립커피 / 아인슈페너 / 드립모카 / 쑥라떼 등",
+  "opentime": "10:00~18:00",
+  "restdate": "매주 수요일~목요일",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2839784",
+  "title": "태시트 TACIT",
+  "addr": "강원특별자치도 고성군 청간정길 25-2",
+  "lat": 38.2662,
+  "lng": 128.5575,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/13/4109213_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "태시트 라떼 아메리카노, 라떼, 크림커피 등",
+  "opentime": "10:00~18:30 (마지막 주문 18:00)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "18:30"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2809044",
+  "title": "바다정원",
+  "addr": "강원특별자치도 고성군 토성면 버리깨길 23",
+  "lat": 38.2312,
+  "lng": 128.5827,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/77/3555277_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": false,
+  "menu": "정원라떼 마늘빵 / 수제 카라멜 마끼아또 / 수제 카라멜 밀크쉐이크 등",
+  "opentime": "- 09:30~22:00- 마지막 주문 21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:30",
+   "22:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2929455",
+  "title": "베짱이 문어국밥",
+  "addr": "강원특별자치도 고성군 천학정길 12 교암다이빙리조트",
+  "lat": 38.2893,
+  "lng": 128.548,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/53/2929453_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "문어국밥 고기폭탄국수 / 문어전 / 미니숙회 등",
+  "opentime": "- 평일 10:00~15:00 (마지막 주문 14:00)- 주말 08:00~16:00 (마지막 주문 15:00)",
+  "restdate": "매주 수요일",
+  "hours": [
+   "10:00",
+   "15:00"
+  ],
+  "closed": [
+   3
+  ]
+ },
+ {
+  "sigun": "고성",
+  "contentid": "2946633",
+  "title": "송지호막국수 고성본점",
+  "addr": "강원특별자치도 고성군 죽왕면 동해대로 5866",
+  "lat": 38.3261,
+  "lng": 128.5256,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/99/2947199_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "회막국수 막국수 / 수육 / 메밀전병 등",
+  "opentime": "- 11:00~19:00- 마지막 주문 18:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "11:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2892381",
+  "title": "메밀꽃향기",
+  "addr": "강원특별자치도 양양군 강현면 진미로 218",
+  "lat": 38.1376,
+  "lng": 128.5921,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/72/2892372_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "들기름막국수 들깨감자옹심이 / 메밀막국수 / 소고기 육전 등",
+  "opentime": "[수요일]- 10:00~15:00[금요일~화요일]- 10:00~19:00",
+  "restdate": "매주 목요일",
+  "hours": [
+   "10:00",
+   "15:00"
+  ],
+  "closed": [
+   4
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2892498",
+  "title": "하조맛식당",
+  "addr": "강원특별자치도 양양군 현북면 하륜길 8",
+  "lat": 38.02,
+  "lng": 128.7241,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/89/2892489_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "생선구이돌솥밥 돌솥비빔밥 / 삼겹살 / 제육볶음 등",
+  "opentime": "09:00~20:00※ 전화 문의 후 방문 요망",
+  "restdate": "연중무휴",
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2892400",
+  "title": "사랑대게",
+  "addr": "강원특별자치도 양양군 손양면 선사유적로 721",
+  "lat": 38.09,
+  "lng": 128.6605,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/89/2892389_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "킹크랩 대게 / 모둠회 / 자연산모둠회 등",
+  "opentime": "10:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2892419",
+  "title": "송월메밀국수",
+  "addr": "강원특별자치도 양양군 동명로 282-4 송월메밀국수",
+  "lat": 38.0875,
+  "lng": 128.6535,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/08/2892408_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물메밀국수 비빔메밀국수, 수육, 문어, 순모두부 등",
+  "opentime": "09:30~16:00",
+  "restdate": "매주 화요일",
+  "hours": [
+   "09:30",
+   "16:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "133322",
+  "title": "입암메밀타운",
+  "addr": "강원특별자치도 양양군 현남면 화상천로 155",
+  "lat": 37.9246,
+  "lng": 128.7772,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/18/3071518_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물막국수 비빔막국수 / 수육 / 사리 등",
+  "opentime": "- 10:00~18:00- 준비시간 14:30~15:30- 마지막 주문 17:30",
+  "restdate": "매주 월요일",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "133783",
+  "title": "천선식당",
+  "addr": "강원특별자치도 양양군 양양읍 남대천로 13",
+  "lat": 38.0688,
+  "lng": 128.624,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/27/3567927_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "뚜거리탕 두부전골 / 메기매운탕 / 은어튀김 등",
+  "opentime": "[월요일~토요일]- 06:00~19:00- 준비시간 14:30~16:20- 마지막 주문: 18:30[일요일]- 06:00~15:00-마지막 주문: 14:30",
+  "restdate": "연중무휴",
+  "hours": [
+   "06:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "134091",
+  "title": "등불가든",
+  "addr": "강원특별자치도 양양군 양양읍 포월나들길 23",
+  "lat": 38.1036,
+  "lng": 128.6304,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/82/3071582_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "한우특수부위 한우불고기 / 한우육회 / 자연산송이 등",
+  "opentime": "12:00~21:00",
+  "restdate": "",
+  "hours": [
+   "12:00",
+   "21:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "627070",
+  "title": "옛뜰",
+  "addr": "강원특별자치도 양양군 손양면 동명로 289",
+  "lat": 38.0881,
+  "lng": 128.6541,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/26/3045726_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "섭국 섭 비빔밥 / 순두부 / 두부구이 등",
+  "opentime": "09:00~15:00 (마지막 주문 14:30)",
+  "restdate": "매주 월요일",
+  "hours": [
+   "09:00",
+   "15:00"
+  ],
+  "closed": [
+   1
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2903591",
+  "title": "다래횟집",
+  "addr": "강원특별자치도 양양군 수산2길 17",
+  "lat": 38.0786,
+  "lng": 128.6718,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/80/2903580_image2_1.jpeg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "자연산 모듬회 양식 모듬회 / 광어 / 우럭 등",
+  "opentime": "10:00~21:50",
+  "restdate": "매주 화요일",
+  "hours": [
+   "10:00",
+   "21:50"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2914112",
+  "title": "동해막국수",
+  "addr": "강원특별자치도 양양군 동해대로 54",
+  "lat": 37.9199,
+  "lng": 128.804,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/08/2914108_image2_1.JPG",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": true,
+  "menu": "물국수 수육 / 비빔국수 / 메밀찐만두 등",
+  "opentime": "- 09:30~20:00- 준비시간 14:30~17:00- 점심 마지막 주문 15:10 / 저녁 마지막 주문 19:40",
+  "restdate": "매주 화요일",
+  "hours": [
+   "09:30",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ]
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2929243",
+  "title": "P.E.I coffee",
+  "addr": "강원특별자치도 양양군 동해대로 3539",
+  "lat": 38.1526,
+  "lng": 128.6072,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/12/4106212_image2_1.jpg",
+  "cat3": "FD050100",
+  "cafe": true,
+  "local": true,
+  "menu": "마카다미아 크림라떼 메이플 시나몬 크림라떼 / 젤라또 / 카페라떼 등",
+  "opentime": "10:00~19:00 (마지막 주문 18:30)",
+  "restdate": "연중무휴",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": []
+ },
+ {
+  "sigun": "양양",
+  "contentid": "2903557",
+  "title": "광주빛고을식당",
+  "addr": "강원특별자치도 양양군 낙산사로 47",
+  "lat": 38.1217,
+  "lng": 128.6303,
+  "photo": "https://tong.visitkorea.or.kr/cms/resource/36/2903536_image2_1.jpg",
+  "cat3": "FD010100",
+  "cafe": false,
+  "local": false,
+  "menu": "물곰탕 오징어볶음 / 생대구탕 / 가자미조림 등",
+  "opentime": "[월요일~금요일 / 일요일]- 08:00~20:00[토요일]- 08:00~21:00",
+  "restdate": "연중무휴",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": []
+ }
+]

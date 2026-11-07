@@ -433,6 +433,171 @@
     "desc": "Buckwheat noodles and dried pollack dishes",
     "descSrc": "app"
   },
+  "dh-jjolmyeon": {
+    "name": "Chodang Jjolmyeon Sundubu, Donghae",
+    "nameSrc": "app",
+    "desc": "Spicy soft tofu stew with chewy jjolmyeon noodles",
+    "descSrc": "app"
+  },
+  "dh-bakery": {
+    "name": "Donghae Bakery",
+    "nameSrc": "app",
+    "desc": "Bakery café known for its Donghae potato bread",
+    "descSrc": "app"
+  },
+  "tb-dakgalbi": {
+    "name": "Taebaek Dakgalbi",
+    "nameSrc": "app",
+    "desc": "Taebaek-style mul-dakgalbi (spicy chicken in broth)",
+    "descSrc": "app"
+  },
+  "tb-cafe": {
+    "name": "Cafe Geonneolmok, Taebaek",
+    "nameSrc": "app",
+    "desc": "Mining-town café with coal-briquette-shaped bread and lattes",
+    "descSrc": "app"
+  },
+  "sc-makguksu": {
+    "name": "Bongpyeong Makguksu, Samcheok",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and potato pancakes",
+    "descSrc": "app"
+  },
+  "sc-cafe": {
+    "name": "Bobojeong, Samcheok",
+    "nameSrc": "app",
+    "desc": "Dessert café in Samcheok town",
+    "descSrc": "app"
+  },
+  "hc-makguksu": {
+    "name": "Geumsugangsan Makguksu, Hongcheon",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and boiled pork",
+    "descSrc": "app"
+  },
+  "hc-cafe": {
+    "name": "Rustic Life",
+    "desc": "Rustic Life is a unique type of cafe, located in the forest of Hongcheon."
+  },
+  "hs-makguksu": {
+    "name": "Taegisan Makguksu, Hoengseong",
+    "nameSrc": "app",
+    "desc": "Perilla buckwheat noodles and potato pancakes",
+    "descSrc": "app"
+  },
+  "hs-cafe": {
+    "name": "Norang Gongjang, Hoengseong",
+    "nameSrc": "app",
+    "desc": "Brunch café with Hoengseong hanwoo dishes",
+    "descSrc": "app"
+  },
+  "yw-gondre": {
+    "name": "Donggang-ui Achim, Yeongwol",
+    "nameSrc": "app",
+    "desc": "Gondre (thistle) rice set and smoked duck",
+    "descSrc": "app"
+  },
+  "yw-cafe": {
+    "name": "Gibunjoeun Bakery Cafe, Yeongwol",
+    "nameSrc": "app",
+    "desc": "Bakery café with Yeongwol bread and millet desserts",
+    "descSrc": "app"
+  },
+  "pc-makguksu": {
+    "name": "Yucheon Makguksu, Pyeongchang",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and pheasant dumpling soup",
+    "descSrc": "app"
+  },
+  "pc-cafe": {
+    "name": "Sumi Cafe, Pyeongchang",
+    "nameSrc": "app",
+    "desc": "Café known for Pyeongchang potato bread · closed Tuesdays",
+    "descSrc": "app"
+  },
+  "js-kotdeung": {
+    "name": "Donggwang Sikdang, Jeongseon",
+    "nameSrc": "app",
+    "desc": "Kotdeungchigi and olchaengi noodles, astragalus pork hocks",
+    "descSrc": "app"
+  },
+  "js-cafe": {
+    "name": "Najeon Station Cafe",
+    "nameSrc": "app",
+    "desc": "Café in an old country railway station",
+    "descSrc": "app"
+  },
+  "cw-tofu": {
+    "name": "Samjeong Kongmaeul Tofu House, Cheorwon",
+    "nameSrc": "app",
+    "desc": "Kettle-made tofu hot pot and cheonggukjang",
+    "descSrc": "app"
+  },
+  "cw-cafe": {
+    "name": "Cafe Eunhasu, Cheorwon",
+    "nameSrc": "app",
+    "desc": "Café in Cheorwon town",
+    "descSrc": "app"
+  },
+  "hw-makguksu": {
+    "name": "Haetgol Makguksu, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and handmade tofu",
+    "descSrc": "app"
+  },
+  "hw-cafe": {
+    "name": "Gwangdeok Byeolarae, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Fermented-coffee café below Gwangdeoksan · closed Mon, Tue, Thu",
+    "descSrc": "app"
+  },
+  "yg-makguksu": {
+    "name": "Dochon Makguksu, Yanggu",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and buckwheat crepes",
+    "descSrc": "app"
+  },
+  "yg-cafe": {
+    "name": "Yanggu Nongsakkun",
+    "nameSrc": "app",
+    "desc": "Café with Yanggu apple drinks and potato bread",
+    "descSrc": "app"
+  },
+  "ij-makguksu": {
+    "name": "Wondae Makguksu, Inje",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles on the way to the birch forest",
+    "descSrc": "app"
+  },
+  "ij-cafe": {
+    "name": "Cafe Hachuri, Inje",
+    "nameSrc": "app",
+    "desc": "Café by the Naerincheon River",
+    "descSrc": "app"
+  },
+  "gs-makguksu": {
+    "name": "Songjiho Makguksu",
+    "desc": "Buckwheat noodles with marinated pollack",
+    "descSrc": "app"
+  },
+  "gs-cafe": {
+    "name": "Coffee Go, Goseong",
+    "nameSrc": "app",
+    "desc": "Specialty coffee by the sea in Goseong",
+    "descSrc": "app"
+  },
+  "yy-makguksu": {
+    "name": "Ibam Memil Town, Yangyang",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and boiled pork",
+    "descSrc": "app"
+  },
+  "yy-cafe": {
+    "name": "P.E.I Coffee, Yangyang",
+    "nameSrc": "app",
+    "desc": "Yangyang café known for cream lattes",
+    "descSrc": "app"
+  },
   "gyeongpo-beach": {
     "name": "Gangneung Gyeongpo Beach",
     "desc": "Located 1 kilometer away from Gyeongpodae Pavilion and 6 kilometers from downtown Gangneung, Gyeongpo Beach is a sand bank formed between Gyeongpoho Lake and the ocean."
