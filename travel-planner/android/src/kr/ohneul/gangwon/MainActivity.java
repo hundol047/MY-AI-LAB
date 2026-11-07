@@ -13,6 +13,8 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.CalendarContract;
+import android.speech.RecognizerIntent;
+import java.util.ArrayList;
 import android.view.Window;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
@@ -42,6 +44,8 @@ import org.json.JSONObject;
  * - 서버 API(api/...)는 없으므로 404 → 앱이 간단 모드로 대체한다 (가게 등록은 숨김)
  * - 앱 밖 주소(카카오맵·네이버 등)는 휴대폰 브라우저나 해당 앱으로 연다
  * - "캘린더 저장"은 파일 대신 휴대폰 캘린더에 일정을 바로 넣는다 (웹뷰는 파일 내려받기를 못 함)
+ * - "말하기"는 웹뷰에 음성 인식이 없어서 휴대폰 기본 음성 인식(RecognizerIntent)을 열고 결과를 window.__voiceResult로 넘긴다
+ *   (음성 인식 앱이 마이크를 다루므로 이 앱은 마이크 권한이 필요 없다)
  */
 public class MainActivity extends Activity {
     private static final String HOST = "appassets.androidplatform.net";
@@ -49,6 +53,7 @@ public class MainActivity extends Activity {
     private static final int REQ_LOCATION = 1;
     private static final int REQ_FILE = 2;
     private static final int REQ_CALENDAR = 3;
+    private static final int REQ_VOICE = 4;
 
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
@@ -188,8 +193,32 @@ public class MainActivity extends Activity {
         }
     }
 
-    /** 웹 화면이 부르는 캘린더 다리. 일정: [{title, location, description, start(ms), end(ms)}] */
+    /** 웹 화면이 부르는 다리: 캘린더 넣기, 음성 인식. 일정: [{title, location, description, start(ms), end(ms)}] */
     public class CalendarBridge {
+        @JavascriptInterface
+        public boolean hasVoice() {
+            return new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).resolveActivity(getPackageManager()) != null;
+        }
+
+        @JavascriptInterface
+        public void startVoice(final String lang) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    Intent i = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+                    i.putExtra(RecognizerIntent.EXTRA_LANGUAGE, lang == null || lang.isEmpty() ? "ko-KR" : lang);
+                    i.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1);
+                    i.putExtra(RecognizerIntent.EXTRA_PROMPT, "ko-KR".equals(lang) || lang == null ? "여행을 말해 주세요" : "");
+                    try {
+                        startActivityForResult(i, REQ_VOICE);
+                    } catch (Exception e) {
+                        voiceDone("");
+                    }
+                }
+            });
+        }
+
         @JavascriptInterface
         public void addToCalendar(final String json) {
             runOnUiThread(new Runnable() {
@@ -295,8 +324,22 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** 인식한 글을 웹 화면에 넘긴다 (취소·실패면 빈 글) */
+    private void voiceDone(final String text) {
+        if (web != null) web.evaluateJavascript("window.__voiceResult && window.__voiceResult(" + JSONObject.quote(text == null ? "" : text) + ")", null);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == REQ_VOICE) {
+            String text = "";
+            if (resultCode == RESULT_OK && data != null) {
+                ArrayList<String> list = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
+                if (list != null && !list.isEmpty()) text = list.get(0);
+            }
+            voiceDone(text);
+            return;
+        }
         if (requestCode == REQ_FILE && fileCallback != null) {
             fileCallback.onReceiveValue(WebChromeClient.FileChooserParams.parseResult(resultCode, data));
             fileCallback = null;

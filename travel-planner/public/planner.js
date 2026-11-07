@@ -669,3 +669,46 @@ export function souvenirsFor(trip) {
   }
   return [...seen].map(([item, from]) => ({ item, from }));
 }
+
+// 같은 조건으로 성격이 다른 일정 3개: 추천 / 여유롭게(이미 여유면 알차게) / 색다른 코스(추천에 든 곳을 빼고)
+// 돌려주는 값: [{ key, opts, trip, highlights: [장소 이름], totals }] — 앱이 카드로 보여 주고 고르면 opts로 다시 짠다
+export function planOptions(input, opts = {}) {
+  const base = { ...opts };
+  delete base.keep;
+  const best = planTrip(input, base);
+  const visits = (t) => t.days.flatMap((d) => d.items.filter((it) => it.kind === "visit" && it.place.cat !== "festival").map((it) => it.place));
+  const second = base.pace === "relaxed"
+    ? { key: "packed", opts: { ...base, pace: "packed", lessWalk: !!(base.access?.length) } }
+    : { key: "relaxed", opts: { ...base, pace: "relaxed", lessWalk: true } };
+  // 색다른 코스: 추천의 관광지를 모두 빼 본다. 일정이 너무 비면(추천의 70% 미만) 인기 높은 절반만 뺀다. 꼭 넣을 곳(must)은 빼지 않는다
+  const must = new Set(base.must || []);
+  const bestVisits = visits(best).filter((p) => !must.has(p.id));
+  const tryEx = (ids) => ({ key: "different", opts: { ...base, exclude: [...new Set([...(base.exclude || []), ...ids])] } });
+  let third = tryEx(bestVisits.map((p) => p.id));
+  const count = (t) => t.days.reduce((n, d) => n + d.items.length, 0);
+  let thirdTrip = planTrip(input, { ...third.opts, lodgingId: undefined });
+  if (count(thirdTrip) < Math.max(3, count(best) * 0.6)) {
+    third = tryEx([...bestVisits].sort((a, b) => b.pop - a.pop).slice(0, Math.ceil(bestVisits.length / 2)).map((p) => p.id));
+    thirdTrip = planTrip(input, { ...third.opts, lodgingId: undefined });
+  }
+  third.opts.lodgingId = thirdTrip.lodging?.id;
+  const secondTrip = planTrip(input, second.opts);
+  const pick = (t) => [...new Set(visits(t).sort((a, b) => b.pop - a.pop).map((p) => p.name))].slice(0, 3);
+  return [
+    { key: "best", opts: base, trip: best },
+    { ...second, trip: secondTrip },
+    { ...third, trip: thirdTrip },
+  ].map((o) => ({ ...o, highlights: pick(o.trip), totals: o.trip.totals, places: count(o.trip) }));
+}
+
+// "생각하는 과정"에 보여 줄 실제 숫자: 후보 장소, 그날 문 연 곳, 붐빔 예상으로 미룬 곳, 쉬는 날인 곳
+export function planStats(input, opts = {}) {
+  const days = Array.from({ length: input.days }, (_, i) => addDays(input.date, i));
+  const pool = new Map();
+  days.forEach((d, i) => candidates(dayInput(input, i), opts).forEach((p) => pool.set(p.id, p)));
+  const all = [...pool.values()].filter((p) => p.cat !== "festival");
+  const openSome = all.filter((p) => days.some((d) => !closedOn(p, d)));
+  const crowded = all.filter((p) => days.some((d) => crowdedOn(p.id, d)));
+  const fests = [...pool.values()].filter((p) => p.cat === "festival"); // 축제 항목 (앱이 화면 언어 이름으로 바꿔 보인다)
+  return { candidates: all.length, open: openSome.length, closed: all.length - openSome.length, crowded: crowded.length, festivals: fests };
+}

@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn } from "./planner.js";
+import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -109,7 +109,7 @@ document.querySelectorAll('.seg[data-name="region"], .seg[data-name="days"]').fo
 const routeNow = (input) => (input.days >= 2 && routePicks.length ? [input.region, ...routePicks] : null);
 renderRouteRow();
 
-$("#form").addEventListener("submit", (e) => {
+$("#form").addEventListener("submit", async (e) => {
   e.preventDefault();
   const input = {
     region: segValue("region"),
@@ -123,14 +123,96 @@ $("#form").addEventListener("submit", (e) => {
   if (route) input.route = route;
   const lessWalk = input.who === "parents";
   const access = accessNow();
-  state = { input, opts: { pace: "normal", lessWalk: lessWalk || access.length > 0, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...startOpts(input) } };
+  const v = pendingVoice; pendingVoice = null;
+  state = { input, opts: { pace: v?.pace || "normal", lessWalk: lessWalk || access.length > 0 || !!v?.lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...(v?.people ? { people: bookingPeople(v.people) } : {}), ...startOpts(input) } };
+  if (v) { state.heard = v.heard; state.said = v.said; }
+  state.baseOpts = { ...state.opts }; // 일정 3개 비교의 기준 조건
+  state.choice = "best";
   restoredFromLink = false;
   dayIdx = 0;
+  await thinkThrough(input, state.opts, !!v);
   rebuild();
   show("result");
+  $("#thinking").hidden = true;
   loadWeather();
   track("plan"); track("plan_region", input.region); track("plan_days", String(input.days)); track("plan_move", input.move); track("plan_who", input.who);
   if (state.opts.start) track("start_custom");
+});
+
+/* ---------- 일정을 짜는 과정 ----------
+   엔진은 순식간에 끝나지만, 무엇을 따져 골랐는지가 보이도록 실제 단계와 숫자를 차례로 보여 준다
+   (후보 수·그날 문 연 곳·붐빔으로 미룬 곳·축제·충돌 0건·3개 비교). 꾸민 숫자는 없다 */
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
+const reduceMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+let optionsCache = { key: "", list: null };
+function optionsFor(input, base) {
+  const key = JSON.stringify([input, base]);
+  if (optionsCache.key !== key) optionsCache = { key, list: planOptions(input, base) };
+  return optionsCache.list;
+}
+async function thinkThrough(input, opts, voice) {
+  const box = $("#thinking"), list = $("#thinkSteps");
+  const stats = planStats(input, opts);
+  const opt = optionsFor(input, state.baseOpts);
+  const best = opt[0];
+  const steps = [
+    voice ? t("말씀을 알아들었어요: {what}", { what: (state.heard || []).filter((h) => ["region", "days", "who"].includes(h.key)).map(heardLabel).join(" · ") }) : t("고른 조건을 확인했어요"),
+    t("강원 장소 {n}곳 중 여행 날짜에 문 여는 {open}곳을 골랐어요", { n: stats.candidates, open: stats.open }) + (stats.closed ? t(" · 쉬는 날 {c}곳 제외", { c: stats.closed }) : ""),
+    ...(stats.crowded ? [t("붐빔 예상 {c}곳은 뒤로 미뤘어요 (관광공사 혼잡 예측)", { c: stats.crowded })] : []),
+    ...(stats.festivals.length ? [t("여행 기간 축제도 살폈어요: {f}", { f: stats.festivals.slice(0, 2).map((f) => placeName(f)).join(", ") })] : []),
+    t("이동 시간과 운영시간을 맞춰 동선을 짰어요 · 영업시간 충돌 {c}건", { c: best.totals.conflicts }),
+    t("성격이 다른 일정 3개를 비교했어요"),
+  ];
+  $("#thinkTitle").textContent = t("여행 일정을 짜고 있어요");
+  list.innerHTML = steps.map((x) => `<li>${esc(x)}</li>`).join("");
+  box.hidden = false;
+  const items = [...list.children], gap = reduceMotion() ? 120 : 480;
+  for (let i = 0; i < items.length; i++) {
+    items[i].classList.add("show");
+    await sleep(gap);
+    items[i].classList.add("done");
+  }
+  await sleep(reduceMotion() ? 50 : 250);
+}
+
+// 일정 3개 비교 카드
+const OPT_NAME = { best: "추천", relaxed: "여유롭게", packed: "알차게", different: "색다른 코스" };
+const OPT_SUB = { best: "가장 균형 잡힌 동선", relaxed: "장소를 줄이고 덜 걷고 덜 이동", packed: "하루에 더 많이 보기", different: "추천 일정에 없는 곳 위주" };
+function whyText() {
+  const s = planStats(state.input, state.baseOpts), inp = state.input, acc = state.baseOpts.access || [];
+  const parts = [t("후보 {n}곳 중 여행 날짜에 문 여는 {open}곳에서 골랐어요.", { n: s.candidates, open: s.open })];
+  if (s.crowded) parts.push(t("붐빔 예상 {c}곳은 뒤로 미뤘어요.", { c: s.crowded }));
+  if (acc.length) parts.push(t("휠체어·유모차로 다니기 쉬운 곳을 먼저 넣었어요."));
+  else if (inp.who === "parents") parts.push(t("부모님과 함께라 걷기를 줄였어요."));
+  else if (inp.who === "family") parts.push(t("아이와 함께라 오래 걷는 산길은 줄였어요."));
+  else if (inp.who === "pet") parts.push(t("반려동물 동반이 확인된 곳을 먼저 넣었어요."));
+  if (inp.move === "transit") parts.push(t("기차·버스 시간표와 걷는 거리에 맞췄어요."));
+  if (s.festivals.length) parts.push(t("여행 기간 축제({f})도 살폈어요.", { f: s.festivals.slice(0, 2).map((f) => placeName(f)).join(", ") }));
+  return parts.join(" ");
+}
+function renderOptions() {
+  const box = $("#options"); if (!box) return;
+  if (!state.baseOpts) { box.hidden = true; return; }
+  const list = optionsFor(state.input, state.baseOpts);
+  box.hidden = false;
+  box.innerHTML = `<h3>${t("일정 3개 중에서 고르세요")}</h3><p class="why">${esc(whyText())}</p>
+    <div class="opt-list">${list.map((o) => `<button type="button" class="opt${state.choice === o.key ? " on" : ""}" data-opt="${o.key}">
+      <b>${t(OPT_NAME[o.key])}</b><span class="opt-sub">${t(OPT_SUB[o.key])}</span>
+      <span class="opt-stats">${t("{n}곳 · 이동 {m} · 걷기 {km}km", { n: o.places, m: minutesLabel(o.totals.moveMin), km: o.totals.walkKm })}</span>
+      <span class="opt-hl">${o.highlights.map((n) => esc(placeName(PLACES.find((p) => p.name === n) || { name: n }))).join(" · ")}</span>
+      <span class="opt-pick">${state.choice === o.key ? t("지금 보는 일정") : t("이 일정으로")}</span></button>`).join("")}</div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-opt]"); if (!b || !state?.baseOpts) return;
+  const o = optionsFor(state.input, state.baseOpts).find((x) => x.key === b.dataset.opt);
+  if (!o || state.choice === o.key) return;
+  state.choice = o.key;
+  state.opts = { ...o.opts, rainDays: state.baseOpts.rainDays };
+  if (o.key !== "different") delete state.opts.lodgingId;
+  dayIdx = 0;
+  track("plan_option", o.key);
+  rebuild();
+  toast(t("{name} 일정으로 바꿨어요", { name: t(OPT_NAME[o.key]) }));
 });
 
 /* ---------- 출발지 (이 기기에 저장) ----------
@@ -278,7 +360,7 @@ function show(which) {
   if (which === "result" && trip) setTimeout(() => drawMap(trip.days[dayIdx]), 50);
 }
 $("#home").addEventListener("click", () => { if (state) fillForm(state.input); show("setup"); });
-$("#editBtn").addEventListener("click", () => { fillForm(state.input); show("setup"); });
+$("#editBtn").addEventListener("click", () => { fillForm(state.input); $("#manual").open = true; show("setup"); });
 
 /* ---------- 직접 넣은 장소 (탐색 목록) ----------
    앱이 검토하지 않은 관광공사 장소를 사람이 일정에 넣으면 opts.custom에 장소 정보를 함께 저장한다(공유 링크에도 들어감).
@@ -366,6 +448,8 @@ function render() {
 
   const day = trip.days[dayIdx];
   $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day);
+  renderOptions();
+  renderHeard();
   renderFestivals();
   renderLodging();
   renderBenefits();
@@ -1456,9 +1540,28 @@ async function runGuide(question, shown) {
       missed=(r.add||[]).filter(id=>!placed.has(id));
     }
   }
+  // 생각하는 모습: 무엇을 확인하는지 보여 준 뒤 답을 한 글자씩 쓴다
+  for (const step of [t("질문을 이해하는 중…"), t("일정과 운영시간을 확인하는 중…")]) { wait.textContent = step; await sleep(reduceMotion() ? 80 : 450); }
   wait.classList.remove("pending");
   guideHistory.push({q:question,a:r.answer,local,trip:before,dayIdx:currentDay,ctx,result:r,applied,missed,node:wait,translations:{[requestLang]:r.answer}});
   await renderGuideHistory();
+  await typeOut(wait);
+}
+async function typeOut(node) {
+  const full = node.textContent;
+  if (reduceMotion() || full.length < 2) return;
+  node.classList.add("typing");
+  const step = Math.max(1, Math.round(full.length / 90)); // 길어도 2초 안팎
+  let shown = full;
+  for (let i = 0; i <= full.length; i += step) {
+    if (node.textContent !== shown) break; // 그사이 화면 언어가 바뀌어 다른 글이 들어옴
+    shown = full.slice(0, i);
+    node.textContent = shown;
+    $("#guideLog").scrollTop = $("#guideLog").scrollHeight;
+    await sleep(18);
+  }
+  if (node.textContent === shown) node.textContent = full;
+  node.classList.remove("typing");
 }
 $("#askForm").addEventListener("submit", (e) => {
   track("guide_ask");
@@ -1477,12 +1580,111 @@ const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${Stri
 $("#aiStart").addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = $("#aiStartInput").value.trim(); if (!text) return;
-  const btn = $("#aiStart button"); btn.disabled = true; btn.textContent = "…";
-  const r = (await localAI()).startLocal(text, todayStr());
+  const btn = $("#aiStart button[type=submit]"); btn.disabled = true; btn.textContent = "…";
+  const { parseSpoken } = await import("./voice-parse.js");
+  const r = parseSpoken(text, todayStr());
   btn.disabled = false; btn.textContent = t("만들기");
-  fillForm({ ...r, days: Number(r.days) });
+  // 말한 조건을 폼에 옮기고(폼은 "직접 골라서 만들기"에 접혀 있다), 폼에 없는 조건(인원·속도)은 일정 만들 때 넘긴다
+  fillForm(r.input);
+  document.querySelectorAll('.chips[data-name="access"] button').forEach((b) => b.classList.toggle("on", r.access.includes(b.dataset.v)));
+  if (r.start) setStart({ name: r.start.name, nameEn: r.start.nameEn, lat: r.start.lat, lng: r.start.lng });
+  if (r.startTime) { store.set("startTime", r.startTime); $("#startTime").value = r.startTime; }
+  pendingVoice = { people: r.people, pace: r.pace, lessWalk: r.lessWalk, heard: r.heard, said: r.said };
+  track("voice_plan");
   $("#form").requestSubmit();
-  if (r.summary) toast(r.summary);
+});
+
+/* ---------- 말하기 (음성 인식) ----------
+   - 웹(크롬·삼성 인터넷·사파리): 브라우저 음성 인식(SpeechRecognition). 말하는 동안 글자가 입력칸에 보이고, 말이 끝나면 바로 일정을 만든다
+   - 안드로이드 앱: 웹뷰에는 음성 인식이 없어서 앱의 기본 음성 인식(OhneulApp.startVoice)을 부르고 window.__voiceResult로 받는다
+   - 둘 다 없거나 인터넷이 없으면 마이크를 숨기고 글로 쓰게 한다 */
+let pendingVoice = null;
+const VOICE_LANG = { ko: "ko-KR", en: "en-US", ja: "ja-JP", zh: "zh-CN" };
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+const nativeVoice = () => !!(window.OhneulApp && window.OhneulApp.startVoice && (!window.OhneulApp.hasVoice || window.OhneulApp.hasVoice()));
+const canVoice = () => navigator.onLine !== false && (nativeVoice() || !!SR);
+let listening = null; // { button, input, done }
+function listen(button, input, done) {
+  if (listening) { stopListening(); return; }
+  if (!canVoice()) return toast(t("이 기기에서는 음성 인식을 쓸 수 없어요 · 글로 써 주세요"));
+  listening = { button, input, done };
+  button.setAttribute("aria-pressed", "true");
+  if (button === $("#micBtn")) $("#voiceHint").textContent = t("듣고 있어요… 말이 끝나면 일정을 만들어요");
+  if (nativeVoice()) { window.OhneulApp.startVoice(VOICE_LANG[getLang()] || "ko-KR"); return; }
+  const rec = new SR();
+  rec.lang = VOICE_LANG[getLang()] || "ko-KR";
+  rec.interimResults = true;
+  rec.maxAlternatives = 1;
+  let finalText = "";
+  rec.onresult = (ev) => {
+    let interim = "";
+    for (let i = ev.resultIndex; i < ev.results.length; i++) {
+      const r = ev.results[i];
+      if (r.isFinal) finalText += r[0].transcript; else interim += r[0].transcript;
+    }
+    input.value = (finalText + interim).trim();
+  };
+  rec.onerror = (ev) => { if (ev.error === "not-allowed" || ev.error === "service-not-allowed") toast(t("마이크 권한을 허용해 주세요")); else if (ev.error === "network") toast(t("음성 인식은 인터넷이 필요해요")); };
+  rec.onend = () => voiceDone(input.value.trim());
+  listening.rec = rec;
+  try { rec.start(); } catch { voiceDone(""); }
+}
+function stopListening() { try { listening?.rec?.stop(); } catch { /* 이미 끝남 */ } if (listening && !listening.rec) voiceDone(""); }
+function voiceDone(text) {
+  const l = listening; listening = null;
+  if (!l) return;
+  l.button.setAttribute("aria-pressed", "false");
+  if (l.button === $("#micBtn")) $("#voiceHint").textContent = t("마이크를 누르고 여행을 말해 보세요");
+  if (text) { l.input.value = text; l.done(); }
+}
+// 안드로이드 앱이 부른다: 인식한 글(취소·실패면 빈 값)
+window.__voiceResult = (text) => voiceDone(String(text || "").trim());
+function setupMics() {
+  const ok = canVoice();
+  for (const id of ["micBtn", "askMic"]) { const b = $("#" + id); if (b) b.hidden = !ok; }
+  if (!ok) $("#voiceHint").textContent = t("가고 싶은 여행을 글로 써 주세요");
+}
+$("#micBtn").addEventListener("click", () => listen($("#micBtn"), $("#aiStartInput"), () => $("#aiStart").requestSubmit()));
+$("#askMic")?.addEventListener("click", () => listen($("#askMic"), $("#askInput"), () => $("#askForm").requestSubmit()));
+window.addEventListener("online", setupMics);
+window.addEventListener("offline", setupMics);
+setupMics();
+
+// 알아들은 조건: 결과 화면 위에 칩으로 보여 주고, 누르면 그 조건을 고칠 수 있게 폼을 연다
+const WHO_KO = { solo: "혼자", couple: "연인·친구", family: "아이와", parents: "부모님과", pet: "반려동물과" };
+const MOVE_KO = { car: "자동차", taxi: "택시", transit: "대중교통·도보" };
+const LIKE_KO = { sea: "바다", cafe: "카페", food: "맛집", culture: "역사·문화", nature: "자연·산책" };
+const DAYS_KO = { 1: "당일", 2: "1박 2일", 3: "2박 3일", 4: "3박 4일", 5: "4박 5일" };
+function heardLabel(h) {
+  const inp = state.input;
+  switch (h.key) {
+    case "region": return (inp.route || [inp.region]).map((r) => regionLabel(r, REGIONS[r].label)).join(" → ");
+    case "date": return h.ko ? dateLabel(inp.date) : t("날짜 못 들음 · {d}", { d: dateLabel(inp.date) });
+    case "days": return t(DAYS_KO[inp.days]);
+    case "who": return t(WHO_KO[inp.who]);
+    case "people": { const [a, k] = h.ko.split(":").map(Number); return k ? t("어른 {a} · 아이 {k}", { a, k }) : t("어른 {a}", { a }); }
+    case "move": return t(MOVE_KO[inp.move]);
+    case "likes": return inp.likes.map((l) => t(LIKE_KO[l])).join(" · ");
+    case "access": return t(h.ko === "wheelchair" ? "♿ 휠체어" : "👶 유모차");
+    case "start": return t("{name}에서 출발", { name: isForeign() ? (ORIGINS.find((o) => o.name === h.ko)?.nameEn || h.ko) : h.ko });
+    case "time": return t("{t} 출발", { t: h.ko });
+    case "pace": return t(h.ko === "relaxed" ? "여유롭게" : "더 알차게");
+    case "walk": return t("덜 걷고 싶어요");
+    default: return h.ko;
+  }
+}
+function renderHeard() {
+  const box = $("#heard"); if (!box) return;
+  if (!state.heard) { box.hidden = true; return; }
+  box.hidden = false;
+  box.innerHTML = `<p class="said">🎤 “${esc(state.said || "")}”</p>
+    <div class="chips">${state.heard.map((h) => `<button type="button" class="${h.key === "date" && !h.ko ? "miss" : ""}" data-heard="${h.key}">${esc(heardLabel(h))}</button>`).join("")}</div>
+    <div class="acts"><button class="ghost small" type="button" id="speakAgain">${t("다시 말하기")}</button><button class="ghost small" type="button" data-heard="edit">${t("직접 고치기")}</button></div>`;
+}
+document.addEventListener("click", (e) => {
+  const h = e.target.closest("[data-heard]");
+  if (h) { fillForm(state.input); $("#manual").open = true; show("setup"); setTimeout(() => $("#manual").scrollIntoView({ behavior: "smooth", block: "start" }), 60); return; }
+  if (e.target.id === "speakAgain") { show("setup"); $("#aiStartInput").value = ""; if (canVoice()) listen($("#micBtn"), $("#aiStartInput"), () => $("#aiStart").requestSubmit()); }
 });
 
 /* ---------- 공유 / 캘린더 ---------- */
