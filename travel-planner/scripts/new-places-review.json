@@ -3498,7 +3498,8 @@
   "tags": [
    "senior"
   ],
-  "desc": "원주 향토 추어탕 · 점심 장사"
+  "desc": "원주 향토 추어탕 · 점심 장사",
+  "group": "wonju-chueotang"
  },
  "wj-bok-chueotang": {
   "name": "복추어탕",
@@ -3531,7 +3532,8 @@
   "tags": [
    "senior"
   ],
-  "desc": "1965년부터 이어 온 원주 추어탕 원조집"
+  "desc": "1965년부터 이어 온 원주 추어탕 원조집",
+  "group": "wonju-chueotang"
  },
  "wj-borit": {
   "name": "보릿고개 본점",
