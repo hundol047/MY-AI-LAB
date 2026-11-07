@@ -88,7 +88,7 @@
 - intercity 진부 시외버스터미널 → 상봉역 all: 0편
 - express 동서울종합터미널 → 원주 고속버스터미널 all: 0편
 - express 원주 고속버스터미널 → 동서울종합터미널 all: 0편
-- express 서울고속버스터미널 → 원주 고속버스터미널 all: 97편
+- express 서울고속버스터미널 → 원주 고속버스터미널 all: 98편
 - express 원주 고속버스터미널 → 서울고속버스터미널 all: 97편
 - intercity 동서울종합터미널 → 원주 시외버스터미널 all: 42편
 - intercity 원주 시외버스터미널 → 동서울종합터미널 all: 43편
