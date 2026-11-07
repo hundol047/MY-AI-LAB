@@ -23,7 +23,10 @@ async function vw(path, params) {
   u.search = new URLSearchParams({ ...params, format: "json", errorformat: "json", key: KEY, ...extra });
   const r = await fetch(u, { signal: AbortSignal.timeout(10_000) });
   if (!r.ok) throw new Error(`HTTP ${r.status}`);
-  return (await r.json())?.response;
+  const res = (await r.json())?.response;
+  // 키가 틀렸거나 등록 도메인이 다르면 ERROR가 온다 (결과 없음은 NOT_FOUND) → 바로 멈춘다
+  if (res?.status === "ERROR") throw Object.assign(new Error(`${res.error?.code || ""} ${res.error?.text || ""}`.trim()), { fatal: true });
+  return res;
 }
 async function byAddress(addr) {
   // 괄호·층수 등 덧붙인 말은 뺀다 ("…로 307, 16층" → "…로 307")
@@ -41,12 +44,19 @@ async function byName(r) {
   return hit ? { lat: +hit.point.y, lng: +hit.point.x, how: "이름 검색" } : null;
 }
 
-try { await byAddress("강원특별자치도 강릉시 창해로14번길 20-1"); }
-catch (e) { console.error(`브이월드에 연결하지 못했습니다 (${e.message}). 한국 안의 컴퓨터에서 실행하세요.`); process.exit(1); }
+if (/[가-힣]/.test(KEY) || KEY.length < 20) { console.error(`VWORLD_KEY 값이 실제 키가 아닌 것 같습니다 ("${KEY.slice(0, 6)}…"). 브이월드에서 받은 인증키(영문·숫자·하이픈)를 넣으세요: $env:VWORLD_KEY="발급받은키"`); process.exit(1); }
+try {
+  const t = await byAddress("강원특별자치도 강릉시 창해로14번길 20-1");
+  if (!t) throw new Error("시험 주소를 찾지 못했습니다");
+} catch (e) {
+  console.error(e.fatal ? `브이월드가 키를 받아 주지 않았습니다 (${e.message}). 키 값과, 키를 발급받을 때 등록한 서비스 URL(VWORLD_DOMAIN)을 확인하세요.` : `브이월드에 연결하지 못했습니다 (${e.message}). 한국 안의 컴퓨터에서 실행하세요.`);
+  process.exit(1);
+}
 let found = 0, miss = 0;
 for (const r of rows) {
   if (done.has(r.name) || out[r.no]) continue;
-  const g = (await byAddress(r.addr).catch(() => null)) || (await byName(r).catch(() => null));
+  const stop = (e) => { if (e.fatal) { console.error(`\n브이월드 오류로 멈춥니다: ${e.message}`); process.exit(1); } return null; };
+  const g = (await byAddress(r.addr).catch(stop)) || (await byName(r).catch(stop));
   if (g && g.lat > 37 && g.lat < 38.7 && g.lng > 127 && g.lng < 129.5) { out[r.no] = { ...g, name: r.name }; found++; process.stdout.write("."); }
   else { miss++; process.stdout.write("x"); }
   await sleep(250);
