@@ -36,7 +36,7 @@
 - 다운로드(항상 최신): `https://github.com/hundol047/MY-AI-LAB/releases/download/android-latest/ohneul-gangwon.apk`
 - 만들기: `.github/workflows/android-apk.yml`이 앱·안드로이드 코드가 바뀌어 push될 때 GitHub 러너의 안드로이드 SDK로 `android/build.sh`를 돌려(Gradle 없이 javac → d8 → aapt2 → zipalign → apksigner) 릴리스 `android-latest`에 올린다. 직접 만들려면 `ANDROID_HOME=SDK경로 bash android/build.sh`
 - 서명 키: 저장소 Secrets에 `ANDROID_KEYSTORE_B64`·`ANDROID_KEYSTORE_PASS`가 없으면 빌드마다 새 키로 서명한다. 이 경우 새 버전을 설치하려면 기존 앱을 지우고 설치해야 한다. 키는 공개 저장소에 넣지 않는다.
-- 고정 서명 키의 인증서 SHA-256: `2B:BD:F0:7B:30:6B:98:F2:CA:61:84:9F:EA:FC:FD:98:38:7C:FB:F3:DD:11:52:4F:E5:1E:5C:2A:D2:10:03:38`. Actions 로그의 "APK 만들기" 단계에 찍히는 값(`Signer #1 certificate SHA-256 digest`)이 이것과 같으면 고정 키로 서명된 것이다. 키 파일(.p12)과 암호는 저장소 밖에 보관한다(잃어버리면 기존 설치본을 지우지 않고는 업데이트할 수 없다)
+- 고정 서명 키의 인증서 SHA-256: `40:76:F2:A6:C7:C7:8D:1B:49:D1:3D:AB:75:E7:4B:62:DC:90:21:6A:AF:39:47:79:D7:7E:BB:E2:29:63:C6:76`. Actions 로그의 "APK 만들기" 단계에 찍히는 값(`certificate SHA-256 digest`, 소문자·콜론 없이 찍힘)이 이것과 같으면 고정 키로 서명된 것이다. 키 파일(.p12)과 암호는 저장소 밖에 보관한다(잃어버리면 기존 설치본을 지우지 않고는 업데이트할 수 없다)
 - 설치: 폰에서 파일을 받아 열고, 처음 한 번 "출처를 알 수 없는 앱 설치"를 허용한다.
 
 ## 무료 내장 여행 가이드
