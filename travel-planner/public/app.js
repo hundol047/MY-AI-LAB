@@ -366,7 +366,8 @@ function itemHTML(it, i, day) {
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
         ${(state.opts.access || []).length ? accessLine(p) : ""}
-        ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}</div>` : ""}
+        ${state.input.move === "transit" ? busLine(p, it) : ""}
+        ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
@@ -449,6 +450,20 @@ function accessLine(p) {
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   return `<details class="access"><summary>${tags.length ? `♿ ${tags.join(" · ")}` : t("무장애 정보 있음")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>`;
+}
+
+// 장소 근처 시내·농어촌버스 (bus.json, 국토교통부 TAGO 버스노선정보 · 춘천·원주·횡성·태백·홍천·철원만)
+// 첫차·막차는 노선 기점 출발 시각이라 정류장 도착은 조금 늦다 → 막차 30분 전부터 경고한다
+let busData = null;
+fetchT("bus.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { busData = j; if (trip && state.input.move === "transit" && !$("#result").hidden) render(); }).catch(() => {});
+function busLine(p, it) {
+  const b = busData?.places?.[p.id];
+  if (!b) return "";
+  const nos = b.routes.slice(0, 3).map((r) => t("{n}번", { n: esc(r.no) })).join(", ");
+  const list = b.routes.map((r) => `<li><b>${t("{n}번", { n: esc(r.no) })}</b> ${r.first || "?"}–${r.last || "?"}${r.gap ? " · " + t("{m}분 간격", { m: r.gap }) : ""} · ${esc(r.stop)} ${r.m}m</li>`).join("");
+  const [lh, lm] = (b.last || "").split(":").map(Number);
+  const late = b.last && it && it.end >= lh * 60 + lm - 30;
+  return `<details class="access bus"><summary>🚌 ${esc(b.stop)} ${b.m}m · ${nos}${b.last ? " · " + t("막차 {t}", { t: b.last }) : ""}</summary><ul>${list}</ul><small>${t("국토교통부 TAGO 버스노선정보 · 첫차·막차는 기점 출발 시각")}</small></details>${late ? `<div class="alert warn">${t("근처 버스 막차({t}, 기점 출발)에 가까워요 · 택시를 준비하세요", { t: b.last })}</div>` : ""}`;
 }
 
 /* ---------- 반려동물 동행 ----------

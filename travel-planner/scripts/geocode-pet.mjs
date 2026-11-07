@@ -31,17 +31,25 @@ async function vw(path, params) {
 async function byAddress(addr) {
   // 괄호·층수 등 덧붙인 말은 뺀다 ("…로 307, 16층" → "…로 307")
   const a = addr.replace(/\([^)]*\)/g, " ").replace(/,.*$/, "").replace(/\s+/g, " ").trim();
-  for (const type of ["road", "parcel"]) {
-    const res = await vw("address", { service: "address", request: "getcoord", version: "2.0", crs: "epsg:4326", refine: "true", simple: "false", type, address: a });
+  // 번지 뒤에 붙은 건물·장소 이름도 뺀 주소로 한 번 더 ("오십천로 566 벚꽃둑방길" → "오십천로 566")
+  const cut = a.replace(/^(.*?(?:로|길|리|동|가)\s*\d+(?:-\d+)?)(?:\s.*)?$/, "$1");
+  for (const q of [...new Set([a, cut])]) for (const type of ["road", "parcel"]) {
+    const res = await vw("address", { service: "address", request: "getcoord", version: "2.0", crs: "epsg:4326", refine: "true", simple: "false", type, address: q });
     if (res?.status === "OK" && res.result?.point) return { lat: +res.result.point.y, lng: +res.result.point.x, how: `주소(${type === "road" ? "도로명" : "지번"})` };
     await sleep(200);
   }
   return null;
 }
 async function byName(r) {
-  const res = await vw("search", { service: "search", request: "search", version: "2.0", crs: "EPSG:4326", size: "5", page: "1", query: `${r.sigun} ${r.name}`, type: "place" });
-  const hit = (res?.result?.items || []).find((d) => `${d.address?.road || ""} ${d.address?.parcel || ""}`.includes(r.sigun));
-  return hit ? { lat: +hit.point.y, lng: +hit.point.x, how: "이름 검색" } : null;
+  // "춘천 춘천통나무집닭갈비"처럼 이름 앞에 지역명이 이미 있으면 지역명을 뗀 이름으로도 찾는다. 결과는 그 시군 주소인 것만 쓴다
+  const bare = r.name.replace(new RegExp(`^${r.sigun}`), "").trim();
+  for (const q of [...new Set([`${r.sigun} ${r.name}`, `${r.sigun} ${bare}`])]) {
+    const res = await vw("search", { service: "search", request: "search", version: "2.0", crs: "EPSG:4326", size: "10", page: "1", query: q, type: "place" });
+    const hit = (res?.result?.items || []).find((d) => `${d.address?.road || ""} ${d.address?.parcel || ""}`.includes(r.sigun));
+    if (hit) return { lat: +hit.point.y, lng: +hit.point.x, how: "이름 검색" };
+    await sleep(200);
+  }
+  return null;
 }
 
 if (/[가-힣]/.test(KEY) || KEY.length < 20) { console.error(`VWORLD_KEY 값이 실제 키가 아닌 것 같습니다 ("${KEY.slice(0, 6)}…"). 브이월드에서 받은 인증키(영문·숫자·하이픈)를 넣으세요: $env:VWORLD_KEY="발급받은키"`); process.exit(1); }

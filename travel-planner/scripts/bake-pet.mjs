@@ -66,7 +66,7 @@ for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "�
     const hours = cafe ? ["10:00", "19:00"] : food ? ["11:00", "20:00"] : ["09:00", "18:00"];
     extra.push({ region: AREAS[area].region, id: `pet-${r.no}`, name: r.name, cat: food ? (cafe ? "cafe" : "food") : "nature", area, lat: Number(g.lat.toFixed(4)), lng: Number(g.lng.toFixed(4)),
       hours, closed: [], stay: cafe ? 50 : 60, indoor: food, walk: 1, pop: 1, tags: [], petOnly: true, hoursGuessed: true,
-      desc: (cafe ? "반려동물 동반 카페" : food ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: "", addr: r.addr, wiki: r.name });
+      desc: (cafe ? "반려동물 동반 카페" : food ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: "", addr: r.addr, ...(r.tel ? { tel: r.tel } : {}), wiki: r.name });
     places[`pet-${r.no}`] = r.name;
     report.push({ r, why: `관광공사에 없어 주소 좌표(${g.how})로 넣음 · 영업시간 가정 ${hours.join("–")}` });
     continue;
@@ -93,7 +93,7 @@ for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "�
     region: AREAS[area].region, id: `pet-${r.no}`, name: r.name, cat: isFood ? (cafe ? "cafe" : "food") : String(m.contenttypeid) === "14" ? "culture" : "nature",
     area, lat, lng, hours: h.hours, ...(h.lastEntry ? { lastEntry: h.lastEntry } : {}), closed: parseKtoClosed(rest),
     stay: isFood ? (cafe ? 50 : 60) : 60, indoor: isFood || String(m.contenttypeid) === "14", walk: 1, pop: 1, tags: [], petOnly: true,
-    desc: (cafe ? "반려동물 동반 카페" : isFood ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: [text, rest].filter(Boolean).join(" · "), kto: String(m.contentid), wiki: r.name,
+    desc: (cafe ? "반려동물 동반 카페" : isFood ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: [text, rest].filter(Boolean).join(" · "), kto: String(m.contentid), ...(r.tel ? { tel: r.tel } : {}), wiki: r.name,
   });
   places[`pet-${r.no}`] = r.name;
   if (++n % 20 === 0) process.stdout.write(".");

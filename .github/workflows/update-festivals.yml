@@ -1,9 +1,10 @@
 # 매주 월요일 아침(한국 시간 09:17) 한국관광공사 행사정보에서 강원 축제 날짜를 확인하고,
-# 바뀐 게 있으면 검토용 PR을 만든다 (바로 반영하지 않음).
+# 국토교통부 TAGO 버스노선정보로 장소 근처 시내·농어촌버스(첫차·막차·배차)를 다시 만든다.
+# 테스트를 통과하면 검토 PR 없이 main에 바로 반영하고 앱(APK)도 다시 만든다.
 # 준비: 저장소 Settings → Secrets and variables → Actions → New repository secret
 #       이름 TOUR_API_KEY, 값은 공공데이터포털 한국관광공사 국문 관광정보 서비스 Decoding 키
 # 예약 실행은 기본 브랜치(main)에 이 파일이 있어야 동작한다. Actions 탭에서 "Run workflow"로 바로 돌릴 수도 있다.
-name: 축제 날짜 갱신
+name: 축제 날짜·근처 버스 갱신
 
 on:
   schedule:
@@ -12,7 +13,7 @@ on:
 
 permissions:
   contents: write
-  pull-requests: write
+  actions: write
 
 jobs:
   update:
@@ -44,24 +45,24 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/update-festivals.mjs --write
-      - name: 축제 데이터가 바뀌었는지 확인
+      - name: 장소 근처 버스 (TAGO 버스노선정보)
+        if: steps.key.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/bake-bus.mjs
+      - name: 데이터가 바뀌었는지 확인
         id: diff
         if: steps.key.outputs.ok == 'true'
         run: |
-          # 리포트 날짜만 바뀐 경우에는 PR을 만들지 않는다
-          if git diff --quiet -- public/data.js; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+          # 리포트 날짜만 바뀐 경우에는 반영하지 않는다
+          if git diff --quiet -- public/data.js public/bus.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제·버스 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
       - name: 일정 엔진 테스트 (바뀐 데이터로)
         if: steps.diff.outputs.changed == 'true'
         run: npm test
-      - name: 검토용 PR 만들기 (바뀐 게 있을 때만)
+      - name: main에 반영 (바뀐 게 있을 때만)
         if: steps.diff.outputs.changed == 'true'
-        uses: peter-evans/create-pull-request@v7
-        with:
-          branch: auto/update-festivals
-          commit-message: "Update festival dates from KTO event data"
-          title: "축제 날짜 자동 갱신"
-          body-path: travel-planner/reports/festivals.md
-          add-paths: |
-            travel-planner/public/data.js
-            travel-planner/reports/festivals.md
-          delete-branch: true
+        working-directory: ${{ github.workspace }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md
