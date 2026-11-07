@@ -1,0 +1,8 @@
+node_modules
+.cache
+.local
+android
+screenshots
+reports
+test
+*.log

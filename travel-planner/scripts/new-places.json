@@ -807,6 +807,258 @@
    "area": "yanggu",
    "cat": "nature",
    "title": "양구 산양·사향노루센터"
+  },
+  {
+   "id": "wj-gamyeong",
+   "q": "원주 강원감영",
+   "title": "원주 강원감영",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-hanji",
+   "q": "원주한지테마파크",
+   "title": "원주한지테마파크",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-parkkyongni",
+   "q": "박경리문학공원",
+   "title": "박경리문학공원",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-banggok-station",
+   "q": "원주 반곡역",
+   "title": "원주 반곡역",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-rose-park",
+   "q": "장미공원",
+   "title": "장미공원",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "nature"
+  },
+  {
+   "id": "wj-baramgil",
+   "q": "치악산 바람길숲",
+   "title": "치악산 바람길숲",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "nature"
+  },
+  {
+   "id": "wj-gopanhwa",
+   "q": "치악산 명주사",
+   "title": "치악산 명주사",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "chiaksan",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-yongsomak",
+   "q": "용소막성당",
+   "title": "용소막성당",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "chiaksan",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-gukhyeongsa",
+   "q": "관음사·국형사계곡",
+   "title": "관음사·국형사계곡",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "chiaksan",
+   "cat": "nature"
+  },
+  {
+   "id": "wj-beopcheonsa",
+   "q": "원주 법천사지",
+   "title": "원주 법천사지",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-geodonsa",
+   "q": "원주 거돈사지",
+   "title": "원주 거돈사지",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "culture"
+  },
+  {
+   "id": "wj-seomgang-birch",
+   "q": "원주섬강자작나무숲둘레길",
+   "title": "원주섬강자작나무숲둘레길",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "nature"
+  },
+  {
+   "id": "wj-chilbong",
+   "q": "칠봉유원지",
+   "title": "칠봉유원지",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "nature"
+  },
+  {
+   "id": "hs-seomgang",
+   "q": "섬강",
+   "title": "섬강(섬강유원지)",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature"
+  },
+  {
+   "id": "hs-forest",
+   "q": "국립횡성숲체원",
+   "title": "국립횡성숲체원",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature"
+  },
+  {
+   "id": "hs-byeongjibang",
+   "q": "병지방계곡",
+   "title": "병지방계곡",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "nature"
+  },
+  {
+   "id": "wj-seomgang-makguksu",
+   "q": "섬강막국수",
+   "title": "섬강막국수",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "food"
+  },
+  {
+   "id": "wj-chueotang",
+   "q": "김가네원주추어탕",
+   "title": "김가네원주추어탕",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "food"
+  },
+  {
+   "id": "wj-bok-chueotang",
+   "q": "복추어탕",
+   "title": "복추어탕",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "chiaksan",
+   "cat": "food"
+  },
+  {
+   "id": "wj-borit",
+   "q": "보릿고개 본점",
+   "title": "보릿고개 본점",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "food"
+  },
+  {
+   "id": "wj-hamheung",
+   "q": "천진함흥냉면",
+   "title": "천진함흥냉면",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "food"
+  },
+  {
+   "id": "hs-deodeok",
+   "q": "박현자네더덕밥",
+   "title": "박현자네더덕밥",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "food"
+  },
+  {
+   "id": "hs-hambat",
+   "q": "함밭식당",
+   "title": "함밭식당",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "hoengseong",
+   "cat": "food"
+  },
+  {
+   "id": "hs-kkwong-mandu",
+   "q": "네덜란드꿩만두 새말점",
+   "title": "네덜란드꿩만두 새말점",
+   "sigun": "횡성",
+   "region": "wonju",
+   "area": "chiaksan",
+   "cat": "food"
+  },
+  {
+   "id": "wj-teodeukgol",
+   "q": "터득골북샵",
+   "title": "터득골북샵",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "cafe"
+  },
+  {
+   "id": "wj-rotonda",
+   "q": "카페 로톤다",
+   "title": "카페 로톤다",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "ganhyeon",
+   "cat": "cafe"
+  },
+  {
+   "id": "wj-okhee",
+   "q": "깨 로스터리 옥희방앗간",
+   "title": "깨 로스터리 옥희방앗간",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "cafe"
+  },
+  {
+   "id": "wj-eunseok",
+   "q": "커피은석씨",
+   "title": "커피은석씨",
+   "sigun": "원주",
+   "region": "wonju",
+   "area": "wj_city",
+   "cat": "cafe"
   }
  ]
 }

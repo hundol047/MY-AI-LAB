@@ -67,3 +67,15 @@ TOUR_API_KEY는 KorService2에서 정상 동작합니다(2026-11-06 확인). 탐
 - `npm run diagnose:tour`는 HTTPS만 사용하고 키·요청 URL·응답 원문을 저장하지 않습니다. 최신 결과는 `reports/tour-connectivity.json`입니다. 2026-11-06 결과: KorService2의 지역 목록(법정동·지역 코드)·최소 요청·지역 코드 조회 모두 정상, 폐기된 KorService1만 코드 12(없는 서비스, 정상적인 결과)입니다. 오류 코드 10은 보통 필수 파라미터 누락이나 v2에서 없어진 파라미터 때문이고, 22는 하루 호출 한도 초과입니다.
 - 실시간 숙박 비교 및 자동 확정·취소에는 실제 공급사 계약/계정과 API 명세가 필요합니다. 이 환경에는 TOUR_API_KEY만 연결되어 있습니다. Expedia Rapid 승인 또는 실제 제휴 공급사의 테스트 계정·숙소 ID 매핑 없이 성공·예약 확정을 만들어내지 않습니다.
 - 무료 웹 푸시는 `PUBLIC_APP_URL=https://실제-공개-앱-주소` 설정 시 활성화됩니다. VAPID 키는 앱 서버가 자동 생성합니다. `api/push-config`로 활성 상태를 확인할 수 있습니다. 현재 공개 서버 주소가 없어 운영 발송은 미활성입니다. 푸시 키 파일은 DB 옆 `vapid.json`이며 DB 백업과 별도로 영구 보존해야 합니다.
+
+## 앱 서버 올리기 (후기·예약 신청·가게 등록을 공개 버전에서 쓰려면)
+
+GitHub Pages 웹앱과 APK는 정적 파일만 있어서 서버가 필요한 기능(후기, 숙소·투어 예약 신청, 가게 등록, 사용 통계)이 숨겨집니다. 저장소 루트의 `render.yaml`과 `travel-planner/Dockerfile`로 서버를 한 번에 올릴 수 있습니다.
+
+1. https://dashboard.render.com 에 GitHub 계정으로 가입
+2. **New → Blueprint** → 저장소 `hundol047/MY-AI-LAB` 선택 → `render.yaml`을 읽어 `ohneul-gangwon` 서비스를 만든다
+3. 입력 칸 두 개를 채운다: `TOUR_API_KEY`(공공데이터포털 Decoding 키), `PUBLIC_APP_URL`(만들어진 주소, 예: `https://ohneul-gangwon.onrender.com` — 처음엔 비워 두고 주소가 나온 뒤 넣어도 된다)
+4. 결제 수단 등록 후 **Apply**. 디스크(/var/data)에 SQLite를 두므로 재시작해도 후기·신청이 남는다 (디스크는 유료 플랜에서만 붙는다)
+5. 관리자 화면: `https://주소/admin.html`, 관리자 토큰은 Render의 Environment 탭 `ADMIN_API_TOKEN` 값
+
+서버 주소가 생기면 그 주소 자체가 모든 기능이 켜진 앱이 된다. 주소를 알려 주면 APK와 GitHub Pages 웹앱도 그 서버를 쓰도록 연결한다.

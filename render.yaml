@@ -1,0 +1,26 @@
+# Render 블루프린트: 저장소를 연결하면 travel-planner 앱 서버를 만든다 (API-SETUP.md "앱 서버 올리기" 참고)
+# - 후기·예약 신청·가게 등록 데이터가 재시작 후에도 남도록 디스크(/var/data)에 SQLite를 둔다 (디스크는 유료 플랜에서만 붙는다)
+# - TOUR_API_KEY·PUBLIC_APP_URL은 Render 화면에서 직접 넣는다 (저장소에 키를 넣지 않음)
+services:
+  - type: web
+    name: ohneul-gangwon
+    runtime: docker
+    rootDir: travel-planner
+    dockerfilePath: ./Dockerfile
+    region: singapore
+    plan: starter
+    healthCheckPath: /index.html
+    autoDeploy: true
+    disk:
+      name: data
+      mountPath: /var/data
+      sizeGB: 1
+    envVars:
+      - key: APP_DB_PATH
+        value: /var/data/app.sqlite
+      - key: ADMIN_API_TOKEN
+        generateValue: true
+      - key: TOUR_API_KEY
+        sync: false
+      - key: PUBLIC_APP_URL
+        sync: false
