@@ -1,5 +1,8 @@
 name: Application tests
-on: [push, pull_request]
+on:
+  push:
+    branches-ignore: [live-data]  # 기상특보 파일만 있는 브랜치
+  pull_request:
 permissions:
   contents: read
 jobs:

@@ -86,14 +86,18 @@ const inScope = (input, region) => region === regionOf(input) || (input.days > 1
 export const baseOf = (input) => REGIONS[regionOf(input)].base;
 
 // 그 권역의 장소 + 그날 열리는 확정 축제
-function candidates(input) {
+function candidates(input, opts = {}) {
   const r = regionOf(input);
   const fests = FESTIVALS.filter((f) => f.start && inScope(input, f.region)).map((f) => ({
     ...f, cat: "festival", closed: [], indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"],
   }));
   // 반려동물 동행: 목록에 있는 곳(pet) + 확인은 안 됐지만 야외인 자연·바다(카드에 "동반 확인 필요")만. 실내·식당·카페·문화시설은 목록에 있을 때만
   // 반려동물 동행 전용 장소(petOnly)는 반려동물 동행일 때만 쓴다
-  const ok = (p) => input.who === "pet" ? p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
+  const okWho = (p) => input.who === "pet" ? p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
+  // 휠체어·유모차: 오래 걷거나 산길인 곳(walk 3)은 빼고, 휠체어는 무장애 정보 없이 걷기가 있는 곳(walk 2)도 뺀다
+  const acc = opts.access || [];
+  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp));
+  const ok = (p) => okWho(p) && okAccess(p);
   return [...PLACES.filter((p) => inScope(input, p.region) && ok(p)), ...fests];
 }
 
@@ -144,6 +148,9 @@ function baseScore(p, input, opts, rain) {
   if (input.who === "parents") { if (p.tags.includes("senior")) s += 1.5; if (p.walk >= 2) s -= 1; if (p.walk === 3) s -= 4; }
   if (input.who === "couple" && (p.cat === "cafe" || p.tags.includes("night"))) s += 0.5;
   if (input.who === "pet") s += p.pet ? 3 : -2; // 동반 가능이 확인된 곳 우선
+  const acc = opts.access || [];
+  if (acc.length && p.access) s += (p.access.ramp ? 2 : 0) + (p.access.toilet ? 1 : 0) + (acc.includes("wheelchair") && p.access.wheel ? 1 : 0) + (acc.includes("stroller") && (p.access.stroller || p.access.nursing) ? 1 : 0);
+  else if (acc.length && p.cat !== "festival") s -= 1; // 무장애 정보가 없는 곳은 뒤로
 
   if (opts.lessWalk) { if (p.walk === 3) s -= 5; else if (p.walk === 2) s -= 1; }
   if (rain || opts.indoor) {
@@ -166,7 +173,7 @@ function dayWindow(dayIdx, totalDays) {
 // 하루의 중심 지역 선택: 아직 안 간 곳 중 점수 높은 장소가 몰린 지역
 function pickAnchors(input, opts, rain, used, usedAreas, dateStr, from) {
   const ranked = [];
-  const pool = candidates(input);
+  const pool = candidates(input, opts);
   const BASE = from || baseOf(input);
   for (const [key, area] of Object.entries(AREAS)) {
     if (!inScope(input, area.region)) continue;
@@ -217,7 +224,7 @@ function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
 export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude = new Set(), keepOnly = false, start = null) {
   const dateStr = addDays(input.date, dayIdx);
   const rain = !!(opts.rainDays || [])[dayIdx];
-  const pool = candidates(input);
+  const pool = candidates(input, opts);
   const byId = (id) => pool.find((p) => p.id === id);
   let anchors;
   if (keep.length && byId(keep[0])) anchors = [byId(keep[0]).area];
@@ -240,10 +247,11 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   const win = dayWindow(dayIdx, input.days), end = win.end;
   // 첫날 출발 시각을 정했으면 그 시각에 출발지를 떠난다 (06:00~12:00)
   const t0 = dayIdx === 0 && /^\d{2}:\d{2}$/.test(opts.startTime || "") ? toMin(opts.startTime) : null;
-  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("12:00") ? t0 : win.start;
+  // 06:00~15:00 (기차·버스 도착 시각으로 정한 경우 오후일 수 있다)
+  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("15:00") ? t0 : win.start;
   const pace = opts.pace || "normal";
   const limit = PACE_LIMIT[pace];
-  const pool = candidates(input);
+  const pool = candidates(input, opts);
   const BASE = baseOf(input);
   const byId = (id) => pool.find((p) => p.id === id);
   const anchor = AREAS[anchorKey];

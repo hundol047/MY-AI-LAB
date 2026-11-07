@@ -41,6 +41,13 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/check-hours.mjs
+      - name: 오가는 길 시간표 (열차·고속·시외버스)
+        if: steps.key.outputs.ok == 'true'
+        continue-on-error: true
+        working-directory: travel-planner
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/bake-transit.mjs
       - if: steps.key.outputs.ok == 'true'
         uses: peter-evans/create-pull-request@v7
         with:
@@ -51,3 +58,5 @@ jobs:
           add-paths: |
             travel-planner/public/directory.json
             travel-planner/reports/hours.md
+            travel-planner/public/transit.json
+            travel-planner/reports/transit.md

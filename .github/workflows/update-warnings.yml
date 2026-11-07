@@ -1,0 +1,46 @@
+# 기상특보 갱신: 2시간마다 기상청 특보 현황을 받아 live-data 브랜치의 warnings.json 하나만 덮어쓴다.
+# 앱(웹·안드로이드)은 https://raw.githubusercontent.com/hundol047/MY-AI-LAB/live-data/warnings.json 을 읽는다
+# (공공데이터포털 인증키를 앱에 넣지 않기 위해). 키는 저장소 Secrets의 TOUR_API_KEY (같은 공공데이터포털 키).
+name: 기상특보 갱신
+on:
+  schedule:
+    - cron: "15 */2 * * *"
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: update-warnings
+  cancel-in-progress: true
+jobs:
+  warnings:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+      - name: 키 확인
+        id: key
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: |
+          if [ -n "$TOUR_API_KEY" ]; then echo "ok=true" >> "$GITHUB_OUTPUT"; else echo "ok=false" >> "$GITHUB_OUTPUT"; echo "::warning::저장소 Secrets에 TOUR_API_KEY가 없어 건너뜁니다"; fi
+      - name: 특보 받기
+        if: steps.key.outputs.ok == 'true'
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: mkdir -p "$RUNNER_TEMP/live" && node travel-planner/scripts/bake-warnings.mjs "$RUNNER_TEMP/live/warnings.json"
+      - name: live-data 브랜치에 올리기 (기록 없이 파일 하나만)
+        if: steps.key.outputs.ok == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cd "$RUNNER_TEMP/live"
+          git init -q -b live-data
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add warnings.json
+          git commit -q -m "Weather warnings $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3; do git push -q --force "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" HEAD:live-data && exit 0; sleep $((i * 5)); done
+          exit 1

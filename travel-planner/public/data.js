@@ -1,6 +1,7 @@
 import { EXTRA_PLACES } from "./extra-places.js";
 import { MORE_PLACES } from "./places-more.js";
 import { PET_OK, PET_PLACES } from "./pet-places.js";
+import { ACCESS } from "./access-data.js";
 // 강릉 장소 데이터 (운영정보 확인: 2026년 11월)
 // hours: [열림, 닫힘], lastEntry: 입장·주문 마감, breaks: 브레이크타임 목록
 // closed: 정기 휴무 요일 (0=일 ... 6=토)
@@ -277,6 +278,8 @@ export const PLACES = [
 ];
 // 강원 반려동물 동반 시설 목록에 있는 장소 (scripts/bake-pet.mjs)
 for (const p of PLACES) if (PET_OK.includes(p.id)) p.pet = true;
+// 무장애 편의시설 (scripts/bake-access.mjs, 한국관광공사 무장애 여행 정보)
+for (const p of PLACES) if (ACCESS[p.id]) p.access = ACCESS[p.id];
 
 // 강원 축제
 // confirmed: 날짜가 발표된 축제 → 기간 중 같은 권역 여행이면 일정에 자동 포함

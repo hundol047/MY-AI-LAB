@@ -52,6 +52,17 @@ for (const days of [4, 5])
             for (const rain of [false, true]) check({ region, date, days, who, likes, move }, pace, rain);
 
 assert.ok(carItems / carDays >= 4, `자동차 일정 하루 평균 장소 수 ${carItems / carDays}`);
+// 휠체어·유모차: 오래 걷는 곳(walk 3)은 넣지 않고, 휠체어면 무장애 정보(경사로) 없는 walk 2도 넣지 않는다
+for (const region of ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"])
+  for (const access of [["wheelchair"], ["stroller"]])
+    for (const date of ["2026-11-10", "2027-07-07"]) {
+      const trip = planTrip({ region, date, days: 2, who: "family", likes: [], move: "car" }, { access, lessWalk: true });
+      assert.equal(verify(trip.days), 0, `이동 편의 ${region} ${access}`);
+      for (const it of trip.days.flatMap((d) => d.items)) if (it.place.cat !== "festival") {
+        assert.ok(it.place.walk < 3, `이동 편의 일정에 오래 걷는 곳: ${it.place.name}`);
+        if (access.includes("wheelchair")) assert.ok(it.place.walk === 1 || it.place.access?.ramp, `휠체어 일정에 경사로 정보 없는 곳: ${it.place.name}`);
+      }
+    }
 // 반려동물 동행: 목록에 없는 실내·식당·카페·문화시설은 넣지 않고, 반려동물 동행 전용 장소는 다른 동행에 쓰지 않는다
 for (const region of ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"])
   for (const days of [1, 2, 3])

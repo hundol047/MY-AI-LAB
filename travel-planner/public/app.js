@@ -3,9 +3,10 @@ import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestL
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
-import { alertsFor, OFFICIAL_CHECKS } from "./alerts.js";
+import { alertsFor as weatherAlertsFor, kmaAlertsFor, OFFICIAL_CHECKS } from "./alerts.js";
 import { todayStatus, kstNow } from "./today.js";
 import { toPlannerPlace } from "./directory-place.js";
+import { bestArrival, hasRoute, returnTrips } from "./transit.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -70,6 +71,11 @@ document.querySelectorAll(".seg").forEach((seg) => {
     seg.querySelectorAll("button").forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", x === b); });
   });
 });
+// 이동 편의(휠체어·유모차): 일정 엔진의 5가지 선택과 따로, 켜면 계단·긴 산길을 빼고 무장애 정보가 있는 곳을 먼저 넣는다
+document.querySelector('.chips[data-name="access"]').addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (b) b.classList.toggle("on");
+});
+const accessNow = () => [...document.querySelectorAll('.chips[data-name="access"] .on')].map((b) => b.dataset.v);
 document.querySelector('.chips[data-name="likes"]').addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (b) b.classList.toggle("on");
 });
@@ -86,7 +92,8 @@ $("#form").addEventListener("submit", (e) => {
     move: segValue("move"),
   };
   const lessWalk = input.who === "parents";
-  state = { input, opts: { pace: "normal", lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [], ...startOpts(input) } };
+  const access = accessNow();
+  state = { input, opts: { pace: "normal", lessWalk: lessWalk || access.length > 0, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...startOpts(input) } };
   restoredFromLink = false;
   dayIdx = 0;
   rebuild();
@@ -103,8 +110,60 @@ const savedStart = () => { const s = store.get("startPoint"); return s && Number
 function startOpts(input) {
   const s = savedStart(), base = REGIONS[input.region].base;
   const time = store.get("startTime") || (s && distKm(s, base) * 1.35 > 60 ? "08:00" : "");
+  // 대중교통으로 서울 쪽 역·터미널에서 출발하면 실제 시간표(transit.json)에서 가장 일찍 도착하는 편을 골라, 도착 15분 뒤 기준점에서 첫날을 시작한다
+  const hub = input.move === "transit" && transitHub(s);
+  if (hub && transitData && hasRoute(transitData, hub, input.region)) {
+    const [h, m] = (time || "07:00").split(":").map(Number);
+    const best = bestArrival(transitData, hub, input.region, input.date, h * 60 + m);
+    if (best) {
+      const begin = Math.ceil((best.arrMin + 15) / 5) * 5;
+      return { start: { name: best.hub, lat: base.lat, lng: base.lng }, startTime: fmt(begin), arrival: { mode: best.mode, grade: best.grade, from: hub, hub: best.hub, dep: best.dep, arr: best.arr, fare: best.fare, refDate: best.refDate } };
+    }
+  }
   return { ...(s ? { start: { name: s.name, ...(s.nameEn ? { nameEn: s.nameEn } : {}), lat: s.lat, lng: s.lng } } : {}), ...(time ? { startTime: time } : {}) };
 }
+// 시간표가 있는 서울 쪽 출발지 (origins.js 이름과 같음)
+const TRANSIT_HUBS = ["서울역", "청량리역", "상봉역", "동서울종합터미널", "서울고속버스터미널"];
+function transitHub(s) {
+  if (!s) return null;
+  const o = ORIGINS.find((x) => TRANSIT_HUBS.includes(x.name) && (x.name === s.name || distKm(x, s) < 1.5));
+  return o ? o.name : null;
+}
+let transitData = null;
+fetchT("transit.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { transitData = j; if (trip && !$("#result").hidden) renderTransit(); }).catch(() => {});
+
+/* ---------- 오가는 길 카드: 가는 편과 마지막 날 돌아오는 편 ---------- */
+const MODE_NAME = { train: "기차", express: "고속버스", intercity: "시외버스" };
+// 도착역·터미널 이름 (외국어 화면에서는 영어 + 한국어)
+const HUB_EN = { 강릉: "Gangneung", 속초: "Sokcho", 춘천: "Chuncheon", 원주: "Wonju", 진부: "Jinbu" };
+function hubLabel(name) {
+  if (!isForeign()) return name;
+  const m = name.match(/^(\S+?)(역| 고속버스터미널| 시외버스터미널)$/);
+  if (!m || !HUB_EN[m[1]]) return name;
+  const kind = { "역": "Station", " 고속버스터미널": "Express Bus Terminal", " 시외버스터미널": "Intercity Bus Terminal" }[m[2]];
+  return `${HUB_EN[m[1]]} ${kind} (${name})`;
+}
+function renderTransit() {
+  const box = $("#transit"); if (!box || !trip) return;
+  const a = state.opts.arrival, hub = transitHub(savedStart());
+  if (state.input.move !== "transit") { box.hidden = true; return; }
+  const refLabel = (d) => d ? `${d.slice(4, 6)}/${d.slice(6, 8)}` : "";
+  const line = (x) => `<li><b>${esc(x.dep)}</b> → ${esc(x.arr)} · ${t(MODE_NAME[x.mode])} ${esc(x.grade || "")}${x.fare ? ` · ${won(x.fare)}` : ""}${x.last ? ` · <em>${t("막차")}</em>` : ""}</li>`;
+  let html = `<h3>${t("오가는 길")}</h3>`;
+  if (a) {
+    html += `<p>${t("가는 편: {from} {dep} → {hub} {arr}", { from: esc(isForeign() ? (ORIGINS.find((o) => o.name === a.from)?.nameEn || a.from) : a.from), dep: a.dep, hub: esc(hubLabel(a.hub)), arr: a.arr })} · ${t(MODE_NAME[a.mode])} ${esc(a.grade || "")}${a.fare ? ` · ${won(a.fare)}` : ""}</p>`;
+    const last = trip.days.at(-1), end = last.items.length ? last.items.at(-1).end + 30 : 17 * 60;
+    const back = transitData ? returnTrips(transitData, a.from, state.input.region, last.date, end) : [];
+    html += back.length ? `<h4>${t("마지막 날 돌아오는 편 ({time} 이후)", { time: fmt(end) })}</h4><ul class="pet-list">${back.map(line).join("")}</ul>`
+      : `<p class="sub warn">${t("마지막 일정 뒤에 돌아오는 편이 시간표에 없어요. 일정을 줄이거나 하루 더 머무세요.")}</p>`;
+    html += `<p class="sub">${t("국토교통부 TAGO 시간표 기준 (기차 {t}, 버스 {b}). 예매·시간 변경은 코레일·버스 예매 사이트에서 확인하세요.", { t: refLabel(a.mode === "train" ? a.refDate : transitData?.trainDays?.[isWeekendDate(state.input.date) ? "weekend" : "weekday"]), b: refLabel(transitData?.busDate) })}</p>`;
+  } else {
+    html += `<p class="sub">${hub ? t("이 권역으로 가는 기차·버스 시간표가 없어 이동 시간을 거리로 추정했어요.") : t("출발지를 서울역·청량리역·상봉역·동서울·서울고속버스터미널 중 하나로 정하면 실제 기차·버스 시간표로 첫날을 짜요.")}</p>`;
+  }
+  box.hidden = false;
+  box.innerHTML = html;
+}
+const isWeekendDate = (d) => { const w = new Date(d + "T00:00:00Z").getUTCDay(); return w === 0 || w === 6; };
 function renderStartRow() {
   const s = savedStart(), region = segValue("region") || "gangneung";
   const base = REGIONS[region].base;
@@ -171,6 +230,8 @@ function fillForm(input) {
     document.querySelectorAll(`.seg[data-name="${name}"] button`).forEach((b) => b.classList.toggle("on", b.dataset.v === String(input[name])));
   }
   document.querySelectorAll('.chips[data-name="likes"] button').forEach((b) => b.classList.toggle("on", input.likes.includes(b.dataset.v)));
+  const acc = state?.opts?.access || [];
+  document.querySelectorAll('.chips[data-name="access"] button').forEach((b) => b.classList.toggle("on", acc.includes(b.dataset.v)));
 }
 
 /* ---------- 화면 전환 ---------- */
@@ -279,6 +340,7 @@ function render() {
   renderChecks();
   renderToday();
   renderPet();
+  renderTransit();
   renderShops();
   loadImages();
   drawMap(day);
@@ -300,6 +362,7 @@ function itemHTML(it, i, day) {
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
+        ${(state.opts.access || []).length ? accessLine(p) : ""}
         ${p.petOnly ? `<div class="check soft">${t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
@@ -312,8 +375,22 @@ function itemHTML(it, i, day) {
   </li>`;
 }
 
+// 기상특보(기상청 특보 현황): GitHub Actions가 2시간마다 받아 live-data 브랜치에 올린 warnings.json을 읽는다 (인증키를 앱에 넣지 않음).
+// 장소의 시군은 pet.json의 sigun 표(관광공사 주소 기준)를 함께 쓴다. 오늘·내일 일정에만 붙인다
+let kma = null, placeSigun = null;
+const WARNINGS_URL = "https://raw.githubusercontent.com/hundol047/MY-AI-LAB/live-data/warnings.json";
+Promise.all([
+  fetchT(WARNINGS_URL, { cache: "no-cache" }, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+  fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+]).then(([w, pj]) => { kma = w; placeSigun = pj?.sigun || null; if (pj && !petData) petData = pj; if (w && trip && !$("#result").hidden) render(); });
+function alertsFor(p, date, wx) {
+  const k = kstNow(), tomorrowStr = addDays(k.date, 1);
+  return [...kmaAlertsFor(p, date, { warnings: kma, sigun: placeSigun?.[p.id], today: k.date, tomorrow: tomorrowStr }), ...weatherAlertsFor(p, date, wx)];
+}
+
 // 통제·운휴 경고 문구 (alerts.js). 예보로 본 가능성이라 "멈출 수 있어요"로 말하고, 다른 곳으로 바꿀 수 있게 한다
 function alertText(a) {
+  if (a.kind === "kma") return a.prelim ? t("예비특보: {name} 예정 · 출발 전 기상청 특보를 확인하세요", { name: t(a.name) }) : a.level === "warn" ? t("⚠ {name} 발효 중 · 운영·통제 여부를 꼭 확인하세요", { name: t(a.name) }) : t("{name} 발효 중", { name: t(a.name) });
   if (a.kind === "wind") return t("⚠ 돌풍 최대 {g}m/s 예보 · 운휴·통제될 수 있어요. 출발 전 운영 여부를 확인하거나 '바꾸기'로 다른 곳을 고르세요", { g: a.gust });
   if (a.kind === "sea") return t("⚠ 바람이 센 날(돌풍 {g}m/s) · 풍랑특보가 나면 통제돼요. 출발 전 확인하세요", { g: a.gust });
   if (a.kind === "snow") return t("⚠ 눈 {s}cm 예보 · 고갯길이 막히거나 체인이 필요할 수 있어요", { s: a.snow });
@@ -353,6 +430,15 @@ document.addEventListener("click", (e) => {
   const g = e.target.closest("[data-goday]");
   if (g) { dayIdx = Number(g.dataset.goday); render(); }
 });
+
+// 무장애 편의시설 한 줄 (한국관광공사 무장애 여행 정보). 자세한 원문은 펼쳐 본다 (원문은 한국어)
+const ACCESS_LABEL = { wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
+function accessLine(p) {
+  if (!p.access) return p.cat === "festival" ? "" : `<div class="access none">${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}</div>`;
+  const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
+  const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
+  return `<details class="access"><summary>${tags.length ? `♿ ${tags.join(" · ")}` : t("무장애 정보 있음")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>`;
+}
 
 /* ---------- 반려동물 동행 ----------
    강원 반려동물 동반 시설 목록(pet.json)으로: 여행하는 시군의 동반 가능 숙소, 동물병원·동물약국(전화·지도), 동반 식당이 없는 날 안내 */
@@ -833,15 +919,23 @@ function renderCosts() {
   if (!trip?.days?.length) { box.hidden = true; return; }
   box.hidden = false;
   const people = peopleNow();
-  const e = estimateTrip(trip, state.input, people, feesData, benefitsFor(trip, state.input));
+  // 오가는 기차·버스 운임: 가는 편 운임 + 돌아오는 편(마지막 날 첫 편) 운임
+  let longFare = null;
+  if (state.opts.arrival?.fare && transitData) {
+    const last = trip.days.at(-1), end = last.items.length ? last.items.at(-1).end + 30 : 17 * 60;
+    const back = returnTrips(transitData, state.opts.arrival.from, state.input.region, last.date, end, 1)[0];
+    longFare = { go: state.opts.arrival.fare, back: back?.fare || state.opts.arrival.fare };
+  }
+  const e = estimateTrip(trip, state.input, people, feesData, benefitsFor(trip, state.input), longFare);
   const label = {
-    taxi: t("택시"), fuel: t("자동차 연료"), bus: t("버스"), fees: t("입장료"), meals: t("식사·카페"), stay: t("숙박"),
+    taxi: t("택시"), fuel: t("자동차 연료"), bus: t("버스"), longway: t("오가는 기차·버스"), fees: t("입장료"), meals: t("식사·카페"), stay: t("숙박"),
   };
   const detail = (r) => {
     const d = r.detail;
     if (r.key === "taxi") return t("{n}구간 · 택시 {cars}대 · {src}", { n: d.legs, cars: d.cars, src: t(TAXI.source) }) + (d.far ? t(" · 출발지에서 오는 먼 구간은 기차·버스 요금 별도") : "");
     if (r.key === "fuel") return t("약 {km}km · 연비 {eff}km/L · {src}", { km: d.km, eff: FUEL.kmPerL, src: t(FUEL.source) });
     if (r.key === "bus") return t("{n}번 탑승 · 1회 {fare}", { n: d.rides, fare: won(BUS.fare) }) + (d.far ? t(" · 먼 구간 {n}번은 시외버스라 요금 확인 필요", { n: d.far }) : "");
+    if (r.key === "longway") return t("가는 편 {go} · 돌아오는 편 {back} (어린이는 할인될 수 있어요)", { go: won(r.detail.go), back: won(r.detail.back) });
     if (r.key === "fees") return t("요금 확인된 {n}곳 (한국관광공사)", { n: d.known }) + (e.unknownFees.length ? t(" · 요금 정보 없음: {names}", { names: e.unknownFees.map((p) => esc(placeName(p))).join(", ") }) : "");
     if (r.key === "meals") return t("점심 {l} · 저녁 {d} · 카페 {c} (앱 가정: 1인 점심 {a}, 저녁 {b})", { l: d.lunch, d: d.dinner, c: d.cafe, a: range(...ASSUME.lunch), b: range(...ASSUME.dinner) });
     if (r.key === "stay") return t("{n}박 · {units}{unit} · {type} (앱 가정: 평균 범위, 주말·성수기엔 더 비쌈)", { n: d.nights, units: d.units, unit: d.type === "guesthouse" ? t("명") : t("실"), type: typeLabel(d.type, trip.lodging.typeLabel) });

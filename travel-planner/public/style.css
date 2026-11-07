@@ -511,3 +511,10 @@ body:not(.has-server) .needs-server { display: none !important; }
 .pet-info .sub.warn { color: var(--warn); }
 .pet-list { margin: 0; padding-left: 18px; font-size: 13px; line-height: 1.7; }
 .pet-list a { color: var(--brand); }
+
+/* 무장애 편의시설 */
+.access { margin-top: 4px; font-size: 12px; color: var(--text); }
+.access summary { cursor: pointer; color: var(--brand); font-weight: 600; }
+.access ul { margin: 4px 0; padding-left: 16px; line-height: 1.6; color: var(--sub); }
+.access small { color: var(--sub); }
+.access.none { color: var(--sub); }

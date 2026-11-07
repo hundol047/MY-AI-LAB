@@ -39,7 +39,7 @@ const round100 = (n) => Math.round(n / 100) * 100;
  * trip: planTrip 결과, input: 조건, people: {adults, kids}, fees: fees.json, lodgingType: trip.lodging.type
  * 반환: { rows: [{key, low, high, detail}], total: {low, high}, perPerson: {low, high}, unknownFees: [이름], farBus: n }
  */
-export function estimateTrip(trip, input, people, fees = {}, benefits = []) {
+export function estimateTrip(trip, input, people, fees = {}, benefits = [], longFare = null) {
   const n = Math.max(1, people.adults + people.kids);
   const rows = [];
 
@@ -69,6 +69,12 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = []) {
     farBus = bus.filter((l) => l.km > BUS.farKm).length;
     const low = (bus.length - farBus) * BUS.fare * n; // 먼 구간(시외·고속버스, KTX)은 요금이 달라 합계에서 빼고 따로 알린다
     rows.push({ key: "bus", low, high: low, detail: { rides: bus.length, far: farBus } });
+  }
+
+  // 1-2) 오가는 기차·버스 (시간표의 실제 운임, 어른 기준 · 어린이는 낮은 값에서 반값으로)
+  if (longFare) {
+    const f = longFare.go + longFare.back;
+    rows.push({ key: "longway", low: f * people.adults + Math.round(f * 0.5) * people.kids, high: f * (people.adults + people.kids), detail: { ...longFare } });
   }
 
   // 2) 입장료: 관광공사 요금(fees.json). 요금 정보가 없는 곳은 따로 알린다
