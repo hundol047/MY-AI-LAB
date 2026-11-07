@@ -49,6 +49,13 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/bake-transit.mjs
+      - name: 관광지 혼잡 예측 (앞으로 30일)
+        if: steps.key.outputs.ok == 'true'
+        continue-on-error: true
+        working-directory: travel-planner
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/bake-crowd.mjs
       - name: 패키지 설치·테스트 (바뀐 데이터로)
         if: steps.key.outputs.ok == 'true'
         working-directory: travel-planner
@@ -59,4 +66,4 @@ jobs:
         if: steps.key.outputs.ok == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/commit-data.sh "Refresh official tourism directory, operating hours and timetables" travel-planner/public/directory.json travel-planner/reports/hours.md travel-planner/public/transit.json travel-planner/reports/transit.md
+        run: bash .github/scripts/commit-data.sh "Refresh official tourism directory, operating hours and timetables" travel-planner/public/directory.json travel-planner/reports/hours.md travel-planner/public/transit.json travel-planner/reports/transit.md travel-planner/public/crowd.json travel-planner/reports/crowd.md

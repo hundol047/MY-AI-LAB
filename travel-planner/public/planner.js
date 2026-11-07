@@ -151,8 +151,21 @@ export function fitsHours(h, start, finish) {
 }
 
 // 사용자 조건에 따른 장소 점수
-function baseScore(p, input, opts, rain) {
+// 관광지 혼잡 예측(crowd.json, 한국관광공사 집중률): 앱이 불러오면 setCrowd로 넘긴다. 하루 단위 값이라
+// 붐비는 날(70 이상)은 그곳을 뒤로 미룬다. 꼭 넣어 달라고 한 곳(must)·축제는 그대로 넣는다
+// 주말처럼 거의 모든 곳이 붐비는 날에는 피할 곳이 없으므로, 그날 강원 전체 평균보다 20 이상 더 붐비는 곳만 미룬다
+// (자료가 없는 장소가 유명한 장소보다 앞서지 않게)
+let CROWD = {}, dayMean = {};
+export function setCrowd(places) { CROWD = places || {}; dayMean = {}; }
+export const crowdOn = (id, dateStr) => CROWD[id]?.rates?.[dateStr] ?? null;
+function meanOn(dateStr) {
+  if (!(dateStr in dayMean)) { const v = Object.values(CROWD).map((x) => x.rates?.[dateStr]).filter((x) => x != null); dayMean[dateStr] = v.length ? v.reduce((a, b) => a + b, 0) / v.length : 0; }
+  return dayMean[dateStr];
+}
+export const crowdedOn = (id, dateStr) => { const c = crowdOn(id, dateStr); return c != null && c >= 70 && c - meanOn(dateStr) >= 20; };
+function baseScore(p, input, opts, rain, dateStr = null) {
   let s = p.pop;
+  if (dateStr && crowdedOn(p.id, dateStr)) s -= 2 + (crowdOn(p.id, dateStr) - 70) / 15; // 70 → -2, 100 → -4
   if (p.cat === "festival") s += 10; // 여행 날짜에 열리는 축제는 최우선
   if (p.region !== regionOf(input)) s -= 5; // 고른 권역 우선
   if ((opts.must || []).includes(p.id)) s += 8; // AI 가이드에게 넣어 달라고 한 곳
@@ -196,7 +209,7 @@ function pickAnchors(input, opts, rain, used, usedAreas, dateStr, from) {
     if (!inScope(input, area.region)) continue;
     const scores = pool
       .filter((p) => p.area === key && !used.has(p.id) && isOpenDay(p, dateStr) && p.cat !== "food")
-      .map((p) => baseScore(p, input, opts, rain))
+      .map((p) => baseScore(p, input, opts, rain, dateStr))
       .sort((a, b) => b - a)
       .slice(0, 4);
     if (scores.length < 2) continue; // 볼거리가 거의 없는 지역은 하루 중심으로 삼지 않음
@@ -334,7 +347,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if (!r) continue;
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
-      let v = baseScore(p, input, opts, rain);
+      let v = baseScore(p, input, opts, rain, dateStr);
       v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
       v -= r.wait * 0.05;
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선

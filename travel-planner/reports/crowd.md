@@ -1,0 +1,131 @@
+# 관광지 혼잡 예측 (한국관광공사 집중률)
+
+생성: node scripts/bake-crowd.mjs. 강원 관광지 858곳 · 앱 장소와 맞춘 곳 119곳 · 못 맞춘 관광지형 장소 32곳.
+
+집중률 70 이상이면서 그날 강원 평균보다 20 이상 높으면 '붐빔 예상'(일정 엔진이 그날 뒤로 미룸), 70 이상이면 '붐비는 날'로 카드에 표시한다.
+
+## 맞춘 곳
+
+- sutasa: 수타사
+- alpaca-world: 알파카월드
+- palbongsan: 팔봉산(홍천)
+- hc-mugunghwa: 무궁화수목원
+- garisan-forest: 가리산자연휴양림
+- hc-ginkgo: 홍천 은행나무숲
+- dutayeon: 두타연 (강원평화지역 국가지질공원)
+- yanggu-observatory: 국토정중앙천문대
+- parksookeun: 박수근미술관
+- yanggu-porcelain: 양구백자박물관
+- yanggu-modern: 양구근현대사박물관
+- jogyeongcheol: 화천조경철천문대
+- kkeomeok-bridge: 꺼먹다리
+- ttansan: 딴산
+- baegamsan-cable: 백암산 케이블카
+- baekdamsa: 백담사
+- inje-folk: 인제산촌민속박물관
+- bangtaesan-forest: 국립 방태산자연휴양림
+- manhae-village: 만해마을
+- birch-museum: 미술관 자작나무숲
+- cheongtaesan: 국립 청태산자연휴양림
+- hs-luge: 횡성루지체험장
+- welli-ski: 웰리힐리파크 스노우파크
+- jangneung: 영월 장릉(단종) [유네스코 세계유산]
+- gossigul: 고씨굴 (강원고생대 국가지질공원)
+- byeolmaro: 별마로천문대
+- seondol: 선돌 (강원고생대 국가지질공원)
+- yoseonam: 요선정·요선암
+- kimsatgat: 난고 김삿갓 유적지
+- hwaam-cave: 화암동굴 (강원고생대 국가지질공원)
+- js-railbike: 정선레일바이크
+- byeongbangchi: 병방치 스카이워크
+- auraji: 아우라지
+- manhangjae: 만항재
+- high1-ski: 하이원리조트
+- mindungsan: 민둥산
+- coal-museum: 태백석탄박물관
+- gumunso: 구문소 (강원고생대 국가지질공원)
+- yongyeon-cave: 용연동굴 (강원고생대 국가지질공원)
+- cheoram: 철암탄광역사촌
+- jukseoru: 삼척 죽서루
+- isabu-park: 이사부사자공원&그림책 나라
+- mureung: 무릉계곡
+- cheongok-cave: 천곡황금박쥐동굴
+- herbnara: 허브나라농원
+- yongpyong-ski: 모나용평
+- phoenix-ski: 휘닉스 평창
+- alpensia-ski: 알펜시아 리조트
+- cw-peace-observatory: 철원 평화전망대 (한탄강 유네스코 세계지질공원)
+- sambuyeon: 삼부연폭포 (한탄강 유네스코 세계지질공원)
+- soisan: 소이산
+- crane-center: 철원 철새도래지 (철원평야)
+- geonbongsa: 건봉사
+- cheonggan: 청간정
+- songjiho: 송지호 해수욕장
+- naksansa: 낙산사
+- hyuhyuam: 휴휴암(강원)
+- namae-port: 남애항
+- oak-valley-ski: 오크밸리스키장
+- sinheungsa: 신흥사(설악산)
+- gwangchi-forest: 광치자연휴양림
+- gyeongpo-beach: 강릉 경포해수욕장
+- gangmun-beach: 강문해변
+- anmok-beach: 안목해변
+- namhangjin-beach: 남항진해변(남항진해수욕장)
+- sacheon-beach: 사천해변(사천해수욕장)
+- jeongdongjin: 정동진해변
+- ojukheon: 강릉 오죽헌
+- seongyojang: 강릉 선교장
+- gyeongpodae: 강릉 경포대
+- arte: 아르떼뮤지엄 강릉
+- wolhwa: 강릉 월화거리
+- haslla: 하슬라아트월드
+- gyeongpo-lake: 경포호(철새도래지)
+- gasiyeon: 경포호(철새도래지)
+- solhyang: 강릉 솔향수목원
+- jumunjin-lighthouse: 주문진 등대
+- chuam: 추암 촛대바위
+- nongoldam: 논골담길
+- dojjaebi: 도째비골스카이밸리
+- haerang: 묵호항
+- mangsang: 망상해변
+- hwanseon: 환선굴 (대이리 동굴지대)
+- samcheok-cable: 삼척해상케이블카
+- jangho: 장호항
+- sokcho-beach: 속초해수욕장
+- yeonggeumjeong: 영금정
+- cheongcho: 청초호
+- unification: 고성 통일전망타워
+- hwajinpo: 화진포 (강원평화지역 국가지질공원)
+- ayajin: 아야진해변
+- naksan-beach: 낙산 해수욕장
+- surfyy: 서피비치
+- hajodae: 하조대(전망대)
+- jukdo: 죽도해수욕장
+- birch: 원대리 자작나무 숲 (속삭이는 자작나무 숲)
+- nami: 남이섬
+- kimyoujeong: 김유정문학촌
+- soyang-skywalk: 소양강스카이워크
+- cc-museum: 국립춘천박물관
+- goseokjeong: 고석정 (한탄강 유네스코 세계지질공원)
+- hwacheon-river: 붕어섬
+- samak-cable: 삼악산(춘천)
+- labor-party: 철원 노동당사
+- jiktang: 직탕폭포 (한탄강 유네스코 세계지질공원)
+- sheep: 대관령양떼목장
+- samyang: 삼양라운드힐 (구, 대관령 삼양목장)
+- woljeongsa: 오대산 월정사 전나무숲길
+- samtan: 삼탄아트마인
+- cheongnyeongpo: 청령포 (강원고생대 국가지질공원)
+- hanbando: 한반도지형 (강원고생대 국가지질공원)
+- hwangji: 황지연못
+- windhill: 매봉산
+- sogeumsan: 원주 소금산 출렁다리
+- museum-san: 뮤지엄산
+- bangyeri: 원주 반계리 은행나무
+- guryongsa: 구룡사
+- hoengseong-lake: 횡성호
+- ganhyeon-park: 간현관광지
+
+## 집중률 자료에 없는 장소
+
+비발디파크 스키월드, 을지전망대, 파로호 한반도섬, 화천 비수구미 마을, 평화의 댐, 박인환문학관, 내린천 래프팅, 풍수원성당, 젊은달 와이파크, 검룡소, 태백산 (유일사 코스), 대금굴, 삼척 해양레일바이크, 삼척 이사부길 (새천년해안도로), 봉평 이효석문화마을, 고성 왕곡마을, 설악산 오색 주전골, 설악산 비선대, 설악산 울산바위, 양구 산양·사향노루센터, 영진해변 도깨비 촬영지, 향호해변 버스정류장, 정동심곡 바다부채길, 참소리축음기·에디슨과학박물관, 허균·허난설헌 기념공원, 강릉대도호부 관아, 정동진 시간박물관, 송정 해송숲, 설악산 케이블카, 공지천 유원지, 한탄강 주상절리길, 발왕산 관광케이블카

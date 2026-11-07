@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay } from "./planner.js";
+import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -399,6 +399,7 @@ function itemHTML(it, i, day) {
         <p>${esc(placeDesc(p))}</p>
         ${(state.opts.access || []).length ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}
+        ${crowdLine(p, trip.days[dayIdx].date)}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
@@ -482,6 +483,15 @@ function accessLine(p) {
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   return `<details class="access"><summary>${tags.length ? `♿ ${tags.join(" · ")}` : t("무장애 정보 있음")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>`;
+}
+
+// 관광지 혼잡 예측 (crowd.json, 한국관광공사 집중률 · 앞으로 30일 · 하루 단위). 일정을 짜기 전에 불러 엔진에 넘긴다
+fetchT("crowd.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j?.places) setCrowd(j.places); }).catch(() => {});
+function crowdLine(p, dateStr) {
+  const v = crowdOn(p.id, dateStr);
+  if (v == null || v < 70) return "";
+  const high = crowdedOn(p.id, dateStr); // 그날 다른 곳보다 유난히 붐빔
+  return `<div class="crowd ${high ? "high" : "mid"}">${high ? t("👥 붐빔 예상 (집중률 {v}) · 문 여는 시간에 맞춰 가면 덜 붐벼요", { v: Math.round(v) }) : t("👥 붐비는 날 (집중률 {v})", { v: Math.round(v) })}</div>`;
 }
 
 // 장소 근처 시내·농어촌버스 (bus.json, 국토교통부 TAGO 버스노선정보 · 춘천·원주·횡성·태백·홍천·철원만)
