@@ -404,7 +404,7 @@ function itemHTML(it, i, day) {
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
-        <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
+        <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
         <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
       </div>
@@ -543,6 +543,14 @@ function renderChecks() {
 
 // 길찾기는 카카오맵 장소 검색으로: 지도 서비스의 정확한 위치로 안내된다
 const searchName = (p) => p.name;
+// 길찾기: 앞 장소(첫 장소는 그날 출발점)에서 이 장소까지 카카오맵 길 안내를 연다 (map.kakao.com/link/by/교통수단/출발,위도,경도/도착,위도,경도)
+// 이름에 쉼표·슬래시가 있으면 주소 형식이 깨지므로 뺀다. 대중교통이면 1km 안은 걷기, 그보다 멀면 대중교통 길찾기
+function routeLink(a, b) {
+  const nm = (x) => encodeURIComponent(String(x.name || "").replace(/[,/]/g, " ").trim() || "지점");
+  const km = Math.hypot((a.lat - b.lat) * 111, (a.lng - b.lng) * 88);
+  const by = drives(state.input.move) ? "car" : km < 1 ? "walk" : "traffic";
+  return `https://map.kakao.com/link/by/${by}/${nm(a)},${a.lat},${a.lng}/${nm(b)},${b.lat},${b.lng}`;
+}
 
 function hoursLabel(p, date) {
   if (p.cat === "festival") return t("축제 기간 {a}–{b}", { a: p.start.slice(5).replace("-", "."), b: p.end.slice(5).replace("-", ".") });
@@ -1074,91 +1082,253 @@ function renderPast() {
 
 /* ---------- 지도 ---------- */
 // 지도 라이브러리는 일정 화면을 처음 열 때 받는다 (첫 화면을 가볍게)
-let leafletLoading = null;
+let leafletLoading = null, mlLoading = null;
 let lastMapViewKey = null;
 let mapInteractive = false;
+let mapKind = null; // "3d"(MapLibre, 지형 입체) | "2d"(Leaflet, WebGL이 없거나 3D를 못 불러올 때)
+const loadScript = (src, css) => new Promise((resolve, reject) => {
+  if (css) { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = css; document.head.append(l); }
+  const js = document.createElement("script"); js.src = src; js.onload = resolve; js.onerror = reject; document.head.append(js);
+});
 function loadLeaflet() {
   if (window.L) return Promise.resolve();
-  return (leafletLoading ??= new Promise((resolve, reject) => {
-    const css = document.createElement("link");
-    css.rel = "stylesheet"; css.href = "vendor/leaflet/leaflet.css";
-    document.head.append(css);
-    const js = document.createElement("script");
-    js.src = "vendor/leaflet/leaflet.js";
-    js.onload = resolve; js.onerror = () => { leafletLoading = null; reject(); };
-    document.head.append(js);
-  }));
+  return (leafletLoading ??= loadScript("vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css").catch((e) => { leafletLoading = null; throw e; }));
 }
+function loadMapLibre() {
+  if (window.maplibregl) return Promise.resolve();
+  return (mlLoading ??= loadScript("vendor/maplibre/maplibre-gl.js", "vendor/maplibre/maplibre-gl.css").catch((e) => { mlLoading = null; throw e; }));
+}
+const hasWebGL = (() => { let ok = null; return () => { if (ok === null) { try { const c = document.createElement("canvas"); ok = !!(c.getContext("webgl2") || c.getContext("webgl")); } catch { ok = false; } } return ok; }; })();
+
+// 지도에 그릴 것: 출발점, 숙소, 방문지(번호), 선
+function mapModel(day) {
+  const L0 = lodgingForDay(trip, day.dayIdx) || (day.dayIdx >= state.input.days - 1 ? null : trip.lodging);
+  const marks = [{ lat: day.start.lat, lng: day.start.lng, label: t(day.start.name.startsWith("숙소") ? "숙" : "출"), base: true, tip: startName(day.start, trip.lodging) }];
+  if (L0 && !day.start.name.startsWith("숙소")) marks.push({ lat: L0.lat, lng: L0.lng, label: t("숙"), base: true, tip: t("숙소 · {name}", { name: lodgingName(L0) }) });
+  day.items.forEach((it, i) => marks.push({ lat: it.place.lat, lng: it.place.lng, label: String(i + 1), color: CAT[it.place.cat].color, tip: `${fmt(it.start)} ${placeName(it.place)}` }));
+  const cached = routeCache.get(routeKey(day));
+  const known = cached && !(cached instanceof Promise) ? cached : null;
+  const line = known ? known.line : [[day.start.lat, day.start.lng], ...day.items.map((it) => [it.place.lat, it.place.lng])];
+  return { marks, line, known: !!known, bounds: [...line, ...(L0 ? [[L0.lat, L0.lng]] : [])] };
+}
+
+// 번호가 서로 가리지 않게: 화면에서 32px 안에 겹치는 표시는 한데 모아 원 둘레로 펼치고, 원래 위치까지 선을 긋는다
+// pts: [{x, y}] (화면 좌표) → [{dx, dy}] (펼친 만큼의 이동)
+function declutter(pts, gap = 32) {
+  const out = pts.map(() => ({ dx: 0, dy: 0 }));
+  const seen = new Array(pts.length).fill(false);
+  for (let i = 0; i < pts.length; i++) {
+    if (seen[i]) continue;
+    const group = [i]; seen[i] = true;
+    for (let k = 0; k < group.length; k++) for (let j = 0; j < pts.length; j++) {
+      if (!seen[j] && Math.hypot(pts[group[k]].x - pts[j].x, pts[group[k]].y - pts[j].y) < gap) { seen[j] = true; group.push(j); }
+    }
+    if (group.length < 2) continue;
+    const cx = group.reduce((a, g) => a + pts[g].x, 0) / group.length, cy = group.reduce((a, g) => a + pts[g].y, 0) / group.length;
+    const r = Math.max(gap * 0.75, (gap * group.length) / (2 * Math.PI)); // 이웃 표시끼리 gap만큼 떨어지는 반지름
+    group.forEach((g, n) => {
+      const a = -Math.PI / 2 + (2 * Math.PI * n) / group.length;
+      out[g] = { dx: cx + r * Math.cos(a) - pts[g].x, dy: cy + r * Math.sin(a) - pts[g].y };
+    });
+  }
+  // 펼친 무리끼리 다시 맞닿으면 서로 밀어낸다 (원래 자리에 있는 표시는 덜 움직인다)
+  const pos = pts.map((p, i) => ({ x: p.x + out[i].dx, y: p.y + out[i].dy }));
+  for (let it = 0; it < 40; it++) {
+    let moved = false;
+    for (let i = 0; i < pos.length; i++) for (let j = i + 1; j < pos.length; j++) {
+      let vx = pos[j].x - pos[i].x, vy = pos[j].y - pos[i].y, d = Math.hypot(vx, vy);
+      if (d >= gap) continue;
+      if (d < 0.01) { vx = Math.cos(i + j); vy = Math.sin(i + j); d = 1; }
+      const push = (gap - d) / 2 + 0.5;
+      pos[i].x -= (vx / d) * push; pos[i].y -= (vy / d) * push;
+      pos[j].x += (vx / d) * push; pos[j].y += (vy / d) * push;
+      moved = true;
+    }
+    if (!moved) break;
+  }
+  return pos.map((p, i) => ({ dx: p.x - pts[i].x, dy: p.y - pts[i].y }));
+}
+function pinEl(m) {
+  const el = document.createElement("div");
+  el.className = `pin3d${m.base ? " base" : ""}`;
+  el.innerHTML = `<i class="stem"></i><span style="${m.color ? `--c:${m.color}` : ""}">${esc(m.label)}</span>`;
+  el.title = m.tip; el.setAttribute("aria-label", m.tip);
+  return el;
+}
+function placePin(el, dx, dy) {
+  const span = el.querySelector("span"), stem = el.querySelector(".stem");
+  span.style.transform = `translate(${dx}px, ${dy}px)`;
+  const len = Math.hypot(dx, dy);
+  stem.style.width = `${len}px`;
+  stem.style.transform = `rotate(${Math.atan2(dy, dx)}rad)`;
+  el.classList.toggle("moved", len > 1);
+}
+
 function drawMap(day) {
+  if (mapKind === null) {
+    if (!hasWebGL()) mapKind = "2d";
+    else {
+      loadMapLibre().then(() => { mapKind = "3d"; }).catch(() => { mapKind = "2d"; })
+        .finally(() => { if (trip && !$("#result").hidden) drawMap(trip.days[dayIdx]); });
+      return;
+    }
+  }
+  if (mapKind === "3d") return drawMap3D(day);
   if (!window.L) {
     loadLeaflet().then(() => { if (trip && !$("#result").hidden) drawMap(trip.days[dayIdx]); }).catch(() => {});
     return;
   }
+  drawMap2D(day);
+}
+
+/* 3D: OpenStreetMap 지도를 지형(AWS 공개 고도 자료, terrarium) 위에 입혀 기울여 본다. 산·계곡이 솟아 보인다 */
+let ml = null, mlMarkers = [], mlModel = null;
+const TERRAIN_TILES = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
+function drawMap3D(day) {
+  const model = mapModel(day);
+  if (!day.items.length) return;
+  if (!ml) {
+    ml = new maplibregl.Map({
+      container: "map", attributionControl: { compact: true }, pitch: 55, bearing: -12, maxPitch: 75,
+      center: [model.line[0][1], model.line[0][0]], zoom: 11,
+      dragPan: false, dragRotate: false, scrollZoom: false, touchZoomRotate: false, touchPitch: false, keyboard: false, doubleClickZoom: false, boxZoom: false,
+      style: {
+        version: 8,
+        sources: {
+          osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" },
+          dem: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
+          hill: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
+        },
+        layers: [
+          { id: "osm", type: "raster", source: "osm" },
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.35, "hillshade-shadow-color": "#3a4a40" } },
+        ],
+        terrain: { source: "dem", exaggeration: 1.4 },
+        sky: { "sky-color": "#bfe3f0", "horizon-color": "#e9f4f7", "sky-horizon-blend": 0.6, "atmosphere-blend": 0.5 },
+      },
+    });
+    ml.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    ml.addControl({ onAdd: () => locateButton((ll) => { ml.flyTo({ center: [ll[1], ll[0]], zoom: 14 }); return new maplibregl.Marker({ color: "#2563eb" }).setLngLat([ll[1], ll[0]]).addTo(ml); }), onRemove() {} }, "bottom-right");
+    ml.on("error", (e) => console.warn("지도", e?.error?.message || e));
+    ml.on("move", () => spread3D());
+  }
+  // 번호·시점은 바로, 경로선은 지도 스타일이 준비되면 (타일을 다 받을 때까지 기다리지 않는다)
+  mlMarkers.forEach((m) => m.remove());
+  // 방문지 번호가 출발·숙소 표시보다 위에 오도록 나중에 넣는다
+  mlMarkers = [...model.marks].sort((a, b) => Number(!a.base) - Number(!b.base)).map((m) => {
+    const el = pinEl(m);
+    const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([m.lng, m.lat]).addTo(ml);
+    el.addEventListener("click", () => new maplibregl.Popup({ offset: 18, closeButton: false }).setLngLat([m.lng, m.lat]).setText(m.tip).addTo(ml));
+    return mk;
+  });
+  mlModel = model;
+  ml.resize();
+  const viewKey = routeKey(day);
+  if (lastMapViewKey !== viewKey) {
+    const lats = model.bounds.map((p) => p[0]), lngs = model.bounds.map((p) => p[1]);
+    // 오른쪽 아래 확대·방향 버튼, 위쪽 '지도 이동' 버튼에 번호가 가리지 않도록 여백을 둔다
+    ml.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 70, bottom: 50, left: 40, right: 70 }, maxZoom: 14, pitch: 55, bearing: -12, duration: 0 });
+    fit3D();
+    lastMapViewKey = viewKey;
+  }
+  spread3D();
+  if (!model.known) applyRoad(dayIdx);
+  const line = () => {
+    const geo = { type: "Feature", geometry: { type: "LineString", coordinates: model.line.map(([la, ln]) => [ln, la]) } };
+    if (ml.getSource("route")) ml.getSource("route").setData(geo);
+    else {
+      ml.addSource("route", { type: "geojson", data: geo });
+      ml.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#ffffff", "line-width": 8, "line-opacity": 0.9 } });
+      ml.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#0b5e6b", "line-width": 4.5 } });
+    }
+    ml.setPaintProperty("route", "line-dasharray", model.known ? [1, 0] : [1.5, 1.5]);
+  };
+  // 스타일 JSON만 준비되면 선을 넣을 수 있다 (타일이 다 오기를 기다리는 isStyleLoaded 대신 시도해 보고, 안 되면 style.load 때)
+  const tryLine = () => { try { line(); return true; } catch { return false; } };
+  if (!tryLine()) ml.once("style.load", () => { if (mlModel === model) tryLine(); });
+}
+// 기울인 3D 시점은 화면 가장자리 계산이 어긋나 번호가 잘릴 수 있다 → 펼친 번호까지 모두 화면 안(여백 28px)에 들 때까지 조금씩 멀리 본다
+function fit3D() {
+  const c = ml.getContainer(), w = c.clientWidth, h = c.clientHeight, m = 28;
+  for (let k = 0; k < 6; k++) {
+    const pts = mlMarkers.map((mk) => ml.project(mk.getLngLat()));
+    const off = declutter(pts);
+    const out = pts.some((p, i) => { const x = p.x + off[i].dx, y = p.y + off[i].dy; return x < m || y < m + 40 || x > w - m - 50 || y > h - m; });
+    if (!out) return;
+    ml.jumpTo({ zoom: ml.getZoom() - 0.4 });
+  }
+}
+function spread3D() {
+  if (!ml || !mlMarkers.length) return;
+  const pts = mlMarkers.map((m) => ml.project(m.getLngLat()));
+  declutter(pts).forEach((d, i) => placePin(mlMarkers[i].getElement(), d.dx, d.dy));
+}
+
+/* 2D (Leaflet): WebGL을 못 쓰는 기기 */
+let leafletPins = [];
+function drawMap2D(day) {
   if (!map) {
     map = L.map("map", { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false });
     map.attributionControl.setPrefix(false);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
-    addLocateControl();
+    const Ctl = L.Control.extend({ onAdd: () => locateButton((ll) => { map.setView(ll, 14); return L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }).addTo(map); }) });
+    new Ctl({ position: "bottomright" }).addTo(map);
+    map.on("zoomend moveend", spread2D);
   }
   if (layer) layer.remove();
   layer = L.layerGroup().addTo(map);
-  const pts = day.items.map((it) => [it.place.lat, it.place.lng]);
-  if (!pts.length) return;
-  const cached = routeCache.get(routeKey(day));
-  const known = cached && !(cached instanceof Promise) ? cached : null;
-  if (known) {
-    L.polyline(known.line, { color: "#0b5e6b", weight: 5, opacity: 0.85 }).addTo(layer);
-  } else {
-    L.polyline([[day.start.lat, day.start.lng], ...pts], { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
-    applyRoad(dayIdx);
-  }
-  const startLabel = t(day.start.name.startsWith("숙소") ? "숙" : "출");
-  L.marker([day.start.lat, day.start.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${startLabel}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(esc(startName(day.start, trip.lodging)));
-  const L0 = lodgingForDay(trip, day.dayIdx) || (day.dayIdx >= state.input.days - 1 ? null : trip.lodging);
-  if (L0 && !day.start.name.startsWith("숙소")) L.marker([L0.lat, L0.lng], { icon: L.divIcon({ className: "pin base", html: `<span>${t("숙")}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] }) }).addTo(layer).bindTooltip(t("숙소 · {name}", { name: esc(lodgingName(L0)) }));
-  day.items.forEach((it, i) => {
-    const icon = L.divIcon({ className: "pin", html: `<span style="--c:${CAT[it.place.cat].color}">${i + 1}</span>`, iconSize: [28, 28], iconAnchor: [14, 14] });
-    L.marker([it.place.lat, it.place.lng], { icon }).addTo(layer).bindTooltip(`${fmt(it.start)} ${esc(placeName(it.place))}`);
+  const model = mapModel(day);
+  if (!day.items.length) return;
+  L.polyline(model.line, model.known ? { color: "#0b5e6b", weight: 5, opacity: 0.85 } : { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
+  if (!model.known) applyRoad(dayIdx);
+  leafletPins = [...model.marks].sort((a, b) => Number(!a.base) - Number(!b.base)).map((m, i) => {
+    const el = pinEl(m);
+    const mk = L.marker([m.lat, m.lng], { icon: L.divIcon({ className: "pin-holder", html: el, iconSize: [0, 0] }), zIndexOffset: m.base ? 0 : 1000 + i }).addTo(layer).bindTooltip(esc(m.tip));
+    return mk;
   });
   map.invalidateSize({ pan: false });
-  const extra = L0 ? [[L0.lat, L0.lng]] : [];
   const viewKey = routeKey(day);
   if (lastMapViewKey !== viewKey) {
-    map.fitBounds([...(known ? known.line : [[day.start.lat, day.start.lng], ...pts]), ...extra], { padding: [36, 36], maxZoom: 14, animate: false });
+    map.fitBounds(model.bounds, { paddingTopLeft: [40, 70], paddingBottomRight: [70, 50], maxZoom: 14, animate: false });
     lastMapViewKey = viewKey;
   }
+  spread2D();
+}
+function spread2D() {
+  if (!map || !leafletPins.length) return;
+  const pts = leafletPins.map((m) => map.latLngToContainerPoint(m.getLatLng()));
+  declutter(pts).forEach((d, i) => { const el = leafletPins[i].getElement()?.querySelector(".pin3d"); if (el) placePin(el, d.dx, d.dy); });
 }
 
 $("#mapInteract").addEventListener("click", () => {
-  if (!map) return;
+  if (!map && !ml) return;
   mapInteractive = !mapInteractive;
-  for (const handler of [map.dragging, map.touchZoom, map.keyboard]) handler[mapInteractive ? "enable" : "disable"]();
+  if (ml) for (const h of [ml.dragPan, ml.touchZoomRotate, ml.keyboard, ml.dragRotate, ml.touchPitch, ml.doubleClickZoom]) h[mapInteractive ? "enable" : "disable"]();
+  if (map) for (const handler of [map.dragging, map.touchZoom, map.keyboard]) handler[mapInteractive ? "enable" : "disable"]();
   document.querySelector(".map-wrap").classList.toggle("map-active", mapInteractive);
   $("#mapInteract").setAttribute("aria-pressed", String(mapInteractive));
   $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
 });
+// 내 위치 버튼 (3D·2D 공통). mark(ll): 지도에 표시하고 그 표시를 돌려준다
 let meMarker = null;
-function addLocateControl() {
-  const Ctl = L.Control.extend({
-    onAdd() {
-      const b = L.DomUtil.create("button", "locate");
-      b.type = "button"; b.title = t("내 위치"); b.setAttribute("aria-label", t("내 위치"));
-      b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
-      L.DomEvent.on(b, "click", (e) => {
-        L.DomEvent.stop(e);
-        if (!navigator.geolocation) return toast(t("위치를 사용할 수 없어요"));
-        navigator.geolocation.getCurrentPosition((pos) => {
-          const ll = [pos.coords.latitude, pos.coords.longitude];
-          if (meMarker) meMarker.remove();
-          meMarker = L.circleMarker(ll, { radius: 8, color: "#fff", weight: 3, fillColor: "#2563eb", fillOpacity: 1 }).addTo(map);
-          map.setView(ll, 14);
-        }, () => toast(t("위치 권한을 허용해 주세요")), { enableHighAccuracy: true, timeout: 8000 });
-      });
-      return b;
-    },
+function locateButton(mark) {
+  const wrap = document.createElement("div");
+  wrap.className = "maplibregl-ctrl leaflet-bar locate-wrap";
+  const b = document.createElement("button");
+  b.className = "locate"; b.type = "button"; b.title = t("내 위치"); b.setAttribute("aria-label", t("내 위치"));
+  b.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg>';
+  b.addEventListener("click", (e) => {
+    e.preventDefault(); e.stopPropagation();
+    if (!navigator.geolocation) return toast(t("위치를 사용할 수 없어요"));
+    navigator.geolocation.getCurrentPosition((pos) => {
+      const ll = [pos.coords.latitude, pos.coords.longitude];
+      if (meMarker) meMarker.remove();
+      meMarker = mark(ll);
+    }, () => toast(t("위치 권한을 허용해 주세요")), { enableHighAccuracy: true, timeout: 8000 });
   });
-  new Ctl({ position: "bottomright" }).addTo(map);
+  wrap.append(b);
+  return wrap;
 }
 
 /* ---------- 조작 ---------- */

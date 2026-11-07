@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "{from}에서 여기까지 길찾기": "Directions from {from}",
   "👥 붐비는 날 (집중률 {v})": "👥 Busy day (crowd index {v})",
   "👥 붐빔 예상 (집중률 {v}) · 문 여는 시간에 맞춰 가면 덜 붐벼요": "👥 Busy day expected (crowd index {v}) · go right at opening",
   "👥 조금 붐빔 예상 (집중률 {v})": "👥 Somewhat busy (crowd index {v})",
