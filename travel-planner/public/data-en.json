@@ -1743,5 +1743,149 @@
     "nameSrc": "app",
     "desc": "Rooftop of the Korea Tourism Organization HQ",
     "descSrc": "app"
+  },
+  "wj-gamyeong": {
+    "name": "Gangwon Gamyeong (Wonju)",
+    "nameSrc": "app",
+    "desc": "Joseon-era provincial governor's office in central Wonju, open until late",
+    "descSrc": "app"
+  },
+  "wj-hanji": {
+    "name": "Wonju Hanji Theme Park",
+    "nameSrc": "app",
+    "desc": "Exhibits and hands-on making of hanji, Korean mulberry paper",
+    "descSrc": "app"
+  },
+  "wj-parkkyongni": {
+    "name": "Park Kyong-ni Literary Park",
+    "nameSrc": "app",
+    "desc": "Former home of the author of Toji and its garden",
+    "descSrc": "app"
+  },
+  "wj-baramgil": {
+    "name": "Chiaksan Baramgil Forest",
+    "nameSrc": "app",
+    "desc": "Urban forest trail built on the old Jungang Line railway through central Wonju",
+    "descSrc": "app"
+  },
+  "wj-gopanhwa": {
+    "name": "Museum of Old Woodblock Prints (Myeongjusa)",
+    "nameSrc": "app",
+    "desc": "Mountain-temple museum of old woodblock prints",
+    "descSrc": "app"
+  },
+  "wj-gukhyeongsa": {
+    "name": "Gwaneumsa & Gukhyeongsa Valley",
+    "nameSrc": "app",
+    "desc": "Valley with two temples on the edge of Chiaksan National Park",
+    "descSrc": "app"
+  },
+  "wj-beopcheonsa": {
+    "name": "Beopcheonsa Temple Site, Wonju",
+    "nameSrc": "app",
+    "desc": "Unified Silla temple ruins where the Jigwang National Preceptor stupa returned",
+    "descSrc": "app"
+  },
+  "wj-geodonsa": {
+    "name": "Geodonsa Temple Site, Wonju",
+    "nameSrc": "app",
+    "desc": "Quiet temple ruins guarded by a thousand-year-old zelkova tree",
+    "descSrc": "app"
+  },
+  "wj-seomgang-birch": {
+    "name": "Seomgang Birch Forest Trail, Wonju",
+    "nameSrc": "app",
+    "desc": "Birch forest walk along the Seomgang River",
+    "descSrc": "app"
+  },
+  "wj-chilbong": {
+    "name": "Chilbong Resort Area",
+    "nameSrc": "app",
+    "desc": "Riverside park below seven peaks on the Seomgang River",
+    "descSrc": "app"
+  },
+  "hs-forest": {
+    "name": "National Hoengseong Forest Healing Center",
+    "nameSrc": "app",
+    "desc": "Forest decks and trails at 850 m on Cheongtaesan",
+    "descSrc": "app"
+  },
+  "hs-byeongjibang": {
+    "name": "Byeongjibang Valley",
+    "nameSrc": "app",
+    "desc": "Clear mountain valley stream in Hoengseong",
+    "descSrc": "app"
+  },
+  "wj-seomgang-makguksu": {
+    "name": "Seomgang Makguksu",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles near Ganhyeon",
+    "descSrc": "app"
+  },
+  "wj-chueotang": {
+    "name": "Gimgane Wonju Chueotang",
+    "nameSrc": "app",
+    "desc": "Wonju-style loach soup, lunch only (last order 14:30)",
+    "descSrc": "app"
+  },
+  "wj-bok-chueotang": {
+    "name": "Bok Chueotang",
+    "nameSrc": "app",
+    "desc": "Wonju's first loach soup house since 1965",
+    "descSrc": "app"
+  },
+  "wj-borit": {
+    "name": "Boritgogae (main store)",
+    "nameSrc": "app",
+    "desc": "Third-generation Korean set meals in the Innovation City",
+    "descSrc": "app"
+  },
+  "wj-hamheung": {
+    "name": "Cheonjin Hamheung Naengmyeon",
+    "nameSrc": "app",
+    "desc": "Hamheung-style cold noodles in Dangye-dong",
+    "descSrc": "app"
+  },
+  "hs-deodeok": {
+    "name": "Park Hyeon-ja's Deodeok Rice",
+    "nameSrc": "app",
+    "desc": "Set meals built on Hoengseong's deodeok root",
+    "descSrc": "app"
+  },
+  "hs-hambat": {
+    "name": "Hambat Sikdang",
+    "nameSrc": "app",
+    "desc": "30-year Hoengseong hanwoo beef restaurant in town",
+    "descSrc": "app"
+  },
+  "hs-kkwong-mandu": {
+    "name": "Netherlands Pheasant Dumplings (Saemal)",
+    "nameSrc": "app",
+    "desc": "Pheasant dumpling soup in bone broth near Saemal",
+    "descSrc": "app"
+  },
+  "wj-teodeukgol": {
+    "name": "Teodeukgol Book Shop",
+    "nameSrc": "app",
+    "desc": "Independent bookshop and book café in the woods, open Thursday to Sunday",
+    "descSrc": "app"
+  },
+  "wj-rotonda": {
+    "name": "Cafe Rotonda",
+    "nameSrc": "app",
+    "desc": "Bakery café with a large garden and pond",
+    "descSrc": "app"
+  },
+  "wj-okhee": {
+    "name": "Kkae Roastery Okhee Bangatgan",
+    "nameSrc": "app",
+    "desc": "Third-generation sesame mill and dessert café",
+    "descSrc": "app"
+  },
+  "wj-eunseok": {
+    "name": "Coffee Eunseokssi",
+    "nameSrc": "app",
+    "desc": "Brunch café, daytime only (last order 15:30)",
+    "descSrc": "app"
   }
 }

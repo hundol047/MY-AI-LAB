@@ -869,5 +869,101 @@
   "yy-songwol": {
     "name": "Songwol Memil-guksu, Yangyang",
     "desc": "Cold buckwheat noodles and soft tofu"
+  },
+  "wj-gamyeong": {
+    "name": "Gangwon Gamyeong (Wonju)",
+    "desc": "Joseon-era provincial governor's office in central Wonju, open until late"
+  },
+  "wj-hanji": {
+    "name": "Wonju Hanji Theme Park",
+    "desc": "Exhibits and hands-on making of hanji, Korean mulberry paper"
+  },
+  "wj-parkkyongni": {
+    "name": "Park Kyong-ni Literary Park",
+    "desc": "Former home of the author of Toji and its garden"
+  },
+  "wj-baramgil": {
+    "name": "Chiaksan Baramgil Forest",
+    "desc": "Urban forest trail built on the old Jungang Line railway through central Wonju"
+  },
+  "wj-gopanhwa": {
+    "name": "Museum of Old Woodblock Prints (Myeongjusa)",
+    "desc": "Mountain-temple museum of old woodblock prints"
+  },
+  "wj-gukhyeongsa": {
+    "name": "Gwaneumsa & Gukhyeongsa Valley",
+    "desc": "Valley with two temples on the edge of Chiaksan National Park"
+  },
+  "wj-beopcheonsa": {
+    "name": "Beopcheonsa Temple Site, Wonju",
+    "desc": "Unified Silla temple ruins where the Jigwang National Preceptor stupa returned"
+  },
+  "wj-geodonsa": {
+    "name": "Geodonsa Temple Site, Wonju",
+    "desc": "Quiet temple ruins guarded by a thousand-year-old zelkova tree"
+  },
+  "wj-seomgang-birch": {
+    "name": "Seomgang Birch Forest Trail, Wonju",
+    "desc": "Birch forest walk along the Seomgang River"
+  },
+  "wj-chilbong": {
+    "name": "Chilbong Resort Area",
+    "desc": "Riverside park below seven peaks on the Seomgang River"
+  },
+  "hs-forest": {
+    "name": "National Hoengseong Forest Healing Center",
+    "desc": "Forest decks and trails at 850 m on Cheongtaesan"
+  },
+  "hs-byeongjibang": {
+    "name": "Byeongjibang Valley",
+    "desc": "Clear mountain valley stream in Hoengseong"
+  },
+  "wj-seomgang-makguksu": {
+    "name": "Seomgang Makguksu",
+    "desc": "Buckwheat noodles near Ganhyeon"
+  },
+  "wj-chueotang": {
+    "name": "Gimgane Wonju Chueotang",
+    "desc": "Wonju-style loach soup, lunch only (last order 14:30)"
+  },
+  "wj-bok-chueotang": {
+    "name": "Bok Chueotang",
+    "desc": "Wonju's first loach soup house since 1965"
+  },
+  "wj-borit": {
+    "name": "Boritgogae (main store)",
+    "desc": "Third-generation Korean set meals in the Innovation City"
+  },
+  "wj-hamheung": {
+    "name": "Cheonjin Hamheung Naengmyeon",
+    "desc": "Hamheung-style cold noodles in Dangye-dong"
+  },
+  "hs-deodeok": {
+    "name": "Park Hyeon-ja's Deodeok Rice",
+    "desc": "Set meals built on Hoengseong's deodeok root"
+  },
+  "hs-hambat": {
+    "name": "Hambat Sikdang",
+    "desc": "30-year Hoengseong hanwoo beef restaurant in town"
+  },
+  "hs-kkwong-mandu": {
+    "name": "Netherlands Pheasant Dumplings (Saemal)",
+    "desc": "Pheasant dumpling soup in bone broth near Saemal"
+  },
+  "wj-teodeukgol": {
+    "name": "Teodeukgol Book Shop",
+    "desc": "Independent bookshop and book café in the woods, open Thursday to Sunday"
+  },
+  "wj-rotonda": {
+    "name": "Cafe Rotonda",
+    "desc": "Bakery café with a large garden and pond"
+  },
+  "wj-okhee": {
+    "name": "Kkae Roastery Okhee Bangatgan",
+    "desc": "Third-generation sesame mill and dessert café"
+  },
+  "wj-eunseok": {
+    "name": "Coffee Eunseokssi",
+    "desc": "Brunch café, daytime only (last order 15:30)"
   }
 }

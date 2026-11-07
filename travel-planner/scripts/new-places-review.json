@@ -3199,5 +3199,533 @@
   "kto": "2892419",
   "wiki": "송월메밀국수"
  },
- "_note_ski": "스키장 시즌(2026-11-07 확인): 휘닉스는 2026/27 '11/27 개장·3/14 폐장 목표' 보도 기준, 용평·하이원·비발디·알펜시아는 2025/26 실제 개장일(11/21·11/28·11/29·12/3) 기준, 웰리힐리·오크밸리는 발표 전이라 12/5 개장 가정. 카드에 '개장일은 리조트 공지 확인'을 띄운다."
+ "_note_ski": "스키장 시즌(2026-11-07 확인): 휘닉스는 2026/27 '11/27 개장·3/14 폐장 목표' 보도 기준, 용평·하이원·비발디·알펜시아는 2025/26 실제 개장일(11/21·11/28·11/29·12/3) 기준, 웰리힐리·오크밸리는 발표 전이라 12/5 개장 가정. 카드에 '개장일은 리조트 공지 확인'을 띄운다.",
+ "wj-gamyeong": {
+  "name": "원주 강원감영",
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "조선시대 강원도 관찰사가 일하던 관아 · 원주 도심"
+ },
+ "wj-hanji": {
+  "name": "원주한지테마파크",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ],
+  "closedYearly": [
+   [
+    "01-01",
+    "01-01"
+   ]
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "원주 한지 전시와 만들기 체험"
+ },
+ "wj-parkkyongni": {
+  "name": "박경리문학공원",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "breaks": [
+   [
+    "12:00",
+    "13:00"
+   ]
+  ],
+  "closed": [
+   1
+  ],
+  "closedYearly": [
+   [
+    "01-01",
+    "01-01"
+   ]
+  ],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "『토지』를 완성한 박경리의 옛집과 문학공원"
+ },
+ "wj-baramgil": {
+  "name": "치악산 바람길숲",
+  "hours": [
+   "07:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "옛 중앙선 철길을 바꾼 도심 숲길"
+ },
+ "wj-gopanhwa": {
+  "name": "고판화박물관 (명주사)",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2,
+     3
+    ],
+    "hours": [
+     "10:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "옛 목판화를 모은 산사 속 박물관"
+ },
+ "wj-gukhyeongsa": {
+  "name": "관음사·국형사계곡",
+  "hours": [
+   "08:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [],
+  "desc": "치악산 자락 계곡과 두 산사"
+ },
+ "wj-beopcheonsa": {
+  "name": "원주 법천사지",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "지광국사탑이 돌아온 통일신라 절터"
+ },
+ "wj-geodonsa": {
+  "name": "원주 거돈사지",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "천 년 느티나무가 지키는 고요한 절터"
+ },
+ "wj-seomgang-birch": {
+  "name": "원주 섬강 자작나무숲 둘레길",
+  "hours": [
+   "09:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [],
+  "desc": "섬강을 따라 걷는 자작나무 숲길"
+ },
+ "wj-chilbong": {
+  "name": "칠봉유원지",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "섬강 일곱 봉우리 아래 강변 유원지"
+ },
+ "hs-forest": {
+  "name": "국립횡성숲체원",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "breaks": [
+   [
+    "12:00",
+    "13:00"
+   ]
+  ],
+  "closed": [],
+  "closedNth": [
+   [
+    1,
+    1
+   ]
+  ],
+  "stay": 90,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "청태산 해발 850m 숲길·데크 산책"
+ },
+ "hs-byeongjibang": {
+  "name": "병지방계곡",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [],
+  "desc": "맑은 물이 흐르는 횡성 산골 계곡"
+ },
+ "wj-seomgang-makguksu": {
+  "name": "섬강막국수",
+  "cat": "food",
+  "hours": [
+   "10:00",
+   "19:30"
+  ],
+  "byDay": {
+   "1": [
+    "10:00",
+    "16:30"
+   ],
+   "2": [
+    "10:00",
+    "16:30"
+   ],
+   "3": [
+    "10:00",
+    "16:30"
+   ],
+   "4": [
+    "10:00",
+    "16:30"
+   ],
+   "5": [
+    "10:00",
+    "16:30"
+   ]
+  },
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "간현 유원지 근처 막국수·수육"
+ },
+ "wj-chueotang": {
+  "name": "김가네원주추어탕",
+  "cat": "food",
+  "hours": [
+   "11:00",
+   "14:30"
+  ],
+  "closed": [
+   0
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "원주 향토 추어탕 · 점심 장사"
+ },
+ "wj-bok-chueotang": {
+  "name": "복추어탕",
+  "cat": "food",
+  "hours": [
+   "09:00",
+   "20:30"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [],
+  "closedNth": [
+   [
+    3,
+    4
+   ],
+   [
+    3,
+    5
+   ]
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "1965년부터 이어 온 원주 추어탕 원조집"
+ },
+ "wj-borit": {
+  "name": "보릿고개 본점",
+  "cat": "food",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "byDay": {
+   "1": [
+    "11:00",
+    "14:30"
+   ]
+  },
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "혁신도시 3대째 한정식"
+ },
+ "wj-hamheung": {
+  "name": "천진함흥냉면",
+  "cat": "food",
+  "hours": [
+   "10:30",
+   "19:40"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "단계동 함흥냉면 전문점"
+ },
+ "hs-deodeok": {
+  "name": "박현자네더덕밥",
+  "cat": "food",
+  "hours": [
+   "10:00",
+   "19:30"
+  ],
+  "breaks": [
+   [
+    "14:30",
+    "16:30"
+   ]
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "횡성 특산 더덕으로 차린 밥상"
+ },
+ "hs-hambat": {
+  "name": "함밭식당",
+  "cat": "food",
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "16:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 70,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "횡성 읍내 30년 한우 전문점"
+ },
+ "hs-kkwong-mandu": {
+  "name": "네덜란드꿩만두 새말점",
+  "cat": "food",
+  "hours": [
+   "08:30",
+   "18:30"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "사골 국물 꿩만두국"
+ },
+ "wj-teodeukgol": {
+  "name": "터득골북샵",
+  "cat": "cafe",
+  "hours": [
+   "11:00",
+   "18:00"
+  ],
+  "closed": [
+   1,
+   2,
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "숲속 독립서점 겸 북카페 · 목~일만 엶"
+ },
+ "wj-rotonda": {
+  "name": "카페 로톤다",
+  "cat": "cafe",
+  "hours": [
+   "11:00",
+   "19:20"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "정원과 연못이 있는 베이커리 카페"
+ },
+ "wj-okhee": {
+  "name": "깨 로스터리 옥희방앗간",
+  "cat": "cafe",
+  "hours": [
+   "10:00",
+   "18:30"
+  ],
+  "byDay": {
+   "0": [
+    "11:00",
+    "19:00"
+   ],
+   "6": [
+    "11:00",
+    "19:00"
+   ]
+  },
+  "closed": [
+   2
+  ],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "3대째 참깨·들깨 방앗간 겸 디저트 카페"
+ },
+ "wj-eunseok": {
+  "name": "커피은석씨",
+  "cat": "cafe",
+  "hours": [
+   "11:00",
+   "15:30"
+  ],
+  "closed": [
+   0
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "브런치가 유명한 원주 카페 · 낮 장사"
+ }
 }
