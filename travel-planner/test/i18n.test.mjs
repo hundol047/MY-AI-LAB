@@ -28,7 +28,8 @@ for (const l of ["ja", "zh"]) {
   for (const f of FESTIVALS) assert.ok(FEST[l][f.id] && FEST_DESC[l][f.id], `${l} 축제 ${f.name}`);
 }
 for (const s of new Set([...PLACES, ...FESTIVALS].map((p) => p.souvenir).filter(Boolean))) { assert.ok(SOUVENIR_EN[s], `en 특산물 ${s}`); for (const l of ["ja", "zh"]) assert.ok(SOUVENIR[l][s], `${l} 특산물 ${s}`); }
-for (const p of PLACES) assert.ok(NAMES_JA[p.id] && NAMES_ZH[p.id] && TIPS_JA[p.id] && TIPS_ZH[p.id], `장소 ${p.name}`);
+// 반려동물 동행 전용 장소(petOnly, 목록의 가게·해변)는 가게 이름 그대로 보여 주므로 번역을 요구하지 않는다
+for (const p of PLACES.filter((x) => !x.petOnly)) assert.ok(NAMES_JA[p.id] && NAMES_ZH[p.id] && TIPS_JA[p.id] && TIPS_ZH[p.id], `장소 ${p.name}`);
 // 화면 HTML의 번역 대상 문구도 모두 사전에 있어야 한다
 const html = readFileSync(new URL("../public/index.html", import.meta.url), "utf8");
 for (const m of html.matchAll(/<(\w+)\b[^>]*\sdata-i18n(?=[\s>])[^>]*>(.*?)<\/\1>/g)) assert.ok(Object.hasOwn(EN, m[2].trim()) && Object.hasOwn(JA, m[2].trim()), `HTML 문구 사전에 없음: ${m[2]}`);

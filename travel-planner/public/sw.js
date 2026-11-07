@@ -2,10 +2,10 @@
 // - 앱 파일: 캐시에서 바로 보여주고 뒤에서 새 버전으로 갱신 (stale-while-revalidate)
 // - 지도 타일·사진: 한 번 받으면 캐시에서 (cache-first). 앱을 업데이트해도 지우지 않는 별도 캐시에 두고(산간 지역 오프라인용), 너무 많아지면 오래된 것부터 지운다
 // - AI·날씨·경로 등 API: 항상 네트워크
-const CACHE = "ohneul-gangwon-v34";
+const CACHE = "ohneul-gangwon-v35";
 const MEDIA_CACHE = "ohneul-gangwon-media-v1"; // 앱 버전과 따로 유지
 const MEDIA_MAX = 1500; // 지도 조각·사진 최대 개수 (조각 1개 약 10~30KB)
-const SHELL = ["./", "index.html", "style.css", "app.js", "booking-links.js", "planner.js", "data.js", "extra-places.js", "places-more.js", "i18n.js", "data-en.json", "photos.json", "lodging-places.json", "fees.json", "costs.js", "alerts.js", "today.js", "directory-place.js", "origins.js", "ai-local.js", "guide-topics.js", "knowledge.js", "knowledge-intl.js", "i18n-cjk.js", "icon.svg", "icon-192.png", "apple-touch-icon.png", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
+const SHELL = ["./", "index.html", "style.css", "app.js", "booking-links.js", "planner.js", "data.js", "extra-places.js", "places-more.js", "pet-places.js", "pet.json", "i18n.js", "data-en.json", "photos.json", "lodging-places.json", "fees.json", "costs.js", "alerts.js", "today.js", "directory-place.js", "origins.js", "ai-local.js", "guide-topics.js", "knowledge.js", "knowledge-intl.js", "i18n-cjk.js", "icon.svg", "icon-192.png", "apple-touch-icon.png", "manifest.webmanifest", "vendor/leaflet/leaflet.js", "vendor/leaflet/leaflet.css", "vendor/pretendard/pretendardvariable-dynamic-subset.css"];
 const MEDIA = /tile\.openstreetmap\.org|upload\.wikimedia\.org|tong\.visitkorea\.or\.kr|\.woff2$/;
 const LIVE = /\/api\/|open-meteo|project-osrm|wikipedia\.org\/api/;
 

@@ -52,6 +52,17 @@ for (const days of [4, 5])
             for (const rain of [false, true]) check({ region, date, days, who, likes, move }, pace, rain);
 
 assert.ok(carItems / carDays >= 4, `자동차 일정 하루 평균 장소 수 ${carItems / carDays}`);
+// 반려동물 동행: 목록에 없는 실내·식당·카페·문화시설은 넣지 않고, 반려동물 동행 전용 장소는 다른 동행에 쓰지 않는다
+for (const region of ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"])
+  for (const days of [1, 2, 3])
+    for (const move of ["car", "transit"])
+      for (const date of ["2026-11-10", "2026-11-14", "2027-07-07"]) {
+        const trip = planTrip({ region, date, days, who: "pet", likes: [], move }, {});
+        assert.equal(verify(trip.days), 0, `반려동물 ${region} ${date}`);
+        for (const it of trip.days.flatMap((d) => d.items)) if (it.place.cat !== "festival") assert.ok(it.place.pet || (!it.place.indoor && ["nature", "sea"].includes(it.place.cat)), `반려동물 일정에 확인 안 된 곳: ${it.place.name}`);
+        const other = planTrip({ region, date, days, who: "couple", likes: [], move }, {});
+        assert.ok(!other.days.some((d) => d.items.some((i) => i.place.petOnly)), "반려동물 전용 장소가 다른 동행에 들어감");
+      }
 assert.ok(lunchDays / allDays >= 0.97, `점심 포함 비율 ${lunchDays / allDays}`);
 console.log(`자동차 하루 평균 ${(carItems / carDays).toFixed(1)}곳, 점심 포함 ${(100 * lunchDays / allDays).toFixed(1)}%`);
 

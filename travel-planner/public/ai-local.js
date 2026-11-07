@@ -26,6 +26,7 @@ export function startLocal(text, today) {
   if (has("혼자")) r.who = "solo";
   if (has("아이", "애들", "가족", "아들", "딸")) r.who = "family";
   if (has("부모님", "엄마", "아빠", "어머니", "아버지", "어르신")) r.who = "parents";
+  if (has("강아지", "반려견", "반려동물", "댕댕", "애견", "멍멍")) r.who = "pet";
   if (has("기차", "버스", "뚜벅", "대중교통", "KTX")) r.move = "transit";
   if (has("택시")) r.move = "taxi";
   const cats = { sea: ["바다", "해변"], cafe: ["카페", "커피"], food: ["맛집", "먹", "시장"], culture: ["역사", "문화", "박물관", "전시"], nature: ["자연", "산책", "숲", "산", "호수"] };

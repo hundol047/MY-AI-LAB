@@ -170,10 +170,8 @@
     "desc": "Opened in December 1995, Welli Hilli Park is a resort complex located over 48.6 million square meters around Sulibong Peak in Hoengseong-gun, Gangwon-do."
   },
   "jangneung": {
-    "name": "Jangneung Royal Tomb, Yeongwol",
-    "nameSrc": "app",
-    "desc": "Tomb of King Danjong · UNESCO World Heritage royal tomb",
-    "descSrc": "app"
+    "name": "Yeongwol Jangneung Royal Tomb [UNESCO World Heritage]",
+    "desc": "This site is the tomb of King Danjong (1441-1457), the sixth king of the Joseon dynasty."
   },
   "gossigul": {
     "name": "Gossigul Cave",
@@ -1114,6 +1112,53 @@
     "name": "Ganhyeon Tourist Area",
     "desc": "Riverside walk along the Seomgang River",
     "descSrc": "app"
+  },
+  "pet-10": {
+    "name": "Sageunjinhaebyeon Beach",
+    "desc": "Sageunjinhaebyeon Beach is a white sandy beach connected to Gyeongpohaebyeon Beach in Anhyeon-dong, Gangneung."
+  },
+  "pet-18": {
+    "name": "Sodol Adeul Rock Park"
+  },
+  "pet-25": {
+    "name": "Jumunjin Port",
+    "desc": "Jumunjin Port, one of the main fishing ports on the east coast, is home to over 350 fishing boats."
+  },
+  "pet-26": {
+    "name": "Jumunjin Beach",
+    "desc": "Jumunjin Beach is located in the northernmost part of Gangneung, and is a great place for summertime family vacations due to the beach's shallow water."
+  },
+  "pet-122": {
+    "name": "Chuam Beach",
+    "desc": "Chuam Beach is a white sandy beach with various unique rock formations."
+  },
+  "pet-142": {
+    "name": "Maengbanghaebyeon Beach",
+    "desc": "Maengbanghaebyeon Beach is located 7 kilometers from downtown Samcheok and was developed as a tourist attraction."
+  },
+  "pet-170": {
+    "name": "Sokch Seorak Sunrise Park",
+    "desc": "Referred to as \"Namulchi,\" Sokcho Seorak Sunrise Park is located in the area of National Highway 7, the main point toward Daepohang Port, Yangyang, and Seoraksan Mountain."
+  },
+  "pet-212": {
+    "name": "Seorak Beach",
+    "desc": "Known for its shallow waters and clean white sand, this beach is a sanctuary for surfers."
+  },
+  "pet-214": {
+    "name": "Jukdojeong Pavilion & Jukdo Observatory",
+    "desc": "Jukdojeong Pavilion is located on Jukdo Island in Yangyang, which is a small island with an average circumference of 1 kilometer."
+  },
+  "pet-218": {
+    "name": "Hajodae Beach",
+    "desc": "Hajodae Beach, located in Yangyang-gun, is famous for the beautiful scenery of the deep blue ocean, soft sandy shore, a nearby lighthouse, and unique rock formations and stony islets."
+  },
+  "pet-471": {
+    "name": "Soyang Dam",
+    "desc": "Built in October 1973, Soyang Dam is the largest dam in Korea."
+  },
+  "pet-565": {
+    "name": "Daegwallyeong Sky Ranch",
+    "desc": "Daegwallyeong Sky Ranch, located in the highlands of Daegwallyeong Pass, is an environmentally friendly ranch that raises over 400 cows, sheep, and horses."
   },
   "f-hwacheon": {
     "name": "Hwacheon Sancheoneo Ice Festival",

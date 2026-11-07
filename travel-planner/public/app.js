@@ -278,6 +278,7 @@ function render() {
   renderCosts();
   renderChecks();
   renderToday();
+  renderPet();
   renderShops();
   loadImages();
   drawMap(day);
@@ -296,10 +297,11 @@ function itemHTML(it, i, day) {
     <article class="card place">
       <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em></div>
       <div class="info">
-        <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}</div>
+        <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
-        ${p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
+        ${p.petOnly ? `<div class="check soft">${t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}</div>` : ""}
+        ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="https://map.kakao.com/link/search/${encodeURIComponent(searchName(p))}" target="_blank" rel="noopener">${t("길찾기")}</a>
@@ -351,6 +353,32 @@ document.addEventListener("click", (e) => {
   const g = e.target.closest("[data-goday]");
   if (g) { dayIdx = Number(g.dataset.goday); render(); }
 });
+
+/* ---------- 반려동물 동행 ----------
+   강원 반려동물 동반 시설 목록(pet.json)으로: 여행하는 시군의 동반 가능 숙소, 동물병원·동물약국(전화·지도), 동반 식당이 없는 날 안내 */
+let petData = null;
+function renderPet() {
+  const box = $("#pet"); if (!box) return;
+  if (state.input.who !== "pet" || !trip) { box.hidden = true; return; }
+  if (!petData) { fetchT("pet.json", {}, 6000).then((r) => r.json()).then((j) => { petData = j; renderPet(); }).catch(() => {}); return; }
+  const SG_EN = { 춘천: "Chuncheon", 원주: "Wonju", 강릉: "Gangneung", 동해: "Donghae", 태백: "Taebaek", 속초: "Sokcho", 삼척: "Samcheok", 홍천: "Hongcheon", 횡성: "Hoengseong", 영월: "Yeongwol", 평창: "Pyeongchang", 정선: "Jeongseon", 철원: "Cheorwon", 화천: "Hwacheon", 양구: "Yanggu", 인제: "Inje", 고성: "Goseong", 양양: "Yangyang" };
+  const sgName = (s) => (isForeign() ? `${SG_EN[s] || s} (${s})` : s);
+  const towns = [...new Set(trip.days.flatMap((d) => d.items.map((i) => petData.sigun[i.id]).filter(Boolean)))];
+  // 숙소 시군: 추천 숙소 지역과 가장 가까운 장소의 시군
+  const nearestTown = (pt) => { let best = null, bd = Infinity; for (const p of PLACES) { const sg = petData.sigun[p.id]; if (!sg) continue; const d = distKm(p, pt); if (d < bd) { bd = d; best = sg; } } return best; };
+  const stayTowns = trip.lodging ? [nearestTown(trip.lodging) || towns[0]].filter(Boolean) : [];
+  const link = (x) => `<li><a href="https://map.kakao.com/link/search/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">${esc(x.name)}</a>${x.tel ? ` · <a href="tel:${esc(x.tel)}">${esc(x.tel)}</a>` : ""}</li>`;
+  const list = (title, map, ts, n) => { const rows = ts.flatMap((s) => (map[s] || []).slice(0, n).map((x) => ({ ...x, s }))); return rows.length ? `<h4>${title}</h4><ul class="pet-list">${rows.map(link).join("")}</ul>` : ""; };
+  const noLunch = trip.days.map((d, i) => (d.items.some((it) => it.kind === "lunch") ? null : i + 1)).filter(Boolean);
+  box.hidden = false;
+  box.innerHTML = `<h3>${t("반려동물과 함께")}</h3>
+    <p class="sub">${t("강원 반려동물 동반 시설 목록에 있는 곳(🐾 동반 가능)을 먼저 넣고, 확인이 안 된 실내 시설·식당은 빼요. 야외 자연·해변은 '동반 확인 필요'로 표시해요. 목줄·배변봉투를 챙기고, 실내 동반 조건은 시설마다 달라요.")}</p>
+    ${noLunch.length ? `<p class="sub warn">${t("{days}일차는 근처에 동반 가능한 식당이 목록에 없어 점심을 넣지 않았어요. 포장이나 테라스 좌석을 이용하세요.", { days: noLunch.join(", ") })}</p>` : ""}
+    ${trip.lodging ? list(t("{town} 동반 가능 숙소", { town: stayTowns.map(sgName).join(", ") }), petData.stays, stayTowns, 6) : ""}
+    ${list(t("동물병원"), petData.vets, towns, 3)}
+    ${list(t("동물약국"), petData.pharmacies, towns, 2)}
+    <p class="sub">${t("출처: {src}. 방문 전 동반 가능 여부를 한 번 더 확인하세요.", { src: esc(petData.source) })}</p>`;
+}
 
 function renderChecks() {
   const el = $("#checks"); if (!el) return;

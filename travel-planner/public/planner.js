@@ -91,7 +91,10 @@ function candidates(input) {
   const fests = FESTIVALS.filter((f) => f.start && inScope(input, f.region)).map((f) => ({
     ...f, cat: "festival", closed: [], indoor: false, walk: 2, pop: 3, tags: ["kids", "senior"],
   }));
-  return [...PLACES.filter((p) => inScope(input, p.region)), ...fests];
+  // 반려동물 동행: 목록에 있는 곳(pet) + 확인은 안 됐지만 야외인 자연·바다(카드에 "동반 확인 필요")만. 실내·식당·카페·문화시설은 목록에 있을 때만
+  // 반려동물 동행 전용 장소(petOnly)는 반려동물 동행일 때만 쓴다
+  const ok = (p) => input.who === "pet" ? p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
+  return [...PLACES.filter((p) => inScope(input, p.region) && ok(p)), ...fests];
 }
 
 // 여행 기간과 겹치는 강원 축제 (확정 + 예정)
@@ -140,6 +143,7 @@ function baseScore(p, input, opts, rain) {
   if (input.who === "family") { if (p.tags.includes("kids")) s += 1.5; if (p.walk === 3) s -= 3; }
   if (input.who === "parents") { if (p.tags.includes("senior")) s += 1.5; if (p.walk >= 2) s -= 1; if (p.walk === 3) s -= 4; }
   if (input.who === "couple" && (p.cat === "cafe" || p.tags.includes("night"))) s += 0.5;
+  if (input.who === "pet") s += p.pet ? 3 : -2; // 동반 가능이 확인된 곳 우선
 
   if (opts.lessWalk) { if (p.walk === 3) s -= 5; else if (p.walk === 2) s -= 1; }
   if (rain || opts.indoor) {
@@ -411,6 +415,7 @@ const WHO_TYPES = {
   couple: ["ocean", "pension", "hanok"],
   family: ["resort", "pension"],
   parents: ["hanok", "resort", "ocean"],
+  pet: ["pension", "resort"],
 };
 const TYPE_REASON = {
   guesthouse: "혼자 여행자와 어울리기 좋고 저렴해요",

@@ -33,6 +33,17 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "반려동물과": "With a pet",
+  "🐾 동반 가능": "🐾 Pets OK",
+  "🐾 동반 확인 필요": "🐾 Check pet rules",
+  "영업시간(관광공사 원문): {text}": "Hours (KTO text): {text}",
+  "반려동물과 함께": "Traveling with your pet",
+  "강원 반려동물 동반 시설 목록에 있는 곳(🐾 동반 가능)을 먼저 넣고, 확인이 안 된 실내 시설·식당은 빼요. 야외 자연·해변은 '동반 확인 필요'로 표시해요. 목줄·배변봉투를 챙기고, 실내 동반 조건은 시설마다 달라요.": "Places on Gangwon's pet-friendly list (🐾 Pets OK) come first; indoor places and restaurants not on the list are left out. Outdoor nature spots and beaches are marked 'Check pet rules'. Bring a leash and waste bags; indoor rules differ by place.",
+  "{days}일차는 근처에 동반 가능한 식당이 목록에 없어 점심을 넣지 않았어요. 포장이나 테라스 좌석을 이용하세요.": "Day {days}: no pet-friendly restaurant on the list nearby, so lunch isn't scheduled. Try takeout or terrace seating.",
+  "{town} 동반 가능 숙소": "Pet-friendly stays in {town}",
+  "동물병원": "Animal hospitals",
+  "동물약국": "Pharmacies for pets",
+  "출처: {src}. 방문 전 동반 가능 여부를 한 번 더 확인하세요.": "Source: {src}. Please confirm pet rules before you visit.",
   "그 순서로는 영업시간이 맞지 않아요": "That order doesn't fit the opening hours",
   "위로": "Move up",
   "아래로": "Move down",

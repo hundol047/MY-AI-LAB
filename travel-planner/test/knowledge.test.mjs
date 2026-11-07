@@ -9,7 +9,7 @@ import { NICKS, NICKS_EN, TIPS, TIPS_EN, THEMES, normalize } from "../public/kno
 const fees = JSON.parse(readFileSync(new URL("../public/fees.json", import.meta.url)));
 const ids = new Set(PLACES.map((p) => p.id));
 for (const id of [...Object.keys(NICKS), ...Object.keys(NICKS_EN), ...Object.keys(TIPS), ...Object.keys(TIPS_EN), ...Object.values(THEMES).flat()]) assert.ok(ids.has(id), `없는 장소 id: ${id}`);
-for (const p of PLACES) assert.ok(TIPS[p.id] && TIPS_EN[p.id], `팁 없음: ${p.name}`);
+for (const p of PLACES.filter((x) => !x.petOnly)) assert.ok(TIPS[p.id] && TIPS_EN[p.id], `팁 없음: ${p.name}`); // 반려동물 동행 전용 장소는 관광공사 원문 영업시간을 카드에 보여 준다
 for (const t of Object.values(TIPS)) assert.ok(!/\d{2,3}-\d{3,4}-\d{4}|\d,\d{3}원/.test(t), `팁에 전화번호·가격을 적지 않는다: ${t}`);
 
 assert.equal(normalize("엄빠랑 뚜벅이"), "부모님랑대중교통");

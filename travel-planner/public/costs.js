@@ -29,7 +29,7 @@ export const ASSUME = {
 
 // 동행 선택으로 시작하는 인원 (카드에서 바꿀 수 있음)
 export function defaultPeople(who) {
-  return { solo: { adults: 1, kids: 0 }, couple: { adults: 2, kids: 0 }, family: { adults: 2, kids: 2 }, parents: { adults: 3, kids: 0 } }[who] || { adults: 2, kids: 0 };
+  return { solo: { adults: 1, kids: 0 }, couple: { adults: 2, kids: 0 }, family: { adults: 2, kids: 2 }, parents: { adults: 3, kids: 0 }, pet: { adults: 2, kids: 0 } }[who] || { adults: 2, kids: 0 };
 }
 
 const ROAD = 1.35; // 직선거리 → 도로 거리 (일정 엔진과 같은 보정)

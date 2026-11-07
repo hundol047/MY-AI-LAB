@@ -4,8 +4,8 @@
 
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
-- 대상 293곳 (장소 222 + 축제 71)
-- 영문 이름 찾음 118곳 (소개 포함 102곳) · 못 찾음 175곳
+- 대상 345곳 (장소 274 + 축제 71)
+- 영문 이름 찾음 131곳 (소개 포함 114곳) · 못 찾음 214곳
 
 ## 찾은 곳
 
@@ -28,6 +28,7 @@
 | cheongtaesan | 청태산 자연휴양림 | Cheongtaesan National Recreational Forest (국립 청태산자연휴양림) | 0.00 | 이름 같음 | 있음 |
 | hs-luge | 횡성 루지체험장 | Hoengseong Luge (횡성루지체험장) | 0.00 | 이름 같음 | 있음 |
 | welli-ski | 웰리힐리파크 스키장 | Welli Hilli Park Snow Park (웰리힐리파크 스노우파크) | 0.00 | 이름 같음 | 있음 |
+| jangneung | 영월 장릉 | Yeongwol Jangneung Royal Tomb [UNESCO World Heritage] (영월 장릉(단종) [유네스코 세계유산]) | 0.00 | 이름 같음 | 있음 |
 | byeolmaro | 별마로천문대 | Byeolmaro Observatory (별마로천문대) | 0.05 | 이름 같음 | 있음 |
 | seondol | 영월 선돌 | Seondol Cliff [National Geopark] (선돌 (강원고생대 국가지질공원)) | 0.01 | 이름 같음 | 있음 |
 | yoseonam | 요선정·요선암 | Yoseonjeong Pavilion & Yoseonam Rock (요선정·요선암) | 0.17 | 이름 같음 | 있음 |
@@ -126,6 +127,18 @@
 | guryongsa | 치악산 구룡사 | Guryongsa Temple (구룡사) | 0.53 | 이름 같음 | 있음 |
 | wj-market | 원주 중앙시장·자유시장 | Wonju Jungang Market (원주 중앙시장) | 0.23 | 이름 같음 | 있음 |
 | ganhyeon-park | 간현유원지 | Ganhyeon Tourist Area (간현관광지) | 0.01 | 이름 같음 | - |
+| pet-10 | 사근진해변 | Sageunjinhaebyeon Beach (사근진해변(사근진해수욕장)) | 0.01 | 이름 같음 | 있음 |
+| pet-18 | 아들바위공원 | Sodol Adeul Rock Park (소돌아들바위공원) | 0.01 | 앞에 지역명 추가 | - |
+| pet-25 | 주문진항 | Jumunjin Port (주문진항) | 0.00 | 이름 같음 | 있음 |
+| pet-26 | 주문진해변 | Jumunjin Beach (주문진해변) | 0.01 | 이름 같음 | 있음 |
+| pet-122 | 추암해변 | Chuam Beach (추암해변) | 0.01 | 이름 같음 | 있음 |
+| pet-142 | 맹방해변 | Maengbanghaebyeon Beach (맹방해변) | 0.01 | 이름 같음 | 있음 |
+| pet-170 | 설악 해맞이공원 | Sokch Seorak Sunrise Park (속초 설악해맞이공원) | 0.04 | 이름 같음 | 있음 |
+| pet-212 | 설악해수욕장 | Seorak Beach (설악해수욕장) | 0.01 | 이름 같음 | 있음 |
+| pet-214 | 죽도정 | Jukdojeong Pavilion & Jukdo Observatory (죽도정&죽도 전망대) | 0.01 | 이름 같음 | 있음 |
+| pet-218 | 하조대해수욕장 | Hajodae Beach (하조대해수욕장) | 0.00 | 이름 같음 | 있음 |
+| pet-471 | 소양강댐 | Soyang Dam (소양강댐) | 0.01 | 이름 같음 | 있음 |
+| pet-565 | 대관령 하늘목장 | Daegwallyeong Sky Ranch (대관령 하늘목장) | 0.00 | 이름 같음 | 있음 |
 | f-hwacheon | 화천 산천어축제 | Hwacheon Sancheoneo Ice Festival (얼음나라화천 산천어축제) | 0.00 | 이름 같음 | - |
 | f-trout | 평창송어축제 | Pyeongchang Trout Festival (평창송어축제) | 0.80 | 이름 같음 | 있음 |
 | f-cw-ice | 철원 한탄강 얼음트레킹 축제 | Cheorwon Hantangang River Ice Trekking Festival (철원 한탄강 얼음트레킹 축제) | 0.01 | 이름 같음 | - |
@@ -151,7 +164,6 @@
 | manhae-village | 만해마을 | 2km 안에 이름이 맞는 영문 결과 없음 | Manhae Village — Village and museum honoring the poet and monk Han Yong-un |
 | pungsuwon | 풍수원성당 | 2km 안에 이름이 맞는 영문 결과 없음 | Pungsuwon Catholic Church — Gangwon's first Catholic church (1907), red brick |
 | birch-museum | 미술관 자작나무숲 | 2km 안에 이름이 맞는 영문 결과 없음 | Birch Forest Museum — Photo gallery in a birch forest · closed Tue–Thu |
-| jangneung | 영월 장릉 | 2km 안에 이름이 맞는 영문 결과 없음 | Jangneung Royal Tomb, Yeongwol — Tomb of King Danjong · UNESCO World Heritage royal tomb |
 | gossigul | 고씨굴 | 영문 결과 없음 | Gossigul Cave — 400-million-year-old limestone cave · some narrow, low passages |
 | manhangjae | 만항재 | 영문 결과 없음 | Manhangjae Pass — Highest paved pass you can drive (1,330 m) · wildflowers and snow views |
 | coal-museum | 태백석탄박물관 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Coal Museum — Mine tunnel experience and the story of coal mining |
@@ -241,6 +253,46 @@
 | guryong-food | 구룡사 입구 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Guryongsa Entrance Restaurants — Mountain-vegetable bibimbap and acorn jelly |
 | ganhyeon-food | 간현관광지 식당가 | 2km 안에 이름이 맞는 영문 결과 없음 | Ganhyeon Tourist Area Restaurants — Restaurants below Sogeumsan |
 | hoengseong-lake | 횡성호수길 | 영문 결과 없음 | Hoengseong Lake Trail — Forest trail around the lake |
+| pet-3 | 강릉항 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-11 | 사근진해중공원 전망대 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-14 | 소돌해변 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-16 | 순긋해변 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-17 | 순포해변 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-20 | 안인항 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-21 | 영진항 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-27 | 하평해변 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-76 | 엔드 투 앤드 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-78 | 영진횟집 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-79 | 옛날초당순두부 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-81 | 조개공장 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-82 | 체크이스트 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-94 | 명파해변 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-95 | 반비치 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-107 | 글라스하우스 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-112 | 앤트리카페 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-141 | 덕산해변 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-143 | 삼척 미로(未老)정원 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-144 | 삼척 장미공원 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-161 | 마린데크 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-201 | 양구레포츠공원 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-202 | 파로호꽃섬 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-216 | 지경리해수욕장 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-242 | 물무리골생태습지 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-274 | 행구수변공원 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-313 | 사니다카페 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-403 | 유알컬처파크 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-458 | 인경 화이트하우스 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-468 | 구곡폭포 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-521 | 신북커피 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-528 | 유기농카페 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-538 | 카페드220볼트 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-566 | 막동계곡 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-567 | 장전계곡 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-598 | 송어의집 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-668 | 국제평화아트파크 | 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-670 | 동구래마을 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-672 | 서오지리 연꽃단지 | 2km 안에 이름이 맞는 영문 결과 없음 | 없음(한국어 그대로) |
+| pet-692 | 산일리오 | 영문 결과 없음 | 없음(한국어 그대로) |
 | f-ginkgo | 원주 반계리 은행나무축제 | 영문 결과 없음 | Wonju Bangye-ri Ginkgo Festival — Autumn colors of an 800-year-old ginkgo tree |
 | t-christmas | 강릉 크리스마스 겨울축제 | 영문 결과 없음 | Gangneung Christmas Winter Festival — Light festival on Wolhwa Street and Anmok Beach |
 | t-sunrise | 정동진·경포 해맞이 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdongjin & Gyeongpo New Year Sunrise — Sunrise on January 1 |
@@ -344,7 +396,6 @@
 | hanbando-island | 파로호 한반도섬 | Paroho Lake (Hwacheon) (파로호(화천)) | 18.26 | 이름 같지만 2km 밖 |
 | pungsuwon | 풍수원성당 | Pungsuwon Museum (풍수원유물전시관) | 0.21 | 이름 다름 |
 | birch-museum | 미술관 자작나무숲 | Chuncheon Art Gallery (춘천미술관) | 51.63 | 이름 같지만 2km 밖 |
-| jangneung | 영월 장릉 | Yeongwol Jangneung Royal Tomb [UNESCO World Heritage] (영월 장릉(단종) [유네스코 세계유산]) | 0.00 | 이름 다름 |
 | coal-museum | 태백석탄박물관 | Cheonjedan Altar on Taebaeksan Mountain (태백산 천제단) | 0.27 | 이름 다름 |
 | mureung | 무릉계곡 | Gangwon Yongchupokpo Falls (무릉계곡 용추폭포(강원)) | 0.04 | 이름 다름 |
 | yongpyong-ski | 모나용평 스키장 | Yongpyong Water Park (용평워터파크 ) | 0.01 | 이름 다름 |
@@ -385,6 +436,13 @@
 | wj-market | 원주 중앙시장·자유시장 | Maze Art Wonju Jungang Market (미로예술 원주중앙시장) | 0.24 | 이름 다름 |
 | ganhyeon-food | 간현관광지 식당가 | Wonju Sogeumsan Ulleong Bridge (원주 소금산 울렁다리) | 0.01 | 이름 다름 |
 | ganhyeon-food | 간현관광지 식당가 | Ganhyeon Tourist Area (간현관광지) | 0.01 | 이름 다름 |
+| pet-11 | 사근진해중공원 전망대 | Sageunjinhaebyeon Beach (사근진해변(사근진해수욕장)) | 0.16 | 이름 다름 |
+| pet-14 | 소돌해변 | Sodol Adeul Rock Park (소돌아들바위공원) | 0.26 | 이름 다름 |
+| pet-27 | 하평해변 | Hapyeonghaebyeon Beach (하평해변(동해)) | 40.26 | 이름 같지만 2km 밖 |
+| pet-107 | 글라스하우스 | The Phoenix Jeju Glass House (글라스하우스) | 556.85 | 이름 같지만 2km 밖 |
+| pet-142 | 맹방해변 | Sangmaengbanghaebyeon Beach (상맹방해변) | 2.24 | 이름 같지만 2km 밖 |
+| pet-144 | 삼척 장미공원 | Rose Park (장미공원) | 220.91 | 이름 같지만 2km 밖 |
+| pet-144 | 삼척 장미공원 | Changwon Rose Garden (창원 장미공원) | 251.25 | 이름 같지만 2km 밖 |
 | t-daegwallyeong | 대관령 눈꽃축제 | Daegwallyeong Snow Festival (대관령 눈꽃축제) | NaN | 더 맞는 결과 있음 |
 | t-yeongwol | 영월 단종문화제 | Danjong Culture Festival (단종문화제) | NaN | 더 맞는 결과 있음 |
 | t-mime | 춘천 마임축제 | Chuncheon Mime Festival (춘천마임축제) | NaN | 더 맞는 결과 있음 |

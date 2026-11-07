@@ -86,7 +86,7 @@ const START_SCHEMA = {
     region: { type: "string", enum: REGION_KEYS },
     date: { type: "string", description: "YYYY-MM-DD" },
     days: { type: "integer", enum: [1, 2, 3, 4, 5] },
-    who: { type: "string", enum: ["solo", "couple", "family", "parents"] },
+    who: { type: "string", enum: ["solo", "couple", "family", "parents", "pet"] },
     likes: { type: "array", items: { type: "string", enum: CATS } },
     move: { type: "string", enum: ["car", "taxi", "transit"] },
     summary: { type: "string" },
