@@ -33,11 +33,11 @@ const HUBS = {
   pyeongchang: { train: "진부", intercity: "진부" },
   wonju: { train: "원주", express: "원주", intercity: "원주" },
 };
-// 서울 쪽 출발지 (앱 origins.js 이름과 같게)
+// 출발지 (앱 origins.js 이름과 같게): 서울 쪽 역·터미널, 부산·대구 기차역, 공항·부산·대전 버스터미널
 const ORIGINS = {
-  train: { 서울역: "서울", 청량리역: "청량리", 상봉역: "상봉" },
+  train: { 서울역: "서울", 청량리역: "청량리", 상봉역: "상봉", 부전역: "부전", 동대구역: "동대구" },
   express: { 동서울종합터미널: ["NAEK030", "NAEK031", "NAEK032", "NAEK035"], 서울고속버스터미널: ["NAEK010", "NAEK020", "NAEK021"] },
-  intercity: { 동서울종합터미널: "동서울", 서울고속버스터미널: "서울고속버스터미널(경부)", 상봉역: "상봉" },
+  intercity: { 동서울종합터미널: "동서울", 서울고속버스터미널: "서울고속버스터미널(경부)", 상봉역: "상봉", 인천국제공항: "인천공항2터미널", 김포국제공항: "김포공항", 부산동부터미널: "부산동부", 대전복합터미널: "대전복합" },
 };
 
 const routes = [], log = [];
@@ -45,7 +45,7 @@ const add = (r) => { if (r.trips.length) routes.push(r); log.push(`${r.mode} ${r
 
 // 열차
 const stations = new Map();
-for (const city of ["11", "32"]) for (const s of await call("TrainInfo/GetCtyAcctoTrainSttnList", { cityCode: city })) stations.set(s.nodename, s.nodeid);
+for (const city of ["11", "21", "22", "32"]) for (const s of await call("TrainInfo/GetCtyAcctoTrainSttnList", { cityCode: city })) stations.set(s.nodename, s.nodeid);
 const trainDays = { weekday: nextDow(2), weekend: nextDow(6) };
 for (const [region, hub] of Object.entries(HUBS)) {
   if (!hub.train) continue;

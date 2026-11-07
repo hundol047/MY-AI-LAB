@@ -44,13 +44,30 @@ const CENTER = Object.fromEntries(SG.map((s) => { const pts = base.filter((p) =>
 const FIELDS = { 12: ["usetime", "restdate"], 14: ["usetimeculture", "restdateculture"], 28: ["usetimeleports", "restdateleports"], 38: ["opentime", "restdateshopping"], 39: ["opentimefood", "restdatefood"] };
 const clean = (s) => String(s || "").replace(/<br\s*\/?>/gi, " / ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 const extra = [], report = [];
+const coords = JSON.parse(await readFile(new URL("../data/pet-coords.json", import.meta.url), "utf8").catch(() => "{}"));
 let n = 0;
 for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "식음료"].includes(x.kind))) {
   const c = CENTER[r.sigun];
   if (!c) { report.push({ r, why: "시군 기준점 없음" }); continue; }
   const list = await candidates("KorService2", { id: `pet-${r.no}`, name: r.name, lat: c.lat, lng: c.lng }, opts).catch(() => []);
   const m = list.find((x) => x.ok && /이름 같음|앞에 지역명/.test(x.why) && x.why !== "앞 이름 같음" && String(x.addr1 || "").includes(r.sigun) && String(x.contenttypeid) !== "32" && FIELDS[x.contenttypeid]);
-  if (!m) { report.push({ r, why: "관광공사에서 같은 곳을 못 찾음" }); continue; }
+  if (!m) {
+    // 관광공사에 없지만 주소로 좌표를 찾아 둔 곳(data/pet-coords.json, scripts/geocode-pet.mjs): 영업시간을 모르므로 가정값으로 넣고 카드에 밝힌다
+    const g = coords[r.no];
+    if (!g) { report.push({ r, why: "관광공사에서 같은 곳을 못 찾음" }); continue; }
+    const near = base.find((p) => Math.hypot((p.lat - g.lat) * 111, (p.lng - g.lng) * 88) < 0.3);
+    if (near) { places[near.id] ??= r.name; report.push({ r, why: `앱 장소 ${near.name}와 같은 곳(300m 안)으로 표시` }); continue; }
+    let area = null, best = Infinity;
+    for (const [k, a] of Object.entries(AREAS)) { const d = (a.lat - g.lat) ** 2 + (a.lng - g.lng) ** 2; if (d < best) { best = d; area = k; } }
+    const food = r.kind === "식음료", cafe = food && /카페|커피|베이커리|빵|브루|로스터|디저트/i.test(r.name);
+    const hours = cafe ? ["10:00", "19:00"] : food ? ["11:00", "20:00"] : ["09:00", "18:00"];
+    extra.push({ region: AREAS[area].region, id: `pet-${r.no}`, name: r.name, cat: food ? (cafe ? "cafe" : "food") : "nature", area, lat: Number(g.lat.toFixed(4)), lng: Number(g.lng.toFixed(4)),
+      hours, closed: [], stay: cafe ? 50 : 60, indoor: food, walk: 1, pop: 1, tags: [], petOnly: true, hoursGuessed: true,
+      desc: (cafe ? "반려동물 동반 카페" : food ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: "", addr: r.addr, wiki: r.name });
+    places[`pet-${r.no}`] = r.name;
+    report.push({ r, why: `관광공사에 없어 주소 좌표(${g.how})로 넣음 · 영업시간 가정 ${hours.join("–")}` });
+    continue;
+  }
   const [intro] = await tour("KorService2", "detailIntro2", { contentId: String(m.contentid), contentTypeId: String(m.contenttypeid) }, opts).catch(() => [{}]);
   const [tf, rf] = FIELDS[m.contenttypeid];
   const text = clean(intro?.[tf]), rest = clean(intro?.[rf]);

@@ -113,9 +113,11 @@ function startOpts(input) {
   // 대중교통으로 서울 쪽 역·터미널에서 출발하면 실제 시간표(transit.json)에서 가장 일찍 도착하는 편을 골라, 도착 15분 뒤 기준점에서 첫날을 시작한다
   const hub = input.move === "transit" && transitHub(s);
   if (hub && transitData && hasRoute(transitData, hub, input.region)) {
-    const [h, m] = (time || "07:00").split(":").map(Number);
+    // 출발 시각을 직접 정하지 않았으면 첫차부터 고른다 (먼 출발지의 기본값 08:00 때문에 07:50 열차를 놓치지 않게)
+    const [h, m] = (store.get("startTime") || "05:00").split(":").map(Number);
     const best = bestArrival(transitData, hub, input.region, input.date, h * 60 + m);
-    if (best) {
+    // 18시 넘어 도착하면 첫날 일정을 짤 수 없어 시간표를 쓰지 않는다 (카드에서 안내)
+    if (best && best.arrMin + 15 <= 18 * 60) {
       const begin = Math.ceil((best.arrMin + 15) / 5) * 5;
       return { start: { name: best.hub, lat: base.lat, lng: base.lng }, startTime: fmt(begin), arrival: { mode: best.mode, grade: best.grade, from: hub, hub: best.hub, dep: best.dep, arr: best.arr, fare: best.fare, refDate: best.refDate } };
     }
@@ -123,10 +125,11 @@ function startOpts(input) {
   return { ...(s ? { start: { name: s.name, ...(s.nameEn ? { nameEn: s.nameEn } : {}), lat: s.lat, lng: s.lng } } : {}), ...(time ? { startTime: time } : {}) };
 }
 // 시간표가 있는 서울 쪽 출발지 (origins.js 이름과 같음)
-const TRANSIT_HUBS = ["서울역", "청량리역", "상봉역", "동서울종합터미널", "서울고속버스터미널"];
+const TRANSIT_HUBS = ["서울역", "청량리역", "상봉역", "동서울종합터미널", "서울고속버스터미널", "부전역", "동대구역", "인천국제공항", "김포국제공항", "부산동부터미널", "대전복합터미널"];
 function transitHub(s) {
   if (!s) return null;
-  const o = ORIGINS.find((x) => TRANSIT_HUBS.includes(x.name) && (x.name === s.name || distKm(x, s) < 1.5));
+  // 공항은 터미널이 넓어 3km 안이면 같은 곳으로 본다
+  const o = ORIGINS.find((x) => TRANSIT_HUBS.includes(x.name) && (x.name === s.name || distKm(x, s) < (/공항/.test(x.name) ? 3 : 1.5)));
   return o ? o.name : null;
 }
 let transitData = null;
@@ -158,7 +161,7 @@ function renderTransit() {
       : `<p class="sub warn">${t("마지막 일정 뒤에 돌아오는 편이 시간표에 없어요. 일정을 줄이거나 하루 더 머무세요.")}</p>`;
     html += `<p class="sub">${t("국토교통부 TAGO 시간표 기준 (기차 {t}, 버스 {b}). 예매·시간 변경은 코레일·버스 예매 사이트에서 확인하세요.", { t: refLabel(a.mode === "train" ? a.refDate : transitData?.trainDays?.[isWeekendDate(state.input.date) ? "weekend" : "weekday"]), b: refLabel(transitData?.busDate) })}</p>`;
   } else {
-    html += `<p class="sub">${hub ? t("이 권역으로 가는 기차·버스 시간표가 없어 이동 시간을 거리로 추정했어요.") : t("출발지를 서울역·청량리역·상봉역·동서울·서울고속버스터미널 중 하나로 정하면 실제 기차·버스 시간표로 첫날을 짜요.")}</p>`;
+    html += `<p class="sub">${hub ? t("이 권역으로 가는 기차·버스 시간표가 없어 이동 시간을 거리로 추정했어요.") : t("출발지를 서울역·청량리역·상봉역·동서울·서울고속버스터미널, 부전역·동대구역, 인천·김포공항, 부산동부·대전복합터미널 중 하나로 정하면 실제 기차·버스 시간표로 첫날을 짜요.")}</p>`;
   }
   box.hidden = false;
   box.innerHTML = html;
@@ -363,7 +366,7 @@ function itemHTML(it, i, day) {
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
         ${(state.opts.access || []).length ? accessLine(p) : ""}
-        ${p.petOnly ? `<div class="check soft">${t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}</div>` : ""}
+        ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
@@ -379,8 +382,16 @@ function itemHTML(it, i, day) {
 // 장소의 시군은 pet.json의 sigun 표(관광공사 주소 기준)를 함께 쓴다. 오늘·내일 일정에만 붙인다
 let kma = null, placeSigun = null;
 const WARNINGS_URL = "https://raw.githubusercontent.com/hundol047/MY-AI-LAB/live-data/warnings.json";
+// 특보 받는 순서: 앱 서버(/api/warnings) → 저장소 live-data 브랜치(공개 저장소일 때) → 같은 사이트의 warnings.json
+async function loadWarnings() {
+  for (const u of ["api/warnings", WARNINGS_URL, "warnings.json"]) {
+    const j = await fetchT(u, { cache: "no-cache" }, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+    if (j?.fetchedAt && Array.isArray(j.now)) return j;
+  }
+  return null;
+}
 Promise.all([
-  fetchT(WARNINGS_URL, { cache: "no-cache" }, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+  loadWarnings(),
   fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
 ]).then(([w, pj]) => { kma = w; placeSigun = pj?.sigun || null; if (pj && !petData) petData = pj; if (w && trip && !$("#result").hidden) render(); });
 function alertsFor(p, date, wx) {

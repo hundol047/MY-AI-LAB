@@ -4,8 +4,8 @@
 
 규칙: 영문 제목 괄호 속 한국어 원명이 우리 이름과 대응 + 좌표 2km 안(탐방로는 길이까지). 소개는 원문 첫 문장 그대로(200자 넘으면 생략).
 
-- 대상 345곳 (장소 274 + 축제 71)
-- 영문 이름 찾음 131곳 (소개 포함 114곳) · 못 찾음 214곳
+- 대상 372곳 (장소 301 + 축제 71)
+- 영문 이름 찾음 131곳 (소개 포함 114곳) · 못 찾음 241곳
 
 ## 찾은 곳
 
@@ -208,11 +208,38 @@
 | hw-cafe | 광덕 별아래 | 영문 결과 없음 | Gwangdeok Byeolarae, Hwacheon — Fermented-coffee café below Gwangdeoksan · closed Mon, Tue, Thu |
 | yg-makguksu | 도촌막국수 | 영문 결과 없음 | Dochon Makguksu, Yanggu — Buckwheat noodles and buckwheat crepes |
 | yg-cafe | 양구농사꾼 | 2km 안에 이름이 맞는 영문 결과 없음 | Yanggu Nongsakkun — Café with Yanggu apple drinks and potato bread |
-| ij-makguksu | 원대막국수 | 영문 결과 없음 | Wondae Makguksu, Inje — Buckwheat noodles on the way to the birch forest |
+| ij-makguksu | 하늘내린 막국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Haneullaerin Makguksu, Inje — Perilla-oil and pollack buckwheat noodles |
 | ij-cafe | 카페 하추리 | 영문 결과 없음 | Cafe Hachuri, Inje — Café by the Naerincheon River |
 | gs-cafe | 커피고 | 2km 안에 이름이 맞는 영문 결과 없음 | Coffee Go, Goseong — Specialty coffee by the sea in Goseong |
 | yy-makguksu | 입암메밀타운 | 영문 결과 없음 | Ibam Memil Town, Yangyang — Buckwheat noodles and boiled pork |
 | yy-cafe | P.E.I coffee | 2km 안에 이름이 맞는 영문 결과 없음 | P.E.I Coffee, Yangyang — Yangyang café known for cream lattes |
+| dh-kalguksu | 오뚜기칼국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Ottugi Kalguksu, Donghae — Spicy Donghae-style jang-kalguksu noodles |
+| dh-crab | 동해러시아대게마을 | 2km 안에 이름이 맞는 영문 결과 없음 | Donghae Russian Snow Crab Village — Steamed snow crab and crab seafood ramyeon |
+| tb-hanwoo2 | 태백으뜸한우 | 2km 안에 이름이 맞는 영문 결과 없음 | Taebaek Eutteum Hanwoo — Grilled Taebaek hanwoo beef and yukhoe |
+| tb-neowa | 너와집 | 2km 안에 이름이 맞는 영문 결과 없음 | Neowajip, Taebaek — Korean set meals and wild-vegetable bibimbap |
+| sc-dakgalbi | 텃밭에노는닭 | 영문 결과 없음 | Teotbat-e Noneun Dak, Samcheok — Samcheok-style mul-dakgalbi |
+| sc-hoe | 삼척횟집 | 2km 안에 이름이 맞는 영문 결과 없음 | Samcheok Hoetjip — Sliced raw fish and cold mulhoe |
+| hc-hanwoo | 홍천한우사랑말식당 | 영문 결과 없음 | Hongcheon Hanwoo Sarangmal — Hongcheon hanwoo beef and ox-foot soup |
+| hc-jobaksa | 홍천조박사화로구이 | 영문 결과 없음 | Hongcheon Jo Baksa Hwaro-gui — Gochujang pork belly grilled over charcoal |
+| hs-gwangam | 광암막국수 | 영문 결과 없음 | Gwangam Makguksu, Hoengseong — Buckwheat noodles, also with spicy pollack |
+| hs-sundae | 새말토종순대 | 영문 결과 없음 | Saemal Tojong Sundae, Hoengseong — Homemade sundae sausage and sundae soup |
+| yw-hanwoo | 영월동강한우 | 영문 결과 없음 | Yeongwol Donggang Hanwoo — Grilled hanwoo and bulgogi set meals |
+| yw-trout | 옥동양어장횟집 | 영문 결과 없음 | Okdong Fish Farm Restaurant, Yeongwol — Raw and fried trout |
+| pc-sanchae | 동대산식당 | 2km 안에 이름이 맞는 영문 결과 없음 | Dongdaesan Sikdang, Pyeongchang — Odaesan wild-vegetable set meal and grilled dried pollack |
+| pc-trout | 강원수산횟집 | 영문 결과 없음 | Gangwon Susan Hoetjip, Pyeongchang — Pyeongchang raw and fried trout |
+| js-hwanggi | 정선황기막국수 | 영문 결과 없음 | Jeongseon Hwanggi Makguksu — Buckwheat noodles with astragalus and gondre rice |
+| js-gondre | 대숲마을 | 2km 안에 이름이 맞는 영문 결과 없음 | Daesup Maeul, Jeongseon — Stone-pot gondre rice and grilled fish |
+| cw-hanwoo | 철원한우마을 | 2km 안에 이름이 맞는 영문 결과 없음 | Cheorwon Hanwoo Village — Hanwoo bulgogi and yukhoe bibimbap |
+| cw-duck | 오대오리 | 2km 안에 이름이 맞는 영문 결과 없음 | Odae Ori, Cheorwon — Duck soup with scorched rice and smoked duck |
+| hw-mandarin | 강변횟집 | 2km 안에 이름이 맞는 영문 결과 없음 | Gangbyeon Hoetjip, Hwacheon — Spicy mandarin-fish stew and masu-salmon sashimi |
+| hw-baeksuk | 추억만들기 | 영문 결과 없음 | Chueok Mandeulgi, Hwacheon — Chicken soup with scorched rice and spicy braised chicken |
+| yg-trout | 밤나무집 | 영문 결과 없음 | Bamnamujip, Yanggu — Raw trout and wild-vegetable bibimbap |
+| yg-tofu | 전주식당 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeonju Sikdang, Yanggu — Country tofu hot pot and pan-fried tofu |
+| ij-hwangtae | 백담산촌식당 | 영문 결과 없음 | Baekdam Sanchon Sikdang, Inje — Grilled dried pollack set and pollack soup |
+| gs-hoe | 영순네횟집 | 2km 안에 이름이 맞는 영문 결과 없음 | Yeongsun-ne Hoetjip, Goseong — Sliced raw fish and mulhoe |
+| gs-maeuntang | 청보횟집 | 2km 안에 이름이 맞는 영문 결과 없음 | Cheongbo Hoetjip, Goseong — Local fish spicy stew and sea-squirt bibimbap |
+| yy-donghae | 동해막국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Donghae Makguksu, Yangyang — Buckwheat noodles and buckwheat dumplings |
+| yy-songwol | 송월메밀국수 | 2km 안에 이름이 맞는 영문 결과 없음 | Songwol Memil-guksu, Yangyang — Cold buckwheat noodles and soft tofu |
 | namhangjin-beach | 남항진해변 | 2km 안에 이름이 맞는 영문 결과 없음 | Namhangjin Beach — Quiet beach with the Solbaram Bridge |
 | sea-trail | 정동심곡 바다부채길 | 2km 안에 이름이 맞는 영문 결과 없음 | Jeongdong-Simgok Badabuchae-gil Trail — 2.9 km clifftop coastal trail · closed during high-wave warnings |
 | terarosa | 테라로사 커피공장 강릉본점 | 영문 결과 없음 | Terarosa Coffee Factory (Gangneung Main Store) — Roastery and coffee museum |
@@ -407,6 +434,16 @@
 | cw-tofu | 삼정콩마을가마솥두부집 | Hantangang River [National Geopark] (한탄강(국가지질공원, 고석정)) | 0.18 | 이름 다름 |
 | cw-tofu | 삼정콩마을가마솥두부집 | Goseokjeong National Tourist Area (고석정국민관광지) | 0.29 | 이름 다름 |
 | cw-tofu | 삼정콩마을가마솥두부집 | Cheorwon Facilities Management Office (Formerly, Iron Triangle Battlefield (철원 시설물관리사업소 (구 철의삼각전적관)) | 0.29 | 이름 다름 |
+| dh-crab | 동해러시아대게마을 | Haeamjeong Pavilion (동해 해암정) | 0.24 | 이름 다름 |
+| pc-sanchae | 동대산식당 | Odaesan Minsok Sikdang (오대산민속식당) | 0.00 | 이름 다름 |
+| pc-sanchae | 동대산식당 | Odaesan National Park (오대산국립공원) | 0.06 | 이름 다름 |
+| cw-hanwoo | 철원한우마을 | Sanoe Hanu Village (산외한우마을) | 279.75 | 이름 같지만 2km 밖 |
+| cw-duck | 오대오리 | Hantangang River [National Geopark] (한탄강(국가지질공원, 고석정)) | 0.15 | 이름 다름 |
+| cw-duck | 오대오리 | Goseokjeong National Tourist Area (고석정국민관광지) | 0.16 | 이름 다름 |
+| cw-duck | 오대오리 | Cheorwon Facilities Management Office (Formerly, Iron Triangle Battlefield (철원 시설물관리사업소 (구 철의삼각전적관)) | 0.16 | 이름 다름 |
+| yy-donghae | 동해막국수 | Baekchon Makguksu (백촌막국수) | 47.41 | 이름 같지만 2km 밖 |
+| yy-donghae | 동해막국수 | Hyundai Buckwheat Noodles (현대막국수) | 50.45 | 이름 같지만 2km 밖 |
+| yy-donghae | 동해막국수 | Songjiho Makguksu (송지호막국수) | 51.32 | 이름 같지만 2km 밖 |
 | namhangjin-beach | 남항진해변 | Aranaby Zipline (아라나비(스카이 어촌체험)) | 0.17 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Gangneung Jjamppong Sundubu Donghwa Garden (강릉짬뽕순두부 동화가든 본점) | 0.11 | 이름 다름 |
 | toetmaru | 카페 툇마루 | Chodang Dubu Village (초당두부마을) | 0.11 | 이름 다름 |

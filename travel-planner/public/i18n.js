@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "출발지를 서울역·청량리역·상봉역·동서울·서울고속버스터미널, 부전역·동대구역, 인천·김포공항, 부산동부·대전복합터미널 중 하나로 정하면 실제 기차·버스 시간표로 첫날을 짜요.": "Set your start to Seoul, Cheongnyangni, Sangbong, Bujeon (Busan) or Dongdaegu Station, Incheon or Gimpo Airport, or Dong Seoul, Seoul Express, Busan Dongbu or Daejeon bus terminal, and day 1 follows the real train or bus timetable.",
+  "영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요": "No opening hours given, so {h} is assumed · please check before you go",
   "강풍주의보": "High wind advisory",
   "강풍경보": "High wind warning",
   "풍랑주의보": "High seas advisory",

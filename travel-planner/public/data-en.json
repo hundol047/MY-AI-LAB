@@ -562,9 +562,9 @@
     "descSrc": "app"
   },
   "ij-makguksu": {
-    "name": "Wondae Makguksu, Inje",
+    "name": "Haneullaerin Makguksu, Inje",
     "nameSrc": "app",
-    "desc": "Buckwheat noodles on the way to the birch forest",
+    "desc": "Perilla-oil and pollack buckwheat noodles",
     "descSrc": "app"
   },
   "ij-cafe": {
@@ -594,6 +594,168 @@
     "name": "P.E.I Coffee, Yangyang",
     "nameSrc": "app",
     "desc": "Yangyang café known for cream lattes",
+    "descSrc": "app"
+  },
+  "dh-kalguksu": {
+    "name": "Ottugi Kalguksu, Donghae",
+    "nameSrc": "app",
+    "desc": "Spicy Donghae-style jang-kalguksu noodles",
+    "descSrc": "app"
+  },
+  "dh-crab": {
+    "name": "Donghae Russian Snow Crab Village",
+    "nameSrc": "app",
+    "desc": "Steamed snow crab and crab seafood ramyeon",
+    "descSrc": "app"
+  },
+  "tb-hanwoo2": {
+    "name": "Taebaek Eutteum Hanwoo",
+    "nameSrc": "app",
+    "desc": "Grilled Taebaek hanwoo beef and yukhoe",
+    "descSrc": "app"
+  },
+  "tb-neowa": {
+    "name": "Neowajip, Taebaek",
+    "nameSrc": "app",
+    "desc": "Korean set meals and wild-vegetable bibimbap",
+    "descSrc": "app"
+  },
+  "sc-dakgalbi": {
+    "name": "Teotbat-e Noneun Dak, Samcheok",
+    "nameSrc": "app",
+    "desc": "Samcheok-style mul-dakgalbi",
+    "descSrc": "app"
+  },
+  "sc-hoe": {
+    "name": "Samcheok Hoetjip",
+    "nameSrc": "app",
+    "desc": "Sliced raw fish and cold mulhoe",
+    "descSrc": "app"
+  },
+  "hc-hanwoo": {
+    "name": "Hongcheon Hanwoo Sarangmal",
+    "nameSrc": "app",
+    "desc": "Hongcheon hanwoo beef and ox-foot soup",
+    "descSrc": "app"
+  },
+  "hc-jobaksa": {
+    "name": "Hongcheon Jo Baksa Hwaro-gui",
+    "nameSrc": "app",
+    "desc": "Gochujang pork belly grilled over charcoal",
+    "descSrc": "app"
+  },
+  "hs-gwangam": {
+    "name": "Gwangam Makguksu, Hoengseong",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles, also with spicy pollack",
+    "descSrc": "app"
+  },
+  "hs-sundae": {
+    "name": "Saemal Tojong Sundae, Hoengseong",
+    "nameSrc": "app",
+    "desc": "Homemade sundae sausage and sundae soup",
+    "descSrc": "app"
+  },
+  "yw-hanwoo": {
+    "name": "Yeongwol Donggang Hanwoo",
+    "nameSrc": "app",
+    "desc": "Grilled hanwoo and bulgogi set meals",
+    "descSrc": "app"
+  },
+  "yw-trout": {
+    "name": "Okdong Fish Farm Restaurant, Yeongwol",
+    "nameSrc": "app",
+    "desc": "Raw and fried trout",
+    "descSrc": "app"
+  },
+  "pc-sanchae": {
+    "name": "Dongdaesan Sikdang, Pyeongchang",
+    "nameSrc": "app",
+    "desc": "Odaesan wild-vegetable set meal and grilled dried pollack",
+    "descSrc": "app"
+  },
+  "pc-trout": {
+    "name": "Gangwon Susan Hoetjip, Pyeongchang",
+    "nameSrc": "app",
+    "desc": "Pyeongchang raw and fried trout",
+    "descSrc": "app"
+  },
+  "js-hwanggi": {
+    "name": "Jeongseon Hwanggi Makguksu",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles with astragalus and gondre rice",
+    "descSrc": "app"
+  },
+  "js-gondre": {
+    "name": "Daesup Maeul, Jeongseon",
+    "nameSrc": "app",
+    "desc": "Stone-pot gondre rice and grilled fish",
+    "descSrc": "app"
+  },
+  "cw-hanwoo": {
+    "name": "Cheorwon Hanwoo Village",
+    "nameSrc": "app",
+    "desc": "Hanwoo bulgogi and yukhoe bibimbap",
+    "descSrc": "app"
+  },
+  "cw-duck": {
+    "name": "Odae Ori, Cheorwon",
+    "nameSrc": "app",
+    "desc": "Duck soup with scorched rice and smoked duck",
+    "descSrc": "app"
+  },
+  "hw-mandarin": {
+    "name": "Gangbyeon Hoetjip, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Spicy mandarin-fish stew and masu-salmon sashimi",
+    "descSrc": "app"
+  },
+  "hw-baeksuk": {
+    "name": "Chueok Mandeulgi, Hwacheon",
+    "nameSrc": "app",
+    "desc": "Chicken soup with scorched rice and spicy braised chicken",
+    "descSrc": "app"
+  },
+  "yg-trout": {
+    "name": "Bamnamujip, Yanggu",
+    "nameSrc": "app",
+    "desc": "Raw trout and wild-vegetable bibimbap",
+    "descSrc": "app"
+  },
+  "yg-tofu": {
+    "name": "Jeonju Sikdang, Yanggu",
+    "nameSrc": "app",
+    "desc": "Country tofu hot pot and pan-fried tofu",
+    "descSrc": "app"
+  },
+  "ij-hwangtae": {
+    "name": "Baekdam Sanchon Sikdang, Inje",
+    "nameSrc": "app",
+    "desc": "Grilled dried pollack set and pollack soup",
+    "descSrc": "app"
+  },
+  "gs-hoe": {
+    "name": "Yeongsun-ne Hoetjip, Goseong",
+    "nameSrc": "app",
+    "desc": "Sliced raw fish and mulhoe",
+    "descSrc": "app"
+  },
+  "gs-maeuntang": {
+    "name": "Cheongbo Hoetjip, Goseong",
+    "nameSrc": "app",
+    "desc": "Local fish spicy stew and sea-squirt bibimbap",
+    "descSrc": "app"
+  },
+  "yy-donghae": {
+    "name": "Donghae Makguksu, Yangyang",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and buckwheat dumplings",
+    "descSrc": "app"
+  },
+  "yy-songwol": {
+    "name": "Songwol Memil-guksu, Yangyang",
+    "nameSrc": "app",
+    "desc": "Cold buckwheat noodles and soft tofu",
     "descSrc": "app"
   },
   "gyeongpo-beach": {

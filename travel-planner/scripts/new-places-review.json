@@ -179,7 +179,7 @@
   "closedYearly": [
    [
     "03-16",
-    "12-04"
+    "11-28"
    ]
   ],
   "risk": [
@@ -961,7 +961,7 @@
   "closedYearly": [
    [
     "03-16",
-    "12-04"
+    "11-27"
    ]
   ],
   "risk": [
@@ -1329,7 +1329,7 @@
   "closedYearly": [
    [
     "04-01",
-    "11-24"
+    "11-20"
    ]
   ],
   "risk": [
@@ -1359,8 +1359,8 @@
   "closed": [],
   "closedYearly": [
    [
-    "03-16",
-    "12-04"
+    "03-15",
+    "11-26"
    ]
   ],
   "risk": [
@@ -1391,7 +1391,7 @@
   "closedYearly": [
    [
     "03-16",
-    "12-04"
+    "12-02"
    ]
   ],
   "risk": [
@@ -2355,18 +2355,20 @@
   "wiki": "양구농사꾼"
  },
  "ij-makguksu": {
-  "name": "원대막국수",
+  "name": "하늘내린 막국수",
   "cat": "food",
   "region": "seorak",
   "area": "inje",
-  "lat": 38.0023,
-  "lng": 128.2315,
+  "lat": 38.0344,
+  "lng": 128.2156,
   "hours": [
    "10:00",
-   "16:30"
+   "18:30"
   ],
-  "lastEntry": "16:00",
-  "closed": [],
+  "lastEntry": "18:00",
+  "closed": [
+   2
+  ],
   "stay": 60,
   "indoor": true,
   "walk": 1,
@@ -2374,9 +2376,9 @@
   "tags": [
    "senior"
   ],
-  "desc": "자작나무숲 가는 길 막국수와 곰취수육",
-  "kto": "134492",
-  "wiki": "원대막국수"
+  "desc": "들기름 막국수와 명태회 막국수",
+  "kto": "4095616",
+  "wiki": "하늘내린 막국수"
  },
  "ij-cafe": {
   "name": "카페 하추리",
@@ -2499,5 +2501,703 @@
   "desc": "양양 크림라떼 카페",
   "kto": "2929243",
   "wiki": "P.E.I coffee"
- }
+ },
+ "dh-kalguksu": {
+  "name": "오뚜기칼국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.5497,
+  "lng": 129.1102,
+  "hours": [
+   "07:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "얼큰한 동해식 장칼국수",
+  "kto": "2855471",
+  "wiki": "오뚜기칼국수"
+ },
+ "dh-crab": {
+  "name": "동해러시아대게마을",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4779,
+  "lng": 129.1563,
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "lastEntry": "19:30",
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "대게찜과 대게해물라면",
+  "kto": "2874418",
+  "wiki": "동해러시아대게마을"
+ },
+ "tb-hanwoo2": {
+  "name": "태백으뜸한우",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1622,
+  "lng": 128.9853,
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "태백 한우 구이와 육회",
+  "kto": "681547",
+  "wiki": "태백으뜸한우"
+ },
+ "tb-neowa": {
+  "name": "너와집",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1614,
+  "lng": 128.9856,
+  "hours": [
+   "11:00",
+   "20:30"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "너와정식·산채비빔밥 한식 밥상",
+  "kto": "681650",
+  "wiki": "너와집"
+ },
+ "sc-dakgalbi": {
+  "name": "텃밭에노는닭",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "samcheok",
+  "lat": 37.2387,
+  "lng": 129.0457,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "삼척 물닭갈비",
+  "kto": "2877990",
+  "wiki": "텃밭에노는닭"
+ },
+ "sc-hoe": {
+  "name": "삼척횟집",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4422,
+  "lng": 129.1922,
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "모둠회와 물회",
+  "kto": "135814",
+  "wiki": "삼척횟집"
+ },
+ "hc-hanwoo": {
+  "name": "홍천한우사랑말식당",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "hongcheon",
+  "lat": 37.7012,
+  "lng": 127.8527,
+  "hours": [
+   "10:30",
+   "20:50"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "홍천 한우 구이와 우족탕",
+  "kto": "2807694",
+  "wiki": "홍천한우사랑말식당"
+ },
+ "hc-jobaksa": {
+  "name": "홍천조박사화로구이",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "hongcheon",
+  "lat": 37.6204,
+  "lng": 127.6671,
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고추장 삼겹살 화로구이",
+  "kto": "2892475",
+  "wiki": "홍천조박사화로구이"
+ },
+ "hs-gwangam": {
+  "name": "광암막국수",
+  "cat": "food",
+  "region": "wonju",
+  "area": "hoengseong",
+  "lat": 37.488,
+  "lng": 128.0724,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "lastEntry": "19:00",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "메밀 막국수와 명태비빔막국수",
+  "kto": "2774536",
+  "wiki": "광암막국수"
+ },
+ "hs-sundae": {
+  "name": "새말토종순대",
+  "cat": "food",
+  "region": "wonju",
+  "area": "chiaksan",
+  "lat": 37.4495,
+  "lng": 128.0776,
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "토종 순대와 순대국밥",
+  "kto": "2875712",
+  "wiki": "새말토종순대"
+ },
+ "yw-hanwoo": {
+  "name": "영월동강한우",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "yeongwol",
+  "lat": 37.1821,
+  "lng": 128.4664,
+  "hours": [
+   "10:30",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "영월 한우 구이와 불고기 백반",
+  "kto": "2914140",
+  "wiki": "영월동강한우"
+ },
+ "yw-trout": {
+  "name": "옥동양어장횟집",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "yeongwol",
+  "lat": 37.1218,
+  "lng": 128.5611,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "lastEntry": "19:00",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "송어회와 송어튀김",
+  "kto": "2915567",
+  "wiki": "옥동양어장횟집"
+ },
+ "pc-sanchae": {
+  "name": "동대산식당",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "odaesan",
+  "lat": 37.7167,
+  "lng": 128.6019,
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "오대산 산채정식과 황태구이",
+  "kto": "628661",
+  "wiki": "동대산식당"
+ },
+ "pc-trout": {
+  "name": "강원수산횟집",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "yeongwol",
+  "lat": 37.343,
+  "lng": 128.5031,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "lastEntry": "19:30",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "평창 송어회와 송어튀김",
+  "kto": "2787227",
+  "wiki": "강원수산횟집"
+ },
+ "js-hwanggi": {
+  "name": "정선황기막국수",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "jeongseon",
+  "lat": 37.3808,
+  "lng": 128.6641,
+  "hours": [
+   "09:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "황기를 넣은 막국수와 곤드레밥",
+  "kto": "627999",
+  "wiki": "정선황기막국수"
+ },
+ "js-gondre": {
+  "name": "대숲마을",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1941,
+  "lng": 128.8681,
+  "hours": [
+   "09:30",
+   "20:00"
+  ],
+  "breaks": [
+   [
+    "14:30",
+    "15:30"
+   ]
+  ],
+  "lastEntry": "19:00",
+  "closed": [
+   4
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "돌솥 곤드레밥과 생선구이",
+  "kto": "2925290",
+  "wiki": "대숲마을"
+ },
+ "cw-hanwoo": {
+  "name": "철원한우마을",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cheorwon",
+  "lat": 38.1293,
+  "lng": 127.2987,
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "철원 한우 불고기와 육회비빔밥",
+  "kto": "3572998",
+  "wiki": "철원한우마을"
+ },
+ "cw-duck": {
+  "name": "오대오리",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cheorwon",
+  "lat": 38.1874,
+  "lng": 127.2873,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "lastEntry": "19:00",
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "누룽지 오리백숙과 훈제오리",
+  "kto": "2809927",
+  "wiki": "오대오리"
+ },
+ "hw-mandarin": {
+  "name": "강변횟집",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "hwacheon",
+  "lat": 38.0961,
+  "lng": 127.7756,
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "쏘가리 매운탕과 산천어회",
+  "kto": "133487",
+  "wiki": "강변횟집"
+ },
+ "hw-baeksuk": {
+  "name": "추억만들기",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cheorwon",
+  "lat": 38.0767,
+  "lng": 127.4701,
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "누룽지 백숙과 닭볶음탕",
+  "kto": "2844141",
+  "wiki": "추억만들기"
+ },
+ "yg-trout": {
+  "name": "밤나무집",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "yanggu",
+  "lat": 38.046,
+  "lng": 127.9786,
+  "hours": [
+   "09:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "송어회와 산채비빔밥",
+  "kto": "626786",
+  "wiki": "밤나무집"
+ },
+ "yg-tofu": {
+  "name": "전주식당",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "yanggu",
+  "lat": 38.11,
+  "lng": 127.9863,
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "촌두부 전골과 두부구이",
+  "kto": "2925454",
+  "wiki": "전주식당"
+ },
+ "ij-hwangtae": {
+  "name": "백담산촌식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "seoraksan",
+  "lat": 38.2011,
+  "lng": 128.3467,
+  "hours": [
+   "07:00",
+   "20:30"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "황태구이 정식과 황태해장국",
+  "kto": "135924",
+  "wiki": "백담산촌식당"
+ },
+ "gs-hoe": {
+  "name": "영순네횟집",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2496,
+  "lng": 128.5676,
+  "hours": [
+   "10:00",
+   "21:30"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "16:00"
+   ]
+  ],
+  "lastEntry": "20:00",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고성 모둠회와 물회",
+  "kto": "2774691",
+  "wiki": "영순네횟집"
+ },
+ "gs-maeuntang": {
+  "name": "청보횟집",
+  "cat": "food",
+  "region": "seorak",
+  "area": "goseong",
+  "lat": 38.356,
+  "lng": 128.5099,
+  "hours": [
+   "10:00",
+   "20:30"
+  ],
+  "breaks": [
+   [
+    "15:00",
+    "17:30"
+   ]
+  ],
+  "closed": [],
+  "closedNth": [
+   [
+    2,
+    1
+   ],
+   [
+    2,
+    3
+   ]
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "망치·삼숙이 매운탕과 멍게비빔밥",
+  "kto": "2514832",
+  "wiki": "청보횟집"
+ },
+ "yy-donghae": {
+  "name": "동해막국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 37.9199,
+  "lng": 128.804,
+  "hours": [
+   "09:30",
+   "20:00"
+  ],
+  "breaks": [
+   [
+    "14:30",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "메밀 물국수와 메밀찐만두",
+  "kto": "2914112",
+  "wiki": "동해막국수"
+ },
+ "yy-songwol": {
+  "name": "송월메밀국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0875,
+  "lng": 128.6535,
+  "hours": [
+   "09:30",
+   "16:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "물메밀국수와 순두부",
+  "kto": "2892419",
+  "wiki": "송월메밀국수"
+ },
+ "_note_ski": "스키장 시즌(2026-11-07 확인): 휘닉스는 2026/27 '11/27 개장·3/14 폐장 목표' 보도 기준, 용평·하이원·비발디·알펜시아는 2025/26 실제 개장일(11/21·11/28·11/29·12/3) 기준, 웰리힐리·오크밸리는 발표 전이라 12/5 개장 가정. 카드에 '개장일은 리조트 공지 확인'을 띄운다."
 }

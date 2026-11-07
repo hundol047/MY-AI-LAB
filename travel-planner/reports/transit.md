@@ -14,6 +14,14 @@
 - train 강릉역 → 상봉역 weekday: 5편
 - train 상봉역 → 강릉역 weekend: 8편
 - train 강릉역 → 상봉역 weekend: 9편
+- train 부전역 → 강릉역 weekday: 3편
+- train 강릉역 → 부전역 weekday: 4편
+- train 부전역 → 강릉역 weekend: 3편
+- train 강릉역 → 부전역 weekend: 4편
+- train 동대구역 → 강릉역 weekday: 4편
+- train 강릉역 → 동대구역 weekday: 4편
+- train 동대구역 → 강릉역 weekend: 4편
+- train 강릉역 → 동대구역 weekend: 4편
 - train 서울역 → 춘천역 weekday: 0편
 - train 춘천역 → 서울역 weekday: 0편
 - train 서울역 → 춘천역 weekend: 0편
@@ -26,6 +34,14 @@
 - train 춘천역 → 상봉역 weekday: 3편
 - train 상봉역 → 춘천역 weekend: 0편
 - train 춘천역 → 상봉역 weekend: 0편
+- train 부전역 → 춘천역 weekday: 0편
+- train 춘천역 → 부전역 weekday: 0편
+- train 부전역 → 춘천역 weekend: 0편
+- train 춘천역 → 부전역 weekend: 0편
+- train 동대구역 → 춘천역 weekday: 0편
+- train 춘천역 → 동대구역 weekday: 0편
+- train 동대구역 → 춘천역 weekend: 0편
+- train 춘천역 → 동대구역 weekend: 0편
 - train 서울역 → 진부역 weekday: 9편
 - train 진부역 → 서울역 weekday: 12편
 - train 서울역 → 진부역 weekend: 9편
@@ -38,6 +54,14 @@
 - train 진부역 → 상봉역 weekday: 4편
 - train 상봉역 → 진부역 weekend: 7편
 - train 진부역 → 상봉역 weekend: 6편
+- train 부전역 → 진부역 weekday: 0편
+- train 진부역 → 부전역 weekday: 0편
+- train 부전역 → 진부역 weekend: 0편
+- train 진부역 → 부전역 weekend: 0편
+- train 동대구역 → 진부역 weekday: 0편
+- train 진부역 → 동대구역 weekday: 0편
+- train 동대구역 → 진부역 weekend: 0편
+- train 진부역 → 동대구역 weekend: 0편
 - train 서울역 → 원주역 weekday: 6편
 - train 원주역 → 서울역 weekday: 6편
 - train 서울역 → 원주역 weekend: 7편
@@ -50,6 +74,14 @@
 - train 원주역 → 상봉역 weekday: 2편
 - train 상봉역 → 원주역 weekend: 2편
 - train 원주역 → 상봉역 weekend: 2편
+- train 부전역 → 원주역 weekday: 11편
+- train 원주역 → 부전역 weekday: 11편
+- train 부전역 → 원주역 weekend: 12편
+- train 원주역 → 부전역 weekend: 12편
+- train 동대구역 → 원주역 weekday: 0편
+- train 원주역 → 동대구역 weekday: 0편
+- train 동대구역 → 원주역 weekend: 0편
+- train 원주역 → 동대구역 weekend: 0편
 - express 동서울종합터미널 → 강릉 고속버스터미널 all: 12편
 - express 강릉 고속버스터미널 → 동서울종합터미널 all: 12편
 - express 서울고속버스터미널 → 강릉 고속버스터미널 all: 24편
@@ -60,6 +92,14 @@
 - intercity 강릉 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 강릉 시외버스터미널 all: 0편
 - intercity 강릉 시외버스터미널 → 상봉역 all: 0편
+- intercity 인천국제공항 → 강릉 시외버스터미널 all: 9편
+- intercity 강릉 시외버스터미널 → 인천국제공항 all: 0편
+- intercity 김포국제공항 → 강릉 시외버스터미널 all: 0편
+- intercity 강릉 시외버스터미널 → 김포국제공항 all: 0편
+- intercity 부산동부터미널 → 강릉 시외버스터미널 all: 1편
+- intercity 강릉 시외버스터미널 → 부산동부터미널 all: 0편
+- intercity 대전복합터미널 → 강릉 시외버스터미널 all: 0편
+- intercity 강릉 시외버스터미널 → 대전복합터미널 all: 0편
 - express 동서울종합터미널 → 속초 고속버스터미널 all: 15편
 - express 속초 고속버스터미널 → 동서울종합터미널 all: 15편
 - express 서울고속버스터미널 → 속초 고속버스터미널 all: 46편
@@ -70,6 +110,14 @@
 - intercity 속초 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 속초 시외버스터미널 all: 0편
 - intercity 속초 시외버스터미널 → 상봉역 all: 0편
+- intercity 인천국제공항 → 속초 시외버스터미널 all: 4편
+- intercity 속초 시외버스터미널 → 인천국제공항 all: 4편
+- intercity 김포국제공항 → 속초 시외버스터미널 all: 0편
+- intercity 속초 시외버스터미널 → 김포국제공항 all: 0편
+- intercity 부산동부터미널 → 속초 시외버스터미널 all: 3편
+- intercity 속초 시외버스터미널 → 부산동부터미널 all: 4편
+- intercity 대전복합터미널 → 속초 시외버스터미널 all: 2편
+- intercity 속초 시외버스터미널 → 대전복합터미널 all: 1편
 - express 동서울종합터미널 → 춘천 고속버스터미널 all: 0편
 - express 춘천 고속버스터미널 → 동서울종합터미널 all: 0편
 - express 서울고속버스터미널 → 춘천 고속버스터미널 all: 10편
@@ -80,12 +128,28 @@
 - intercity 춘천 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 춘천 시외버스터미널 all: 0편
 - intercity 춘천 시외버스터미널 → 상봉역 all: 0편
+- intercity 인천국제공항 → 춘천 시외버스터미널 all: 18편
+- intercity 춘천 시외버스터미널 → 인천국제공항 all: 0편
+- intercity 김포국제공항 → 춘천 시외버스터미널 all: 0편
+- intercity 춘천 시외버스터미널 → 김포국제공항 all: 0편
+- intercity 부산동부터미널 → 춘천 시외버스터미널 all: 8편
+- intercity 춘천 시외버스터미널 → 부산동부터미널 all: 0편
+- intercity 대전복합터미널 → 춘천 시외버스터미널 all: 8편
+- intercity 춘천 시외버스터미널 → 대전복합터미널 all: 0편
 - intercity 동서울종합터미널 → 진부 시외버스터미널 all: 0편
 - intercity 진부 시외버스터미널 → 동서울종합터미널 all: 0편
 - intercity 서울고속버스터미널 → 진부 시외버스터미널 all: 0편
 - intercity 진부 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 진부 시외버스터미널 all: 0편
 - intercity 진부 시외버스터미널 → 상봉역 all: 0편
+- intercity 인천국제공항 → 진부 시외버스터미널 all: 0편
+- intercity 진부 시외버스터미널 → 인천국제공항 all: 0편
+- intercity 김포국제공항 → 진부 시외버스터미널 all: 0편
+- intercity 진부 시외버스터미널 → 김포국제공항 all: 0편
+- intercity 부산동부터미널 → 진부 시외버스터미널 all: 0편
+- intercity 진부 시외버스터미널 → 부산동부터미널 all: 0편
+- intercity 대전복합터미널 → 진부 시외버스터미널 all: 0편
+- intercity 진부 시외버스터미널 → 대전복합터미널 all: 0편
 - express 동서울종합터미널 → 원주 고속버스터미널 all: 0편
 - express 원주 고속버스터미널 → 동서울종합터미널 all: 0편
 - express 서울고속버스터미널 → 원주 고속버스터미널 all: 98편
@@ -96,3 +160,11 @@
 - intercity 원주 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 원주 시외버스터미널 all: 0편
 - intercity 원주 시외버스터미널 → 상봉역 all: 3편
+- intercity 인천국제공항 → 원주 시외버스터미널 all: 15편
+- intercity 원주 시외버스터미널 → 인천국제공항 all: 15편
+- intercity 김포국제공항 → 원주 시외버스터미널 all: 0편
+- intercity 원주 시외버스터미널 → 김포국제공항 all: 0편
+- intercity 부산동부터미널 → 원주 시외버스터미널 all: 0편
+- intercity 원주 시외버스터미널 → 부산동부터미널 all: 0편
+- intercity 대전복합터미널 → 원주 시외버스터미널 all: 7편
+- intercity 원주 시외버스터미널 → 대전복합터미널 all: 10편

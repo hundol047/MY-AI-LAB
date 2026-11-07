@@ -247,8 +247,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   const win = dayWindow(dayIdx, input.days), end = win.end;
   // 첫날 출발 시각을 정했으면 그 시각에 출발지를 떠난다 (06:00~12:00)
   const t0 = dayIdx === 0 && /^\d{2}:\d{2}$/.test(opts.startTime || "") ? toMin(opts.startTime) : null;
-  // 06:00~15:00 (기차·버스 도착 시각으로 정한 경우 오후일 수 있다)
-  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("15:00") ? t0 : win.start;
+  // 06:00~18:00 (기차·버스 도착 시각으로 정한 경우 오후일 수 있다)
+  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("18:00") ? t0 : win.start;
   const pace = opts.pace || "normal";
   const limit = PACE_LIMIT[pace];
   const pool = candidates(input, opts);

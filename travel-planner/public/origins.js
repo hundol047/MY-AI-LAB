@@ -9,4 +9,8 @@ export const ORIGINS = [
   { name: "인천국제공항", nameEn: "Incheon International Airport", lat: 37.4491, lng: 126.4505 },
   { name: "김포국제공항", nameEn: "Gimpo International Airport", lat: 37.5626, lng: 126.8013 },
   { name: "양양국제공항", nameEn: "Yangyang International Airport", lat: 38.0613, lng: 128.6690 },
+  { name: "부전역", nameEn: "Bujeon Station (Busan)", lat: 35.1645, lng: 129.0597 },
+  { name: "동대구역", nameEn: "Dongdaegu Station", lat: 35.8794, lng: 128.6286 },
+  { name: "부산동부터미널", nameEn: "Busan Dongbu Bus Terminal", lat: 35.2843, lng: 129.0947 },
+  { name: "대전복합터미널", nameEn: "Daejeon Complex Bus Terminal", lat: 36.3505, lng: 127.4368 },
 ];

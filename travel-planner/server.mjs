@@ -11,6 +11,7 @@ import { gzipSync } from "node:zlib";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
+import { fetchWarnings } from "./scripts/kma-warnings.mjs";
 import { PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -40,6 +41,7 @@ const gzipCache = new Map();
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
 
 // 요청 하나에서 오류가 나도 서버 전체가 꺼지지 않게 감싼다
+let warningsCache = null;
 const server = http.createServer((req, res) => {
   handle(req, res).catch((err) => {
     console.error("요청 처리 오류:", req.method, req.url, err.message);
@@ -55,6 +57,14 @@ async function handle(req, res) {
   // 내장 가이드만 사용한다. 예전 클라이언트 요청도 유료 모델로 전달하지 않는다.
   if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {
     return json(res, 410, {error:"LOCAL_GUIDE_ONLY", message:"Use the built-in travel guide. Menu entry is manual."});
+  }
+
+  // 기상특보: 서버의 TOUR_API_KEY(공공데이터포털 키)로 기상청 특보 현황을 받아 30분 동안 재사용한다 (키는 브라우저로 보내지 않는다)
+  if (req.method === "GET" && url.pathname === "/api/warnings") {
+    try {
+      if (!warningsCache || Date.now() - warningsCache.at > 30 * 60e3) warningsCache = { at: Date.now(), data: await fetchWarnings(process.env.TOUR_API_KEY) };
+      return json(res, 200, warningsCache.data);
+    } catch { return json(res, 503, { error: "WARNINGS_UNAVAILABLE" }); }
   }
 
   // 다국어 메뉴 QR 코드
