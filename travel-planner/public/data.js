@@ -413,11 +413,13 @@ export const BENEFITS = [
   {
     id: "b-halfprice", kind: "program", title: "반값여행 (지역사랑 휴가지원)", start: null, end: "2026-12-31",
     towns: ["평창", "영월", "횡성"], regions: ["pyeongchang", "wonju"], needsNight: false,
-    areas: ["daegwallyeong", "odaesan", "yeongwol"], placeIds: ["hoengseong-lake", "hanwoo"],
+    // 평창·영월·횡성에 있는 앱 장소 (관광공사 주소로 정한 시군, public/pet.json sigun · 권역 경계와 시군 경계가 달라 장소로 판단한다)
+    placeIds: ["pungsuwon", "birch-museum", "anheung-bread", "cheongtaesan", "hs-luge", "welli-ski", "jangneung", "gossigul", "byeolmaro", "seondol", "yoseonam", "kimsatgat", "young-dal", "hyoseok-village", "herbnara", "yongpyong-ski", "phoenix-ski", "alpensia-ski", "hs-makguksu", "hs-cafe", "yw-gondre", "yw-cafe", "pc-makguksu", "pc-cafe", "hs-gwangam", "hs-sundae", "yw-hanwoo", "yw-trout", "pc-sanchae", "pc-trout", "sheep", "samyang", "ohsam", "balwang", "woljeongsa", "cheongnyeongpo", "hanbando", "yw-market", "bongpyeong", "jinbu-food", "hanwoo", "hoengseong-lake"],
     amount: 100000, how: "여행 경비의 50%를 지역사랑상품권으로 돌려받아요 (개인 최대 10만 원, 2인 이상 최대 20만 원)",
     steps: ["여행 전 사전 신청·승인", "여행 후 증빙 제출", "심사 후 지역사랑상품권 지급"],
     proofs: ["숙박 영수증", "식당 영수증", "체험시설 이용 증빙", "관광지 인증사진 2곳 이상"],
-    note: "카드·현금영수증·모바일 결제 내역만 인정 (간이영수증·계좌이체 불가) · 하반기 공고는 대한민국 구석구석에서 확인",
+    note: "카드·현금영수증·모바일 결제 내역만 인정 (간이영수증·계좌이체 불가) · 그 시군과 이웃 시군 주민은 신청할 수 없음 (예: 평창은 강릉·영월·정선·횡성·홍천 주민 제외) · 회차·신청 날짜는 시군마다 다름",
+    link: "https://korean.visitkorea.or.kr/dgtourcard/tour50.do", caps: { one: 100000, group: 200000 }, rate: 0.5,
     unconfirmed: true,
   },
 ];

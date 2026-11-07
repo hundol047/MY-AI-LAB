@@ -618,3 +618,5 @@ body:not(.has-server) .needs-server { display: none !important; }
 }
 /* 아주 좁은 폰의 일정 화면: 공유·캘린더·언어 버튼이 들어가도록 앱 이름 글자는 숨기고 점 로고만 둔다 */
 @media (max-width: 400px) { .top:has(#topActions:not([hidden])) .brand span:last-child { display: none; } }
+.opt .opt-half { font-size: 12px; font-weight: 700; color: #b45309; }
+.b-est { font-size: 13px; font-weight: 600; margin: 4px 0 6px; }

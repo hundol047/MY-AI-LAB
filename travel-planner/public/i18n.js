@@ -33,6 +33,11 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "시군 공고에서 회차 확인": "Check rounds in the county notice",
+  "지금 진행 중인 회차·신청 날짜 보기": "See current rounds and application dates",
+  "대상 시군 장소 {n}곳 ({names}) · 승인되면 경비의 50%, 최대 {cap}원": "{n} stops in eligible counties ({names}) · if approved, 50% of costs back, up to ₩{cap}",
+  " · 이 일정 예상 경비로는 약 {won}원까지": " · about ₩{won} for this plan's estimated costs",
+  "💰 반값여행 대상 지역 포함": "💰 Includes half-price travel areas",
   "여행 기간 축제도 살폈어요: {f}": "Checked festivals during your trip: {f}",
   "말씀을 알아들었어요: {what}": "Got it: {what}",
   "고른 조건을 확인했어요": "Checked your choices",
@@ -535,7 +540,7 @@ const BENEFIT_EN = {
     title: "Half-price travel (local vacation support)",
     how: "Get 50% of travel costs back as local gift vouchers (up to ₩100,000 per person, ₩200,000 for 2+ people)",
     steps: ["Apply and get approved before the trip", "Submit proofs after the trip", "Vouchers paid after review"],
-    note: "Only card, cash-receipt or mobile payment records count (no simple receipts or bank transfers) · check the second-half announcement on Korea Tourism Organization's VisitKorea",
+    note: "Only card, cash-receipt or mobile payment records count (no simple receipts or bank transfers) · residents of that county and its neighbours can't apply (e.g. Pyeongchang excludes Gangneung, Yeongwol, Jeongseon, Hoengseong and Hongcheon residents) · rounds and application dates differ by county",
   },
 };
 

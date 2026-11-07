@@ -1,6 +1,6 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
 import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats } from "./planner.js";
-import { PLACES, REGIONS, SHOP_MALL, LODGING } from "./data.js";
+import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
 import { alertsFor as weatherAlertsFor, kmaAlertsFor, OFFICIAL_CHECKS } from "./alerts.js";
@@ -175,6 +175,9 @@ async function thinkThrough(input, opts, voice) {
   await sleep(reduceMotion() ? 50 : 250);
 }
 
+// 반값여행(지역사랑 휴가지원) 대상 시군 장소가 일정에 있는지
+const HALF = BENEFITS.find((b) => b.id === "b-halfprice");
+const halfPriceIn = (tr) => { const ids = new Set(HALF?.placeIds || []); return tr.days.some((d) => d.items.some((it) => ids.has(it.id))); };
 // 일정 3개 비교 카드
 const OPT_NAME = { best: "추천", relaxed: "여유롭게", packed: "알차게", different: "색다른 코스" };
 const OPT_SUB = { best: "가장 균형 잡힌 동선", relaxed: "장소를 줄이고 덜 걷고 덜 이동", packed: "하루에 더 많이 보기", different: "추천 일정에 없는 곳 위주" };
@@ -200,6 +203,7 @@ function renderOptions() {
       <b>${t(OPT_NAME[o.key])}</b><span class="opt-sub">${t(OPT_SUB[o.key])}</span>
       <span class="opt-stats">${t("{n}곳 · 이동 {m} · 걷기 {km}km", { n: o.places, m: minutesLabel(o.totals.moveMin), km: o.totals.walkKm })}</span>
       <span class="opt-hl">${o.highlights.map((n) => esc(placeName(PLACES.find((p) => p.name === n) || { name: n }))).join(" · ")}</span>
+      ${halfPriceIn(o.trip) ? `<span class="opt-half">${t("💰 반값여행 대상 지역 포함")}</span>` : ""}
       <span class="opt-pick">${state.choice === o.key ? t("지금 보는 일정") : t("이 일정으로")}</span></button>`).join("")}</div>`;
 }
 document.addEventListener("click", (e) => {
@@ -966,6 +970,18 @@ function lodgingHTML(day) {
 /* ---------- 혜택 내비 + 증빙 보관함 ---------- */
 const proofKey = () => `proofs:${state.input.region}:${state.input.date}`;
 const loadProofs = () => store.get(proofKey()) || {};
+// 반값여행 예상 환급: 이 일정의 예상 경비(교통·입장·식사·숙박) 50%, 1명 최대 10만 원·2명 이상 최대 20만 원.
+// 경비 중 대상 시군에서 쓴 몫만 인정되므로 "최대"로 보여 준다
+function halfPriceEstimate(b) {
+  const ppl = peopleNow(), n = (ppl.adults || 0) + (ppl.kids || 0);
+  const cap = n >= 2 ? b.caps.group : b.caps.one;
+  let est = null;
+  try { const c = estimateTrip(trip, state.input, ppl, feesData || {}, []); est = c?.total ? Math.round((c.total.low * b.rate) / 1000) * 1000 : null; } catch { /* 비용을 아직 못 셈 */ }
+  const ids = new Set(b.placeIds || []);
+  const stops = trip.days.flatMap((d) => d.items.filter((it) => ids.has(it.id)).map((it) => placeName(it.place)));
+  return t("대상 시군 장소 {n}곳 ({names}) · 승인되면 경비의 50%, 최대 {cap}원", { n: stops.length, names: [...new Set(stops)].slice(0, 3).join(", "), cap: cap.toLocaleString() })
+    + (est ? t(" · 이 일정 예상 경비로는 약 {won}원까지", { won: Math.min(cap, est).toLocaleString() }) : "");
+}
 function renderBenefits() {
   const list = benefitsFor(trip, state.input).filter((b) => b.status !== "closed");
   const box = $("#benefits");
@@ -973,7 +989,7 @@ function renderBenefits() {
   box.hidden = false;
   const proofs = loadProofs();
   const total = list.filter((b) => b.kind === "place").reduce((a, b) => a + b.amount, 0);
-  const badge = { auto: t("일정에 포함 · 현장에서 받기"), check: t("하반기 공고 확인 필요") };
+  const badge = { auto: t("일정에 포함 · 현장에서 받기"), check: t("시군 공고에서 회차 확인") };
   box.innerHTML = `
     <h3>${t("이 일정으로 받는 혜택")}${total ? ` <span class="sum">${t("현장 환급 {n}원", { n: total.toLocaleString() })}</span>` : ""}</h3>
     <ul class="benefit-list">${list.map((b) => {
@@ -984,6 +1000,8 @@ function renderBenefits() {
         <p>${benefitText(b, "how")}</p>
         ${b.steps ? `<p class="b-steps">${benefitText(b, "steps").map((x, i) => `${i + 1}. ${x}`).join("  ")}</p>` : ""}
         ${b.note ? `<p class="b-note">${benefitText(b, "note")}</p>` : ""}
+        ${b.caps ? `<p class="b-est">${halfPriceEstimate(b)}</p>` : ""}
+        ${b.link ? `<a class="ghost small" href="${esc(b.link)}" target="_blank" rel="noopener">${t("지금 진행 중인 회차·신청 날짜 보기")}</a>` : ""}
         ${need.length ? `<div class="proofs"><span>${t("증빙 {a}/{b}", { a: have, b: need.length })}</span>${need.map((p) => {
           const n = (proofs[b.id + ":" + p] || []).length;
           return `<label class="proof ${n ? "ok" : ""}">${n ? "✓ " : "+ "}${t(p)}${n > 1 ? t(" {n}장", { n }) : ""}<input type="file" accept="image/*" capture="environment" data-proof="${b.id}:${p}" hidden></label>`;
