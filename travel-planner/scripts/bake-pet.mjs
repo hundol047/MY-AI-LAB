@@ -60,6 +60,9 @@ for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "�
     let area = null, best = Infinity;
     for (const [k, a] of Object.entries(AREAS)) { const d = (a.lat - g.lat) ** 2 + (a.lng - g.lng) ** 2; if (d < best) { best = d; area = k; } }
     const food = r.kind === "식음료", cafe = food && /카페|커피|베이커리|빵|브루|로스터|디저트/i.test(r.name);
+    // 목록에 같은 시설이 이름만 바꿔 두 번 있는 경우(예: "아름들 반려견쉼터"·"반려견쉼터 아름들"): 같은 좌표·같은 종류면 하나만 둔다
+    const twin = extra.find((x) => x.lat === Number(g.lat.toFixed(4)) && x.lng === Number(g.lng.toFixed(4)) && x.cat === (food ? (cafe ? "cafe" : "food") : "nature"));
+    if (twin) { places[`pet-${r.no}`] = r.name; report.push({ r, why: `목록에 같은 곳이 두 번 있음 (${twin.name})` }); continue; }
     const hours = cafe ? ["10:00", "19:00"] : food ? ["11:00", "20:00"] : ["09:00", "18:00"];
     extra.push({ region: AREAS[area].region, id: `pet-${r.no}`, name: r.name, cat: food ? (cafe ? "cafe" : "food") : "nature", area, lat: Number(g.lat.toFixed(4)), lng: Number(g.lng.toFixed(4)),
       hours, closed: [], stay: cafe ? 50 : 60, indoor: food, walk: 1, pop: 1, tags: [], petOnly: true, hoursGuessed: true,
@@ -109,9 +112,9 @@ await mkdir(new URL("../reports/", import.meta.url), { recursive: true });
 await writeFile(new URL("../reports/pet.md", import.meta.url), [
   "# 반려동물 동행 대조 리포트", "", `생성: node scripts/bake-pet.mjs. 원자료: ${out.source}`, "",
   `- 목록 ${rows.length}곳 (숙박 ${rows.filter((r) => r.kind === "숙박").length} · 식음료 ${rows.filter((r) => r.kind === "식음료").length} · 관광지 ${rows.filter((r) => r.kind === "관광지").length} · 체험 ${rows.filter((r) => r.kind === "체험").length} · 동물병원 ${rows.filter((r) => r.kind === "동물병원").length} · 약국 ${rows.filter((r) => r.kind === "약국").length})`,
-  `- 앱 장소와 같은 곳 ${Object.keys(places).length - extra.length}곳 · 관광공사에서 찾아 반려동물 동행 전용으로 더한 곳 ${extra.length}곳 · 못 넣은 곳 ${report.length}곳`, "",
+  `- 앱 장소와 같은 곳 ${Object.keys(places).filter((k) => !k.startsWith("pet-")).length}곳 · 관광공사에서 찾아 반려동물 동행 전용으로 더한 곳 ${extra.length}곳 · 못 넣은 곳 ${report.length}곳`, "",
   "## 앱 장소와 같은 곳", "", "| 앱 id | 목록 이름 |", "|---|---|", ...Object.entries(places).filter(([id]) => !id.startsWith("pet-")).map(([id, n]) => `| ${id} | ${esc(n)} |`), "",
   "## 반려동물 동행 전용으로 더한 곳", "", "| id | 이름 | 분류 | 영업시간(관광공사) |", "|---|---|---|---|", ...extra.map((p) => `| ${p.id} | ${esc(p.name)} | ${p.cat} | ${esc(p.hoursText).slice(0, 70)} |`), "",
   "## 못 넣은 곳", "", "| 번호 | 이름 | 시군 | 이유 |", "|---|---|---|---|", ...report.map(({ r, why }) => `| ${r.no} | ${esc(r.name)} | ${r.sigun} | ${esc(why)} |`), "",
 ].join("\n"));
-console.log(`\n앱 장소 일치 ${Object.keys(places).length - extra.length} · 더한 곳 ${extra.length} · 못 넣음 ${report.length} → public/pet.json, public/pet-places.js, reports/pet.md`);
+console.log(`\n앱 장소 일치 ${Object.keys(places).filter((k) => !k.startsWith("pet-")).length} · 더한 곳 ${extra.length} · 못 넣음 ${report.length} → public/pet.json, public/pet-places.js, reports/pet.md`);
