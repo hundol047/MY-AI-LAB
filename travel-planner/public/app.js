@@ -1198,10 +1198,20 @@ function drawMap3D(day) {
           osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" },
           dem: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
+          // 3D 건물: OpenFreeMap(무료, 키 없음)의 OpenMapTiles 벡터 지도 building 층 (render_height·render_min_height, m)
+          ofm: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenFreeMap © OpenMapTiles" },
         },
         layers: [
           { id: "osm", type: "raster", source: "osm" },
           { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.35, "hillshade-shadow-color": "#3a4a40" } },
+          // 시내를 가까이 볼 때(13~) 건물이 솟아오른다. 높이가 없는 건물은 2층(6m)으로 본다
+          { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
+            paint: {
+              "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#e6e0d4", 30, "#d4cbbb", 100, "#bfb4a1"],
+              "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
+              "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
+              "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 14, 0.85],
+            } },
         ],
         terrain: { source: "dem", exaggeration: 1.4 },
         sky: { "sky-color": "#bfe3f0", "horizon-color": "#e9f4f7", "sky-horizon-blend": 0.6, "atmosphere-blend": 0.5 },
@@ -1209,6 +1219,7 @@ function drawMap3D(day) {
     });
     ml.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
     ml.addControl({ onAdd: () => locateButton((ll) => { ml.flyTo({ center: [ll[1], ll[0]], zoom: 14 }); return new maplibregl.Marker({ color: "#2563eb" }).setLngLat([ll[1], ll[0]]).addTo(ml); }), onRemove() {} }, "bottom-right");
+    // 건물 자료를 못 받아도(오프라인 등) 지형 지도는 그대로 보인다
     ml.on("error", (e) => console.warn("지도", e?.error?.message || e));
     ml.on("move", () => spread3D());
   }
