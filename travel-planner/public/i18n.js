@@ -33,6 +33,27 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "여행잇": "Yeohaengit",
+  "전국 여행,<br>나에게 맞는 하루": "Your Korea trip,<br>your kind of day",
+  "여행할 시·도": "Destination province",
+  "여행 일정": "Itinerary",
+  "예산": "Budget",
+  "여행 도우미": "Travel guide",
+  "사진 준비 중": "Photo unavailable",
+  "예약 검색": "Find rooms",
+  "가격 비교": "Compare prices",
+  "숙소 더 보기": "More stays",
+  "요금·빈 객실은 예약 사이트에서 확인하세요.": "Check rates and availability on the booking site.",
+  "운영시간은 방문 전 확인": "Check opening hours before visiting",
+  "추가 정보": "More details",
+  "전국 여행 시작하기": "Plan a Korea trip",
+  "지도로 위치 보기": "View on map",
+  "여행지 자료 {n}곳을 살펴보고 있어요": "Checking {n} destination records",
+  "자료에 있는 운영시간과 이동 동선을 비교했어요": "Compared recorded hours and travel routes",
+  "여행 취향과 이동 동선을 기준으로 추천해요.": "Recommended for your interests and route.",
+  "자료가 부족해 조건에 맞는 장소가 적습니다.": "There are few places with data matching these conditions.",
+  "선택 지역의 시작 후보를 추천합니다.": "Starter suggestions for your selected region.",
+
   "시군 공고에서 회차 확인": "Check rounds in the county notice",
   "지금 진행 중인 회차·신청 날짜 보기": "See current rounds and application dates",
   "대상 시군 장소 {n}곳 ({names}) · 승인되면 경비의 50%, 최대 {cap}원": "{n} stops in eligible counties ({names}) · if approved, 50% of costs back, up to ₩{cap}",
@@ -342,7 +363,6 @@ export const EN = {
   "자동": "Auto",
   "고른 출발지는 이 기기에 저장돼요. 자동: 가까우면 10시, 멀면(60km 넘게) 8시에 출발": "Your starting point is saved on this device. Auto: leave at 10:00 if nearby, 08:00 if over 60 km away",
   "{name} (기본)": "{name} (default)",
-  "내 위치": "My location",
   "최근 출발지": "Recent",
   "검색 결과가 없어요": "No matches",
   "출발지를 {name}(으)로 정했어요": "Starting point set to {name}",
@@ -618,7 +638,7 @@ export function applyStatic(root = document) {
     el.title = t(el.dataset.koTitle);
     el.setAttribute("aria-label", el.title);
   });
-  document.title = t("오늘강원");
+  document.title = t("여행잇");
   root.querySelectorAll("[data-lang]").forEach((b) => {
     const on = b.dataset.lang === lang;
     b.classList.toggle("on", on);

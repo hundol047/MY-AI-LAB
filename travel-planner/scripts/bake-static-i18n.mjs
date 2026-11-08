@@ -16,7 +16,7 @@ const blockAt = (html) => { const a = html.indexOf(START); return a < 0 ? null :
 export function staticKeys(fullHtml) {
   const at = blockAt(fullHtml);
   const html = at ? fullHtml.slice(0, at[0]) + fullHtml.slice(at[1]) : fullHtml; // 만들어 넣은 부분은 빼고
-  const keys = new Set(["오늘강원"]); // 문서 제목
+  const keys = new Set(["여행잇"]); // 문서 제목
   for (const m of html.matchAll(/<(\w+)\b[^>]*\sdata-i18n(?=[\s>])[^>]*>(.*?)<\/\1>/gs)) keys.add(m[2].trim());
   for (const m of html.matchAll(/<[^>]*\bdata-i18n-ph\b[^>]*>/g)) keys.add(m[0].match(/placeholder="([^"]*)"/)[1]);
   for (const m of html.matchAll(/<[^>]*\bdata-i18n-title\b[^>]*>/g)) keys.add((m[0].match(/(?:title|aria-label)="([^"]*)"/) || [])[1]);
@@ -41,7 +41,7 @@ function build(html) {
     q("[data-i18n-ph]", function (el) { var k = el.placeholder; if (D[k]) { el.dataset.koPh = k; el.placeholder = D[k]; } });
     q("[data-i18n-title]", function (el) { var k = el.title || el.getAttribute("aria-label") || ""; if (D[k]) { el.dataset.koTitle = k; el.title = D[k]; el.setAttribute("aria-label", D[k]); } });
     q("[data-lang]", function (b) { var on = b.dataset.lang === document.documentElement.dataset.earlyLang; b.classList.toggle("on", on); b.setAttribute("aria-pressed", on); });
-    document.title = D["오늘강원"];
+    document.title = D["여행잇"];
     document.documentElement.classList.remove("i18n-wait");
   })();
   </script>`;

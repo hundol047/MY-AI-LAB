@@ -1,3 +1,4 @@
+import {NATIONAL_REGIONS,NATIONAL_AREAS,NATIONAL_PLACES,NATIONAL_LODGING} from "./national-data.js";
 import { EXTRA_PLACES } from "./extra-places.js";
 import { MORE_PLACES } from "./places-more.js";
 import { PET_OK, PET_PLACES } from "./pet-places.js";
@@ -17,6 +18,7 @@ export const CHECKED = "2026-11";
 
 // 권역: 선택지는 5개
 export const REGIONS = {
+  ...NATIONAL_REGIONS,
   gangneung: { label: "강릉·동해", base: { name: "강릉역", lat: 37.7643, lng: 128.8996 } },
   seorak: { label: "속초·양양", base: { name: "속초시외버스터미널", lat: 38.2063, lng: 128.5910 } },
   chuncheon: { label: "춘천·철원", base: { name: "춘천역", lat: 37.8847, lng: 127.7170 } },
@@ -26,6 +28,7 @@ export const REGIONS = {
 export const BASE = REGIONS.gangneung.base;
 
 export const AREAS = {
+  ...NATIONAL_AREAS,
   // 강릉·동해
   gyeongpo: { region: "gangneung", name: "경포·초당", lat: 37.795, lng: 128.902 },
   anmok: { region: "gangneung", name: "안목·남항진", lat: 37.770, lng: 128.948 },
@@ -266,6 +269,7 @@ const WONJU = [
 ];
 
 export const PLACES = [
+  ...NATIONAL_PLACES,
   ...EXTRA_PLACES,
   ...MORE_PLACES,
   ...GANGNEUNG.map((p) => ({ region: "gangneung", ...p })),
@@ -364,6 +368,7 @@ export const FESTIVALS = [
 // 숙소 지역: 실제 숙소가 모여 있는 곳과 그곳에 많은 숙소 종류
 // types: guesthouse(게스트하우스), business(비즈니스호텔), ocean(오션뷰 호텔), pension(펜션), resort(리조트·콘도), hanok(한옥스테이)
 export const LODGING = [
+  ...NATIONAL_LODGING,
   { id: "l-gyeongpo", region: "gangneung", name: "경포", lat: 37.8000, lng: 128.9050, types: ["ocean", "resort", "pension"], desc: "경포해변·호수 앞 오션뷰 호텔과 리조트" },
   { id: "l-anmok", region: "gangneung", name: "강문·안목", lat: 37.7800, lng: 128.9400, types: ["ocean", "pension", "guesthouse"], desc: "해변 바로 앞 호텔과 감성 숙소" },
   { id: "l-gn-station", region: "gangneung", name: "강릉역·시내", lat: 37.7630, lng: 128.9000, types: ["business", "guesthouse", "hanok"], desc: "KTX역 근처, 대중교통 편리" },
