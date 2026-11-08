@@ -590,6 +590,9 @@ function itemHTML(it, i, day) {
   const mode = t(MODE[it.travelMode]);
   let leg = i === 0 ? t("{start}에서 {mode} {min}분", { start: esc(startName(day.start, trip.lodging)), mode, min: it.travelMin }) : it.travelMode === "same" ? t("바로 옆") : t("{mode} {min}분", { mode, min: it.travelMin });
   if (it.travelMode === "taxi" && it.km) leg += t(" · 약 {won}", { won: won(taxiFare(it.km)) });
+  // 앞 장소를 나와 다음 장소에 도착하기까지 30분 넘게 비면 "자유 시간"으로 보여 준다 (저녁 시간 기다림·문 여는 시간 기다림)
+  const prev = i > 0 ? day.items[i - 1] : null, free = prev ? it.start - it.travelMin - prev.end : 0;
+  if (free >= 30) leg = t("자유 시간 {min}분 · 근처 산책·쉬기", { min: free }) + " · " + leg;
   const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>

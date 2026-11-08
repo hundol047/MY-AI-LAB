@@ -164,6 +164,8 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   const has = (...w) => w.some((x) => n.includes(x));
   const fees = ctx.fees || {};
   const opts = ctx.opts || {};
+  // 반려동물 동행이면 동반 가능한 곳만, 아니면 반려동물 전용 장소는 빼고 권한다
+  const whoOk = (p) => ctx.input?.who === "pet" ? !!p.pet || (!p.indoor && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
   const regions = new Set([ctx.input?.region, ...trip.days.flatMap((d) => d.items.map((i) => i.place.region))].filter(Boolean));
   const inTrip = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
   const info = (kind, answer) => ({ answer, changed: false, lang, kind });
@@ -262,7 +264,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     const cat = CAT_LABEL[askedCat][lang];
     const center = day.items.length ? day.items[Math.floor(day.items.length / 2)].place : null;
     const pick = PLACES
-      .filter((p) => p.cat === askedCat && regions.has(p.region) && !inTrip.has(p.id) && !hoursFor(p, day.date).closedToday && !(opts.exclude || []).includes(p.id))
+      .filter((p) => p.cat === askedCat && regions.has(p.region) && whoOk(p) && !inTrip.has(p.id) && !hoursFor(p, day.date).closedToday && !(opts.exclude || []).includes(p.id))
       .sort((a, b) => (center ? dist(a, center) - dist(b, center) : (b.pop || 0) - (a.pop || 0)))[0];
     if (!pick) return info("addCat", L(`${dayLabel}에 더 넣을 만한 ${josa(cat, ["을", "를"])} 찾지 못했어요. 이번 권역의 ${josa(cat, ["은", "는"])} 이미 일정에 있거나 그날 쉬어요.`, `I couldn't find another ${cat} for ${dayLabel}. The ones in this area are already in your plan or closed that day.`, `${dayLabel}に追加できる${cat}が見つかりませんでした。このエリアの${cat}はもうプランにあるか、その日は休みです。`, `没找到${dayLabel}还能加的${cat}。这个区域的${cat}已经在行程里，或者当天休息。`));
     const tip = tipOf(pick) ? ` ${firstSentence(tipOf(pick))}` : "";
@@ -355,7 +357,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     if ((has("맛집") || has("카페")) && !mentioned.length) {
       const cafe = has("카페") && !has("맛집");
       const center = day.items.length ? day.items[0].place : null;
-      const ps = PLACES.filter((p) => p.cat === (cafe ? "cafe" : "food") && regions.has(p.region) && !hoursFor(p, day.date).closedToday)
+      const ps = PLACES.filter((p) => p.cat === (cafe ? "cafe" : "food") && regions.has(p.region) && whoOk(p) && !hoursFor(p, day.date).closedToday)
         .sort((a, b) => (center ? dist(a, center) - dist(b, center) : 0)).slice(0, 3);
       const item = (p) => (lang === "ko" ? `${p.name}(${p.desc})` : `${nmK(p)} — ${firstSentence(tipOf(p) || "")}`);
       if (ps.length) return info(cafe ? "cafe" : "food", L(

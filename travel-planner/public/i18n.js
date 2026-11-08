@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "자유 시간 {min}분 · 근처 산책·쉬기": "{min} min free time · stroll or rest nearby",
   "문을 닫았어요 (폐업·휴업)": "It's closed (shut down or on break)",
   "운영시간·쉬는 날이 달라요": "Hours or closing days are wrong",
   "주차 정보가 달라요": "Parking info is wrong",

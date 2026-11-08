@@ -105,5 +105,9 @@ assert.equal(ask("내일비오면어떡해").indoor, "on");
 assert.equal(ask("닭갈비가 먹고싶어").kind, "food");
 assert.notEqual(guideLocal("닭갈비 맛집 알려줘", trip, 0, { input, opts, fees, lang: "en", namesEn }).kind, "rain");
 assert.equal(askEn("Is Ojukheon worth a visit?").changed, false);
-assert.deepEqual(askEn("I'd like to visit Ojukheon").add, ["ojukheon"]);
+// 일정에 아직 없는 곳으로 시험한다 (엔진이 바뀌어 기준 일정에 들어간 곳이면 다음 후보)
+{
+  const [id, en] = [["ojukheon", "Ojukheon"], ["haslla", "Haslla Art World"], ["jeongdongjin", "Jeongdongjin"]].find(([x]) => !inTrip.has(x));
+  assert.deepEqual(askEn(`I'd like to visit ${en}`).add, [id]);
+}
 console.log("ok - 무료 간단 모드 가이드");

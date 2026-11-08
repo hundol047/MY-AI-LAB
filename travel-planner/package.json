@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node --use-env-proxy server.mjs",
-    "test": "node test/transit.test.mjs && node test/bus.test.mjs && node test/route.test.mjs && node test/crowd.test.mjs && node test/voice.test.mjs && node test/directory-place.test.mjs && node test/today.test.mjs && node test/alerts.test.mjs && node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/i18n.test.mjs && node scripts/bake-static-i18n.mjs --check && node test/guide-eval.mjs --check && node test/travel-ux.test.mjs && node test/local-guide.test.mjs && node test/remediation.test.mjs && node test/planner.test.mjs",
+    "test": "node test/transit.test.mjs && node test/bus.test.mjs && node test/route.test.mjs && node test/crowd.test.mjs && node test/voice.test.mjs && node test/quality.test.mjs && node test/directory-place.test.mjs && node test/today.test.mjs && node test/alerts.test.mjs && node test/tour-match.test.mjs && node test/costs.test.mjs && node test/knowledge.test.mjs && node test/i18n.test.mjs && node scripts/bake-static-i18n.mjs --check && node test/guide-eval.mjs --check && node test/travel-ux.test.mjs && node test/local-guide.test.mjs && node test/remediation.test.mjs && node test/planner.test.mjs",
     "test:services": "node test/usage-stats.test.mjs && node test/bookings.test.mjs && node test/directory.test.mjs && node test/services.test.mjs && node test/service-api.test.mjs && node test/tour-errors.test.mjs && node test/push.test.mjs",
     "sync:directory": "node --use-env-proxy scripts/sync-directory.mjs",
     "diagnose:tour": "node --use-env-proxy scripts/diagnose-tour.mjs"

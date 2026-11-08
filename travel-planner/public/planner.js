@@ -218,6 +218,10 @@ function pickAnchors(input, opts, rain, used, usedAreas, dateStr, from) {
     if (area.region !== regionOf(input)) total -= 6;
     const far = distanceKm(BASE, area);
     total -= drives(input.move) ? far * 0.2 : far * 0.4;
+    // 숙소·출발지에서 그 지역까지 예상 이동이 50분을 넘으면 더 피한다 (대중교통은 같은 거리라도 훨씬 오래 걸린다)
+    // 서울 등 권역 밖에서 출발하는 첫날은 어디든 멀기 때문에 권역 기준점(역·터미널)에서 잰다
+    const legMin = travel(distanceKm(BASE, baseOf(input)) > 60 ? baseOf(input) : BASE, area, input.move).min;
+    if (legMin > 50) total -= (legMin - 50) * 0.3;
     ranked.push({ key, total });
   }
   ranked.sort((a, b) => b.total - a.total);
@@ -246,7 +250,7 @@ function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
   for (const [a, b] of h.breaks) if (start < b && start + stay > a) start = Math.max(start, b);
   const wait = start - arrive;
   const finish = start + stay;
-  if (wait > MAX_WAIT || finish > end + 15 || !fitsHours(h, start, finish)) return null;
+  if (wait > MAX_WAIT || finish > end + (opts.strictEnd ? 0 : 15) || !fitsHours(h, start, finish)) return null;
   return { tr, start, finish, wait };
 }
 
@@ -269,7 +273,68 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
     if (day.items.length >= 3) break;
   }
   for (const id of best.trial) used.add(id);
+  if (best.day.tune) {
+    const { startPt, dayStart, input: di, opts: dopts, end, dateStr: ds } = best.day.tune;
+    best.day.items = reorderDay(best.day.items, startPt, dayStart, di, dopts, end, ds);
+  }
+  delete best.day.tune;
   return best.day;
+}
+
+// 음식 종류 (하루 두 번 같은 음식을 피하려고)
+const DISH = /막국수|닭갈비|순두부|두부|물회|회|추어탕|한우|송어|곤드레|메밀|해장국|냉면|만두|대게|칼국수/;
+const dishOf = (p) => (p.cat === "food" && !p.multi ? (String(p.name).match(DISH) || [null])[0] : p.cat === "food" ? (String(p.name).match(/닭갈비|막국수|물회|순두부/) || [null])[0] : null);
+
+// 하루 순서 다듬기: 방문지 하나를 다른 자리로 옮기거나(or-opt) 구간을 뒤집어(2-opt) 다시 시각을 계산하고,
+// 모든 곳이 운영시간 안이고 점심·저녁이 제 시간대에 남으며 이동+기다림이 3분 넘게 줄면 받아들인다
+function reorderDay(items, startPt, dayStart, input, opts, end, dateStr) {
+  if (items.length < 3) return items;
+  const retime = (seq, bound = Infinity) => {
+    const out = [];
+    let from = startPt, t = dayStart, cost = 0;
+    for (let i = 0; i < seq.length; i++) {
+      const it = seq[i];
+      if (i === 0 && it.kind !== "visit" && items[0].kind === "visit") return null; // 식사를 맨 앞으로 당겨 오전을 비우지 않는다
+      // 식사 시간까지 기다리는 시간도 비용 (이동만 줄고 빈 시간이 늘면 손해)
+      if (it.kind === "dinner" && t < DINNER[0] - 20) { cost += (DINNER[0] - 20 - t) * 0.5; t = DINNER[0] - 20; }
+      if (it.kind === "lunch" && t < LUNCH[0] - 20) { cost += (LUNCH[0] - 20 - t) * 0.5; t = LUNCH[0] - 20; }
+      if (i && it.place.cat === "cafe" && seq[i - 1].place.cat === "cafe") return null;
+      const r = tryPlace(it.place, from, t, input, opts, end, dateStr);
+      if (!r) return null;
+      if (it.kind === "lunch" && (r.start < LUNCH[0] - 20 || r.start > LUNCH[1])) return null;
+      if (it.kind === "dinner" && (r.start < DINNER[0] - 20 || r.start > DINNER[1])) return null;
+      if (it.kind === "visit" && it.place.tags.includes("night") && seq.slice(0, i).some((x) => x.kind === "dinner") !== items.slice(0, items.indexOf(it)).some((x) => x.kind === "dinner")) return null; // 야경은 저녁 앞뒤를 바꾸지 않는다
+      out.push({ ...it, start: r.start, end: r.finish, travelMin: r.tr.min, travelMode: r.tr.mode, km: r.tr.km });
+      cost += r.tr.min + r.wait * 0.5;
+      if (cost >= bound) return null; // 이미 지금 순서보다 나쁘면 끝까지 계산하지 않는다
+      from = it.place; t = r.finish;
+    }
+    return { out, cost };
+  };
+  let cur = retime(items);
+  if (!cur) return items;
+  let seq = items;
+  for (let pass = 0; pass < 2; pass++) {
+    let improved = false;
+    const n = seq.length;
+    for (let i = 0; i < n; i++) {
+      if (seq[i].kind !== "visit") continue;
+      for (let j = 0; j < n; j++) {
+        if (i === j) continue;
+        // 옮기기: i번째 방문지를 j 자리로
+        const moved = seq.slice(); const [x] = moved.splice(i, 1); moved.splice(j, 0, x);
+        // 뒤집기: i..j 구간 (방문지만 있을 때)
+        const lo = Math.min(i, j), hi = Math.max(i, j);
+        const rev = seq.slice(0, lo).concat(seq.slice(lo, hi + 1).reverse(), seq.slice(hi + 1));
+        for (const cand of seq.slice(lo, hi + 1).every((y) => y.kind === "visit") ? [moved, rev] : [moved]) {
+          const r = retime(cand, cur.cost - 3);
+          if (r && r.cost < cur.cost - 3) { cur = r; seq = cand; improved = true; }
+        }
+      }
+    }
+    if (!improved) break;
+  }
+  return cur.out;
 }
 
 function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly, start) {
@@ -277,6 +342,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   const dateStr = addDays(input.date, dayIdx);
   const rain = !!(opts.rainDays || [])[dayIdx];
   const win = dayWindow(dayIdx, input.days), end = win.end;
+  // 마지막 날·당일치기는 집에 가야 하므로 끝나는 시각을 넘기지 않는다
+  if (dayIdx === input.days - 1) opts = { ...opts, strictEnd: true };
   // 첫날 출발 시각을 정했으면 그 시각에 출발지를 떠난다 (06:00~12:00)
   const t0 = dayIdx === 0 && /^\d{2}:\d{2}$/.test(opts.startTime || "") ? toMin(opts.startTime) : null;
   // 06:00~18:00 (기차·버스 도착 시각으로 정한 경우 오후일 수 있다)
@@ -290,7 +357,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
 
   const items = [];
   const startPt = start || BASE;
-  let from = startPt, t = dayStart, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0;
+  let from = startPt, t = dayStart, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0, fillers = 0;
+  const dishes = new Set(); // 같은 음식(막국수·닭갈비…)은 하루 한 번
   const groups = new Set();
   const cafeMax = (input.likes || []).includes("cafe") ? 2 : 1;
 
@@ -305,6 +373,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
     if (p.cat === "sea") seas++;
     if (p.group) groups.add(p.group);
     if (hasDinner && kind === "visit") nightCount++;
+    const dish = dishOf(p);
+    if (dish) dishes.add(dish);
   };
 
   // 확정된 장소 먼저 배치 (시간 재계산)
@@ -320,13 +390,17 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   for (let guard = 0; guard < (keepOnly ? 0 : 20); guard++) {
     if (t >= end - 20) break;
     const kind = slotKind(t, hasLunch, hasDinner, end);
-    let nightOnly = false;
+    let nightOnly = false, filler = false;
     if (kind === "visit" && visits >= limit) {
-      // 방문 한도를 채워도 저녁 식사는 챙긴다
-      if (!hasDinner && end >= DINNER[1] && t < DINNER[1]) { t = Math.max(t, DINNER[0] - 20); continue; }
+      // 방문 한도를 채워도 저녁 식사는 챙긴다. 저녁까지 45분 넘게 비면(여유롭게가 아니면) 가까운 짧은 곳을 하나 더 넣어 빈 시간을 채운다
+      if (!hasDinner && end >= DINNER[1] && t < DINNER[1]) {
+        if (fillers < (pace === "relaxed" ? 1 : 2) && DINNER[0] - 20 - t >= (pace === "relaxed" ? 90 : 45)) filler = true; // 여유롭게는 1시간 반 넘게 빌 때만 한 곳
+        else { t = Math.max(t, DINNER[0] - 20); continue; }
+      }
       // 저녁 식사 후 야경 한 곳
       // 숙박하는 날(21시까지)은 밤 코스 2곳, 당일치기는 1곳
-      if (hasDinner && nightCount < (end >= toMin("21:00") ? 2 : 1) && t < end - 40) nightOnly = true;
+      if (filler) { /* 아래에서 짧은 곳을 고른다 */ }
+      else if (hasDinner && nightCount < (end >= toMin("21:00") ? 2 : 1) && t < end - 40) nightOnly = true;
       else break;
     }
     let best = null;
@@ -340,6 +414,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if ((opts.avoid || []).includes(p.cat) && !isFood) continue;
       if (p.cat === "cafe" && items.length && items[items.length - 1].place.cat === "cafe") continue;
       if (nightOnly && !p.tags.includes("night")) continue;
+      if (filler && (p.multi && p.cat !== "food" ? false : stayOf(p, opts) > 70)) continue;
+      if (isFood && dishes.has(dishOf(p))) continue;
       if (p.cat === "sea" && seas >= (rain ? 1 : 2)) continue;
       // 점심 시간 직전이면 너무 긴 방문은 점심을 밀어내지 않도록 제한
       if (kind === "visit" && !hasLunch && t < LUNCH[0] && t + 30 + p.stay > LUNCH[1]) continue;
@@ -347,13 +423,20 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if (!r) continue;
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
+      if (filler && (r.tr.min > 20 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고 저녁 전에 끝나는 곳만
       let v = baseScore(p, input, opts, rain, dateStr);
       v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
+      if (r.tr.min > 50) v -= (r.tr.min - 50) * 0.12; // 한 번에 50분 넘는 이동은 더 피한다
+      // 같은 지역 안에서 이어 가기: 지금 있는 지역(또는 이미 다녀온 지역)을 떠났다가 다시 오지 않게
+      if (from.area && p.area === from.area) v += 1.2;
+      else if (items.some((x) => x.place.area === p.area) && items.length && items[items.length - 1].place.area !== p.area) v -= 2;
       v -= r.wait * 0.05;
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);
       const radius = drives(input.move) ? 6 : 4;
-      if (fromAnchor > (drives(input.move) ? 30 : 20)) continue; // 하루 동선 밖
+      // 하루 동선 밖. 다만 숙박하는 날 저녁은 숙소(그날 출발점) 근처 식당도 된다 — 돌아가는 길이라서
+      const nearHome = kind === "dinner" && start && dayIdx < input.days - 1 && distanceKm(startPt, p) <= (drives(input.move) ? 12 : 6);
+      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome) continue;
       if (fromAnchor > radius) v -= (fromAnchor - radius) * (drives(input.move) ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
@@ -361,6 +444,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if (!best || v > best.v) best = { p, r, v };
     }
     if (!best) {
+      if (filler) { fillers = 9; t = Math.max(t, DINNER[0] - 20); continue; } // 채울 곳이 없으면 자유 시간
       if (nightOnly) break;
       if (kind !== "visit") { // 식사할 곳이 없으면 이번 끼니는 건너뜀
         if (kind === "lunch") hasLunch = true; else hasDinner = true;
@@ -369,9 +453,12 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       break;
     }
     commit(best.p, best.r, kind);
+    if (filler) fillers++;
   }
 
-  return { date: dateStr, dayIdx, region: regionOf(input), start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items };
+  // 순서 다듬기(reorderDay)에 필요한 값: 중심 지역 후보 중 고른 하루에만 planDay가 한 번 돌린다 (사람이 순서를 정한 날은 그대로)
+  const tune = keep.length ? null : { startPt, dayStart, input, opts, end, dateStr };
+  return { date: dateStr, dayIdx, region: regionOf(input), start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items, tune };
 }
 
 // 숙소는 여행 내내 한 곳: 짐을 옮기지 않도록 모든 밤을 같은 숙소에서 묵는다
