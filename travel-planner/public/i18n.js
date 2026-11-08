@@ -33,6 +33,19 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "문을 닫았어요 (폐업·휴업)": "It's closed (shut down or on break)",
+  "운영시간·쉬는 날이 달라요": "Hours or closing days are wrong",
+  "주차 정보가 달라요": "Parking info is wrong",
+  "위치가 달라요": "Location is wrong",
+  "기타": "Other",
+  "무엇이 다른지 적어 주세요 (선택)": "What's different? (optional)",
+  "개인정보는 받지 않아요. 확인 후 앱 정보를 고칩니다.": "No personal data is collected. We'll check and fix the app.",
+  "취소": "Cancel",
+  "정보가 달라요": "Info wrong?",
+  "제보함": "Reported",
+  "{name} 정보가 달라요": "Report wrong info: {name}",
+  "고마워요! 제보를 받았어요": "Thanks! Report received",
+  "제보 작성 화면을 열었어요 · 보내기를 눌러 주세요": "Opened the report form · please press submit",
   "저장": "Save",
   "저장 공간이 부족해요 · 저장한 일정을 지워 주세요": "Out of storage · delete some saved plans",
   "이 기기에 저장했어요 · 첫 화면 '저장한 일정'에서 열 수 있어요": "Saved on this device · open it from 'Saved plans' on the first screen",

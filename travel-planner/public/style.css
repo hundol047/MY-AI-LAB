@@ -644,3 +644,12 @@ body:not(.has-server) .needs-server { display: none !important; }
 .cmp th, .cmp td { display: table-cell; }
 .cmp tbody th { width: 64px; white-space: nowrap; color: var(--sub); font-weight: 700; }
 .cmp thead th:first-child { width: 64px; }
+/* 정보 오류 제보 */
+.report-dlg { border: 1px solid var(--line); border-radius: 16px; padding: 18px; width: min(380px, calc(100vw - 32px)); box-sizing: border-box; background: var(--card, var(--bg)); color: var(--text); }
+.report-dlg::backdrop { background: rgba(0,0,0,.35); }
+.report-dlg h3 { margin: 0 0 10px; font-size: 16px; }
+.report-kinds { display: grid; gap: 8px; margin-bottom: 10px; font-size: 14px; }
+.report-dlg textarea { width: 100%; box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; padding: 8px; font: inherit; background: var(--bg); color: var(--text); }
+.report-note { font-size: 12px; color: var(--sub); margin: 6px 0 10px; }
+.report-dlg .acts { justify-content: flex-end; }
+.place .acts { flex-wrap: wrap; }

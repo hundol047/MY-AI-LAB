@@ -25,6 +25,12 @@ try{
  assert.equal((await call('/api/reviews?place=ojukheon')).data.length,1);
  assert.equal((await call(`/api/reviews/${review.data.id}/report`,'POST',{reason:'검토 필요합니다.'})).status,201);
  assert.equal((await call('/api/admin/reports','GET',null,admin)).data.length,1);
+ // 장소 정보 오류 제보: 등록된 장소·정해진 종류만, 관리자만 목록 조회
+ assert.equal((await call('/api/place-reports','POST',{place:'ojukheon',kind:'hours',note:'월요일에도 엽니다'})).status,201);
+ assert.equal((await call('/api/place-reports','POST',{place:'no-such-place',kind:'hours'})).status,400);
+ assert.equal((await call('/api/place-reports','POST',{place:'ojukheon',kind:'nope'})).status,400);
+ assert.equal((await call('/api/admin/place-reports')).status,401);
+ const pr=(await call('/api/admin/place-reports','GET',null,admin)).data; assert.equal(pr.length,1); assert.equal(pr[0].kind,'hours');
  const curve=createECDH('prime256v1');curve.generateKeys();const sub={endpoint:'https://fcm.googleapis.com/fcm/send/test-only',keys:{p256dh:curve.getPublicKey().toString('base64url'),auth:Buffer.alloc(16,1).toString('base64url')}};
  assert.equal((await call('/api/push-config')).data.enabled,true);
  assert.equal((await call(`/api/bookings/${b.data.id}/push`,'POST',{subscription:sub})).status,404);
@@ -33,5 +39,5 @@ try{
  assert.equal((await call(`/api/bookings/${b.data.id}/push`,'DELETE',{endpoint:sub.endpoint},token)).status,200);
  assert.equal((await call(`/api/bookings/${b.data.id}/cancel`,'POST',null,token)).data.status,'cancelled');
  assert.equal((await call('/api/reviews','POST',{},null,{origin:'https://other.example'})).status,403);
- console.log('ok - HTTP 인증·신청·상태 변경·견적·결제 차단·후기 공개·신고·취소·교차 출처 차단');
+ console.log('ok - HTTP 인증·신청·상태 변경·견적·결제 차단·후기 공개·신고·장소 제보·취소·교차 출처 차단');
 }finally{await new Promise(r=>server.close(r));await rm(dir,{recursive:true,force:true});}

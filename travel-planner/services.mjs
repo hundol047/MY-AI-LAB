@@ -15,6 +15,7 @@ export function createServices(file) {
     CREATE TABLE IF NOT EXISTS bookings(id TEXT PRIMARY KEY, token TEXT NOT NULL, requestKey TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS reviews(id TEXT PRIMARY KEY, place TEXT NOT NULL, state TEXT NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, review TEXT NOT NULL, reason TEXT NOT NULL, createdAt TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS place_reports(id TEXT PRIMARY KEY, place TEXT NOT NULL, kind TEXT NOT NULL, note TEXT NOT NULL, createdAt TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY, secret TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS shops(id TEXT PRIMARY KEY, state TEXT NOT NULL, fingerprint TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS push_subscriptions(booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, PRIMARY KEY(booking,endpoint));
@@ -170,6 +171,13 @@ export function createServices(file) {
       if (!db.prepare("SELECT id FROM reviews WHERE id=? AND state='published'").get(id)) fail(404,'후기가 없습니다.');
       db.prepare('INSERT INTO reports VALUES(?,?,?,?)').run(randomUUID(),id,reason.trim(),new Date().toISOString()); return {received:true};
     },
-    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); }
+    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    // 장소 정보 오류 제보 (문 닫음·시간 다름·주차·위치 등). 개인정보는 받지 않는다
+    addPlaceReport(body) {
+      const KINDS = ['closed', 'hours', 'parking', 'location', 'other'];
+      if (typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || (body.note != null && (typeof body.note !== 'string' || body.note.length > 500))) fail(400,'장소, 제보 종류, 500자 이내 설명을 확인하세요.');
+      db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,String(body.note||'').trim(),new Date().toISOString()); return {received:true};
+    },
+    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); }
   };
 }

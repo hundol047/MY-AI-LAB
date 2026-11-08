@@ -279,6 +279,40 @@ document.addEventListener("change", (e) => {
   const b = $("#compareBtn"); if (b) { b.disabled = comparePick.size < 2; b.textContent = t("고른 일정 비교 ({n})", { n: comparePick.size }); }
 });
 
+/* ---------- 장소 정보 오류 제보 ----------
+   앱 서버가 있으면 서버(api/place-reports)로, 없으면(GitHub Pages·APK) 공개 저장소의 GitHub 이슈 작성 화면을 미리 채워 연다 */
+const REPORT_KIND = { closed: "문을 닫았어요 (폐업·휴업)", hours: "운영시간·쉬는 날이 달라요", parking: "주차 정보가 달라요", location: "위치가 달라요", other: "기타" };
+const reported = () => new Set(store.get("reportedPlaces") || []);
+let reportPlace = null;
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-report]"); if (!b) return;
+  reportPlace = PLACES.find((p) => p.id === b.dataset.report); if (!reportPlace) return;
+  $("#reportTitle").textContent = t("{name} 정보가 달라요", { name: placeName(reportPlace) });
+  $("#reportForm").reset();
+  $("#reportDlg").showModal?.() ?? $("#reportDlg").setAttribute("open", "");
+});
+$("#reportCancel").addEventListener("click", () => $("#reportDlg").close());
+$("#reportForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target), kind = f.get("kind"), note = String(f.get("note") || "").trim();
+  if (!reportPlace || !kind) return;
+  const p = reportPlace;
+  let sent = false;
+  if (document.body.classList.contains("has-server")) {
+    try { const r = await fetchT("api/place-reports", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ place: p.id, kind, note }) }, 5000); sent = r.ok; } catch { sent = false; }
+  }
+  if (!sent) {
+    const title = `[장소 제보] ${p.name} (${p.id}) · ${REPORT_KIND[kind]}`;
+    const body = [`장소: ${p.name} (${p.id})`, `종류: ${REPORT_KIND[kind]}`, `내용: ${note || "-"}`, `여행 날짜: ${state?.input?.date || "-"}`, "", "(오늘강원 앱의 '정보가 달라요'에서 보냄)"].join("\n");
+    window.open(`https://github.com/hundol047/MY-AI-LAB/issues/new?labels=place-report&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`, "_blank", "noopener");
+  }
+  store.set("reportedPlaces", [...new Set([...reported(), p.id])].slice(-200));
+  $("#reportDlg").close();
+  track("place_report", kind);
+  toast(sent ? t("고마워요! 제보를 받았어요") : t("제보 작성 화면을 열었어요 · 보내기를 눌러 주세요"));
+  if (trip && !$("#result").hidden) render();
+});
+
 /* ---------- 출발지 (이 기기에 저장) ----------
    첫날은 고른 출발지에서 출발한다. 없으면 권역 기준점(역·터미널). 출발 시각 자동: 가까우면 10시, 60km 넘으면 8시 */
 const distKm = (a, b) => { const r = Math.PI / 180, x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
@@ -576,7 +610,7 @@ function itemHTML(it, i, day) {
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
+        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
       </div>
     </article>
