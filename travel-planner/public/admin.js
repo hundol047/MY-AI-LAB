@@ -4,6 +4,7 @@ const call=(path,body)=>api(path,{token,...(body?{method:'POST',body}:{})});
 async function action(path,body,button){button.disabled=true;try{await call(path,body);await load();msg.textContent='저장했습니다.';}catch(e){msg.textContent=e.message;button.disabled=false;}}
 async function load(){
  const [bookings,reviews,reports,shops,push]=await Promise.all([call(`api/admin/bookings?offset=${offset}`),call(`api/admin/reviews?offset=${offset}`),call(`api/admin/reports?offset=${offset}`),call(`api/admin/shops?offset=${offset}`),call("api/admin/push")]);
+ const placeReports=await call(`api/admin/place-reports?offset=${offset}`).catch(()=>[]);$('placeReports').replaceChildren();for(const r of placeReports)$('placeReports').append(el('p',`${r.place} · ${r.kind} · ${r.note||'-'} · ${r.createdAt}`));
  for(const id of ['bookings','reviews','reports','shops'])$(id).replaceChildren();
  call("api/admin/stats?days=30").then(st=>{const rows=Object.entries(st.total).sort((a,b)=>b[1]-a[1]).slice(0,30);$('stats').textContent=rows.length?rows.map(([k,n])=>`${k} ${n}`).join(' · '):'아직 집계가 없습니다.';}).catch(()=>{});
  $('pushStatus').textContent=`웹 푸시 ${push.enabled?'켜짐':'설정 필요'} · 구독 ${push.subscriptions} · 대기 ${push.pending} · 실패 ${push.failed}`;

@@ -4,6 +4,7 @@ import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestL
 import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
+import { sunTimes } from "./sun.js";
 import { alertsFor as weatherAlertsFor, kmaAlertsFor, OFFICIAL_CHECKS } from "./alerts.js";
 import { todayStatus, kstNow } from "./today.js";
 import { toPlannerPlace } from "./directory-place.js";
@@ -223,6 +224,99 @@ document.addEventListener("click", (e) => {
   toast(t("{name} 일정으로 바꿨어요", { name: t(OPT_NAME[o.key]) }));
 });
 
+/* ---------- 일정 저장·비교 (이 기기에만, 최대 20개) ---------- */
+const savedTrips = () => (store.get("savedTrips") || []).filter((x) => x?.snap?.input && x.meta);
+function tripSummary() {
+  let cost = null;
+  try { const c = estimateTrip(trip, state.input, peopleNow(), feesData || {}, []); cost = c?.total || null; } catch { /* 비용 계산 전 */ }
+  return { places: trip.totals.places, moveMin: trip.totals.moveMin, walkKm: trip.totals.walkKm, cost, stops: trip.days.flatMap((d) => d.items.filter((i) => i.kind === "visit").map((i) => i.place.name)).slice(0, 4) };
+}
+$("#saveTripBtn").addEventListener("click", () => {
+  const list = savedTrips();
+  const meta = { date: state.input.date, regions: state.input.route || [state.input.region], days: state.input.days, choice: state.choice || "best" };
+  const entry = { id: Date.now().toString(36), meta, savedAt: Date.now(), snap: snapshot(), extra: { baseOpts: state.baseOpts, choice: state.choice, heard: state.heard, said: state.said }, sum: tripSummary() };
+  if (!store.set("savedTrips", [entry, ...list].slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  track("trip_save");
+  toast(t("이 기기에 저장했어요 · 첫 화면 '저장한 일정'에서 열 수 있어요"));
+  renderSaved();
+});
+let comparePick = new Set();
+// 저장한 일정 이름은 화면 언어로 그때그때 만든다 (예: "11월 14일 (토) · 춘천·철원 → 속초·양양 · 2박 3일 · 여유롭게")
+const savedName = (x) => [dateLabel(x.meta.date), x.meta.regions.map((r) => regionLabel(r, REGIONS[r].label)).join(" → "), t(DAYS_KO[x.meta.days]), x.meta.choice !== "best" ? t(OPT_NAME[x.meta.choice]) : ""].filter(Boolean).join(" · ");
+function renderSaved() {
+  const box = $("#saved"); if (!box) return;
+  const list = savedTrips();
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const won = (n) => `${Math.round(n / 10000)}${t("만 원")}`;
+  box.innerHTML = `<h3>${t("저장한 일정")}</h3><ul class="saved-list">${list.map((x) => `<li>
+      <label class="pick"><input type="checkbox" data-cmp="${x.id}" ${comparePick.has(x.id) ? "checked" : ""}></label>
+      <div><b>${esc(savedName(x))}</b><span>${t("{n}곳 · 이동 {m}", { n: x.sum.places, m: minutesLabel(x.sum.moveMin) })}${x.sum.cost ? ` · ${won(x.sum.cost.low)}~${won(x.sum.cost.high)}` : ""}</span></div>
+      <button class="ghost small" type="button" data-open-saved="${x.id}">${t("열기")}</button><button class="ghost small icon" type="button" data-del-saved="${x.id}" aria-label="${t("삭제")}" title="${t("삭제")}">✕</button>
+    </li>`).join("")}</ul>
+    ${list.length > 1 ? `<button class="ghost small" type="button" id="compareBtn" ${comparePick.size >= 2 ? "" : "disabled"}>${t("고른 일정 비교 ({n})", { n: comparePick.size })}</button>` : ""}
+    <div id="compareBox"></div>`;
+}
+document.addEventListener("click", (e) => {
+  const o = e.target.closest("[data-open-saved]");
+  if (o) { const x = savedTrips().find((y) => y.id === o.dataset.openSaved); if (x) { openSnapshot(x.snap, x.extra || {}); track("trip_open_saved"); } return; }
+  const d = e.target.closest("[data-del-saved]");
+  if (d) { store.set("savedTrips", savedTrips().filter((y) => y.id !== d.dataset.delSaved)); comparePick.delete(d.dataset.delSaved); renderSaved(); return; }
+  if (e.target.id === "compareBtn") {
+    const rows = savedTrips().filter((x) => comparePick.has(x.id));
+    const won = (n) => `${Math.round(n / 10000)}${t("만 원")}`;
+    const best = (f, low = true) => { const v = rows.map(f); const m = low ? Math.min(...v) : Math.max(...v); return (x) => (f(x) === m ? " class=\"best\"" : ""); };
+    const bm = best((x) => x.sum.moveMin), bw = best((x) => x.sum.walkKm), bp = best((x) => x.sum.places, false), bc = best((x) => x.sum.cost?.low ?? 1e12);
+    $("#compareBox").innerHTML = `<div class="cmp-wrap"><table class="cmp"><thead><tr><th></th>${rows.map((x) => `<th>${esc(savedName(x))}</th>`).join("")}</tr></thead><tbody>
+      <tr><th>${t("장소")}</th>${rows.map((x) => `<td${bp(x)}>${x.sum.places}</td>`).join("")}</tr>
+      <tr><th>${t("이동")}</th>${rows.map((x) => `<td${bm(x)}>${minutesLabel(x.sum.moveMin)}</td>`).join("")}</tr>
+      <tr><th>${t("걷기")}</th>${rows.map((x) => `<td${bw(x)}>${x.sum.walkKm}km</td>`).join("")}</tr>
+      <tr><th>${t("예상 비용")}</th>${rows.map((x) => `<td${bc(x)}>${x.sum.cost ? `${won(x.sum.cost.low)}~${won(x.sum.cost.high)}` : "-"}</td>`).join("")}</tr>
+      <tr><th>${t("주요 장소")}</th>${rows.map((x) => `<td>${x.sum.stops.map((n) => esc(placeName(PLACES.find((p) => p.name === n) || { name: n }))).join(", ")}</td>`).join("")}</tr>
+    </tbody></table></div>`;
+    track("trip_compare");
+  }
+});
+document.addEventListener("change", (e) => {
+  const c = e.target.closest("[data-cmp]"); if (!c) return;
+  if (c.checked) { if (comparePick.size >= 3) { c.checked = false; return toast(t("한 번에 3개까지 비교할 수 있어요")); } comparePick.add(c.dataset.cmp); } else comparePick.delete(c.dataset.cmp);
+  const b = $("#compareBtn"); if (b) { b.disabled = comparePick.size < 2; b.textContent = t("고른 일정 비교 ({n})", { n: comparePick.size }); }
+});
+
+/* ---------- 장소 정보 오류 제보 ----------
+   앱 서버가 있으면 서버(api/place-reports)로, 없으면(GitHub Pages·APK) 공개 저장소의 GitHub 이슈 작성 화면을 미리 채워 연다 */
+const REPORT_KIND = { closed: "문을 닫았어요 (폐업·휴업)", hours: "운영시간·쉬는 날이 달라요", parking: "주차 정보가 달라요", location: "위치가 달라요", other: "기타" };
+const reported = () => new Set(store.get("reportedPlaces") || []);
+let reportPlace = null;
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-report]"); if (!b) return;
+  reportPlace = PLACES.find((p) => p.id === b.dataset.report); if (!reportPlace) return;
+  $("#reportTitle").textContent = t("{name} 정보가 달라요", { name: placeName(reportPlace) });
+  $("#reportForm").reset();
+  $("#reportDlg").showModal?.() ?? $("#reportDlg").setAttribute("open", "");
+});
+$("#reportCancel").addEventListener("click", () => $("#reportDlg").close());
+$("#reportForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = new FormData(e.target), kind = f.get("kind"), note = String(f.get("note") || "").trim();
+  if (!reportPlace || !kind) return;
+  const p = reportPlace;
+  let sent = false;
+  if (document.body.classList.contains("has-server")) {
+    try { const r = await fetchT("api/place-reports", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ place: p.id, kind, note }) }, 5000); sent = r.ok; } catch { sent = false; }
+  }
+  if (!sent) {
+    const title = `[장소 제보] ${p.name} (${p.id}) · ${REPORT_KIND[kind]}`;
+    const body = [`장소: ${p.name} (${p.id})`, `종류: ${REPORT_KIND[kind]}`, `내용: ${note || "-"}`, `여행 날짜: ${state?.input?.date || "-"}`, "", "(오늘강원 앱의 '정보가 달라요'에서 보냄)"].join("\n");
+    window.open(`https://github.com/hundol047/MY-AI-LAB/issues/new?labels=place-report&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`, "_blank", "noopener");
+  }
+  store.set("reportedPlaces", [...new Set([...reported(), p.id])].slice(-200));
+  $("#reportDlg").close();
+  track("place_report", kind);
+  toast(sent ? t("고마워요! 제보를 받았어요") : t("제보 작성 화면을 열었어요 · 보내기를 눌러 주세요"));
+  if (trip && !$("#result").hidden) render();
+});
+
 /* ---------- 출발지 (이 기기에 저장) ----------
    첫날은 고른 출발지에서 출발한다. 없으면 권역 기준점(역·터미널). 출발 시각 자동: 가까우면 10시, 60km 넘으면 8시 */
 const distKm = (a, b) => { const r = Math.PI / 180, x = Math.sin((b.lat - a.lat) * r / 2) ** 2 + Math.cos(a.lat * r) * Math.cos(b.lat * r) * Math.sin((b.lng - a.lng) * r / 2) ** 2; return 12742 * Math.asin(Math.sqrt(x)); };
@@ -370,7 +464,7 @@ function show(which) {
   window.scrollTo({ top: 0 });
   if (which === "result" && trip) setTimeout(() => drawMap(trip.days[dayIdx]), 50);
 }
-$("#home").addEventListener("click", () => { if (state) fillForm(state.input); show("setup"); });
+$("#home").addEventListener("click", () => { if (state) fillForm(state.input); show("setup"); renderSaved(); });
 $("#editBtn").addEventListener("click", () => { fillForm(state.input); $("#manual").open = true; show("setup"); });
 
 /* ---------- 직접 넣은 장소 (탐색 목록) ----------
@@ -458,7 +552,7 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day);
+  $("#timeline").innerHTML = sunHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day);
   renderOptions();
   renderHeard();
   renderFestivals();
@@ -476,6 +570,28 @@ function render() {
   drawMap(day);
 }
 
+// 일출·일몰 (그날 첫 장소 기준) + 동해안에서 묵은 다음 날 아침 해돋이 제안 (숙소에서 가장 가까운 일출 명소, 해 뜨기 15분 전 도착)
+const SUNRISE_SPOTS = ["jeongdongjin", "gyeongpo-beach", "chuam", "yeonggeumjeong", "naksan-beach", "sokcho-beach"];
+function sunHTML(day) {
+  const at = day.items[0]?.place || day.start;
+  const s = at && sunTimes(day.date, at.lat, at.lng);
+  if (!s) return "";
+  let rise = "";
+  const night = day.dayIdx > 0 ? lodgingForDay(trip, day.dayIdx - 1) : null;
+  if (night) {
+    const spot = SUNRISE_SPOTS.map((id) => PLACES.find((p) => p.id === id)).filter(Boolean)
+      .map((p) => ({ p, km: distKm(night, p) })).sort((a, b) => a.km - b.km)[0];
+    if (spot && spot.km <= 25) {
+      const sr = sunTimes(day.date, spot.p.lat, spot.p.lng).rise;
+      const walk = spot.km < 1.2;
+      const min = walk ? Math.max(5, Math.round(spot.km * 1.3 * 15)) : Math.max(5, Math.round((spot.km * 1.35) / 40 * 60 / 5) * 5);
+      const [h, m] = sr.split(":").map(Number);
+      const go = fmt(h * 60 + m - 15 - min);
+      rise = `<div class="sunrise">${t("🌅 해돋이 보기: {spot} 일출 {rise} · 숙소에서 {mode} {min}분, {go}에 나가면 돼요", { spot: esc(placeName(spot.p)), rise: sr, mode: t(walk ? "걸어서" : state.input.move === "transit" ? "택시로" : "차로"), min, go })}</div>`;
+    }
+  }
+  return `<li class="sun">☀️ ${t("일출 {r} · 일몰 {s}", { r: s.rise, s: s.set })}${rise}</li>`;
+}
 function itemHTML(it, i, day) {
   const p = it.place, c = CAT[p.cat];
   const mode = t(MODE[it.travelMode]);
@@ -495,12 +611,13 @@ function itemHTML(it, i, day) {
         ${(state.opts.access || []).length ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}
         ${crowdLine(p, trip.days[dayIdx].date)}
+        ${state.input.move === "car" ? parkingLine(p) : ""}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.source==="OpenStreetMap" ? `<div class="check soft">${t("운영시간은 방문 전 확인")}</div>` : p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
+        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
       </div>
     </article>
@@ -578,6 +695,18 @@ function accessLine(p) {
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   return `<details class="access"><summary>${tags.length ? `♿ ${tags.join(" · ")}` : t("무장애 정보 있음")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>`;
+}
+
+// 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
+let parkingData = null;
+fetchT("parking.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { parkingData = j?.places || null; if (trip && state.input.move === "car" && !$("#result").hidden) render(); }).catch(() => {});
+function parkingLine(p) {
+  const v = parkingData?.[p.id];
+  if (!v) return p.multi || p.cat === "festival" ? "" : `<div class="parking none">${t("🅿️ 주차 정보 없음 · 근처 공영주차장을 확인하세요")}</div>`;
+  if (v.ok === false) return `<div class="parking no">${t("🅿️ 전용 주차장 없음 · 근처 공영주차장 이용")}</div>`;
+  const cnt = (v.text.match(/(\d[\d,]*)\s*대/) || [])[1];
+  const fee = v.fee === "free" ? t("무료") : v.fee === "paid" ? t("유료") : "";
+  return `<div class="parking ok" title="${esc(v.text)}">${t("🅿️ 주차 가능")}${cnt ? t(" · {n}대", { n: cnt }) : ""}${fee ? ` · ${fee}` : ""}</div>`;
 }
 
 // 관광지 혼잡 예측 (crowd.json, 한국관광공사 집중률 · 앞으로 30일 · 하루 단위). 일정을 짜기 전에 불러 엔진에 넘긴다
@@ -1801,17 +1930,21 @@ if (getLang() === "ko" || getLang() === "en") applyStatic();
 await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
 if (getLang() === "ja" || getLang() === "zh") applyStatic();
 
+function openSnapshot(saved, extra = {}) {
+  restoredFromLink = true;
+  state = { input: saved.input, opts: { rainDays: [], exclude: [], prefer: [], avoid: [], ...saved.opts }, ...extra };
+  registerCustom(state.opts);
+  trip = planTrip(state.input, state.opts);
+  dayIdx = 0;
+  show("result"); render();
+  trip.days.forEach((_, i) => applyRoad(i));
+  loadWeather();
+}
 (function boot() {
   const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;
   const saved = fromHash || null;
   if (saved && saved.input && PLACES.length) {
-    restoredFromLink = true;
-    state = { input: saved.input, opts: { rainDays: [], exclude: [], prefer: [], avoid: [], ...saved.opts } };
-    registerCustom(state.opts);
-    trip = planTrip(state.input, state.opts);
-    show("result"); render();
-    trip.days.forEach((_, i) => applyRoad(i));
-    loadWeather();
+    openSnapshot(saved);
   } else {
     const last = store.get("lastTrip");
     if (last?.input) fillForm({ ...last.input, date: last.input.date < $("#date").min ? tomorrow() : last.input.date });
@@ -1819,6 +1952,7 @@ if (getLang() === "ja" || getLang() === "zh") applyStatic();
 })();
 
 renderPast();
+renderSaved();
 renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다
