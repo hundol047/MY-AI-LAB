@@ -1,0 +1,245 @@
+# 주차 정보 (한국관광공사 소개정보)
+
+생성: node scripts/bake-parking.mjs. 붙인 곳 212곳 (가능 199 · 불가 13 · 무료 28 · 유료 1)
+
+- sutasa: 가능  — 가능
+- alpaca-world: 가능  — 가능 (250대)
+- palbongsan: 가능  — 가능
+- hc-mugunghwa: 가능  — 가능
+- garisan-forest: 가능  — 가능
+- hc-ginkgo: 불가  — 불가능
+- hc-hwaro: 가능  — 가능
+- dutayeon: 가능  — 가능
+- yanggu-observatory: 가능  — 가능
+- parksookeun: 가능 free — 무료
+- eulji-observatory: 가능  — 가능
+- hanbando-island: 가능  — 가능
+- bisugumi: 가능  — 가능
+- peace-dam: 가능  — 가능
+- jogyeongcheol: 가능  — 가능
+- kkeomeok-bridge: 불가  — 없음
+- ttansan: 가능  — 가능
+- baegamsan-cable: 불가  — 불가능
+- baekdamsa: 가능 paid — 가능 / 셔틀 버스 이용 (어른 편도 2,500원, 소인(18세 이하) 편도 1,200원)
+- parkinhwan: 가능 free — 가능 · 무료
+- bangtaesan-forest: 가능  — 가능
+- manhae-village: 가능  — 가능
+- pungsuwon: 가능  — 가능
+- birch-museum: 가능 free — 무료
+- cheongtaesan: 가능  — 가능
+- jangneung: 가능  — 가능
+- gossigul: 가능  — 가능 (약 110대)
+- byeolmaro: 가능 free — 가능요금 (무료)
+- seondol: 가능  — 가능
+- yoseonam: 가능  — 가능
+- kimsatgat: 가능  — 가능
+- young-dal: 가능 free — 무료
+- hwaam-cave: 가능  — 가능
+- byeongbangchi: 가능  — 가능
+- auraji: 가능  — 가능
+- manhangjae: 가능  — 가능
+- high1-ski: 가능  — 가능
+- mindungsan: 가능  — 가능
+- coal-museum: 가능 free — 무료
+- geomnyongso: 가능  — 가능
+- gumunso: 가능  — 가능
+- yongyeon-cave: 가능  — 가능
+- taebaeksan: 가능  — 가능
+- daegeumgul: 가능  — 가능
+- jukseoru: 가능  — 가능
+- isabu-park: 가능 free — 가능요금 (무료)
+- sc-coast-road: 가능  — 가능
+- mureung: 가능  — 가능
+- cheongok-cave: 가능  — 가능
+- hyoseok-village: 가능  — 가능
+- herbnara: 가능  — 가능 (206대)
+- yongpyong-ski: 가능 free — 무료
+- cw-peace-observatory: 가능  — 가능
+- sambuyeon: 가능  — 가능
+- soisan: 불가  — 불가능
+- crane-center: 불가  — 불가능
+- wanggok: 가능 free — 가능요금 (무료)
+- geonbongsa: 가능  — 가능
+- cheonggan: 가능  — 가능
+- songjiho: 가능  — 가능
+- naksansa: 가능  — 가능
+- hyuhyuam: 가능  — 가능
+- namae-port: 가능  — 가능
+- jujeongol: 가능  — 가능
+- sinheungsa: 가능  — 가능
+- biseondae: 가능  — 가능
+- ulsanbawi: 가능  — 가능
+- gwangchi-forest: 가능  — 가능
+- yanggu-goral: 가능  — 가능
+- wj-gamyeong: 가능  — 가능
+- wj-hanji: 가능  — 가능
+- wj-parkkyongni: 가능 free — 가능요금 (무료)
+- wj-baramgil: 가능  — 가능
+- wj-gopanhwa: 가능  — 가능
+- wj-gukhyeongsa: 가능  — 가능
+- wj-beopcheonsa: 가능  — 가능
+- wj-geodonsa: 가능  — 가능
+- wj-seomgang-birch: 가능  — 가능
+- wj-chilbong: 가능  — 가능
+- hs-forest: 가능  — 가능 (소형 약 70대 / 대형 약 8대)
+- hs-byeongjibang: 가능  — 가능
+- wj-seomgang-makguksu: 가능  — 가능
+- wj-chueotang: 가능  — 가능
+- wj-bok-chueotang: 불가  — 불가능
+- wj-borit: 가능 free — 가능요금(최초 2시간 무료 / 이후 30분당 1,000원 추가 요금 발생)
+- wj-hamheung: 가능  — 가능
+- hs-deodeok: 가능  — 가능
+- hs-hambat: 가능  — 가능
+- hs-kkwong-mandu: 가능  — 가능
+- wj-teodeukgol: 가능 free — 가능요금 (무료)
+- wj-rotonda: 가능  — 있음
+- wj-okhee: 가능  — 가능
+- wj-eunseok: 가능  — 가능
+- dh-jjolmyeon: 가능 free — 가능요금 (무료)
+- dh-bakery: 불가  — 불가능
+- tb-cafe: 가능  — 가능
+- sc-makguksu: 가능  — 가능
+- sc-cafe: 불가  — 불가능
+- hc-makguksu: 가능  — 가능
+- hc-cafe: 가능 free — 가능요금 (무료)
+- hs-makguksu: 가능  — 가능
+- hs-cafe: 가능 free — 가능 요금 (무료)
+- yw-gondre: 가능  — 가능
+- yw-cafe: 불가  — 불가능
+- pc-makguksu: 가능 free — 가능요금 (무료)
+- pc-cafe: 가능  — 가능
+- js-kotdeung: 가능  — 가능
+- js-cafe: 가능 free — 가능 / 무료
+- cw-tofu: 가능  — 가능
+- cw-cafe: 가능  — 가능
+- hw-cafe: 가능  — 가능
+- yg-makguksu: 가능  — 가능
+- yg-cafe: 가능  — 가능
+- ij-makguksu: 가능  — 가능 (약 소형 100대 / 대형 10대)
+- ij-cafe: 가능  — 가능
+- gs-makguksu: 가능 free — 가능 요금 (무료)
+- gs-cafe: 가능 free — 가능요금 (무료)
+- yy-makguksu: 가능  — 주차 가능(50대)
+- yy-cafe: 가능  — 가능
+- dh-kalguksu: 가능  — 가능
+- dh-crab: 가능  — 가능
+- tb-hanwoo2: 가능  — 가능
+- tb-neowa: 가능  — 가능
+- sc-dakgalbi: 가능  — 가능
+- sc-hoe: 가능  — 가능
+- hc-hanwoo: 가능  — 가능
+- hc-jobaksa: 가능  — 가능
+- hs-gwangam: 불가  — 불가능
+- hs-sundae: 가능  — 가능
+- yw-hanwoo: 가능  — 가능
+- yw-trout: 가능  — 가능
+- pc-sanchae: 가능 free — 가능(무료)
+- pc-trout: 가능  — 가능
+- js-gondre: 가능  — 가능
+- cw-hanwoo: 가능  — 가능
+- cw-duck: 가능  — 가능
+- hw-mandarin: 가능  — 가능
+- hw-baeksuk: 가능  — 가능
+- yg-trout: 가능  — 가능
+- yg-tofu: 불가  — 불가능
+- ij-hwangtae: 가능  — 가능
+- gs-hoe: 가능  — 가능
+- gs-maeuntang: 불가  — 불가능
+- yy-donghae: 가능  — 가능
+- yy-songwol: 가능  — 가능
+- gyeongpo-beach: 가능  — 가능
+- gangmun-beach: 가능  — 가능
+- anmok-beach: 가능  — 가능
+- namhangjin-beach: 가능  — 가능 (소형 약 150대)
+- sacheon-beach: 가능  — 가능
+- yeongjin-beach: 가능  — 가능
+- hyangho-beach: 가능  — 가능
+- jeongdongjin: 가능  — 가능
+- terarosa: 가능 free — 가능요금 (무료)
+- toetmaru: 가능  — 있음
+- chodang-tofu: 가능  — 가능 (30대)
+- jjamppong-tofu: 가능  — 가능 (50대)
+- ojukheon: 가능 free — 무료
+- seongyojang: 가능  — 가능
+- gyeongpodae: 가능  — 가능
+- heo-park: 가능  — 가능
+- arte: 가능 free — 무료
+- gwana: 가능  — 가능
+- haslla: 가능  — 가능
+- gyeongpo-lake: 가능  — 가능
+- gasiyeon: 가능 free — 가능요금 (무료)
+- solhyang: 가능  — 가능
+- jumunjin-lighthouse: 가능  — 가능
+- chuam: 가능  — 가능
+- dojjaebi: 가능  — 가능
+- haerang: 가능  — 가능
+- mangsang: 가능  — 가능
+- hwanseon: 가능  — 가능
+- samcheok-cable: 가능  — 가능
+- jangho: 가능  — 가능
+- sokcho-beach: 가능  — 가능
+- yeonggeumjeong: 가능  — 가능
+- cheongcho: 가능  — 가능
+- seorak-cable: 가능  — 가능
+- unification: 가능  — 가능
+- hwajinpo: 가능 free — 가능 (소형 약 100대 / 버스 약 10대)요금 (무료)
+- ayajin: 가능  — 가능
+- naksan-beach: 가능  — 가능
+- surfyy: 가능 free — 무료
+- hajodae: 가능  — 가능
+- jukdo: 가능  — 가능 (약 소형 100대)
+- birch: 가능  — 가능
+- chilsung: 불가  — 불가능
+- nami: 가능  — 가능 (약 600대)
+- kimyoujeong: 가능  — 가능
+- soyang-skywalk: 가능  — 가능
+- cc-museum: 가능 free — 무료
+- gongjicheon: 가능  — 가능
+- goseokjeong: 가능  — 가능
+- hwacheon-river: 가능  — 있음
+- samak-cable: 가능  — 가능
+- labor-party: 가능  — 가능
+- gamjabat: 가능  — 가능
+- sheep: 가능  — 가능
+- samyang: 가능  — 가능
+- balwang: 가능  — 가능
+- woljeongsa: 가능  — 가능
+- samtan: 가능  — 가능
+- cheongnyeongpo: 가능  — 가능
+- hanbando: 가능  — 가능
+- hwangji: 가능  — 가능
+- windhill: 가능  — 가능
+- sogeumsan: 가능  — 가능
+- bangyeri: 가능  — 가능
+- guryongsa: 가능  — 가능
+- hoengseong-lake: 가능 free — 무료
+- ganhyeon-park: 가능  — 가능
+
+## 못 붙인 곳
+
+- 비발디파크 스키월드: 소개정보를 받지 못함
+- 양구백자박물관: 주차 원문 비어 있음
+- 양구근현대사박물관: 주차 원문 비어 있음
+- 인제 산촌민속박물관: 주차 원문 비어 있음
+- 내린천 래프팅: 주차 원문 비어 있음
+- 횡성 루지체험장: 주차 원문 비어 있음
+- 웰리힐리파크 스키장: 소개정보를 받지 못함
+- 정선 레일바이크: 소개정보를 받지 못함
+- 철암탄광역사촌: 주차 원문 비어 있음
+- 삼척 해양레일바이크: 주차 원문 비어 있음
+- 휘닉스 평창 스키장: 주차 원문 비어 있음
+- 알펜시아 스키장: 주차 원문 비어 있음
+- 오크밸리 스키장: 소개정보를 받지 못함
+- 태백닭갈비: 주차 원문 비어 있음
+- 햇골막국수: 주차 원문 비어 있음
+- 정선황기막국수: 주차 원문 비어 있음
+- 정동심곡 바다부채길: 주차 원문 비어 있음
+- 보헤미안로스터즈 박이추커피공장: 관광공사 항목 없음
+- 참소리축음기·에디슨과학박물관: 주차 원문 비어 있음
+- 월화거리: 주차 원문 비어 있음
+- 정동진 시간박물관: 주차 원문 비어 있음
+- 송정 해송숲: 관광공사 항목 없음
+- 묵호 논골담길: 주차 원문 비어 있음
+- 한탄강 주상절리길: 주차 원문 비어 있음
+- 직탕폭포: 주차 원문 비어 있음
+- 뮤지엄 산: 주차 원문 비어 있음
