@@ -965,5 +965,101 @@
   "wj-eunseok": {
     "name": "Coffee Eunseokssi",
     "desc": "Brunch café, daytime only (last order 15:30)"
+  },
+  "dh-hansum": {
+    "name": "Hansum (Donghae)",
+    "desc": "Set meal of seasonal Donghae ingredients and potato gnocchi"
+  },
+  "dh-mukho287": {
+    "name": "Mukho 287",
+    "desc": "Café overlooking the Mukho sea; opens 08:00 on weekends"
+  },
+  "sc-buil": {
+    "name": "Buil Makguksu",
+    "desc": "Samcheok cold buckwheat noodles and boiled pork, lunch only"
+  },
+  "sc-mannam": {
+    "name": "Mannam Sikdang",
+    "desc": "Samcheok gomchi (snailfish) hangover soup from 8 a.m"
+  },
+  "sc-obok": {
+    "name": "Obok Miga",
+    "desc": "Samcheok cold raw-fish soup (mulhoe) and stone-pot set meals"
+  },
+  "yy-cheonseon": {
+    "name": "Cheonseon Sikdang",
+    "desc": "Namdaecheon river goby soup and tofu hot pot from 6 a.m"
+  },
+  "yy-yetteul": {
+    "name": "Yetteul",
+    "desc": "Yangyang mussel soup (seopguk) and mussel bibimbap, until 14:30"
+  },
+  "yy-memilkkot": {
+    "name": "Memilkkot Hyanggi",
+    "desc": "Perilla-oil buckwheat noodles and potato ongsimi"
+  },
+  "ij-baekdam-tofu": {
+    "name": "Baekdam Sundubu",
+    "desc": "Soft tofu and grilled dried pollack sets at the Baekdamsa entrance; opens early"
+  },
+  "ij-wondae": {
+    "name": "Wondae Makguksu",
+    "desc": "Buckwheat noodles and gomchwi boiled pork on the way to the birch forest; closes around 16:00"
+  },
+  "gs-badajeongwon": {
+    "name": "Bada Jeongwon",
+    "desc": "Goseong café with a seaside garden, open until 21:00"
+  },
+  "hc-memilga": {
+    "name": "Hongcheon Memilga",
+    "desc": "Perilla-oil bracken buckwheat noodles and boiled pork"
+  },
+  "hc-yakbapsang": {
+    "name": "Yagi Doeneun Bapsang",
+    "desc": "Gondre and dried radish-greens stone-pot rice and herbal chicken"
+  },
+  "cw-eorang": {
+    "name": "Eorang Son Mandu",
+    "desc": "Cheorwon hand-made dumpling soup; weekdays until 15:00, weekends until 19:30"
+  },
+  "hw-eojuk": {
+    "name": "Hwacheon Eojuktang",
+    "desc": "Freshwater fish porridge soup; closes on irregular days"
+  },
+  "yg-naengmyeon": {
+    "name": "Yanggu Son Naengmyeon",
+    "desc": "Yanggu cold noodles with spicy raw fish, lunch only (11:30–14:30)"
+  },
+  "pc-migayeon": {
+    "name": "Bongpyeong Memil Migayeon",
+    "desc": "100% buckwheat noodles and buckwheat-sprout bibim"
+  },
+  "pc-gohyang": {
+    "name": "Gohyang Iyagi",
+    "desc": "Daegwallyeong gondre stone-pot rice and hanwoo"
+  },
+  "js-hambaek": {
+    "name": "Hambaeksan Dolsotbap",
+    "desc": "Jeongseon gondre stone-pot set, lunch only"
+  },
+  "js-gun-eon": {
+    "name": "Gun-eon Songeo Hoetjip",
+    "desc": "Jeongseon trout sashimi and fried trout"
+  },
+  "tb-gwangcheon": {
+    "name": "Gwangcheon Makguksu",
+    "desc": "Taebaek buckwheat noodles and buckwheat crepes, lunch only"
+  },
+  "tb-guwau": {
+    "name": "Guwau Sundubu",
+    "desc": "Soft tofu at Guwau, Taebaek's sunflower village"
+  },
+  "js-pigojigo": {
+    "name": "Pigojigo",
+    "desc": "Coal-mine-town café known for briquette-shaped bread"
+  },
+  "yw-ogrann": {
+    "name": "Ogrann Danpatbbang",
+    "desc": "Yeongwol hand-made red-bean buns; open Friday to Sunday only"
   }
 }

@@ -3729,5 +3729,686 @@
   "pop": 1,
   "tags": [],
   "desc": "브런치가 유명한 원주 카페 · 낮 장사"
+ },
+ "ij-baekdam-tofu": {
+  "name": "백담순두부",
+  "cat": "food",
+  "region": "seorak",
+  "area": "seoraksan",
+  "lat": 38.1967,
+  "lng": 128.3449,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "07:00",
+   "19:00"
+  ],
+  "seasons": [
+   {
+    "months": [
+     12,
+     1,
+     2,
+     3
+    ],
+    "hours": [
+     "08:00",
+     "18:00"
+    ]
+   }
+  ],
+  "closed": [],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "백담사 입구 순두부·황태구이 정식",
+  "kto": "133224",
+  "wiki": "백담순두부"
+ },
+ "yy-cheonseon": {
+  "name": "천선식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0688,
+  "lng": 128.624,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "06:00",
+   "18:30"
+  ],
+  "byDay": {
+   "0": [
+    "06:00",
+    "15:00"
+   ]
+  },
+  "breaks": [
+   [
+    "14:30",
+    "16:20"
+   ]
+  ],
+  "closed": [],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "남대천 뚜거리탕과 두부전골",
+  "kto": "133783",
+  "wiki": "천선식당"
+ },
+ "cw-eorang": {
+  "name": "어랑손만두국",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cheorwon",
+  "lat": 38.1879,
+  "lng": 127.2877,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "09:30",
+   "15:00"
+  ],
+  "byDay": {
+   "0": [
+    "09:30",
+    "19:30"
+   ],
+   "6": [
+    "09:30",
+    "19:30"
+   ]
+  },
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 40,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "철원 손만두국과 만두전골",
+  "kto": "134048",
+  "wiki": "어랑손만두국"
+ },
+ "pc-gohyang": {
+  "name": "고향이야기",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "daegwallyeong",
+  "lat": 37.6691,
+  "lng": 128.71,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "breaks": [
+   [
+    "14:00",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "대관령 곤드레돌솥밥과 한우",
+  "kto": "134095",
+  "wiki": "고향이야기"
+ },
+ "sc-buil": {
+  "name": "부일막국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4671,
+  "lng": 129.1638,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "15:30"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "삼척 물막국수와 수육 · 점심 장사",
+  "kto": "134371",
+  "wiki": "부일막국수"
+ },
+ "ij-wondae": {
+  "name": "원대막국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "inje",
+  "lat": 38.0023,
+  "lng": 128.2315,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "16:00"
+  ],
+  "byDay": {
+   "0": [
+    "10:00",
+    "16:30"
+   ],
+   "6": [
+    "10:00",
+    "16:30"
+   ]
+  },
+  "closed": [],
+  "stay": 40,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "자작나무숲 가는 길 막국수와 곰취수육",
+  "kto": "134492",
+  "wiki": "원대막국수"
+ },
+ "pc-migayeon": {
+  "name": "봉평메밀미가연",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "odaesan",
+  "lat": 37.612,
+  "lng": 128.3783,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "봉평 100% 메밀국수와 메밀싹 비빔",
+  "kto": "135532",
+  "wiki": "봉평메밀미가연"
+ },
+ "yy-yetteul": {
+  "name": "옛뜰",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0881,
+  "lng": 128.6541,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "09:00",
+   "14:30"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "양양 섭국과 섭비빔밥 · 점심 장사",
+  "kto": "627070",
+  "wiki": "옛뜰"
+ },
+ "js-hambaek": {
+  "name": "함백산돌솥밥",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1942,
+  "lng": 128.868,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "16:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "정선 곤드레 돌솥정식 · 점심 장사",
+  "kto": "2774502",
+  "wiki": "함백산돌솥밥"
+ },
+ "hw-eojuk": {
+  "name": "화천어죽탕",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "hwacheon",
+  "lat": 38.0939,
+  "lng": 127.7602,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "09:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "화천 민물고기 어죽탕 · 비정기 휴무",
+  "kto": "2789510",
+  "wiki": "화천어죽탕"
+ },
+ "gs-badajeongwon": {
+  "name": "바다정원",
+  "cat": "cafe",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2312,
+  "lng": 128.5827,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "09:30",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "바다 정원이 있는 고성 카페",
+  "kto": "2809044",
+  "wiki": "바다정원"
+ },
+ "hc-memilga": {
+  "name": "홍천메밀가",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "nami",
+  "lat": 37.6783,
+  "lng": 127.6964,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "19:30"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 40,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "들기름 고사리 막국수와 수육",
+  "kto": "2837997",
+  "wiki": "홍천메밀가"
+ },
+ "yw-ogrann": {
+  "name": "오그란이 단팥빵",
+  "cat": "cafe",
+  "region": "pyeongchang",
+  "area": "yeongwol",
+  "lat": 37.1455,
+  "lng": 128.4894,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   1,
+   2,
+   3,
+   4
+  ],
+  "stay": 30,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "영월 수제 단팥빵 · 금~일만 엶",
+  "kto": "2855525",
+  "wiki": "오그란이 단팥빵"
+ },
+ "sc-obok": {
+  "name": "오복미가",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4654,
+  "lng": 129.1722,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "21:30"
+  ],
+  "breaks": [
+   [
+    "15:30",
+    "16:30"
+   ]
+  ],
+  "closed": [],
+  "stay": 60,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "삼척 물회와 돌솥 정식",
+  "kto": "2877972",
+  "wiki": "오복미가"
+ },
+ "yy-memilkkot": {
+  "name": "메밀꽃향기",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.1376,
+  "lng": 128.5921,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "byDay": {
+   "3": [
+    "10:00",
+    "15:00"
+   ]
+  },
+  "closed": [
+   4
+  ],
+  "stay": 50,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "들기름막국수와 감자옹심이",
+  "kto": "2892381",
+  "wiki": "메밀꽃향기"
+ },
+ "hc-yakbapsang": {
+  "name": "약이되는밥상",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "nami",
+  "lat": 37.694,
+  "lng": 127.7023,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "08:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "곤드레·시래기 돌솥밥과 한방 닭백숙",
+  "kto": "2892439",
+  "wiki": "약이되는밥상"
+ },
+ "tb-gwangcheon": {
+  "name": "광천막국수 본점",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.1803,
+  "lng": 128.9726,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "15:30"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 40,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "태백 막국수와 메밀전병 · 점심 장사",
+  "kto": "2892445",
+  "wiki": "광천막국수 본점"
+ },
+ "js-gun-eon": {
+  "name": "군언송어횟집",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "jeongseon",
+  "lat": 37.3861,
+  "lng": 128.6727,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "20:00"
+  ],
+  "closed": [],
+  "closedNth": [
+   [
+    2,
+    2
+   ],
+   [
+    2,
+    4
+   ]
+  ],
+  "stay": 60,
+  "pop": 1,
+  "tags": [],
+  "desc": "정선 송어회와 송어튀김",
+  "kto": "2913319",
+  "wiki": "군언송어횟집"
+ },
+ "yg-naengmyeon": {
+  "name": "양구손냉면",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "yanggu",
+  "lat": 38.0804,
+  "lng": 128.0161,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:30",
+   "14:30"
+  ],
+  "closed": [],
+  "stay": 40,
+  "pop": 1,
+  "tags": [],
+  "desc": "양구 회냉면 · 점심 장사",
+  "kto": "2913456",
+  "wiki": "양구손냉면"
+ },
+ "tb-guwau": {
+  "name": "구와우순두부식당",
+  "cat": "food",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.2078,
+  "lng": 128.9866,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:30",
+   "15:00"
+  ],
+  "closed": [
+   0
+  ],
+  "stay": 40,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "해바라기 마을 구와우의 순두부",
+  "kto": "2925173",
+  "wiki": "구와우순두부식당"
+ },
+ "sc-mannam": {
+  "name": "만남의식당",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4391,
+  "lng": 129.1907,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "08:00",
+   "15:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 40,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "곰치해장국으로 아침을 여는 삼척 식당",
+  "kto": "2925262",
+  "wiki": "만남의식당"
+ },
+ "dh-mukho287": {
+  "name": "묵호287",
+  "cat": "cafe",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.5551,
+  "lng": 129.1181,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "byDay": {
+   "0": [
+    "08:00",
+    "21:00"
+   ],
+   "6": [
+    "08:00",
+    "21:00"
+   ]
+  },
+  "closed": [],
+  "stay": 50,
+  "pop": 2,
+  "tags": [],
+  "desc": "묵호 바다가 보이는 카페",
+  "kto": "2929520",
+  "wiki": "묵호287"
+ },
+ "js-pigojigo": {
+  "name": "피고지고",
+  "cat": "cafe",
+  "region": "pyeongchang",
+  "area": "taebaek",
+  "lat": 37.2011,
+  "lng": 128.8542,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "10:30",
+   "19:00"
+  ],
+  "closed": [
+   0
+  ],
+  "stay": 40,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "탄광촌 구공탄빵 카페",
+  "kto": "3474425",
+  "wiki": "피고지고"
+ },
+ "dh-hansum": {
+  "name": "한섬",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.5182,
+  "lng": 129.1211,
+  "indoor": true,
+  "walk": 1,
+  "hours": [
+   "11:00",
+   "19:30"
+  ],
+  "breaks": [
+   [
+    "13:30",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   1,
+   2,
+   3
+  ],
+  "stay": 70,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "동해 제철 재료와 감자로 차린 한상 · 목~일만 엶",
+  "kto": "4020587",
+  "wiki": "한섬"
  }
 }

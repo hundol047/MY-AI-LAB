@@ -1,6 +1,6 @@
 # 주차 정보 (한국관광공사 소개정보)
 
-생성: node scripts/bake-parking.mjs. 붙인 곳 212곳 (가능 199 · 불가 13 · 무료 28 · 유료 1)
+생성: node scripts/bake-parking.mjs. 붙인 곳 235곳 (가능 222 · 불가 13 · 무료 29 · 유료 1)
 
 - sutasa: 가능  — 가능
 - alpaca-world: 가능  — 가능 (250대)
@@ -147,6 +147,29 @@
 - gs-maeuntang: 불가  — 불가능
 - yy-donghae: 가능  — 가능
 - yy-songwol: 가능  — 가능
+- ij-baekdam-tofu: 가능  — 가능
+- yy-cheonseon: 가능 free — 가능 (약 소형 10대 미만)요금 (무료)
+- cw-eorang: 가능  — 가능
+- pc-gohyang: 가능  — 가능
+- sc-buil: 가능  — 가능
+- ij-wondae: 가능  — 가능
+- pc-migayeon: 가능  — 가능
+- yy-yetteul: 가능  — 가능
+- js-hambaek: 가능  — 가능
+- gs-badajeongwon: 가능  — 가능 (약 400대)
+- hc-memilga: 가능  — 가능
+- yw-ogrann: 가능  — 가능
+- sc-obok: 가능  — 가능
+- yy-memilkkot: 가능  — 가능
+- hc-yakbapsang: 가능  — 가능
+- tb-gwangcheon: 가능  — 가능
+- js-gun-eon: 가능  — 가능
+- yg-naengmyeon: 가능  — 가능
+- tb-guwau: 가능  — 가능
+- sc-mannam: 가능  — 가능
+- dh-mukho287: 가능  — 가능
+- js-pigojigo: 가능  — 가능
+- dh-hansum: 가능  — 가능
 - gyeongpo-beach: 가능  — 가능
 - gangmun-beach: 가능  — 가능
 - anmok-beach: 가능  — 가능
@@ -233,6 +256,7 @@
 - 태백닭갈비: 주차 원문 비어 있음
 - 햇골막국수: 주차 원문 비어 있음
 - 정선황기막국수: 주차 원문 비어 있음
+- 화천어죽탕: 주차 원문 비어 있음
 - 정동심곡 바다부채길: 주차 원문 비어 있음
 - 보헤미안로스터즈 박이추커피공장: 관광공사 항목 없음
 - 참소리축음기·에디슨과학박물관: 주차 원문 비어 있음

@@ -1887,5 +1887,149 @@
     "nameSrc": "app",
     "desc": "Brunch café, daytime only (last order 15:30)",
     "descSrc": "app"
+  },
+  "dh-hansum": {
+    "name": "Hansum (Donghae)",
+    "nameSrc": "app",
+    "desc": "Set meal of seasonal Donghae ingredients and potato gnocchi",
+    "descSrc": "app"
+  },
+  "dh-mukho287": {
+    "name": "Mukho 287",
+    "nameSrc": "app",
+    "desc": "Café overlooking the Mukho sea; opens 08:00 on weekends",
+    "descSrc": "app"
+  },
+  "sc-buil": {
+    "name": "Buil Makguksu",
+    "nameSrc": "app",
+    "desc": "Samcheok cold buckwheat noodles and boiled pork, lunch only",
+    "descSrc": "app"
+  },
+  "sc-mannam": {
+    "name": "Mannam Sikdang",
+    "nameSrc": "app",
+    "desc": "Samcheok gomchi (snailfish) hangover soup from 8 a.m",
+    "descSrc": "app"
+  },
+  "sc-obok": {
+    "name": "Obok Miga",
+    "nameSrc": "app",
+    "desc": "Samcheok cold raw-fish soup (mulhoe) and stone-pot set meals",
+    "descSrc": "app"
+  },
+  "yy-cheonseon": {
+    "name": "Cheonseon Sikdang",
+    "nameSrc": "app",
+    "desc": "Namdaecheon river goby soup and tofu hot pot from 6 a.m",
+    "descSrc": "app"
+  },
+  "yy-yetteul": {
+    "name": "Yetteul",
+    "nameSrc": "app",
+    "desc": "Yangyang mussel soup (seopguk) and mussel bibimbap, until 14:30",
+    "descSrc": "app"
+  },
+  "yy-memilkkot": {
+    "name": "Memilkkot Hyanggi",
+    "nameSrc": "app",
+    "desc": "Perilla-oil buckwheat noodles and potato ongsimi",
+    "descSrc": "app"
+  },
+  "ij-baekdam-tofu": {
+    "name": "Baekdam Sundubu",
+    "nameSrc": "app",
+    "desc": "Soft tofu and grilled dried pollack sets at the Baekdamsa entrance; opens early",
+    "descSrc": "app"
+  },
+  "ij-wondae": {
+    "name": "Wondae Makguksu",
+    "nameSrc": "app",
+    "desc": "Buckwheat noodles and gomchwi boiled pork on the way to the birch forest; closes around 16:00",
+    "descSrc": "app"
+  },
+  "gs-badajeongwon": {
+    "name": "Bada Jeongwon",
+    "nameSrc": "app",
+    "desc": "Goseong café with a seaside garden, open until 21:00",
+    "descSrc": "app"
+  },
+  "hc-memilga": {
+    "name": "Hongcheon Memilga",
+    "nameSrc": "app",
+    "desc": "Perilla-oil bracken buckwheat noodles and boiled pork",
+    "descSrc": "app"
+  },
+  "hc-yakbapsang": {
+    "name": "Yagi Doeneun Bapsang",
+    "nameSrc": "app",
+    "desc": "Gondre and dried radish-greens stone-pot rice and herbal chicken",
+    "descSrc": "app"
+  },
+  "cw-eorang": {
+    "name": "Eorang Son Mandu",
+    "nameSrc": "app",
+    "desc": "Cheorwon hand-made dumpling soup; weekdays until 15:00, weekends until 19:30",
+    "descSrc": "app"
+  },
+  "hw-eojuk": {
+    "name": "Hwacheon Eojuktang",
+    "nameSrc": "app",
+    "desc": "Freshwater fish porridge soup; closes on irregular days",
+    "descSrc": "app"
+  },
+  "yg-naengmyeon": {
+    "name": "Yanggu Son Naengmyeon",
+    "nameSrc": "app",
+    "desc": "Yanggu cold noodles with spicy raw fish, lunch only (11:30–14:30)",
+    "descSrc": "app"
+  },
+  "pc-migayeon": {
+    "name": "Bongpyeong Memil Migayeon",
+    "nameSrc": "app",
+    "desc": "100% buckwheat noodles and buckwheat-sprout bibim",
+    "descSrc": "app"
+  },
+  "pc-gohyang": {
+    "name": "Gohyang Iyagi",
+    "nameSrc": "app",
+    "desc": "Daegwallyeong gondre stone-pot rice and hanwoo",
+    "descSrc": "app"
+  },
+  "js-hambaek": {
+    "name": "Hambaeksan Dolsotbap",
+    "nameSrc": "app",
+    "desc": "Jeongseon gondre stone-pot set, lunch only",
+    "descSrc": "app"
+  },
+  "js-gun-eon": {
+    "name": "Gun-eon Songeo Hoetjip",
+    "nameSrc": "app",
+    "desc": "Jeongseon trout sashimi and fried trout",
+    "descSrc": "app"
+  },
+  "tb-gwangcheon": {
+    "name": "Gwangcheon Makguksu",
+    "nameSrc": "app",
+    "desc": "Taebaek buckwheat noodles and buckwheat crepes, lunch only",
+    "descSrc": "app"
+  },
+  "tb-guwau": {
+    "name": "Guwau Sundubu",
+    "nameSrc": "app",
+    "desc": "Soft tofu at Guwau, Taebaek's sunflower village",
+    "descSrc": "app"
+  },
+  "js-pigojigo": {
+    "name": "Pigojigo",
+    "nameSrc": "app",
+    "desc": "Coal-mine-town café known for briquette-shaped bread",
+    "descSrc": "app"
+  },
+  "yw-ogrann": {
+    "name": "Ogrann Danpatbbang",
+    "nameSrc": "app",
+    "desc": "Yeongwol hand-made red-bean buns; open Friday to Sunday only",
+    "descSrc": "app"
   }
 }
