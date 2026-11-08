@@ -1,3 +1,4 @@
+import {NATIONAL_REGIONS} from "./national-data.js";
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
 import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
@@ -80,14 +81,17 @@ const accessNow = () => [...document.querySelectorAll('.chips[data-name="access"
 document.querySelector('.chips[data-name="likes"]').addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (b) b.classList.toggle("on");
 });
-const segValue = (name) => document.querySelector(`.seg[data-name="${name}"] .on`)?.dataset.v;
+const nationalSelect = $("#nationalRegion");
+for (const [key,r] of Object.entries(NATIONAL_REGIONS)) { const o=document.createElement('option');o.value=key;o.textContent=r.names[getLang()]||r.label;nationalSelect.append(o); }
+const segValue = (name) => name==='region'&&nationalSelect.value!=='gangwon'?nationalSelect.value:document.querySelector(`.seg[data-name="${name}"] .on`)?.dataset.v;
+nationalSelect.addEventListener('change',()=>{document.querySelector('.seg[data-name="region"]').hidden=nationalSelect.value!=='gangwon';routePicks=[];renderRouteRow();renderStartRow();});
 // 이어서 갈 권역 (일정 엔진의 5가지 선택과 따로): 2일 이상일 때만 보이고, 고른 순서대로 최대 2곳(일수-1곳까지)
 const routeBox = document.querySelector('.chips[data-name="route"]');
 let routePicks = [];
 function renderRouteRow() {
   const row = $("#routeRow"); if (!row) return;
   const days = Number(segValue("days")), first = segValue("region");
-  row.hidden = days < 2;
+  row.hidden = days < 2 || nationalSelect.value !== 'gangwon';
   routePicks = routePicks.filter((r) => r !== first).slice(0, Math.max(0, Math.min(2, days - 1)));
   routeBox.querySelectorAll("button").forEach((b) => {
     const i = routePicks.indexOf(b.dataset.v);
@@ -158,22 +162,22 @@ async function thinkThrough(input, opts, voice) {
   const best = opt[0];
   const steps = [
     voice ? t("말씀을 알아들었어요: {what}", { what: (state.heard || []).filter((h) => ["region", "days", "who"].includes(h.key)).map(heardLabel).join(" · ") }) : t("고른 조건을 확인했어요"),
-    t("강원 장소 {n}곳 중 여행 날짜에 문 여는 {open}곳을 골랐어요", { n: stats.candidates, open: stats.open }) + (stats.closed ? t(" · 쉬는 날 {c}곳 제외", { c: stats.closed }) : ""),
+    t("여행지 자료 {n}곳을 살펴보고 있어요", { n: stats.candidates }) + (stats.closed ? t(" · 쉬는 날 {c}곳 제외", { c: stats.closed }) : ""),
     ...(stats.crowded ? [t("붐빔 예상 {c}곳은 뒤로 미뤘어요 (관광공사 혼잡 예측)", { c: stats.crowded })] : []),
     ...(stats.festivals.length ? [t("여행 기간 축제도 살폈어요: {f}", { f: stats.festivals.slice(0, 2).map((f) => placeName(f)).join(", ") })] : []),
-    t("이동 시간과 운영시간을 맞춰 동선을 짰어요 · 영업시간 충돌 {c}건", { c: best.totals.conflicts }),
+    t("자료에 있는 운영시간과 이동 동선을 비교했어요"),
     t("성격이 다른 일정 3개를 비교했어요"),
   ];
   $("#thinkTitle").textContent = t("여행 일정을 짜고 있어요");
   list.innerHTML = steps.map((x) => `<li>${esc(x)}</li>`).join("");
   box.hidden = false;
-  const items = [...list.children], gap = reduceMotion() ? 120 : 480;
+  const items = [...list.children], gap = reduceMotion() ? 0 : 35;
   for (let i = 0; i < items.length; i++) {
     items[i].classList.add("show");
     await sleep(gap);
     items[i].classList.add("done");
   }
-  await sleep(reduceMotion() ? 50 : 250);
+  await sleep(0);
 }
 
 // 반값여행(지역사랑 휴가지원) 대상 시군 장소가 일정에 있는지
@@ -184,7 +188,7 @@ const OPT_NAME = { best: "추천", relaxed: "여유롭게", packed: "알차게",
 const OPT_SUB = { best: "가장 균형 잡힌 동선", relaxed: "장소를 줄이고 덜 걷고 덜 이동", packed: "하루에 더 많이 보기", different: "추천 일정에 없는 곳 위주" };
 function whyText() {
   const s = planStats(state.input, state.baseOpts), inp = state.input, acc = state.baseOpts.access || [];
-  const parts = [t("후보 {n}곳 중 여행 날짜에 문 여는 {open}곳에서 골랐어요.", { n: s.candidates, open: s.open })];
+  const parts = [t("여행 취향과 이동 동선을 기준으로 추천해요.")];
   if (s.crowded) parts.push(t("붐빔 예상 {c}곳은 뒤로 미뤘어요.", { c: s.crowded }));
   if (acc.length) parts.push(t("휠체어·유모차로 다니기 쉬운 곳을 먼저 넣었어요."));
   else if (inp.who === "parents") parts.push(t("부모님과 함께라 걷기를 줄였어요."));
@@ -438,6 +442,8 @@ $("#startGps").addEventListener("click", () => {
 document.querySelector('.seg[data-name="region"]').addEventListener("click", () => setTimeout(renderStartRow, 0));
 
 function fillForm(input) {
+  nationalSelect.value=NATIONAL_REGIONS[input.region]?input.region:'gangwon';
+  document.querySelector('.seg[data-name="region"]').hidden=nationalSelect.value!=='gangwon';
   $("#date").value = input.date;
   for (const name of ["region", "days", "who", "move"]) {
     document.querySelectorAll(`.seg[data-name="${name}"] button`).forEach((b) => b.classList.toggle("on", b.dataset.v === String(input[name])));
@@ -451,6 +457,7 @@ function fillForm(input) {
 
 /* ---------- 화면 전환 ---------- */
 function show(which) {
+  if(which==="result")queueMicrotask(()=>setWorkspace("plan"));
   $("#setup").hidden = which !== "setup";
   $("#result").hidden = which !== "result";
   $("#topActions").hidden = which !== "result";
@@ -525,12 +532,12 @@ async function loadWeather() {
 function render() {
   const { input } = state;
   const nights = t(["당일", "1박 2일", "2박 3일", "3박 4일", "4박 5일"][input.days - 1] || `${input.days - 1}박 ${input.days}일`);
-  $("#tripTitle").textContent = `${dateLabel(input.date)} · ${nights}`;
+  $("#tripTitle").textContent = `${regionLabel(input.region,REGIONS[input.region].label)} · ${dateLabel(input.date)} · ${nights}`;
   const tot = trip.totals;
   $("#stats").innerHTML = `
     <span>${t("{n}곳", { n: tot.places })}</span>
     <span>${t("이동 {t}", { t: minutesLabel(tot.moveMin) })}</span>
-    <span class="${tot.conflicts ? "warn" : "ok"}">${tot.conflicts ? t("영업시간 충돌 {n}건", { n: tot.conflicts }) : t("영업시간·휴무 확인 완료")}</span>
+    <span class="${tot.conflicts ? "warn" : "ok"}">${tot.conflicts ? t("영업시간 충돌 {n}건", { n: tot.conflicts }) : trip.days.some(d=>d.items.some(i=>i.place.hoursGuessed))?t("운영시간은 방문 전 확인"):t("영업시간·휴무 확인 완료")}</span>
     ${trip.days.every((d) => d.road) && drives(state.input.move) ? `<span>${t("실제 도로 기준")}</span>` : ""}`;
 
   $("#tabs").innerHTML = trip.days.map((d, i) => {
@@ -606,7 +613,7 @@ function itemHTML(it, i, day) {
         ${crowdLine(p, trip.days[dayIdx].date)}
         ${state.input.move === "car" ? parkingLine(p) : ""}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
-        ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
+        ${p.source==="OpenStreetMap" ? `<div class="check soft">${t("운영시간은 방문 전 확인")}</div>` : p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
@@ -940,7 +947,7 @@ function heroCaption() {
 
 /* ---------- 축제 ---------- */
 function renderFestivals() {
-  const list = festivalsDuring(state.input);
+  const list = festivalsDuring(state.input).filter(f=>(state.input.route||[state.input.region]).includes(f.region));
   const box = $("#festivals");
   if (!list.length) { box.hidden = true; return; }
   box.hidden = false;
@@ -959,9 +966,13 @@ function renderFestivals() {
    추천 숙소 지역 + 그 지역의 실제 숙소 3곳 (한국관광공사 숙박 정보, scripts/bake-lodging.mjs → lodging-places.json)
    "바다·호수 전망"은 관광공사 소개글에 적힌 경우만 표시한다 */
 let lodgingPlaces = null;
+const liveStays=new Map();
+function refreshStays(l){if(!l||liveStays.has(l.id))return;liveStays.set(l.id,null);fetchT("api/lodgings?"+new URLSearchParams({lat:l.lat,lng:l.lng}),{},8000).then(r=>r.ok?r.json():null).then(d=>{if(!Array.isArray(d?.hotels)||!d.hotels.length)return;liveStays.set(l.id,d.hotels);if(currentLodging()?.id===l.id)renderLodging();}).catch(()=>{});}
+
 const lodgingPlacesReady = fetchT("lodging-places.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({}))
   .then((j) => { lodgingPlaces = j; if (trip?.lodging && !$("#result").hidden) renderLodging(); });
 function staysFor(l) {
+  if(liveStays.get(l.id)?.length)return liveStays.get(l.id);
   const byType = lodgingPlaces?.[l.id] || {};
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
@@ -987,35 +998,13 @@ function bookingReason(query) {
   return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
-const STAY_ART = (() => {
-  const bg = '<defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3f1ef"/><stop offset="1" stop-color="#f6ecdc"/></linearGradient></defs><rect width="56" height="56" fill="url(#b)"/>';
-  const T = "#0b5e6b", M = "#5f9b9a", A = "#f2a541", W = "#ffffff";
-  const art = {
-    ocean: `<circle cx="42" cy="15" r="5" fill="${A}"/><rect x="14" y="14" width="20" height="28" rx="2" fill="${T}"/><g fill="${W}"><rect x="18" y="19" width="4" height="4"/><rect x="26" y="19" width="4" height="4"/><rect x="18" y="27" width="4" height="4"/><rect x="26" y="27" width="4" height="4"/></g><rect y="42" width="56" height="14" fill="${M}"/><path d="M4 47q4-3 8 0t8 0t8 0t8 0t8 0t8 0" fill="none" stroke="${W}" stroke-width="2" stroke-linecap="round"/>`,
-    business: `<rect x="10" y="18" width="16" height="30" rx="2" fill="${M}"/><rect x="24" y="10" width="22" height="38" rx="2" fill="${T}"/><g fill="${W}"><rect x="28" y="15" width="4" height="4"/><rect x="37" y="15" width="4" height="4"/><rect x="28" y="23" width="4" height="4"/><rect x="37" y="23" width="4" height="4"/><rect x="28" y="31" width="4" height="4"/><rect x="37" y="31" width="4" height="4"/><rect x="14" y="23" width="3" height="3"/><rect x="19" y="23" width="3" height="3"/><rect x="14" y="30" width="3" height="3"/><rect x="19" y="30" width="3" height="3"/></g><rect y="48" width="56" height="8" fill="${M}" opacity=".5"/>`,
-    pension: `<circle cx="44" cy="30" r="7" fill="${M}"/><rect x="43" y="34" width="2" height="12" fill="${T}"/><path d="M8 28L22 15L36 28Z" fill="${A}"/><rect x="11" y="28" width="22" height="18" fill="${T}"/><rect x="19" y="34" width="6" height="12" fill="${W}"/><rect x="13" y="31" width="4" height="4" fill="${W}"/><rect y="46" width="56" height="10" fill="${M}" opacity=".5"/>`,
-    hanok: `<path d="M5 25Q10 28 28 24Q46 28 51 25L46 19Q28 22 10 19Z" fill="${T}"/><path d="M16 19Q28 11 40 19Z" fill="${T}"/><rect x="12" y="27" width="32" height="17" fill="#f3e3c3"/><g fill="${T}"><rect x="12" y="27" width="2" height="17"/><rect x="27" y="27" width="2" height="17"/><rect x="42" y="27" width="2" height="17"/></g><g fill="${M}"><rect x="16" y="31" width="8" height="8"/><rect x="32" y="31" width="8" height="8"/></g><rect x="8" y="44" width="40" height="4" fill="${M}"/>`,
-    resort: `<path d="M0 34L14 20L24 28L36 14L56 34V56H0Z" fill="${M}" opacity=".7"/><rect x="10" y="26" width="36" height="20" rx="2" fill="${T}"/><g fill="${W}"><rect x="14" y="30" width="5" height="4"/><rect x="22" y="30" width="5" height="4"/><rect x="30" y="30" width="5" height="4"/><rect x="38" y="30" width="4" height="4"/><rect x="14" y="37" width="5" height="4"/><rect x="22" y="37" width="5" height="4"/><rect x="30" y="37" width="5" height="4"/><rect x="38" y="37" width="4" height="4"/></g><rect x="6" y="46" width="44" height="5" rx="2.5" fill="#7cc4c9"/>`,
-    guesthouse: `<path d="M12 27L28 14L44 27Z" fill="${T}"/><rect x="15" y="27" width="26" height="19" fill="${M}"/><circle cx="28" cy="33" r="3.5" fill="${W}"/><rect x="25" y="38" width="6" height="8" fill="${T}"/><rect x="36" y="16" width="4" height="7" fill="${T}"/><circle cx="46" cy="14" r="3" fill="${A}"/><rect y="46" width="56" height="10" fill="${M}" opacity=".45"/>`,
-  };
-  return Object.fromEntries(Object.entries(art).map(([k, v]) => [k, `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56">${bg}${v}</svg>`).replace(/'/g, "%27")}')`])); // style="…" 안에 들어가므로 작은따옴표
-})();
 function staysHTML(l) {
-  const list = staysFor(l);
-  if (!list.length) return "";
-  const byType = lodgingPlaces?.[l.id] || {};
-  const type = byType[l.type]?.length ? l.type : Object.keys(byType).find((k) => byType[k]?.length) || l.type; // staysFor가 고른 목록의 종류
-  const art = STAY_ART[type] || STAY_ART.pension;
-  return `<div class="stays"><b>${t("이 지역 추천 숙소")}</b><ul>${list.map((h) => {
-    const q = encodeURIComponent(h.name);
-    return `<li>
-      <div class="stay-img" style="background-image:${h.photo ? `url('${h.photo}'), ` : ""}${art}"></div>
-      <div class="stay-info"><strong>${esc(h.name)}</strong>
-        <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
-      <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
-    </li>`;
-  }).join("")}</ul><p class="stay-note">${t("여행 날짜와 인원으로 예약 플랫폼을 엽니다. 객실·아동 나이·세금·취소 조건과 최종 금액을 확인하세요. 최저가는 보장하지 않습니다.")}</p></div>`;
+ const list=staysFor(l);if(!list.length)return "";
+ const card=h=>{const choice=recommendBooking(h.name,stayInput(),peopleNow(),getLang(),store.get('offers:'+h.name));let photo='';try{const u=new URL(h.photo);if(u.protocol==='https:'&&!u.username&&!u.password)photo=u.href;}catch{}
+ return `<article class="stay-card"><div class="stay-photo"><span>${t("사진 준비 중")}</span>${photo?`<img src="${esc(photo)}" alt="${esc(h.name)}" loading="lazy" referrerpolicy="no-referrer">`:''}</div><div class="stay-body"><h4>${esc(h.name)}</h4><p>${esc(h.addr||'')}</p><span class="stay-distance">${t("{km}km",{km:h.km})}</span><div class="stay-card-actions"><a class="ghost price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t("예약 검색")}</a><a class="ghost" href="${esc(choice.alternatives[0].url)}" target="_blank" rel="noopener">${t("가격 비교")}</a><a class="stay-map" href="https://map.naver.com/p/search/${encodeURIComponent(h.name+' '+(h.addr||''))}" target="_blank" rel="noopener">${t("지도로 위치 보기")} ↗</a></div><details class="stay-rate-details"><summary>${t("확인한 요금 비교")}</summary>${priceLinks(h.name)}</details></div></article>`;};
+ return `<div class="stays"><div class="stay-grid">${list.slice(0,3).map(card).join('')}</div>${list.length>3?`<details class="stay-more"><summary>${t("숙소 더 보기")}</summary><div class="stay-grid">${list.slice(3).map(card).join('')}</div></details>`:''}<p class="stay-note">${t("요금·빈 객실은 예약 사이트에서 확인하세요.")}</p></div>`;
 }
+document.addEventListener('error',e=>{if(e.target.matches?.('.stay-photo img'))e.target.remove();},true);
 // 여러 권역 여행: 보고 있는 날의 밤 숙소(마지막 날이면 마지막 숙소)를 보여 주고, 예약 검색 날짜도 그 숙소의 체크인·박수로 연다
 const currentLodging = () => (trip?.lodgings?.length ? lodgingForDay(trip, dayIdx) || trip.lodgings.at(-1) : trip?.lodging);
 function stayInput() {
@@ -1026,6 +1015,7 @@ function renderLodging() {
   const box = $("#lodgingCard"), l = currentLodging();
   if (!l) { box.hidden = true; return; }
   box.hidden = false;
+  refreshStays(l);
   const q = encodeURIComponent(l.query);
   const multi = trip.lodgings?.length > 1;
   const tag = multi ? t("추천 숙소 · {d}일차 밤부터 {n}박", { d: l.from + 1, n: l.nights }) : l.nights === 1 ? t("추천 숙소 · 1박") : t("추천 숙소 · {n}박 내내", { n: l.nights });
@@ -1034,14 +1024,14 @@ function renderLodging() {
     ${plan}
     <div class="info">
       <div class="meta"><span class="tag" style="--c:var(--brand)">${tag}</span></div>
-      <h3>${esc(lodgingName(l))} · ${typeLabel(l.type, l.typeLabel)}</h3>
+      <h3>${esc(lodgingName(l))}</h3>
       <p>${esc(lodgingDesc(l))}</p>
-      <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
+
     </div>
     <div class="booking-options"><label>${t("객실 수")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
     ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}
-    <p>${t("아동 나이를 모두 선택하면 예약 검색에 전달합니다. 플랫폼에서 최종 조건을 확인하세요.")}</p></div>
-    ${bookingReason(l.query)}
+    ${bookingPeople(peopleNow()).kids?`<p>${t("아동 나이를 모두 선택하면 예약 검색에 전달합니다. 플랫폼에서 최종 조건을 확인하세요.")}</p>`:""}</div>
+    <details class="stay-settings"><summary>${t("추가 정보")}</summary>${bookingReason(l.query)}</details>
     ${staysHTML(l)}
     <div class="acts">
       ${priceLinks(l.query, false)}
@@ -1839,7 +1829,7 @@ $("#shareBtn").addEventListener("click", async () => {
   track("share");
   const url = location.href;
   try {
-    if (navigator.share) await navigator.share({ title: t("강원 여행 일정"), url });
+    if (navigator.share) await navigator.share({ title: t("여행 일정"), url });
     else { await navigator.clipboard.writeText(url); toast(t("링크를 복사했어요")); }
   } catch {}
 });
@@ -1857,7 +1847,7 @@ function calendarEvents() {
     uid: `${d.date}-${i}-${it.id}@ohneul-gangwon`,
     title: placeName(it.place),
     location: it.place.name,
-    description: t("강원 여행 일정"),
+    description: t("여행 일정"),
     start: kstMs(d.date, it.start), end: kstMs(d.date, it.end),
     lat: it.place.lat, lng: it.place.lng,
   })));
@@ -1919,6 +1909,7 @@ addEventListener("online", updateOnline); addEventListener("offline", updateOnli
 /* ---------- 언어 전환 (한국어 / EN / 日本語 / 中文) ---------- */
 async function switchLang(l) {
   setLang(l);
+  for(const option of nationalSelect.options){const r=NATIONAL_REGIONS[option.value];option.textContent=r?(r.names[l]||r.label):({ko:"강원",en:"Gangwon",ja:"江原",zh:"江原"}[l]||"강원");}
   track("lang", l);
   await loadLang((u) => fetchT(u, {}, 4000));
   applyStatic();
@@ -2013,3 +2004,7 @@ if (directoryAdd) {
     toast(t("{name}은(는) 이번 일정의 권역·영업시간에 맞지 않아 넣지 못했어요", { name: p.name }));
   }).catch(() => toast(t("탐색 목록을 불러오지 못했어요")));
 }
+
+let workspaceView='plan';
+function setWorkspace(view){workspaceView=view;for(const pane of document.querySelectorAll('.workspace-pane'))pane.hidden=pane.id!=='pane-'+view;document.querySelectorAll('[data-view]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.view===view)));$('#noStay').hidden=!!trip?.lodging;if(view==='plan')setTimeout(()=>map?.invalidateSize?.(),80);}
+document.querySelector('.workspace-nav').addEventListener('click',e=>{const b=e.target.closest('[data-view]');if(b)setWorkspace(b.dataset.view);});

@@ -4,7 +4,7 @@
 // - 종류는 관광공사 분류(lclsSystm3)로 나눈다: 호텔 AC01, 콘도·리조트 AC02, 펜션 AC0301, 한옥 AC0302, 민박 AC0303, 모텔 AC04, 게스트하우스 AC06
 // - "전망 좋은 호텔"은 관광공사 소개글에 바다·호수 전망이 적힌 호텔을 앞에 두고, 그때만 view: true (전망을 지어내지 않는다)
 // - 숙소 지역 중심 3km 안(없으면 6km), 사진 있는 곳을 먼저, 가까운 순으로 3곳
-import { writeFile, mkdir } from "node:fs/promises";
+import { readFile, writeFile, mkdir } from "node:fs/promises";
 import { LODGING } from "../public/data.js";
 import { tour, km, https } from "./tour-api.mjs";
 
@@ -68,6 +68,9 @@ for (const l of LODGING) {
     report.push({ l, type, list });
   }
 }
+// This batch is Gangwon-specific; retain national starter records and let /api/lodgings refresh them at runtime.
+const previous=JSON.parse(await readFile(new URL("../public/lodging-places.json",import.meta.url),"utf8").catch(()=>"{}"));
+for(const l of LODGING.filter(l=>!["gangneung","seorak","chuncheon","pyeongchang","wonju"].includes(l.region)))if(previous[l.id])out[l.id]=previous[l.id];
 await writeFile(new URL("../public/lodging-places.json", import.meta.url), JSON.stringify(out, null, 1) + "\n");
 
 const esc = (s) => String(s).replace(/\|/g, "\\|");

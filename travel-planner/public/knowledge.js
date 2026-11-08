@@ -939,3 +939,6 @@ export const FAQ_EN = {
   특산물_after: " You can also list things to order from home in the Local specialties section of your plan.",
   숙소: "The lodging section below your plan picks one place that fits your whole route. Before booking, use the pre-booking check to review the refund policy and reviews.",
 };
+
+import {NATIONAL_PLACES} from "./national-data.js";
+for(const p of NATIONAL_PLACES){TIPS[p.id]="지도에서 위치와 최신 운영 안내를 확인할 수 있어요.";TIPS_EN[p.id]="Check the map for the location and current opening information.";}

@@ -1,3 +1,4 @@
+import {loadLodgings} from "./lodging-api.mjs";
 import {createPushSender,startPushWorker} from './web-push.mjs';
 import { scheduleMaintenance } from "./maintenance.mjs";
 import { serviceAPI } from "./service-api.mjs";
@@ -36,6 +37,8 @@ const MIME = {
 };
 
 const photoCache = new Map();
+const lodgingCache=new Map();
+let lodgingRequests=0;
 const gzipCache = new Map();
 
 const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".json"] }).end(JSON.stringify(obj));
@@ -53,6 +56,17 @@ async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
 
   if (await services(req,res,url)) return;
+
+  if(req.method==='GET' && url.pathname==='/api/lodgings'){
+    const point={lat:Number(url.searchParams.get('lat')),lng:Number(url.searchParams.get('lng'))};
+    if(!url.searchParams.has('lat')||!url.searchParams.has('lng')||!Number.isFinite(point.lat)||!Number.isFinite(point.lng)||point.lat<33||point.lat>39||point.lng<124||point.lng>132)return json(res,400,{error:'INVALID_LOCATION'});
+    const cacheKey=point.lat.toFixed(3)+','+point.lng.toFixed(3),hit=lodgingCache.get(cacheKey);
+    if(hit&&Date.now()-hit.at<1800000)return json(res,200,{hotels:hit.hotels});
+    if(lodgingRequests>=4)return json(res,429,{error:'TRY_LATER'});
+    lodgingRequests++;
+    try{const hotels=await loadLodgings(point,{key:process.env.TOUR_API_KEY||process.env.BOPok_TOURAPI_KEY});if(lodgingCache.size>=100)lodgingCache.delete(lodgingCache.keys().next().value);lodgingCache.set(cacheKey,{at:Date.now(),hotels});return json(res,200,{hotels});}
+    catch(e){return json(res,e.status||502,{error:e.status===503?'PROVIDER_NOT_CONFIGURED':'PROVIDER_UNAVAILABLE'});}finally{lodgingRequests--;}
+  }
 
   // 내장 가이드만 사용한다. 예전 클라이언트 요청도 유료 모델로 전달하지 않는다.
   if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {

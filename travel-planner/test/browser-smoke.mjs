@@ -1,0 +1,21 @@
+import assert from 'node:assert/strict';
+import {chromium} from 'playwright';
+import {mkdir} from 'node:fs/promises';
+const url=process.env.TEST_APP_URL||'http://127.0.0.1:8082';
+const browser=await chromium.launch({headless:true,...(process.env.CHROMIUM_PATH?{executablePath:process.env.CHROMIUM_PATH}:{})});
+const out=process.env.TEST_SCREENSHOT_DIR||'/tmp/my-ai-lab-preview';await mkdir(out,{recursive:true});
+try{for(const [label,viewport] of [['desktop',{width:1440,height:1000}],['mobile',{width:390,height:844}]]){
+ const context=await browser.newContext({viewport,locale:'ko-KR',serviceWorkers:'block',acceptDownloads:true});const page=await context.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ // External providers are deterministic here; live provider data requires the server API key.
+ await page.route('**/api/lodgings?**',r=>r.fulfill({json:{hotels:Array.from({length:6},(_,i)=>({id:String(i),name:'테스트 호텔 '+(i+1),addr:'부산광역시 테스트 주소',lat:35.1,lng:129.04,km:i+0.3,photo:i<2?'https://hotel.example/'+i+'.png':''}))}}));
+ await page.route('https://hotel.example/0.png',r=>r.fulfill({contentType:'image/png',body:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/l9sAAAAASUVORK5CYII=','base64')}));await page.route('https://hotel.example/1.png',r=>r.abort());
+ await page.route('https://api.open-meteo.com/**',r=>r.abort());await page.route('https://router.project-osrm.org/**',r=>r.abort());
+ await page.goto(url);await page.waitForFunction(()=>document.querySelector('#nationalRegion').options.length===17);assert.equal(await page.title(),'여행잇');await page.screenshot({path:out+'/'+label+'-home.png',fullPage:true});
+ await page.selectOption('#nationalRegion','busan');await page.fill('#date','2027-01-16');await page.locator('#form button[type=submit]').click();await page.locator('#result:not([hidden])').waitFor();await page.locator('#timeline .item').first().waitFor();assert.match(await page.locator('#tripTitle').textContent(),/부산/);assert.equal(await page.locator('#pane-stay').isVisible(),false);assert.ok(await page.locator('#timeline .item').count()>1);assert.ok(!await page.locator('#festivals').isVisible());const shared=page.url();await page.screenshot({path:out+'/'+label+'-plan.png',fullPage:true});
+ await page.locator('[data-view=stay]').click();await page.locator('.stay-card').first().waitFor();assert.equal(await page.locator('.stay-card:visible').count(),3);await page.locator('.stay-card img').first().scrollIntoViewIfNeeded();await page.waitForFunction(()=>document.querySelector('.stay-card img')?.naturalWidth>0);await page.waitForFunction(()=>!document.querySelector('img[src="https://hotel.example/1.png"]'));const href=await page.locator('.stay-card .price').first().getAttribute('href');assert.equal(new URL(href).searchParams.get('checkin'),'2027-01-16');assert.equal(new URL(href).searchParams.get('checkout'),'2027-01-17');await page.locator('.stay-more>summary').click();assert.equal(await page.locator('.stay-card:visible').count(),6);await page.locator('.stay-more>summary').click();
+ await page.locator('[data-view=budget]').click();assert.ok(await page.locator('#costs').isVisible());await page.locator('[data-view=guide]').click();assert.ok(await page.locator('#askInput').isVisible());await page.locator('[data-view=plan]').click();await page.locator('#tabs button').nth(1).click();assert.match(await page.locator('#tabs .on strong').textContent(),/2일차/);
+ const dl=page.waitForEvent('download');await page.locator('#icsBtn').click();const file=await dl;assert.match(file.suggestedFilename(),/\.ics$/);
+ await page.goto(shared);await page.locator('#result:not([hidden])').waitFor();assert.match(await page.locator('#tripTitle').textContent(),/부산/);
+ await page.locator('[data-lang=en]').click();await page.waitForFunction(()=>document.documentElement.lang==='en');assert.match(await page.locator('[data-view=stay]').textContent(),/Stay/);
+ assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),'no horizontal page overflow');assert.deepEqual(errors,[]);await context.close();console.log('ok - '+label+' national planning / panels / images / booking dates / calendar / shared link / language / overflow');
+}}finally{await browser.close();}

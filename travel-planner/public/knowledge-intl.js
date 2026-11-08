@@ -1159,3 +1159,6 @@ export const FAQ_ZH = {
   특산물_after: " 在行程页面的特产部分，也可以整理回家后要订购的东西。",
   숙소: "住宿已在行程页面下方选好一处适合整条路线的地方。预订前请用“预订前安心检查”看看退款规定和评价。",
 };
+
+import {NATIONAL_PLACES} from "./national-data.js";
+for(const p of NATIONAL_PLACES){NAMES_JA[p.id]=p.name;NAMES_ZH[p.id]=p.name;TIPS_JA[p.id]=p.desc||"所在地を地図で確認";TIPS_ZH[p.id]=p.desc||"在地图上查看位置";}

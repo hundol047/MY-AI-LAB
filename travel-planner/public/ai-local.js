@@ -1,3 +1,4 @@
+import {NATIONAL_REGIONS} from "./national-data.js";
 import { GUIDE_TOPICS } from "./guide-topics.js";
 // 내장 여행 지식과 일정 엔진으로 답하는 무료 가이드
 import { addDays, parseRequestLocally, hoursFor, fmt, RAIN } from "./planner.js";
@@ -6,6 +7,7 @@ import { normalize, detectLang, NICKS, NICKS_EN, TIPS, TIPS_EN, THEMES, FAQ, FAQ
 import { toSimplified, NAMES_JA, NAMES_ZH, NICKS_JA, NICKS_ZH, TIPS_JA, TIPS_ZH, FAQ_JA, FAQ_ZH } from "./knowledge-intl.js";
 
 const REGION_WORDS = {
+  ...Object.fromEntries(Object.entries(NATIONAL_REGIONS).map(([k,r])=>[k,[r.label,...Object.values(r.names)]])),
   gangneung: ["강릉", "동해", "삼척", "정동진", "경포", "주문진"],
   seorak: ["속초", "양양", "고성", "설악", "인제"],
   chuncheon: ["춘천", "남이섬", "화천", "철원", "홍천"],
@@ -15,9 +17,10 @@ const REGION_WORDS = {
 
 export function startLocal(text, today) {
   const t = normalize(text);
+  const destinationText = t.replace(/(?:서울|부산|대구|인천|광주|대전|울산|제주)(?:역|공항|터미널)?에서(?:출발)?/g, "");
   const has = (...w) => w.some((x) => t.includes(x));
   const r = { region: "gangneung", date: addDays(today, 1), days: 2, who: "couple", likes: [], move: "car" };
-  for (const [k, words] of Object.entries(REGION_WORDS)) if (has(...words)) { r.region = k; break; }
+  for (const [k, words] of Object.entries(REGION_WORDS)) if (words.some(w=>destinationText.includes(normalize(w)))) { r.region = k; break; }
   if (has("당일", "하루")) r.days = 1;
   if (has("1박")) r.days = 2;
   if (has("2박")) r.days = 3;
@@ -39,7 +42,7 @@ export function startLocal(text, today) {
     r.date = addDays(today, (6 - wd + 7) % 7 || 7);
   }
   // "춘천 들렀다 속초, 강릉까지 3박"처럼 권역이 여럿이면 말한 순서대로 이어 가는 여행 (2일 이상, 최대 3곳)
-  const at = Object.entries(REGION_WORDS).map(([k, words]) => [k, Math.min(...words.map((w) => (t.indexOf(w) + 1 || Infinity) - 1))]).filter(([, i]) => Number.isFinite(i)).sort((a, b) => a[1] - b[1]).map(([k]) => k);
+  const at = Object.entries(REGION_WORDS).map(([k, words]) => [k, Math.min(...words.map((w) => (destinationText.indexOf(normalize(w)) + 1 || Infinity) - 1))]).filter(([, i]) => Number.isFinite(i)).sort((a, b) => a[1] - b[1]).map(([k]) => k);
   if (at.length) r.region = at[0];
   if (at.length >= 2 && r.days >= 2) r.route = at.slice(0, Math.min(3, r.days));
   const m = t.match(/(\d{1,2})월(\d{1,2})일/);
@@ -194,6 +197,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   const targets = mentioned.length ? mentioned : dayPlaces.filter((p) => p.cat || p.start);
 
   const hoursLine = (p, date) => {
+    if(p.hoursGuessed)return `${nm(p)} ${L("운영시간은 방문 전 확인하세요", "check current opening hours before visiting", "営業時間は訪問前に確認してください", "出发前请确认营业时间")}`;
     if (p.start) return `${nm(p)} ${p.start <= date && date <= p.end ? L("축제 기간이에요", "festival is on", "開催中", "节庆期间") : L("축제 기간이 아니에요", "festival is not on", "開催期間外", "不在节庆期间")}`;
     const h = hoursFor(p, date);
     if (h.closedToday) return `${nm(p)} ${L("이날 휴무", "closed that day", "この日は休み", "当天休息")}`;

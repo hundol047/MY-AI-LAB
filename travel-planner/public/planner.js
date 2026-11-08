@@ -74,7 +74,7 @@ function isOpenDay(p, dateStr) {
 }
 
 const regionOf = (input) => input.region || "gangneung";
-const REGION_KEYS = ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"];
+const REGION_KEYS = Object.keys(REGIONS);
 // 여러 권역을 이어 가는 여행: input.route = ["chuncheon", "seorak", "gangneung"] (최대 3곳, 하루 이상씩)
 // 날짜를 앞 권역부터 고르게 나눈다 (5일·3곳 → 2·2·1일). 권역이 하나뿐이면 예전과 같다
 export function routeOf(input) {
@@ -99,7 +99,7 @@ const NEIGHBORS = {
   pyeongchang: ["gangneung", "wonju"],
   wonju: ["pyeongchang", "chuncheon"],
 };
-const inScope = (input, region) => region === regionOf(input) || (input.days > 1 && NEIGHBORS[regionOf(input)].includes(region));
+const inScope = (input, region) => region === regionOf(input) || (input.days > 1 && (NEIGHBORS[regionOf(input)] || []).includes(region));
 export const baseOf = (input) => REGIONS[regionOf(input)].base;
 
 // 그 권역의 장소 + 그날 열리는 확정 축제
@@ -113,7 +113,7 @@ function candidates(input, opts = {}) {
   const okWho = (p) => input.who === "pet" ? p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
   // 휠체어·유모차: 오래 걷거나 산길인 곳(walk 3)은 빼고, 휠체어는 무장애 정보 없이 걷기가 있는 곳(walk 2)도 뺀다
   const acc = opts.access || [];
-  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp));
+  const okAccess = (p) => (!acc.length || !p.unverified || p.wheelchairKnown === "yes") && (!acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp && !p.access?.wheel)));
   const ok = (p) => okWho(p) && okAccess(p);
   return [...PLACES.filter((p) => inScope(input, p.region) && ok(p)), ...fests];
 }
