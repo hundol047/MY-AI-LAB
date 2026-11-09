@@ -57,6 +57,7 @@ export const AREAS = {
   ganhyeon: { region: "wonju", name: "간현·지정", lat: 37.385, lng: 127.820 },
   chiaksan: { region: "wonju", name: "치악산", lat: 37.404, lng: 128.048 },
   hoengseong: { region: "wonju", name: "횡성", lat: 37.490, lng: 127.985 },
+  hs_east: { region: "wonju", name: "횡성 둔내·안흥", lat: 37.470, lng: 128.230 }, // 횡성 동쪽 (청태산·웰리힐리·안흥). 읍내 쪽과 30km 넘게 떨어져 따로 둔다
   hongcheon: { region: "chuncheon", name: "홍천", lat: 37.697, lng: 127.888 },
   yanggu: { region: "chuncheon", name: "양구", lat: 38.106, lng: 127.990 },
 };
@@ -390,6 +391,7 @@ export const LODGING = [
   { id: "l-wj-city", region: "wonju", name: "원주 시내", lat: 37.3450, lng: 127.9400, types: ["business", "guesthouse"], desc: "역·터미널 근처 호텔" },
   { id: "l-jijeong", region: "wonju", name: "원주 지정면", lat: 37.4100, lng: 127.8200, types: ["resort"], desc: "뮤지엄 산 옆 리조트" },
   { id: "l-chiak", region: "wonju", name: "치악산", lat: 37.4000, lng: 128.0400, types: ["pension", "hanok"], desc: "산자락 펜션" },
+  { id: "l-dunnae", region: "wonju", name: "횡성 둔내", lat: 37.4970, lng: 128.2420, types: ["resort", "pension"], desc: "웰리힐리파크 리조트와 펜션 · 청태산 숲 가까이" },
 ];
 
 export const LODGING_TYPES = {
@@ -414,17 +416,18 @@ export const BENEFITS = [
     id: "b-halfprice", kind: "program", title: "반값여행 (지역사랑 휴가지원)", start: null, end: "2026-12-31",
     towns: ["평창", "영월", "횡성"], regions: ["pyeongchang", "wonju"], needsNight: false,
     // 평창·영월·횡성에 있는 앱 장소 (관광공사 주소로 정한 시군, public/pet.json sigun · 권역 경계와 시군 경계가 달라 장소로 판단한다)
-    // 시군별 대상 장소 (관광공사 주소로 정한 시군, public/pet.json sigun). 장소를 더하면 test/planner.test.mjs가 빠진 곳을 알려 준다
+    // 시군별 대상 장소 (관광공사 주소로 정한 시군, public/pet.json sigun · 반려동물 동행 전용 장소 포함). 장소를 더하면 test/planner.test.mjs가 빠진 곳을 알려 준다
     placesByTown: {
-      평창: ["hyoseok-village", "herbnara", "yongpyong-ski", "phoenix-ski", "alpensia-ski", "pc-sangwonsa", "pc-sillok", "pc-hangang-source", "pc-sago", "pc-dalbit", "pc-heungjeong", "pc-mui", "pc-leeseungbok", "pc-jeonggangwon", "pc-bangadari", "pc-lavender", "pc-kensington", "pc-machu", "pc-botanic", "pc-skijump", "pc-olympic", "pc-seonjaryeong", "pc-doam", "pc-animal-farm", "pc-inart", "pc-buil", "pc-memil", "pc-hwangtae", "pc-napjak", "pc-yeonworil", "pc-7hundred", "pc-makguksu", "pc-cafe", "pc-sanchae", "pc-trout", "pc-gohyang", "pc-migayeon", "sheep", "samyang", "ohsam", "balwang", "woljeongsa", "bongpyeong", "jinbu-food"],
-      영월: ["jangneung", "gossigul", "byeolmaro", "seondol", "yoseonam", "kimsatgat", "young-dal", "yw-gondre", "yw-cafe", "yw-hanwoo", "yw-trout", "yw-ogrann", "cheongnyeongpo", "hanbando", "yw-market"],
-      횡성: ["pungsuwon", "birch-museum", "anheung-bread", "cheongtaesan", "hs-luge", "welli-ski", "hs-forest", "hs-byeongjibang", "hs-deodeok", "hs-hambat", "hs-kkwong-mandu", "hs-makguksu", "hs-cafe", "hs-gwangam", "hs-sundae", "hanwoo", "hoengseong-lake"],
+      평창: ["hyoseok-village", "herbnara", "yongpyong-ski", "phoenix-ski", "alpensia-ski", "pc-sangwonsa", "pc-sillok", "pc-hangang-source", "pc-sago", "pc-dalbit", "pc-heungjeong", "pc-mui", "pc-leeseungbok", "pc-jeonggangwon", "pc-bangadari", "pc-lavender", "pc-kensington", "pc-machu", "pc-botanic", "pc-skijump", "pc-olympic", "pc-seonjaryeong", "pc-doam", "pc-animal-farm", "pc-inart", "pc-buil", "pc-memil", "pc-hwangtae", "pc-napjak", "pc-yeonworil", "pc-7hundred", "pc-makguksu", "pc-cafe", "pc-sanchae", "pc-trout", "pc-gohyang", "pc-migayeon", "sheep", "samyang", "ohsam", "balwang", "woljeongsa", "bongpyeong", "jinbu-food", "pet-564", "pet-565", "pet-566", "pet-567", "pet-595", "pet-596", "pet-597", "pet-598", "pet-599", "pet-600", "pet-601", "pet-610", "pet-611"],
+      영월: ["jangneung", "gossigul", "byeolmaro", "seondol", "yoseonam", "kimsatgat", "young-dal", "yw-gondre", "yw-cafe", "yw-hanwoo", "yw-trout", "yw-ogrann", "cheongnyeongpo", "hanbando", "yw-market", "pet-242", "pet-269", "pet-270"],
+      횡성: ["pungsuwon", "birch-museum", "anheung-bread", "cheongtaesan", "hs-luge", "welli-ski", "hs-forest", "hs-byeongjibang", "hs-deodeok", "hs-hambat", "hs-kkwong-mandu", "hs-makguksu", "hs-cafe", "hs-gwangam", "hs-sundae", "hanwoo", "hoengseong-lake", "pet-691", "pet-692", "pet-693", "pet-694"],
     },
     // 반값여행 코스: 대상 시군 안의 장소·숙소만으로 짠 일정 (시군 밖에서 쓴 돈은 환급 대상이 아니라서)
     packages: [
       { id: "hp-pyeongchang", town: "평창", region: "pyeongchang", days: 2, lodging: ["l-jinbu", "l-yongpyong"], title: "평창 1박 2일", sub: "오대산·봉평·대관령" },
       { id: "hp-yeongwol", town: "영월", region: "pyeongchang", days: 2, lodging: ["l-yeongwol"], title: "영월 1박 2일", sub: "동강·청령포·별마로천문대" },
       { id: "hp-hoengseong", town: "횡성", region: "wonju", days: 1, lodging: [], title: "횡성 당일", sub: "횡성호·풍수원·한우" },
+      { id: "hp-hoengseong2", town: "횡성", region: "wonju", days: 2, lodging: ["l-dunnae"], title: "횡성 1박 2일", sub: "횡성호·자작나무숲·청태산 숲" },
     ],
     amount: 100000, how: "여행 경비의 50%를 지역사랑상품권으로 돌려받아요 (개인 최대 10만 원, 2인 이상 최대 20만 원)",
     steps: ["여행 전 사전 신청·승인", "여행 후 증빙 제출", "심사 후 지역사랑상품권 지급"],

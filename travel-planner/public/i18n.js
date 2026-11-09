@@ -33,6 +33,9 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)": "Outside the half-price county, so this meal isn't refunded (nearest pet-friendly restaurant)",
+  "횡성 1박 2일": "Hoengseong, 2 days 1 night",
+  "횡성호·자작나무숲·청태산 숲": "Hoengseong Lake · Birch Forest · Cheongtaesan forest",
   "💰 반값여행 코스": "💰 Half-price travel courses",
   "{towns}에서 쓴 경비의 50%를 지역사랑상품권으로 돌려받아요 (1명 최대 10만 원, 2명 이상 최대 20만 원). 코스는 그 시군 안의 장소·숙소로만 짜요.": "Get 50% of what you spend in {towns} back as local gift vouchers (up to ₩100,000 per person, ₩200,000 for 2+). These courses use only places and stays inside that county.",
   "대상 장소 {n}곳": "{n} eligible places",
@@ -542,7 +545,7 @@ const AREA_EN = {
   "속초 시내": "Downtown Sokcho", "설악산": "Seoraksan", "고성": "Goseong", "양양": "Yangyang", "인제": "Inje",
   "춘천 시내": "Downtown Chuncheon", "남이섬·김유정": "Nami Island·Kim Yu-jeong", "철원": "Cheorwon", "화천": "Hwacheon",
   "대관령": "Daegwallyeong", "오대산·진부": "Odaesan·Jinbu", "정선": "Jeongseon", "영월": "Yeongwol", "태백": "Taebaek",
-  "원주 시내": "Downtown Wonju", "간현·지정": "Ganhyeon·Jijeong", "치악산": "Chiaksan", "횡성": "Hoengseong", "홍천": "Hongcheon", "양구": "Yanggu",
+  "원주 시내": "Downtown Wonju", "간현·지정": "Ganhyeon·Jijeong", "치악산": "Chiaksan", "횡성": "Hoengseong", "횡성 둔내·안흥": "Dunnae·Anheung, Hoengseong", "홍천": "Hongcheon", "양구": "Yanggu",
 };
 const BASE_EN = { "강릉역": "Gangneung Station", "속초시외버스터미널": "Sokcho Intercity Bus Terminal", "춘천역": "Chuncheon Station", "진부역": "Jinbu Station", "원주역": "Wonju Station" };
 const LODGING_EN = {
@@ -572,6 +575,7 @@ const LODGING_EN = {
   "l-wj-city": ["Downtown Wonju", "Hotels near the station and terminal"],
   "l-jijeong": ["Wonju Jijeong-myeon", "Resorts next to Museum SAN"],
   "l-chiak": ["Chiaksan", "Pensions at the foot of the mountain"],
+  "l-dunnae": ["Dunnae, Hoengseong", "Welli Hilli Park resort and pensions, near Cheongtaesan forest"],
 };
 const TYPE_EN = { guesthouse: "Guesthouse", business: "Business hotel", ocean: "Hotel with a view", pension: "Pension", resort: "Resort·condo", hanok: "Hanok stay" };
 const TYPE_KO_TO_KEY = { "게스트하우스": "guesthouse", "비즈니스호텔": "business", "전망 좋은 호텔": "ocean", "펜션": "pension", "리조트·콘도": "resort", "한옥스테이": "hanok" };

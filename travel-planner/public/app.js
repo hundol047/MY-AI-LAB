@@ -263,7 +263,7 @@ function renderHalfPkgs() {
       return `<button type="button" class="hp" data-hp="${pk.id}">
         <b>${t(pk.title)}</b><span class="hp-sub">${t(pk.sub)}</span>
         <span class="hp-places">${pop(pk2.placeIds).map((p) => esc(placeName(p))).join(" · ")}</span>
-        <span class="hp-meta">${t("대상 장소 {n}곳", { n: pk2.placeIds.length })}${pk.lodging.length ? " · " + t("숙소도 {town} 안", { town: t(pk.town) }) : ""}</span>
+        <span class="hp-meta">${t("대상 장소 {n}곳", { n: pk2.placeIds.filter((id) => !PLACES.find((p) => p.id === id)?.petOnly).length })}${pk.lodging.length ? " · " + t("숙소도 {town} 안", { town: t(pk.town) }) : ""}</span>
         <span class="hp-go">${t("이 코스로 일정 만들기")}</span></button>`;
     }).join("")}</div>
     <p class="hp-note">${t("그 시군과 이웃 시군 주민은 신청할 수 없어요 · 여행 전 사전 신청이 필요하고 회차·날짜는 시군마다 달라요")} <a href="${esc(b.link)}" target="_blank" rel="noopener">${t("지금 진행 중인 회차·신청 날짜 보기")}</a></p>`;
@@ -643,6 +643,7 @@ function itemHTML(it, i, day) {
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : p.pet === false ? t("🐾 동반 불가") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
+        ${state.opts.halfPkg && !(halfPackage(state.opts.halfPkg)?.placeIds || []).includes(p.id) ? `<div class="check soft">${t("반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)")}</div>` : ""}
         ${it.extra ? `<div class="check soft">${t("저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요", { min: it.extra })}</div>` : ""}
         ${(state.opts.access || []).length ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}

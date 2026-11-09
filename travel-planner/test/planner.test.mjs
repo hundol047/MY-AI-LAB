@@ -114,7 +114,7 @@ assert.equal(hoursFor(P("solhyang"), "2026-12-01").close, 17 * 60);
   const sigun = JSON.parse(readFileSync(new URL("../public/pet.json", import.meta.url), "utf8")).sigun;
   const H = BENEFITS.find((b) => b.id === "b-halfprice");
   for (const town of H.towns) {
-    const want = PLACES.filter((p) => sigun[p.id] === town && !p.petOnly).map((p) => p.id).sort();
+    const want = PLACES.filter((p) => sigun[p.id] === town).map((p) => p.id).sort();
     assert.deepEqual([...H.placesByTown[town]].sort(), want, `${town} 반값여행 장소 목록 (data.js placesByTown)`);
   }
   for (const pk of H.packages) for (const move of ["car", "transit"]) {

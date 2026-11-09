@@ -307,7 +307,7 @@
    "q": "안흥찐빵마을",
    "sigun": "횡성",
    "region": "wonju",
-   "area": "hoengseong",
+   "area": "hs_east",
    "cat": "food"
   },
   {
@@ -315,7 +315,7 @@
    "q": "청태산자연휴양림",
    "sigun": "횡성",
    "region": "wonju",
-   "area": "hoengseong",
+   "area": "hs_east",
    "cat": "nature"
   },
   {
@@ -336,7 +336,7 @@
    "q": "웰리힐리파크",
    "sigun": "횡성",
    "region": "wonju",
-   "area": "hoengseong",
+   "area": "hs_east",
    "cat": "nature",
    "winter": true,
    "qs": [
@@ -940,7 +940,7 @@
    "title": "국립횡성숲체원",
    "sigun": "횡성",
    "region": "wonju",
-   "area": "hoengseong",
+   "area": "hs_east",
    "cat": "nature"
   },
   {

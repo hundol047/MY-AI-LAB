@@ -133,7 +133,12 @@ function candidates(input, opts = {}) {
   const ok = (p) => okWho(p) && okAccess(p);
   // 반값여행 코스(opts.halfPkg)처럼 정해 둔 장소만 쓸 때 (축제는 그 시군 것인지 알 수 없어 뺀다)
   const onlyIds = opts.onlyIds || halfPackage(opts.halfPkg)?.placeIds;
-  if (onlyIds) { const only = new Set(onlyIds); return PLACES.filter((p) => only.has(p.id) && ok(p)); }
+  if (onlyIds) {
+    const only = new Set(onlyIds);
+    // 반려동물 동행은 그 시군에 동반 식당이 드물어(영월 등) 끼니가 빠지므로, 식사만은 근처 시군의 동반 확인 식당도 쓴다 (그 끼니는 환급 대상이 아님)
+    const petMeal = (p) => input.who === "pet" && p.cat === "food" && p.pet && inScope(input, p.region);
+    return PLACES.filter((p) => (only.has(p.id) || petMeal(p)) && ok(p));
+  }
   return [...PLACES.filter((p) => inScope(input, p.region) && ok(p)), ...fests];
 }
 

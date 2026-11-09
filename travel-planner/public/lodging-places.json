@@ -1065,5 +1065,47 @@
     "addr": "강원특별자치도 원주시 소초면 백교길 107"
    }
   ]
+ },
+ "l-dunnae": {
+  "resort": [
+   {
+    "id": "136548",
+    "name": "웰리힐리파크",
+    "lat": 37.48723,
+    "lng": 128.24929,
+    "km": 1.3,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/62/2720962_image2_1.jpg",
+    "addr": "강원특별자치도 횡성군 둔내면 고원로 451"
+   }
+  ],
+  "pension": [
+   {
+    "id": "3044525",
+    "name": "꿈나무펜션",
+    "lat": 37.49884,
+    "lng": 128.24247,
+    "km": 0.2,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/75/4097375_image2_1.jpg",
+    "addr": "강원특별자치도 횡성군 둔내면 고원로425번길 35-1"
+   },
+   {
+    "id": "139105",
+    "name": "꿈꾸는소나무",
+    "lat": 37.50044,
+    "lng": 128.24232,
+    "km": 0.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/53/4115153_image2_1.jpg",
+    "addr": "강원특별자치도 횡성군 둔내면 고원로425번길 35-15"
+   },
+   {
+    "id": "2380348",
+    "name": "모던힐펜션",
+    "lat": 37.4972,
+    "lng": 128.24702,
+    "km": 0.4,
+    "photo": "https://tong.visitkorea.or.kr/cms/resource/37/2380337_image2_1.jpg",
+    "addr": "강원특별자치도 횡성군 둔내면 두원1길 20-7"
+   }
+  ]
  }
 }
