@@ -33,6 +33,11 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "좋아요": "Like",
+  "별로예요": "Not for me",
+  "장소마다 👍👎로 같이 골라요": "Let's pick together with 👍👎 on each place",
+  "링크를 복사했어요 · 받은 사람이 장소마다 👍👎를 남길 수 있어요": "Link copied · People you share it with can leave 👍👎 on each place",
+  "잠시 후 다시 해 주세요": "Please try again in a moment",
   "고속도로 정체 예상 +{min}분 ({dep} 출발 · 주말·연휴에 자주 막히는 시간대) · 일찍 출발하면 덜 막혀요": "Expected highway congestion +{min} min (leaving {dep}, a usual weekend/holiday jam time) · Leaving earlier helps",
   "돌아가는 길: {from}~{to} 상행 정체 예상 (일요일·연휴 마지막 날) · {from} 전이나 {to} 넘어 출발하면 덜 막혀요": "Way back: expected Seoul-bound congestion {from}–{to} (Sunday / last day of holiday) · Leave before {from} or after {to}",
   "반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)": "Outside the half-price county, so this meal isn't refunded (nearest pet-friendly restaurant)",

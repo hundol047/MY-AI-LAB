@@ -130,6 +130,7 @@ $("#form").addEventListener("submit", async (e) => {
   // 반값여행 코스로 시작: 그 시군 장소·숙소만 쓴다 (링크에는 코스 id만)
   const hp = pendingPackage; pendingPackage = null;
   if (hp) state.opts.halfPkg = hp.id;
+  state.opts.voteKey = randomKey(10); // 같이 고르기(공유 링크 투표)용 일정 키 — 링크에 담겨 받은 사람도 같은 표를 본다
   state.baseOpts = { ...state.opts }; // 일정 3개 비교의 기준 조건
   state.choice = "best";
   restoredFromLink = false;
@@ -585,6 +586,7 @@ function render() {
 
   const day = trip.days[dayIdx];
   $("#timeline").innerHTML = sunHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
+  if (canVote() && votes.key !== state.opts.voteKey) loadVotes(); // 다른 일정(또는 받은 링크)을 열면 그 일정의 표를 받는다
   renderOptions();
   renderHeard();
   renderFestivals();
@@ -656,7 +658,7 @@ function itemHTML(it, i, day) {
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       <div class="acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
+        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a>${voteHTML(p.id)}<button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
       </div>
     </article>
@@ -1887,13 +1889,46 @@ document.addEventListener("click", (e) => {
   if (e.target.id === "speakAgain") { show("setup"); $("#aiStartInput").value = ""; if (canVoice()) listen($("#micBtn"), $("#aiStartInput"), () => $("#aiStart").requestSubmit()); }
 });
 
+/* ---------- 같이 고르기: 공유 링크로 받은 사람도 장소마다 👍/👎 (앱 서버가 있을 때만) ----------
+   일정 키(state.opts.voteKey)는 일정을 만들 때 정하고 링크에 담긴다. 투표한 사람은 이 기기의 무작위 id로만 구분한다 (개인정보 없음) */
+const randomKey = (n) => Array.from(crypto.getRandomValues(new Uint8Array(n)), (x) => "abcdefghijklmnopqrstuvwxyz0123456789"[x % 36]).join("");
+const voterId = () => { let v = store.get("voterId"); if (!v || !/^[a-z0-9]{8,32}$/.test(v)) { v = randomKey(16); store.set("voterId", v); } return v; };
+let votes = { key: "", places: {} };
+const canVote = () => document.body.classList.contains("has-server") && /^[a-z0-9]{8,16}$/.test(state?.opts?.voteKey || "");
+function voteHTML(id) {
+  if (!canVote()) return "";
+  const v = votes.key === state.opts.voteKey ? votes.places[id] || { up: 0, down: 0, mine: 0 } : { up: 0, down: 0, mine: 0 };
+  return `<span class="vote" data-vote-place="${id}"><button class="ghost small${v.mine > 0 ? " on" : ""}" type="button" data-vote="1" aria-label="${t("좋아요")}">👍 ${v.up || ""}</button><button class="ghost small${v.mine < 0 ? " on" : ""}" type="button" data-vote="-1" aria-label="${t("별로예요")}">👎 ${v.down || ""}</button></span>`;
+}
+function paintVotes() { document.querySelectorAll("[data-vote-place]").forEach((el) => { el.outerHTML = voteHTML(el.dataset.votePlace); }); }
+async function loadVotes() {
+  if (!canVote() || !trip) return;
+  const key = state.opts.voteKey;
+  try {
+    const r = await fetchT(`api/votes?trip=${key}&voter=${voterId()}`, {}, 4000);
+    if (r.ok && state?.opts?.voteKey === key) { votes = { key, places: (await r.json()).places || {} }; paintVotes(); }
+  } catch { /* 서버가 잠시 안 됨 */ }
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-vote]"); if (!b || !canVote()) return;
+  const id = b.closest("[data-vote-place]").dataset.votePlace, want = Number(b.dataset.vote);
+  const mine = votes.key === state.opts.voteKey ? votes.places[id]?.mine || 0 : 0;
+  try {
+    const r = await fetchT("api/votes", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ trip: state.opts.voteKey, place: id, voter: voterId(), vote: mine === want ? 0 : want }) }, 5000);
+    if (!r.ok) return toast((await r.json().catch(() => ({}))).error || t("잠시 후 다시 해 주세요"));
+    votes = { key: state.opts.voteKey, places: (await r.json()).places || {} }; paintVotes();
+    track("vote");
+  } catch { toast(t("잠시 후 다시 해 주세요")); }
+});
+
 /* ---------- 공유 / 캘린더 ---------- */
 $("#shareBtn").addEventListener("click", async () => {
   track("share");
   const url = location.href;
+  const vote = document.body.classList.contains("has-server") && state?.opts?.voteKey;
   try {
-    if (navigator.share) await navigator.share({ title: t("강원 여행 일정"), url });
-    else { await navigator.clipboard.writeText(url); toast(t("링크를 복사했어요")); }
+    if (navigator.share) await navigator.share({ title: t("강원 여행 일정"), ...(vote ? { text: t("장소마다 👍👎로 같이 골라요") } : {}), url });
+    else { await navigator.clipboard.writeText(url); toast(vote ? t("링크를 복사했어요 · 받은 사람이 장소마다 👍👎를 남길 수 있어요") : t("링크를 복사했어요")); }
   } catch {}
 });
 
@@ -2024,7 +2059,7 @@ renderStartRow();
 // 예약·후기·가게 등록은 앱 서버(server.mjs)가 있어야 동작한다. GitHub Pages·안드로이드 앱처럼 서버가 없으면 그 버튼들을 숨긴다
 // (needs-server 클래스: 기본은 숨김, 서버가 응답하면 body.has-server로 보인다)
 fetchT("api/shops?region=gangneung", {}, 3000)
-  .then((r) => { if (r.ok) document.body.classList.add("has-server"); })
+  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); } })
   .catch(() => {});
 
 // 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다

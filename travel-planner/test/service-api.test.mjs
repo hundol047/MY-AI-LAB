@@ -29,6 +29,18 @@ try{
  assert.equal((await call('/api/place-reports','POST',{place:'ojukheon',kind:'hours',note:'월요일에도 엽니다'})).status,201);
  assert.equal((await call('/api/place-reports','POST',{place:'no-such-place',kind:'hours'})).status,400);
  assert.equal((await call('/api/place-reports','POST',{place:'ojukheon',kind:'nope'})).status,400);
+// 같이 고르기 투표: 바꾸기·취소, 다른 사람 표와 합산, 잘못된 키·장소 거절
+{const v=(b)=>call('/api/votes','POST',{trip:'tripkey0001',...b});
+ assert.equal((await v({place:'ojukheon',voter:'voteraaaa1',vote:1})).status,200);
+ assert.equal((await v({place:'ojukheon',voter:'voterbbbb2',vote:-1})).status,200);
+ await v({place:'ojukheon',voter:'voteraaaa1',vote:-1}); await v({place:'ojukheon',voter:'voteraaaa1',vote:1});
+ const r=(await call('/api/votes?trip=tripkey0001&voter=voteraaaa1')).data;
+ assert.deepEqual(r.places.ojukheon,{up:1,down:1,mine:1});
+ await v({place:'ojukheon',voter:'voterbbbb2',vote:0});
+ assert.deepEqual((await call('/api/votes?trip=tripkey0001')).data.places.ojukheon,{up:1,down:0,mine:0});
+ assert.equal((await v({place:'no-such-place',voter:'voteraaaa1',vote:1})).status,400);
+ assert.equal((await call('/api/votes','POST',{trip:'BAD KEY',place:'ojukheon',voter:'voteraaaa1',vote:1})).status,400);
+ assert.equal((await v({place:'ojukheon',voter:'voteraaaa1',vote:5})).status,400);}
  assert.equal((await call('/api/admin/place-reports')).status,401);
  const pr=(await call('/api/admin/place-reports','GET',null,admin)).data; assert.equal(pr.length,1); assert.equal(pr[0].kind,'hours');
  const curve=createECDH('prime256v1');curve.generateKeys();const sub={endpoint:'https://fcm.googleapis.com/fcm/send/test-only',keys:{p256dh:curve.getPublicKey().toString('base64url'),auth:Buffer.alloc(16,1).toString('base64url')}};

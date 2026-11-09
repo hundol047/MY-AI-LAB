@@ -16,6 +16,7 @@ export function createServices(file) {
     CREATE TABLE IF NOT EXISTS reviews(id TEXT PRIMARY KEY, place TEXT NOT NULL, state TEXT NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, review TEXT NOT NULL, reason TEXT NOT NULL, createdAt TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS place_reports(id TEXT PRIMARY KEY, place TEXT NOT NULL, kind TEXT NOT NULL, note TEXT NOT NULL, createdAt TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS votes(trip TEXT NOT NULL, place TEXT NOT NULL, voter TEXT NOT NULL, vote INTEGER NOT NULL, at TEXT NOT NULL, PRIMARY KEY(trip,place,voter));
     CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY, secret TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS shops(id TEXT PRIMARY KEY, state TEXT NOT NULL, fingerprint TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS push_subscriptions(booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, PRIMARY KEY(booking,endpoint));
@@ -72,6 +73,8 @@ export function createServices(file) {
           db.prepare('DELETE FROM bookings WHERE id=?').run(b.id);db.prepare('DELETE FROM recovery WHERE id=?').run(b.id);forgetPush(b.id);deleted++;
         }
       }
+      // 같이 고르기 투표는 여행이 끝나면 쓸모가 없어서 보관 기간이 지나면 지운다
+      db.prepare('DELETE FROM votes WHERE at<?').run(new Date(now-retentionDays*86400000).toISOString());
       return {deleted};
     },
     removeBooking(id,token) {
@@ -178,6 +181,27 @@ export function createServices(file) {
       if (typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || (body.note != null && (typeof body.note !== 'string' || body.note.length > 500))) fail(400,'장소, 제보 종류, 500자 이내 설명을 확인하세요.');
       db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,String(body.note||'').trim(),new Date().toISOString()); return {received:true};
     },
-    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); }
+    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    // 같이 고르기: 공유한 일정(trip, 일정을 만들 때 정한 무작위 키)의 장소마다 👍/👎. voter는 그 기기의 무작위 id (개인정보 없음)
+    vote(body) {
+      const ok = (s, n) => typeof s === 'string' && new RegExp(`^[a-z0-9]{8,${n}}$`).test(s);
+      if (!ok(body.trip, 16) || !ok(body.voter, 32) || typeof body.place !== 'string' || !body.place || body.place.length > 100 || ![-1, 0, 1].includes(body.vote)) fail(400,'투표 내용을 확인하세요.');
+      if (body.vote === 0) db.prepare('DELETE FROM votes WHERE trip=? AND place=? AND voter=?').run(body.trip, body.place, body.voter);
+      else {
+        if (db.prepare('SELECT COUNT(*) n FROM votes WHERE trip=?').get(body.trip).n >= 2000) fail(429,'이 일정의 투표가 너무 많습니다.');
+        db.prepare('INSERT INTO votes VALUES(?,?,?,?,?) ON CONFLICT(trip,place,voter) DO UPDATE SET vote=excluded.vote, at=excluded.at').run(body.trip, body.place, body.voter, body.vote, new Date().toISOString());
+      }
+      return this.votes(body.trip, body.voter);
+    },
+    votes(trip, voter = '') {
+      if (typeof trip !== 'string' || !/^[a-z0-9]{8,16}$/.test(trip)) fail(400,'일정 키를 확인하세요.');
+      const places = {};
+      for (const r of db.prepare('SELECT place, vote, voter FROM votes WHERE trip=?').all(trip)) {
+        const v = (places[r.place] ??= { up: 0, down: 0, mine: 0 });
+        if (r.vote > 0) v.up++; else v.down++;
+        if (voter && r.voter === voter) v.mine = r.vote;
+      }
+      return { trip, places };
+    }
   };
 }
