@@ -52,5 +52,5 @@ for (const region of R) for (const move of ["car", "taxi", "transit"]) for (cons
   }
   optTrips++;
 }
-assert.ok(thinDays / (optTrips * 12) <= 0.08, `관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
+assert.ok(thinDays / (optTrips * 12) <= 0.01, `관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
 console.log(`ok - 3박 4일 일정 3개 × ${optTrips}건: 모두 1~4일차 · 관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);

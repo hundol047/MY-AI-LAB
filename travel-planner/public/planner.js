@@ -279,13 +279,16 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
   let anchors;
   if (keep.length && byId(keep[0])) anchors = [byId(keep[0]).area];
   else anchors = pickAnchors(input, opts, rain, used, usedAreas, dateStr, start).slice(0, 4);
-  // 중심 지역 후보를 차례로 시도해 일정이 충분히 차는 곳을 고른다
+  // 중심 지역 후보를 차례로 시도해 일정이 충분히 차는 곳을 고른다.
+  // 식사만 두 번 있고 관광지가 1곳뿐인 날(긴 여행 뒷날, 대중교통으로 근처를 다 쓴 경우)은 다른 지역도 시도해 관광지가 더 많은 날을 쓴다
+  const sights = (d) => d.items.filter((it) => it.kind === "visit").length;
+  const worth = (d) => Math.min(sights(d), 2) * 100 + d.items.length;
   let best = null;
   for (const key of anchors) {
     const trial = new Set(used);
     const day = buildDay(input, opts, dayIdx, trial, key, keep, exclude, keepOnly, start);
-    if (!best || day.items.length > best.day.items.length) best = { day, trial };
-    if (day.items.length >= 3) break;
+    if (!best || worth(day) > worth(best.day)) best = { day, trial };
+    if (day.items.length >= 3 && (sights(day) >= 2 || keepOnly)) break;
   }
   for (const id of best.trial) used.add(id);
   if (best.day.tune) {
