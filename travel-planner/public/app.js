@@ -1110,10 +1110,13 @@ function staysFor(l) {
   const byType = lodgingPlaces?.[l.id] || {};
   return byType[l.type]?.length ? byType[l.type] : Object.values(byType).find((v) => v.length) || [];
 }
-function priceLinks(query) {
+function priceLinks(query, compact = false) {
   const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
+  const main = `<a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>`;
+  // 숙소 목록의 각 줄은 예약 버튼만 (다른 플랫폼·요금 비교는 아래 큰 버튼에서 한 번만)
+  if (compact) return `<div class="booking-choice">${main}</div>`;
   return `<div class="booking-choice">
-    <a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>
+    ${main}
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
       `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
     <details><summary>${t("확인한 요금 비교")}</summary>
@@ -1129,7 +1132,7 @@ function priceLinks(query) {
 }
 function bookingReason(query) {
   const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
-  return `<p class="booking-reason">${t(choice.reason)}<br>${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
+  return `<p class="booking-reason">${choice.compared ? `${t(choice.reason)}<br>` : ""}${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
 const STAY_ART = (() => {
@@ -1159,7 +1162,7 @@ function staysHTML(l) {
         <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
       <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
     </li>`;
-  }).join("")}</ul><p class="stay-note">${t("여행 날짜와 인원으로 예약 플랫폼을 엽니다. 객실·아동 나이·세금·취소 조건과 최종 금액을 확인하세요. 최저가는 보장하지 않습니다.")}</p></div>`;
+  }).join("")}</ul></div>`;
 }
 // 여러 권역 여행: 보고 있는 날의 밤 숙소(마지막 날이면 마지막 숙소)를 보여 주고, 예약 검색 날짜도 그 숙소의 체크인·박수로 연다
 const currentLodging = () => (trip?.lodgings?.length ? lodgingForDay(trip, dayIdx) || trip.lodgings.at(-1) : trip?.lodging);
@@ -1184,8 +1187,7 @@ function renderLodging() {
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
     <div class="booking-options"><label>${t("객실 수")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
-    ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}
-    <p>${t("아동 나이를 모두 선택하면 예약 검색에 전달합니다. 플랫폼에서 최종 조건을 확인하세요.")}</p></div>
+    ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}</div>
     ${bookingReason(l.query)}
     ${staysHTML(l)}
     <div class="acts">
