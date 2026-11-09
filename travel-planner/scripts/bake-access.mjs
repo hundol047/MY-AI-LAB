@@ -16,16 +16,23 @@ const FIELDS = { parking: "주차", publictransport: "대중교통", route: "접
 const yes = (s, re) => { if (!s || !re.test(s)) return false; const t = s.replace(/(턱|단차|계단|문턱)\s*(이|가)?\s*없[음어고는]?/g, ""); return !/없음|불가|어려움|미설치/.test(t); };
 
 const ACCESS = {}, rows = [];
+// API가 실패하면(하루 호출 한도 등) 지난번 값을 그대로 둔다 — 실패를 "등록 안 됨"으로 덮어쓰지 않게
+const PREV = await import("../public/access-data.js").then((m) => m.ACCESS || {}).catch(() => ({}));
+let failed = 0;
+const FAIL = Symbol("fail");
 for (const p of PLACES.filter((x) => !x.multi)) {
   // 장소 번호(contentid)는 국문 관광정보와 같다. 사진·운영시간에서 이미 받아 둔 국문 검색 결과(캐시)로 번호를 얻고,
   // 무장애 상세는 장소당 한 번만 부른다 (하루 호출 한도 보호)
   let id = p.kto;
   if (!id) {
-    const list = await candidates("KorService2", p, opts).catch(() => []);
+    const list = await candidates("KorService2", p, opts).catch(() => FAIL);
+    if (list === FAIL) { failed++; if (PREV[p.id]) { ACCESS[p.id] = PREV[p.id]; rows.push({ p, why: "검색 실패 → 지난 값 유지" }); } else rows.push({ p, why: "검색 실패" }); continue; }
     id = list.find((c) => c.ok && c.km <= maxKmFor(p))?.contentid;
   }
   if (!id) { rows.push({ p, why: "관광공사 항목 없음" }); continue; }
-  const [d] = await tour("KorWithService2", "detailWithTour2", { contentId: String(id) }, opts).catch(() => [null]);
+  const res = await tour("KorWithService2", "detailWithTour2", { contentId: String(id) }, opts).catch(() => FAIL);
+  if (res === FAIL) { failed++; if (PREV[p.id]) { ACCESS[p.id] = PREV[p.id]; rows.push({ p, why: "무장애 조회 실패 → 지난 값 유지" }); } else rows.push({ p, why: "무장애 조회 실패" }); continue; }
+  const [d] = res;
   if (!d) { rows.push({ p, why: "무장애 정보에 등록되지 않음" }); continue; }
   const m = { contentid: id };
   const text = {};
@@ -56,4 +63,4 @@ await writeFile(new URL("../reports/access.md", import.meta.url), [
   ...rows.filter((r) => r.a).map((r) => `| ${r.p.id} | ${esc(r.p.name)} | ${flag(r.a, "wheel")} | ${flag(r.a, "ramp")} | ${flag(r.a, "elevator")} | ${flag(r.a, "toilet")} | ${flag(r.a, "parking")} | ${flag(r.a, "stroller")} | ${flag(r.a, "nursing")} |`), "",
   "## 정보 없는 곳", "", ...rows.filter((r) => !r.a).map((r) => `- ${r.p.id} ${esc(r.p.name)}: ${r.why}`), "",
 ].join("\n"));
-console.log(`\n무장애 정보 ${Object.keys(ACCESS).length}곳 → public/access-data.js, reports/access.md`);
+console.log(`\n무장애 정보 ${Object.keys(ACCESS).length}곳${failed ? ` (API 실패 ${failed}곳)` : ""} → public/access-data.js, reports/access.md`);

@@ -6,12 +6,13 @@
 //   reports/pet.md         대조 결과
 // 실행: TOUR_API_KEY=Decoding키 node scripts/bake-pet.mjs
 import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { candidates, tour, judge, firstSentence } from "./tour-api.mjs";
+import { candidates, tour, judge, firstSentence, core, dice } from "./tour-api.mjs";
 import { parseKtoHours, parseKtoClosed } from "../public/directory-place.js";
 
 const key = process.env.TOUR_API_KEY;
 if (!key) { console.error("TOUR_API_KEY가 필요합니다"); process.exit(1); }
 const opts = { key, cache: true };
+const DIRECTORY = JSON.parse(await readFile(new URL("../public/directory.json", import.meta.url), "utf8")).places;
 const { PLACES, AREAS } = await import("../public/data.js");
 const base = PLACES.filter((p) => !p.petOnly);
 // 따옴표 안의 쉼표("…로 307, 16층")는 칸 구분이 아니다
@@ -45,37 +46,45 @@ const FIELDS = { 12: ["usetime", "restdate"], 14: ["usetimeculture", "restdatecu
 const clean = (s) => String(s || "").replace(/<br\s*\/?>/gi, " / ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
 const extra = [], report = [];
 const coords = JSON.parse(await readFile(new URL("../data/pet-coords.json", import.meta.url), "utf8").catch(() => "{}"));
-let n = 0;
-for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "식음료"].includes(x.kind))) {
-  const c = CENTER[r.sigun];
-  if (!c) { report.push({ r, why: "시군 기준점 없음" }); continue; }
-  const list = await candidates("KorService2", { id: `pet-${r.no}`, name: r.name, lat: c.lat, lng: c.lng }, opts).catch(() => []);
-  const m = list.find((x) => x.ok && /이름 같음|앞에 지역명/.test(x.why) && x.why !== "앞 이름 같음" && String(x.addr1 || "").includes(r.sigun) && String(x.contenttypeid) !== "32" && FIELDS[x.contenttypeid]);
-  if (!m) {
+// 관광공사에 없지만 주소로 좌표를 찾아 둔 곳(data/pet-coords.json, scripts/geocode-pet.mjs): 영업시간을 모르므로 가정값으로 넣고 카드에 밝힌다
+function addGuessed(r) {
     // 관광공사에 없지만 주소로 좌표를 찾아 둔 곳(data/pet-coords.json, scripts/geocode-pet.mjs): 영업시간을 모르므로 가정값으로 넣고 카드에 밝힌다
     const g = coords[r.no];
-    if (!g) { report.push({ r, why: "관광공사에서 같은 곳을 못 찾음" }); continue; }
+    if (!g) { report.push({ r, why: "관광공사에서 같은 곳을 못 찾음" }); return; }
     const near = base.find((p) => Math.hypot((p.lat - g.lat) * 111, (p.lng - g.lng) * 88) < 0.3);
-    if (near) { places[near.id] ??= r.name; report.push({ r, why: `앱 장소 ${near.name}와 같은 곳(300m 안)으로 표시` }); continue; }
+    if (near) { places[near.id] ??= r.name; report.push({ r, why: `앱 장소 ${near.name}와 같은 곳(300m 안)으로 표시` }); return; }
     let area = null, best = Infinity;
     for (const [k, a] of Object.entries(AREAS)) { const d = (a.lat - g.lat) ** 2 + (a.lng - g.lng) ** 2; if (d < best) { best = d; area = k; } }
     const food = r.kind === "식음료", cafe = food && /카페|커피|베이커리|빵|브루|로스터|디저트/i.test(r.name);
     // 목록에 같은 시설이 이름만 바꿔 두 번 있는 경우(예: "아름들 반려견쉼터"·"반려견쉼터 아름들"): 같은 좌표·같은 종류면 하나만 둔다
     const twin = extra.find((x) => x.lat === Number(g.lat.toFixed(4)) && x.lng === Number(g.lng.toFixed(4)) && x.cat === (food ? (cafe ? "cafe" : "food") : "nature"));
-    if (twin) { places[`pet-${r.no}`] = r.name; report.push({ r, why: `목록에 같은 곳이 두 번 있음 (${twin.name})` }); continue; }
+    if (twin) { places[`pet-${r.no}`] = r.name; report.push({ r, why: `목록에 같은 곳이 두 번 있음 (${twin.name})` }); return; }
     const hours = cafe ? ["10:00", "19:00"] : food ? ["11:00", "20:00"] : ["09:00", "18:00"];
     extra.push({ region: AREAS[area].region, id: `pet-${r.no}`, name: r.name, cat: food ? (cafe ? "cafe" : "food") : "nature", area, lat: Number(g.lat.toFixed(4)), lng: Number(g.lng.toFixed(4)),
       hours, closed: [], stay: cafe ? 50 : 60, indoor: food, walk: 1, pop: 1, tags: [], petOnly: true, hoursGuessed: true,
       desc: (cafe ? "반려동물 동반 카페" : food ? "반려동물 동반 식당" : "반려동물 동반 가능") + ` · ${r.sigun}`, hoursText: "", addr: r.addr, ...(r.tel ? { tel: r.tel } : {}), wiki: r.name });
     places[`pet-${r.no}`] = r.name;
     report.push({ r, why: `관광공사에 없어 주소 좌표(${g.how})로 넣음 · 영업시간 가정 ${hours.join("–")}` });
-    continue;
+}
+let n = 0;
+for (const r of rows.filter((x) => !used.has(x.no) && ["관광지", "체험", "식음료"].includes(x.kind))) {
+  const c = CENTER[r.sigun];
+  if (!c) { report.push({ r, why: "시군 기준점 없음" }); continue; }
+  const list = await candidates("KorService2", { id: `pet-${r.no}`, name: r.name, lat: c.lat, lng: c.lng }, opts).catch(() => []);
+  let m = list.find((x) => x.ok && /이름 같음|앞에 지역명/.test(x.why) && x.why !== "앞 이름 같음" && String(x.addr1 || "").includes(r.sigun) && String(x.contenttypeid) !== "32" && FIELDS[x.contenttypeid]);
+  // 이름으로 못 찾았으면: 주소 좌표(pet-coords.json) 150m 안 관광공사 목록(directory.json)에서 이름이 비슷한 곳 (띄어쓰기·앞 지역명 차이 등)
+  if (!m && coords[r.no]) {
+    const g = coords[r.no], cn = core(r.name);
+    const hit = DIRECTORY.filter((d) => d.type !== "32" && FIELDS[d.type] && Math.hypot((d.lat - g.lat) * 111, (d.lng - g.lng) * 88) * 1000 <= 150)
+      .map((d) => ({ d, s: dice(cn, core(d.name)) })).filter((x) => x.s >= 0.5 || core(x.d.name).includes(cn) || cn.includes(core(x.d.name))).sort((a, b) => b.s - a.s)[0];
+    if (hit) m = { contentid: hit.d.id, contenttypeid: hit.d.type, title: hit.d.name, mapy: hit.d.lat, mapx: hit.d.lng, viaDir: true };
   }
+  if (!m) { addGuessed(r); continue; }
   const [intro] = await tour("KorService2", "detailIntro2", { contentId: String(m.contentid), contentTypeId: String(m.contenttypeid) }, opts).catch(() => [{}]);
   const [tf, rf] = FIELDS[m.contenttypeid];
   const text = clean(intro?.[tf]), rest = clean(intro?.[rf]);
   const h = parseKtoHours(text);
-  if (!h) { report.push({ r, why: `영업시간을 읽지 못함 (${text.slice(0, 40)})` }); continue; }
+  if (!h) { if (m.viaDir) { addGuessed(r); continue; } report.push({ r, why: `영업시간을 읽지 못함 (${text.slice(0, 40)})` }); continue; }
   // 쉬는날에 계절 휴무("동절기", "11월~3월")가 있으면 요일 규칙으로 옮길 수 없어 넣지 않는다
   if (/동절기|하절기|\d+\s*월\s*[~∼\-]|\d+월\s*(중순|초|말)/.test(rest)) { report.push({ r, why: `계절 휴무를 규칙으로 옮기지 못함 (${rest.slice(0, 40)})` }); continue; }
   if (extra.some((x) => x.kto === String(m.contentid))) { report.push({ r, why: "목록에 같은 곳이 두 번 있음" }); continue; }
