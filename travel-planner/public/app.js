@@ -723,7 +723,7 @@ function itemHTML(it, i, day) {
   <li class="item" data-i="${i}">
     <div class="time"><b>${fmt(it.start)}</b><span>${fmt(it.end)}</span></div>
     <article class="card place">
-      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em>${p.photoAt ? `<i class="near" title="${esc(t("주변 사진 · {place}", { place: p.photoAt }))}">${t("주변 사진")}</i>` : ""}</div>
+      <div class="side"><div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em>${p.photoAt ? `<i class="near" title="${esc(t("주변 사진 · {place}", { place: p.photoAt }))}">${t("주변 사진")}</i>` : ""}</div>${state.input.move === "car" ? parkingShort(p) : ""}</div>
       <div class="info">
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : p.pet === false ? t("🐾 동반 불가") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
@@ -733,14 +733,13 @@ function itemHTML(it, i, day) {
         ${(state.opts.access || []).length ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}
         ${crowdLine(p, trip.days[dayIdx].date)}
-        ${state.input.move === "car" ? parkingLine(p) : ""}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
-      <div class="acts">
-        <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a>${voteHTML(p.id)}<button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button>${i > 0 ? `<button class="ghost small icon" type="button" data-move="${i}:-1" aria-label="${t("위로")}" title="${t("위로")}">↑</button>` : ""}${i < trip.days[dayIdx].items.length - 1 ? `<button class="ghost small icon" type="button" data-move="${i}:1" aria-label="${t("아래로")}" title="${t("아래로")}">↓</button>` : ""}
       </div>
+      <div class="acts place-acts">
+        <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
+        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a>${voteHTML(p.id)}
       </div>
     </article>
   </li>`;
@@ -841,6 +840,20 @@ function parkingLine(p) {
   return `<div class="parking ok" title="${esc(v.text)}">${t("🅿️ 주차 가능")}${cnt ? t(" · {n}대", { n: cnt }) : ""}${fee ? ` · ${fee}` : ""}</div>` + (!cnt && !fee ? lots : "");
 }
 
+// 사진 아래 짧은 주차 표시 (자세한 내용은 눌러서): 관광공사 원문 → 근처 주차장 순
+function parkingShort(p) {
+  if (p.multi || p.cat === "festival") return "";
+  const v = parkingData?.[p.id], l = lotsData?.[p.id]?.[0];
+  const fee = (f) => (f === "free" ? t("무료") : f === "paid" ? t("유료") : f === "mixed" ? t("무료·유료") : "");
+  let short, cls = "ok";
+  if (v && v.ok !== false) { const cnt = (v.text.match(/(\d[\d,]*)\s*대/) || [])[1]; short = [t("주차"), cnt ? t("{n}대", { n: cnt }) : "", fee(v.fee)].filter(Boolean).join(" "); }
+  else if (l) { short = [t("{m}m", { m: l.m }), fee(l.fee)].filter(Boolean).join(" "); cls = "lot"; }
+  else if (v?.ok === false) { short = t("주차장 없음"); cls = "no"; }
+  else return "";
+  const detail = parkingLine(p).replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+  return `<details class="park-mini ${cls}"><summary title="${esc(detail)}">🅿️ ${esc(short)}</summary><div>${parkingLine(p)}</div></details>`;
+}
+
 // 관광지 혼잡 예측 (crowd.json, 한국관광공사 집중률 · 앞으로 30일 · 하루 단위). 일정을 짜기 전에 불러 엔진에 넘긴다
 fetchT("crowd.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j?.places) setCrowd(j.places); }).catch(() => {});
 function crowdLine(p, dateStr) {
@@ -899,8 +912,11 @@ function renderPet() {
 function renderChecks() {
   const el = $("#checks"); if (!el) return;
   el.hidden = false;
-  el.innerHTML = `<h3>${t("출발 전 확인")}</h3><p class="sub">${t("임시 휴장·통제는 미리 알 수 없어요. 출발 전날 공식 안내를 한 번 확인하세요.")}</p>
-    <div class="acts">${OFFICIAL_CHECKS.map((c) => `<a class="ghost small" href="${c.url}" target="_blank" rel="noopener">${t(c.label)}</a>`).join("")}</div>`;
+  const ICON = { parks: "⛰️", weather: "🌦️", road: "🚗" };
+  const SUB = { parks: "knps.or.kr", weather: "weather.go.kr", road: "roadplus.co.kr" };
+  el.innerHTML = `<div class="checks-head"><h3>${t("출발 전 확인")}</h3><span>${t("전날 한 번")}</span></div>
+    <div class="check-tiles">${OFFICIAL_CHECKS.map((c) => `<a class="check-tile" href="${c.url}" target="_blank" rel="noopener"><b>${ICON[c.key] || "🔎"}</b><span>${t(c.label)}</span><small>${SUB[c.key] || ""}</small></a>`).join("")}</div>
+    <p class="sub">${t("임시 휴장·통제는 미리 알 수 없어요")}</p>`;
 }
 
 // 길찾기는 카카오맵 장소 검색으로: 지도 서비스의 정확한 위치로 안내된다
@@ -1132,7 +1148,10 @@ function priceLinks(query, compact = false) {
 }
 function bookingReason(query) {
   const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
-  return `<p class="booking-reason">${choice.compared ? `${t(choice.reason)}<br>` : ""}${choice.dates.checkin ? `${esc(choice.dates.checkin)} → ${esc(choice.dates.checkout)} · ` : ""}${t("어른 {adults}명 · 어린이 {kids}명 · 객실 {rooms}개", {adults:choice.adults,kids:choice.kids,rooms:choice.rooms})}</p>`;
+  // 날짜·인원을 한 줄로 짧게 (11.21–11.22 · 어른 2 · 객실 1)
+  const md = (d) => (d ? d.slice(5).replace("-", ".") : "");
+  const parts = [choice.dates.checkin ? `${md(choice.dates.checkin)}–${md(choice.dates.checkout)}` : "", t("어른 {n}", { n: choice.adults }), choice.kids ? t("어린이 {n}", { n: choice.kids }) : "", t("객실 {n}", { n: choice.rooms })].filter(Boolean);
+  return `${choice.compared ? `<p class="booking-reason">${t(choice.reason)}</p>` : ""}<p class="stay-when">${parts.join(" · ")}</p>`;
 }
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
 const STAY_ART = (() => {
@@ -1186,11 +1205,11 @@ function renderLodging() {
       <p>${esc(lodgingDesc(l))}</p>
       <div class="why">${lodgingReason(l)}${l.others.length ? t(" · 다른 선택: {o}", { o: l.others.map(typeLabelFromKo).join(", ") }) : ""}</div>
     </div>
-    <div class="booking-options"><label>${t("객실 수")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
+    <div class="booking-options"><label>${t("객실")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
     ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}</div>
     ${bookingReason(l.query)}
     ${staysHTML(l)}
-    <div class="acts">
+    <div class="stay-main">
       ${priceLinks(l.query, false)}
       <button class="ghost small" type="button" id="safeOpen">${t("예약 전 안심 체크")}</button>
     </div>

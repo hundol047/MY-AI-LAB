@@ -33,6 +33,14 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "어른 {n}": "{n} adults",
+  "어린이 {n}": "{n} kids",
+  "객실 {n}": "{n} rooms",
+  "객실": "Rooms",
+  "주차": "Parking",
+  "주차장 없음": "No parking",
+  "전날 한 번": "Check the day before",
+  "임시 휴장·통제는 미리 알 수 없어요": "Temporary closures can't be known in advance",
   "📱 다른 기기로 옮기기": "📱 Move to another device",
   "코드로 받기": "Receive with code",
   "다른 기기에서 옮긴 일정이 있나요?": "Moving plans from another device?",

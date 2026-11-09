@@ -692,3 +692,54 @@ body:not(.has-server) .needs-server { display: none !important; }
 .transfer-dlg .code-box { margin-top: 12px; display: grid; gap: 8px; justify-items: center; }
 .transfer-dlg .code { font-size: 28px; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
 .transfer-row { margin: 0; font-size: 13px; color: var(--sub); }
+
+/* ---- 장소 카드: 사진 아래 짧은 주차, 버튼은 3칸 격자 ---- */
+.place { position: relative; }
+.place .side { display: grid; gap: 6px; align-content: start; min-width: 0; }
+.park-mini { font-size: 11px; line-height: 1.3; color: var(--text); }
+.park-mini summary { list-style: none; cursor: pointer; padding: 4px 6px; border-radius: 8px; background: var(--brand-soft); text-align: center; overflow-wrap: anywhere; }
+.park-mini summary::-webkit-details-marker { display: none; }
+.park-mini.lot summary { background: color-mix(in srgb, var(--brand-soft) 60%, var(--surface)); }
+.park-mini.no summary { background: color-mix(in srgb, var(--warn) 10%, var(--surface)); color: var(--warn); }
+.park-mini[open] > div { position: absolute; left: 12px; right: 12px; top: calc(100% - 6px); z-index: 5; padding: 8px 10px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface); box-shadow: 0 6px 18px rgba(0,0,0,.12); }
+.place .acts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }
+.place .acts > .ghost, .place .acts .vote .ghost { width: 100%; justify-content: center; text-align: center; padding-left: 4px; padding-right: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.place .acts .vote { display: contents; }
+body:not(.has-server) .place .acts .needs-server { display: none; }
+
+/* ---- 숙소 카드: 날짜·인원 한 줄, 버튼 위치 통일 ---- */
+.stay-when { margin: 6px 0 0; font-size: 12px; color: var(--sub); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#lodgingCard .booking-options { margin: 8px 0 0; align-items: center; font-size: 12px; }
+#lodgingCard .booking-options input { width: 56px; padding: 4px 6px; margin-left: 6px; }
+#lodgingCard .booking-options p { display: none; }
+.stays li { grid-template-columns: 56px minmax(0, 1fr); }
+.stays .stay-acts { grid-column: 2; display: flex; gap: 6px; flex-wrap: nowrap; }
+.stays .stay-acts .booking-choice { display: contents; }
+.stays .stay-acts .ghost { flex: 1 1 auto; text-align: center; }
+.stays .stay-acts > a.ghost:last-child { flex: 0 0 auto; }
+.stay-main { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin-top: 12px; }
+.stay-main .booking-choice { display: contents; }
+.stay-main .booking-choice > .price { grid-column: 1 / -1; text-align: center; justify-content: center; }
+.stay-main .booking-choice > details { grid-column: span 1; }
+.stay-main details > summary { list-style: none; display: grid; place-items: center; height: 100%; min-height: 34px; padding: 6px 4px; border: 1px solid var(--line); border-radius: 10px; font-size: 12px; color: var(--text); background: var(--surface); text-align: center; cursor: pointer; }
+.stay-main details > summary::-webkit-details-marker { display: none; }
+.stay-main details[open] { grid-column: 1 / -1; }
+.stay-main details[open] > summary { background: var(--brand-soft); }
+.stay-main #safeOpen { width: 100%; min-height: 34px; font-size: 12px; }
+
+/* ---- 출발 전 확인: 아이콘 타일 3개 ---- */
+.checks-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 8px; }
+.checks-head h3 { margin: 0; }
+.checks-head span { font-size: 12px; color: var(--brand); font-weight: 700; }
+.check-tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.check-tile { display: grid; justify-items: center; gap: 4px; padding: 12px 6px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); text-decoration: none; text-align: center; }
+.check-tile b { font-size: 22px; line-height: 1; }
+.check-tile span { font-size: 12px; font-weight: 700; line-height: 1.3; }
+.check-tile small { font-size: 10px; color: var(--sub); }
+.check-tile:active { background: var(--brand-soft); }
+.checks .sub { margin: 8px 0 0; text-align: center; }
+/* 버튼 줄은 카드 아래 전체 폭 (사진 칸 + 내용 칸) */
+.place .place-acts { grid-column: 1 / -1; margin-top: 0; }
+#lodgingCard .booking-options label { display: inline-flex; align-items: center; gap: 6px; }
+#lodgingCard .booking-options input { margin-left: 0; }
+#lodgingCard .booking-options { justify-content: space-between; }
