@@ -677,3 +677,4 @@ body:not(.has-server) .needs-server { display: none !important; }
 /* 같이 고르기 (👍/👎) */
 .vote { display: inline-flex; gap: 4px; }
 .vote button.on { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); font-weight: 700; }
+.parking.lots { color: var(--text); } .parking.lots small { color: var(--sub); }

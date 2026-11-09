@@ -739,13 +739,25 @@ function accessLine(p) {
 // 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
 let parkingData = null;
 fetchT("parking.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { parkingData = j?.places || null; if (trip && state.input.move === "car" && !$("#result").hidden) render(); }).catch(() => {});
+// 장소 근처(500m 안) 주차장 (parking-lots.json, 행정안전부 전국주차장정보표준데이터)
+let lotsData = null;
+fetchT("parking-lots.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { lotsData = j?.places || null; if (trip && state.input.move === "car" && !$("#result").hidden) render(); }).catch(() => {});
+function lotsLine(p) {
+  const ls = lotsData?.[p.id];
+  if (!ls?.length) return "";
+  const fee = (f) => (f === "free" ? t("무료") : f === "paid" ? t("유료") : f === "mixed" ? t("무료·유료") : "");
+  const one = (l) => [esc(l.name), t("{m}m", { m: l.m }), l.kind ? t(l.kind) : "", fee(l.fee), l.spaces ? t("{n}면", { n: l.spaces }) : "", l.hours || ""].filter(Boolean).join(" · ");
+  return `<div class="parking lots" title="${esc(t("행정안전부 전국주차장정보표준데이터 · 걸어서 갈 만한 거리(직선 500m 안)"))}">${t("🅿️ 근처 주차장: {lot}", { lot: one(ls[0]) })}${ls[1] ? `<small> · ${one(ls[1])}</small>` : ""}</div>`;
+}
 function parkingLine(p) {
-  const v = parkingData?.[p.id];
-  if (!v) return p.multi || p.cat === "festival" ? "" : `<div class="parking none">${t("🅿️ 주차 정보 없음 · 근처 공영주차장을 확인하세요")}</div>`;
-  if (v.ok === false) return `<div class="parking no">${t("🅿️ 전용 주차장 없음 · 근처 공영주차장 이용")}</div>`;
+  const v = parkingData?.[p.id], lots = lotsLine(p);
+  // 관광공사 원문이 없으면 근처 주차장(공공데이터)으로, 둘 다 없으면 "정보 없음"
+  if (!v) return lots || (p.multi || p.cat === "festival" ? "" : `<div class="parking none">${t("🅿️ 주차 정보 없음 · 근처 공영주차장을 확인하세요")}</div>`);
+  if (v.ok === false) return `<div class="parking no">${t("🅿️ 전용 주차장 없음 · 근처 공영주차장 이용")}</div>` + lots;
   const cnt = (v.text.match(/(\d[\d,]*)\s*대/) || [])[1];
   const fee = v.fee === "free" ? t("무료") : v.fee === "paid" ? t("유료") : "";
-  return `<div class="parking ok" title="${esc(v.text)}">${t("🅿️ 주차 가능")}${cnt ? t(" · {n}대", { n: cnt }) : ""}${fee ? ` · ${fee}` : ""}</div>`;
+  // 관광공사 원문이 "가능"뿐이면(대수·요금 없음) 근처 주차장도 함께
+  return `<div class="parking ok" title="${esc(v.text)}">${t("🅿️ 주차 가능")}${cnt ? t(" · {n}대", { n: cnt }) : ""}${fee ? ` · ${fee}` : ""}</div>` + (!cnt && !fee ? lots : "");
 }
 
 // 관광지 혼잡 예측 (crowd.json, 한국관광공사 집중률 · 앞으로 30일 · 하루 단위). 일정을 짜기 전에 불러 엔진에 넘긴다

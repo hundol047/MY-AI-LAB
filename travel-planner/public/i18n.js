@@ -33,6 +33,13 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🅿️ 근처 주차장: {lot}": "🅿️ Parking nearby: {lot}",
+  "{m}m": "{m} m",
+  "{n}면": "{n} spaces",
+  "무료·유료": "free/paid",
+  "공영": "public",
+  "민영": "private",
+  "행정안전부 전국주차장정보표준데이터 · 걸어서 갈 만한 거리(직선 500m 안)": "Ministry of the Interior national parking data · within walking distance (500 m straight line)",
   "이 지역은 시내버스 시간표 공개 자료가 없어 이동 시간은 예상이에요 · 장소마다 '길찾기'(카카오맵 대중교통)에서 실제 버스 시간을 확인하세요": "No public city-bus timetables for this area, so travel times are estimates · Check real buses with 'Directions' (Kakao Map transit) on each place",
   "좋아요": "Like",
   "별로예요": "Not for me",

@@ -57,12 +57,18 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/bake-parking.mjs
+      - name: 장소 근처 주차장 (전국주차장정보표준데이터)
+        if: steps.key.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
+        run: node scripts/bake-parking-lots.mjs
       - name: 데이터가 바뀌었는지 확인
         id: diff
         if: steps.key.outputs.ok == 'true'
         run: |
           # 리포트 날짜만 바뀐 경우에는 반영하지 않는다
-          if git diff --quiet -- public/data.js public/bus.json public/parking.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제·버스 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+          if git diff --quiet -- public/data.js public/bus.json public/parking.json public/parking-lots.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제·버스 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
       - name: 일정 엔진 테스트 (바뀐 데이터로)
         if: steps.diff.outputs.changed == 'true'
         run: npm test
@@ -71,4 +77,4 @@ jobs:
         working-directory: ${{ github.workspace }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md
+        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md travel-planner/public/parking-lots.json travel-planner/reports/parking-lots.md
