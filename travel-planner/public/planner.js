@@ -1,14 +1,18 @@
 // 일정 생성 엔진: 검증된 장소 데이터 + 영업시간/휴무/이동시간 제약을 모두 지키는 일정만 만든다.
 import { PLACES, AREAS, REGIONS, FESTIVALS, LODGING, LODGING_TYPES, BENEFITS } from "./data.js";
 
+var TO_MIN = new Map(); // toMin이 아래 상수 계산에 먼저 쓰여서 var로 끌어올린다
+
 const LUNCH = [toMin("11:30"), toMin("14:20")];
 const DINNER = [toMin("17:30"), toMin("19:30")];
 const PACE_LIMIT = { relaxed: 3, normal: 4, packed: 6 };
 const MAX_WAIT = 30;
 
 export function toMin(hhmm) {
-  const [h, m] = hhmm.split(":").map(Number);
-  return h * 60 + m;
+  TO_MIN ||= new Map();
+  let v = TO_MIN.get(hhmm);
+  if (v === undefined) { const [h, m] = hhmm.split(":").map(Number); v = h * 60 + m; TO_MIN.set(hhmm, v); }
+  return v;
 }
 export function fmt(min) {
   const h = Math.floor(min / 60), m = Math.round(min % 60);
@@ -46,9 +50,11 @@ export function travel(a, b, move) {
 }
 const round5 = (m) => Math.max(5, Math.round(m / 5) * 5);
 
+const WEEKDAY = new Map();
 export function weekdayOf(dateStr) {
-  const [y, m, d] = dateStr.split("-").map(Number);
-  return new Date(y, m - 1, d).getDay();
+  let v = WEEKDAY.get(dateStr);
+  if (v === undefined) { const [y, m, d] = dateStr.split("-").map(Number); v = new Date(y, m - 1, d).getDay(); WEEKDAY.set(dateStr, v); }
+  return v;
 }
 export function addDays(dateStr, n) {
   const [y, m, d] = dateStr.split("-").map(Number);
@@ -70,7 +76,7 @@ function closedOn(p, dateStr) {
   return false;
 }
 function isOpenDay(p, dateStr) {
-  return !closedOn(p, dateStr);
+  return !hoursFor(p, dateStr).closedToday;
 }
 
 const regionOf = (input) => input.region || "gangneung";
@@ -127,7 +133,16 @@ export function festivalsDuring(input) {
 }
 
 // 그날의 실제 운영시간 (계절·요일별 차이 반영)
+// 같은 장소·같은 날짜는 여러 번 묻기 때문에 계산 결과를 기억해 둔다 (결과는 읽기 전용으로 쓴다)
+const HOURS = new WeakMap();
 export function hoursFor(p, dateStr) {
+  let byDate = HOURS.get(p);
+  if (!byDate || byDate.src !== p.hours) { byDate = new Map(); byDate.src = p.hours; HOURS.set(p, byDate); }
+  let h = byDate.get(dateStr);
+  if (!h) { h = computeHours(p, dateStr); byDate.set(dateStr, h); }
+  return h;
+}
+function computeHours(p, dateStr) {
   const month = Number(dateStr.split("-")[1]);
   const wd = weekdayOf(dateStr);
   const season = (p.seasons || []).find((s) => s.months.includes(month));
@@ -377,6 +392,11 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
     if (dish) dishes.add(dish);
   };
 
+  // 이 장소에서 끝난 뒤 저녁 식당(19:30 전 시작)에 갈 수 있는지
+  const dinnerReachable = (fromP, at) => pool.some((f) => f.cat === "food" && !used.has(f.id) && !exclude.has(f.id) && !dishes.has(dishOf(f)) &&
+    distanceKm(fromP, f) <= (drives(input.move) ? 40 : 25) && isOpenDay(f, dateStr) &&
+    (() => { const r = tryPlace(f, fromP, at, input, opts, end, dateStr); return r && r.start <= DINNER[1] && r.tr.min <= 60; })());
+
   // 확정된 장소 먼저 배치 (시간 재계산)
   for (const id of keep) {
     const p = byId(id);
@@ -403,7 +423,10 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       else if (hasDinner && nightCount < (end >= toMin("21:00") ? 2 : 1) && t < end - 40) nightOnly = true;
       else break;
     }
-    let best = null;
+    let best = null, relax = false;
+    const cands = [];
+    for (let pass = 0; pass < 2 && !best; pass++) {
+    relax = pass === 1;
     for (const p of pool) {
       if (used.has(p.id) || exclude.has(p.id) || !isOpenDay(p, dateStr)) continue;
       const isFood = p.cat === "food";
@@ -436,16 +459,26 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       const radius = drives(input.move) ? 6 : 4;
       // 하루 동선 밖. 다만 숙박하는 날 저녁은 숙소(그날 출발점) 근처 식당도 된다 — 돌아가는 길이라서
       const nearHome = kind === "dinner" && start && dayIdx < input.days - 1 && distanceKm(startPt, p) <= (drives(input.move) ? 12 : 6);
-      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome) continue;
+      // 저녁을 못 찾았을 때(대중교통·반려동물 동반처럼 식당이 드문 경우)는 60분 안이면 동선 밖 식당도 된다
+      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome && !(relax && r.tr.min <= 60)) continue;
       if (fromAnchor > radius) v -= (fromAnchor - radius) * (drives(input.move) ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
       if (items.length && items[items.length - 1].place.cat === p.cat) v -= 1.5;
-      if (!best || v > best.v) best = { p, r, v };
+      cands.push({ p, r, v });
+    }
+    // 두 번째 차례는 저녁 식당을 넓게 찾을 때만
+    if (kind !== "dinner") pass = 2;
+    cands.sort((a, b) => b.v - a.v);
+    // 숙박하는 날 저녁 전 마지막 방문: 끝난 뒤 저녁 먹을 곳에 제때 갈 수 있는 곳만 고른다
+    const needDinner = kind === "visit" && !hasDinner && !nightOnly && end >= DINNER[1] && dayIdx < input.days - 1;
+    best = cands.find((c) => !needDinner || c.r.finish < DINNER[0] - 60 || dinnerReachable(c.p, c.r.finish)) || null;
     }
     if (!best) {
       if (filler) { fillers = 9; t = Math.max(t, DINNER[0] - 20); continue; } // 채울 곳이 없으면 자유 시간
       if (nightOnly) break;
+      // 저녁 전에 더 갈 곳이 없으면 쉬었다가 저녁을 먹는다 (일정을 일찍 끝내지 않음)
+      if (kind === "visit" && !hasDinner && end >= DINNER[1] && t < DINNER[0] - 20) { t = DINNER[0] - 20; continue; }
       if (kind !== "visit") { // 식사할 곳이 없으면 이번 끼니는 건너뜀
         if (kind === "lunch") hasLunch = true; else hasDinner = true;
         continue;

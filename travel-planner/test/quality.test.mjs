@@ -29,7 +29,7 @@ for (const region of R) for (const who of ["couple", "family", "parents", "pet"]
     });
   }
 const pct = (k) => (c[k] / days) * 100;
-const LIMIT = { gap60: 14, zigzag: 14, farStart: 9, leg75: 8.5, drive4h: 6, noDinner: 3.5, noLunch: 0.5, sameDish: 0, lateDayTrip: 0, mealFirst: 0.5 };
+const LIMIT = { gap60: 14, zigzag: 14, farStart: 9, leg75: 8.5, drive4h: 6, noDinner: 0.5, noLunch: 0.5, sameDish: 0, lateDayTrip: 0, mealFirst: 0.5 };
 const NAME = { gap60: "60분 넘는 빈 시간", zigzag: "지역 왔다 갔다", farStart: "숙소에서 첫 장소 60분+", leg75: "한 번 이동 75분+", drive4h: "하루 이동 4시간+", noDinner: "숙박일 저녁 없음", noLunch: "점심 없음", sameDish: "같은 음식 두 번", lateDayTrip: "당일치기 19:30 넘김", mealFirst: "식사로 시작" };
 const over = Object.entries(LIMIT).filter(([k, lim]) => pct(k) > lim).map(([k, lim]) => `${NAME[k]} ${pct(k).toFixed(1)}% (기준 ${lim}% 이하)`);
 assert.deepEqual(over, [], `일정 품질 기준 초과: ${over.join(", ")}\n전체: ${Object.keys(LIMIT).map((k) => `${NAME[k]} ${pct(k).toFixed(1)}%`).join(" · ")}`);

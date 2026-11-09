@@ -153,6 +153,11 @@ function optionsFor(input, base) {
 }
 async function thinkThrough(input, opts, voice) {
   const box = $("#thinking"), list = $("#thinkSteps");
+  // 누르자마자 화면부터 보여 주고(느린 폰에서 멈춘 것처럼 보이지 않게), 다음 화면 그리기 뒤에 계산한다
+  $("#thinkTitle").textContent = t("여행 일정을 짜고 있어요");
+  list.innerHTML = "";
+  box.hidden = false;
+  await new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
   const stats = planStats(input, opts);
   const opt = optionsFor(input, state.baseOpts);
   const best = opt[0];
@@ -164,16 +169,14 @@ async function thinkThrough(input, opts, voice) {
     t("이동 시간과 운영시간을 맞춰 동선을 짰어요 · 영업시간 충돌 {c}건", { c: best.totals.conflicts }),
     t("성격이 다른 일정 3개를 비교했어요"),
   ];
-  $("#thinkTitle").textContent = t("여행 일정을 짜고 있어요");
   list.innerHTML = steps.map((x) => `<li>${esc(x)}</li>`).join("");
-  box.hidden = false;
-  const items = [...list.children], gap = reduceMotion() ? 120 : 480;
+  const items = [...list.children], gap = reduceMotion() ? 100 : 300;
   for (let i = 0; i < items.length; i++) {
     items[i].classList.add("show");
     await sleep(gap);
     items[i].classList.add("done");
   }
-  await sleep(reduceMotion() ? 50 : 250);
+  await sleep(reduceMotion() ? 50 : 150);
 }
 
 // 반값여행(지역사랑 휴가지원) 대상 시군 장소가 일정에 있는지
@@ -632,10 +635,8 @@ async function loadWarnings() {
   }
   return null;
 }
-Promise.all([
-  loadWarnings(),
-  fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null),
-]).then(([w, pj]) => { kma = w; placeSigun = pj?.sigun || null; if (pj && !petData) petData = pj; if (w && trip && !$("#result").hidden) render(); });
+// 시군 표(pet.json)는 지금 특보가 있을 때만 받는다 (첫 화면 데이터 줄이기)
+loadWarnings().then(async (w) => [w, w?.now?.length ? await fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).catch(() => null) : null]).then(([w, pj]) => { kma = w; placeSigun = pj?.sigun || null; if (pj && !petData) petData = pj; if (w && trip && !$("#result").hidden) render(); });
 function alertsFor(p, date, wx) {
   const k = kstNow(), tomorrowStr = addDays(k.date, 1);
   return [...kmaAlertsFor(p, date, { warnings: kma, sigun: placeSigun?.[p.id], today: k.date, tomorrow: tomorrowStr }), ...weatherAlertsFor(p, date, wx)];
@@ -1726,12 +1727,16 @@ $("#suggest").addEventListener("click", (e) => {
 });
 
 /* ---------- AI로 한 줄 시작 ---------- */
+// 말 해석기(가이드 지식 자료 포함 약 70KB)는 첫 화면이 뜨자마자 뒤에서 받아 둔다. 말하거나 쓰는 동안 다 받아져 "만들기"를 누르면 바로 시작
+let voiceMod = null;
+const voiceParser = () => (voiceMod ??= import("./voice-parse.js"));
+setTimeout(() => voiceParser().catch(() => { voiceMod = null; }), 0);
 const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
 $("#aiStart").addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = $("#aiStartInput").value.trim(); if (!text) return;
   const btn = $("#aiStart button[type=submit]"); btn.disabled = true; btn.textContent = "…";
-  const { parseSpoken } = await import("./voice-parse.js");
+  const { parseSpoken } = await voiceParser();
   const r = parseSpoken(text, todayStr());
   btn.disabled = false; btn.textContent = t("만들기");
   // 말한 조건을 폼에 옮기고(폼은 "직접 골라서 만들기"에 접혀 있다), 폼에 없는 조건(인원·속도)은 일정 만들 때 넘긴다
@@ -1974,9 +1979,13 @@ fetchT("api/shops?region=gangneung", {}, 3000)
   .then((r) => { if (r.ok) document.body.classList.add("has-server"); })
   .catch(() => {});
 
-if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+// 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다
+if ("serviceWorker" in navigator) {
+  const reg = () => setTimeout(() => navigator.serviceWorker.register("sw.js").catch(() => {}), 4000);
+  if (document.readyState === "complete") reg(); else addEventListener("load", reg, { once: true });
+}
 // 첫 화면을 그린 뒤 한가할 때 무료 간단 모드를 미리 받아 둔다 (질문할 때 바로 답하게)
-(window.requestIdleCallback || ((f) => setTimeout(f, 1500)))(() => localAI().catch(() => {}));
+
 
 // Directory links use the same validated planner IDs and current itinerary.
 const directoryPlace = new URLSearchParams(location.search).get('addPlace');
