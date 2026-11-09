@@ -479,7 +479,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 하루 동선 밖. 다만 숙박하는 날 저녁은 숙소(그날 출발점) 근처 식당도 된다 — 돌아가는 길이라서
       const nearHome = kind === "dinner" && start && dayIdx < input.days - 1 && distanceKm(startPt, p) <= (drives(input.move) ? 12 : 6);
       // 저녁을 못 찾았을 때(대중교통·반려동물 동반처럼 식당이 드문 경우)는 60분 안이면 동선 밖 식당도 된다
-      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome && !(relax && r.tr.min <= 60)) continue;
+      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome && !(relax && r.tr.min <= (kind === "dinner" ? 60 : 45))) continue;
       if (fromAnchor > radius) v -= (fromAnchor - radius) * (drives(input.move) ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
@@ -487,7 +487,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       cands.push({ p, r, v });
     }
     // 두 번째 차례는 저녁 식당을 넓게 찾을 때만
-    if (kind !== "dinner") pass = 2;
+    // 두 번째 차례(동선 밖까지 넓혀 찾기)는 저녁 식당, 그리고 근처 관광지를 다 써서 오후가 통째로 빌 때만
+    if (kind !== "dinner" && !(kind === "visit" && !nightOnly && !filler && visits < 2 && t < DINNER[0] - 60)) pass = 2;
     cands.sort((a, b) => b.v - a.v);
     // 숙박하는 날 저녁 전 마지막 방문: 끝난 뒤 저녁 먹을 곳에 제때 갈 수 있는 곳만 고른다
     const needDinner = kind === "visit" && !hasDinner && !nightOnly && end >= DINNER[1] && dayIdx < input.days - 1;
@@ -823,12 +824,17 @@ export function planOptions(input, opts = {}) {
   const must = new Set(base.must || []);
   const bestVisits = visits(best).filter((p) => !must.has(p.id));
   const tryEx = (ids) => ({ key: "different", opts: { ...base, exclude: [...new Set([...(base.exclude || []), ...ids])] } });
-  let third = tryEx(bestVisits.map((p) => p.id));
   const count = (t) => t.days.reduce((n, d) => n + d.items.length, 0);
-  let thirdTrip = planTrip(input, { ...third.opts, lodgingId: undefined });
-  if (count(thirdTrip) < Math.max(3, count(best) * 0.6)) {
-    third = tryEx([...bestVisits].sort((a, b) => b.pop - a.pop).slice(0, Math.ceil(bestVisits.length / 2)).map((p) => p.id));
+  const sights = (d) => d.items.filter((it) => it.kind === "visit").length;
+  // 너무 빈 일정: 전체 장소가 추천의 70% 미만이거나, 추천에선 관광지가 2곳 이상인 날이 1곳 이하로 줄어든 경우
+  const thin = (t) => count(t) < Math.max(3, count(best) * 0.7) || t.days.some((d, i) => sights(d) < 2 && sights(best.days[i] || d) >= 2);
+  // 추천의 관광지를 모두 → 인기 높은 절반 → 3분의 1 → 5분의 1 순서로 빼 보고, 처음으로 빈 날이 없는 일정을 쓴다
+  const byPop = [...bestVisits].sort((a, b) => b.pop - a.pop);
+  let third, thirdTrip;
+  for (const share of [1, 1 / 2, 1 / 3, 1 / 5]) {
+    third = tryEx(byPop.slice(0, Math.ceil(byPop.length * share)).map((p) => p.id));
     thirdTrip = planTrip(input, { ...third.opts, lodgingId: undefined });
+    if (!thin(thirdTrip)) break;
   }
   third.opts.lodgingId = thirdTrip.lodging?.id;
   const secondTrip = planTrip(input, second.opts);

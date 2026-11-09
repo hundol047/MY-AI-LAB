@@ -35,3 +35,22 @@ const NAME = { gap60: "60분 넘는 빈 시간", zigzag: "지역 왔다 갔다",
 const over = Object.entries(LIMIT).filter(([k, lim]) => pct(k) > lim).map(([k, lim]) => `${NAME[k]} ${pct(k).toFixed(1)}% (기준 ${lim}% 이하)`);
 assert.deepEqual(over, [], `일정 품질 기준 초과: ${over.join(", ")}\n전체: ${Object.keys(LIMIT).map((k) => `${NAME[k]} ${pct(k).toFixed(1)}%`).join(" · ")}`);
 console.log(`ok - 일정 품질 ${days}일: ` + Object.keys(LIMIT).map((k) => `${NAME[k]} ${pct(k).toFixed(1)}%`).join(" · "));
+
+// 일정 3개 고르기: 3박 4일이면 3개 일정 모두 1~4일차가 있고, 날마다 장소가 있어야 한다.
+// 색다른 코스가 추천 장소를 다 빼서 하루에 관광지가 1곳 이하인 날이 많아지지 않게 (권역 5 × 이동 3 × 취향 2)
+import { planOptions } from "../public/planner.js";
+let optTrips = 0, thinDays = 0;
+for (const region of R) for (const move of ["car", "taxi", "transit"]) for (const likes of [["sea", "food"], ["culture"]]) {
+  const opts = planOptions({ region, date: "2026-11-14", days: 4, who: "couple", likes, move }, {});
+  assert.deepEqual(opts.map((o) => o.key), ["best", "relaxed", "different"], `${region}/${move}: 일정 3개`);
+  for (const o of opts) {
+    assert.equal(o.trip.days.length, 4, `${region}/${move}/${o.key}: 4일`);
+    o.trip.days.forEach((d, i) => {
+      assert.ok(d.items.length >= 2, `${region}/${move}/${o.key} ${i + 1}일차 장소 ${d.items.length}곳`);
+      if (d.items.filter((x) => x.kind === "visit").length < 2) thinDays++;
+    });
+  }
+  optTrips++;
+}
+assert.ok(thinDays / (optTrips * 12) <= 0.08, `관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
+console.log(`ok - 3박 4일 일정 3개 × ${optTrips}건: 모두 1~4일차 · 관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
