@@ -585,7 +585,7 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = sunHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
+  $("#timeline").innerHTML = sunHTML(day) + busNoteHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
   if (canVote() && votes.key !== state.opts.voteKey) loadVotes(); // 다른 일정(또는 받은 링크)을 열면 그 일정의 표를 받는다
   renderOptions();
   renderHeard();
@@ -761,6 +761,12 @@ function crowdLine(p, dateStr) {
 // 첫차·막차는 노선 기점 출발 시각이라 정류장 도착은 조금 늦다 → 막차 30분 전부터 경고한다
 let busData = null;
 fetchT("bus.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { busData = j; if (trip && state.input.move === "transit" && !$("#result").hidden) render(); }).catch(() => {});
+// 시내버스 시간표 공개 자료(TAGO)가 없는 곳(강릉·속초·동해 등)에서 대중교통으로 다니는 날: 이동 시간이 예상임을 알리고 실제 버스는 길찾기로
+function busNoteHTML(day) {
+  if (state.input.move !== "transit" || !day.items.length || !busData) return "";
+  if (day.items.some((it) => busData.places?.[it.id])) return "";
+  return `<li class="leg note">${t("이 지역은 시내버스 시간표 공개 자료가 없어 이동 시간은 예상이에요 · 장소마다 '길찾기'(카카오맵 대중교통)에서 실제 버스 시간을 확인하세요")}</li>`;
+}
 function busLine(p, it) {
   const b = busData?.places?.[p.id];
   if (!b) return "";

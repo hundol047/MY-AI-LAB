@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "이 지역은 시내버스 시간표 공개 자료가 없어 이동 시간은 예상이에요 · 장소마다 '길찾기'(카카오맵 대중교통)에서 실제 버스 시간을 확인하세요": "No public city-bus timetables for this area, so travel times are estimates · Check real buses with 'Directions' (Kakao Map transit) on each place",
   "좋아요": "Like",
   "별로예요": "Not for me",
   "장소마다 👍👎로 같이 골라요": "Let's pick together with 👍👎 on each place",
