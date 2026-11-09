@@ -671,3 +671,6 @@ body:not(.has-server) .needs-server { display: none !important; }
 .hp .hp-places, .hp .hp-meta { font-size: 12px; color: var(--sub); }
 .hp .hp-go { font-size: 13px; font-weight: 700; color: #9a6400; margin-top: 2px; }
 @media (prefers-color-scheme: dark) { .hp .hp-go { color: #f0b84a; } .hp { border-color: color-mix(in srgb, #f0b84a 40%, transparent); } }
+/* 고속도로 정체 예상 */
+.leg .jam { display: block; color: var(--warn); font-weight: 600; }
+.leg.jam { color: var(--warn); }

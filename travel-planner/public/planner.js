@@ -287,6 +287,34 @@ function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
   return { tr, start, finish, wait };
 }
 
+// 주말·연휴 고속도로 정체 (수도권 ↔ 강원, 영동·서울양양·중앙고속도로). 실시간 교통이 아니라 한국도로공사 주말 교통 전망에서
+// 해마다 되풀이되는 시간대: 가는 길(하행) 토요일·연휴 첫날 07~12시, 금요일·연휴 전날 16~21시 / 오는 길(상행) 일요일·연휴 마지막 날 14~21시
+// 공휴일(대체공휴일 포함, 인사혁신처 발표 기준)
+const HOLIDAYS = new Set([
+  "2026-01-01", "2026-02-16", "2026-02-17", "2026-02-18", "2026-03-01", "2026-03-02", "2026-05-05", "2026-05-24", "2026-05-25", "2026-06-03", "2026-06-06",
+  "2026-08-15", "2026-08-17", "2026-09-24", "2026-09-25", "2026-09-26", "2026-10-03", "2026-10-05", "2026-10-09", "2026-12-25",
+  "2027-01-01", "2027-02-06", "2027-02-07", "2027-02-08", "2027-02-09", "2027-03-01", "2027-05-05", "2027-05-13", "2027-06-06", "2027-08-15", "2027-08-16",
+  "2027-09-14", "2027-09-15", "2027-09-16", "2027-10-03", "2027-10-04", "2027-10-09", "2027-10-11", "2027-12-25",
+]);
+const offDay = (d) => [0, 6].includes(weekdayOf(d)) || HOLIDAYS.has(d);
+// 수도권(서울·인천·경기 서부)에서 강원으로 넘어가는 이동인지
+const capital = (p) => p.lat > 37.15 && p.lat < 37.85 && p.lng > 126.5 && p.lng < 127.35;
+// 가는 길 정체: 평소 이동 시간에 더해질 분 (없으면 0)
+export function jamGoing(from, to, dateStr, depMin, move) {
+  if (!drives(move) || !capital(from) || to.lng < 127.55) return 0;
+  const base = travel(from, to, move).min;
+  const peakDay = offDay(dateStr) && !offDay(addDays(dateStr, -1)); // 토요일·연휴 첫날
+  const eve = !offDay(dateStr) && offDay(addDays(dateStr, 1)); // 금요일·연휴 전날
+  if (peakDay && depMin >= toMin("07:00") && depMin < toMin("12:00")) return round5(base * 0.45);
+  if (eve && depMin >= toMin("16:00") && depMin < toMin("21:00")) return round5(base * 0.3);
+  return 0;
+}
+// 오는 길 정체: 마지막 날이 일요일·연휴 마지막 날이면 막히는 시간대
+export function jamComing(start, dateStr, move) {
+  if (!drives(move) || !start || !capital(start)) return null;
+  return offDay(dateStr) && !offDay(addDays(dateStr, 1)) ? { from: "14:00", to: "21:00" } : null;
+}
+
 // 하루 일정 생성. keep: 이미 확정된 앞부분 장소 id 목록
 export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude = new Set(), keepOnly = false, start = null) {
   input = dayInput(input, dayIdx);
@@ -412,7 +440,9 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
 
   const items = [];
   const startPt = start || BASE;
-  let from = startPt, t = dayStart, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0, fillers = 0;
+  // 첫날 수도권에서 차로 오면 주말·연휴 아침 정체만큼 늦게 도착한다 (첫 이동에 더함)
+  const jam = dayIdx === 0 ? jamGoing(startPt, anchor, dateStr, dayStart, input.move) : 0;
+  let from = startPt, t = dayStart + jam, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0, fillers = 0;
   const dishes = new Set(); // 같은 음식(막국수·닭갈비…)은 하루 한 번
   const groups = new Set();
   const cafeMax = (input.likes || []).includes("cafe") ? 2 : 1;
@@ -534,8 +564,10 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   }
 
   // 순서 다듬기(reorderDay)에 필요한 값: 중심 지역 후보 중 고른 하루에만 planDay가 한 번 돌린다 (사람이 순서를 정한 날은 그대로)
-  const tune = keep.length ? null : { startPt, dayStart, input, opts, end, dateStr };
-  return { date: dateStr, dayIdx, region: regionOf(input), start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items, tune };
+  const tune = keep.length ? null : { startPt, dayStart: dayStart + jam, input, opts, end, dateStr };
+  const back = dayIdx === input.days - 1 ? jamComing(opts.start, dateStr, input.move) /* 출발지(사용자가 고른 곳)로 돌아가는 길 */ : null;
+  return { date: dateStr, dayIdx, region: regionOf(input), start: startPt, weekday: weekdayOf(dateStr), rain, area: anchorKey, areaName: anchor.name, items, tune,
+    ...(jam ? { jam: { min: jam, dep: fmt(dayStart) } } : {}), ...(back ? { jamBack: back } : {}) };
 }
 
 // 숙소는 여행 내내 한 곳: 짐을 옮기지 않도록 모든 밤을 같은 숙소에서 묵는다

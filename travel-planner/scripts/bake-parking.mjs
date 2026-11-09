@@ -2,7 +2,7 @@
 // 장소 번호(contentid)는 p.kto, 없으면 국문 검색 결과(캐시)에서 이름·거리로 맞춘 것만 쓴다
 // 출력: public/parking.json ({builtAt, places: {장소 id: {ok: true|false|null, fee: "free"|"paid"|null, text}}}), reports/parking.md
 // 실행: TOUR_API_KEY=Decoding키 node scripts/bake-parking.mjs
-import { writeFile, mkdir } from "node:fs/promises";
+import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { candidates, tour, maxKmFor } from "./tour-api.mjs";
 
 const key = process.env.TOUR_API_KEY;
@@ -23,6 +23,10 @@ export function readParking(text, feeText = "") {
   return { ok, fee, text: [text, feeText].filter(Boolean).join(" · ").slice(0, 80) };
 }
 const out = {}, rows = [];
+// API가 실패하면(하루 호출 한도 등) 지난번 값을 그대로 둔다 — 실패를 "주차 정보 없음"으로 덮어쓰지 않게
+const prev = JSON.parse(await readFile(new URL("../public/parking.json", import.meta.url), "utf8").catch(() => "{}")).places || {};
+let failed = 0;
+const keepPrev = (p, why) => { failed++; if (prev[p.id]) { out[p.id] = prev[p.id]; rows.push(`- ${p.name}: ${why} → 지난 값 유지`); } else rows.push(`- ${p.name}: ${why}`); };
 for (const p of PLACES.filter((x) => !x.multi && !x.petOnly && x.cat !== "festival")) {
   let id = p.kto, type = null;
   if (!id) {
@@ -34,10 +38,11 @@ for (const p of PLACES.filter((x) => !x.multi && !x.petOnly && x.cat !== "festiv
   if (!type) {
     const [c] = await tour("KorService2", "detailCommon2", { contentId: String(id) }, opts).catch(() => [null]);
     type = c?.contenttypeid;
+    if (!type) { keepPrev(p, "종류를 받지 못함"); continue; }
   }
   if (!FIELDS[type]) { rows.push(`- ${p.name}: 주차 항목이 없는 종류(${type})`); continue; }
   const [intro] = await tour("KorService2", "detailIntro2", { contentId: String(id), contentTypeId: String(type) }, opts).catch(() => [null]);
-  if (!intro) { rows.push(`- ${p.name}: 소개정보를 받지 못함`); continue; }
+  if (!intro) { keepPrev(p, "소개정보를 받지 못함"); continue; }
   const [pk, fee] = FIELDS[type].map((f) => clean(intro[f]));
   const r = readParking(pk, fee);
   if (!r) { rows.push(`- ${p.name}: 주차 원문 비어 있음`); continue; }
@@ -48,4 +53,4 @@ await writeFile(new URL("../public/parking.json", import.meta.url), JSON.stringi
 await mkdir(new URL("../reports/", import.meta.url), { recursive: true });
 const n = Object.values(out);
 await writeFile(new URL("../reports/parking.md", import.meta.url), ["# 주차 정보 (한국관광공사 소개정보)", "", `생성: node scripts/bake-parking.mjs. 붙인 곳 ${n.length}곳 (가능 ${n.filter((x) => x.ok).length} · 불가 ${n.filter((x) => x.ok === false).length} · 무료 ${n.filter((x) => x.fee === "free").length} · 유료 ${n.filter((x) => x.fee === "paid").length})`, "", ...Object.entries(out).map(([id, v]) => `- ${id}: ${v.ok === true ? "가능" : v.ok === false ? "불가" : "?"} ${v.fee || ""} — ${v.text}`), "", "## 못 붙인 곳", "", ...rows, ""].join("\n"));
-console.log(`\n주차 정보 ${n.length}곳 → public/parking.json, reports/parking.md`);
+console.log(`\n주차 정보 ${n.length}곳${failed ? ` (API 실패 ${failed}곳은 지난 값 유지)` : ""} → public/parking.json, reports/parking.md`);

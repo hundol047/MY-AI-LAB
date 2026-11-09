@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "고속도로 정체 예상 +{min}분 ({dep} 출발 · 주말·연휴에 자주 막히는 시간대) · 일찍 출발하면 덜 막혀요": "Expected highway congestion +{min} min (leaving {dep}, a usual weekend/holiday jam time) · Leaving earlier helps",
+  "돌아가는 길: {from}~{to} 상행 정체 예상 (일요일·연휴 마지막 날) · {from} 전이나 {to} 넘어 출발하면 덜 막혀요": "Way back: expected Seoul-bound congestion {from}–{to} (Sunday / last day of holiday) · Leave before {from} or after {to}",
   "반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)": "Outside the half-price county, so this meal isn't refunded (nearest pet-friendly restaurant)",
   "횡성 1박 2일": "Hoengseong, 2 days 1 night",
   "횡성호·자작나무숲·청태산 숲": "Hoengseong Lake · Birch Forest · Cheongtaesan forest",

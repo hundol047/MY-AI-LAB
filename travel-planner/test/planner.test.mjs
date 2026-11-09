@@ -108,6 +108,17 @@ assert.equal(hoursFor(P("solhyang"), "2026-12-01").close, 17 * 60);
   const pc = planTrip({ ...input, region: "pyeongchang" }, { must: ["sheep"] });
   assert.equal(benefitsFor(pc, { ...input, region: "pyeongchang" }).find((x) => x.id === "b-halfprice")?.status, "check");
 }
+// 주말·연휴 고속도로 정체: 수도권에서 차로 오는 토요일 아침은 늦게 도착, 평일·대중교통·강원 안 출발은 그대로
+{
+  const seoul = { name: "서울역", lat: 37.5547, lng: 126.9707 }, base = { region: "gangneung", days: 2, who: "couple", likes: ["sea"] };
+  const sat = planTrip({ ...base, date: "2026-11-21", move: "car" }, { start: seoul, startTime: "08:00" });
+  const tue = planTrip({ ...base, date: "2026-11-24", move: "car" }, { start: seoul, startTime: "08:00" });
+  assert.ok(sat.days[0].jam?.min > 0 && !tue.days[0].jam, "토요일 아침만 정체");
+  assert.ok(sat.days[0].items[0].start > tue.days[0].items[0].start, "정체만큼 늦게 도착");
+  assert.deepEqual(planTrip({ ...base, date: "2026-11-21", move: "car" }, { start: seoul }).days[1].jamBack, { from: "14:00", to: "21:00" }, "일요일 오후 상행");
+  assert.ok(!planTrip({ ...base, date: "2026-11-21", move: "transit" }, { start: seoul, startTime: "08:00" }).days[0].jam, "대중교통은 정체 없음");
+  assert.ok(!planTrip({ ...base, date: "2026-11-21", move: "car" }, { start: { name: "속초", lat: 38.2, lng: 128.59 }, startTime: "08:00" }).days[0].jam, "강원 안 출발은 정체 없음");
+}
 // 반값여행: 대상 시군(평창·영월·횡성)의 앱 장소가 빠짐없이 목록에 있고, 코스 일정은 그 시군 장소·숙소만 쓴다
 {
   const { readFileSync } = await import("node:fs");

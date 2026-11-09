@@ -584,7 +584,7 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = sunHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day);
+  $("#timeline").innerHTML = sunHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
   renderOptions();
   renderHeard();
   renderFestivals();
@@ -632,6 +632,8 @@ function itemHTML(it, i, day) {
   // 앞 장소를 나와 다음 장소에 도착하기까지 30분 넘게 비면 "자유 시간"으로 보여 준다 (저녁 시간 기다림·문 여는 시간 기다림)
   const prev = i > 0 ? day.items[i - 1] : null, free = prev ? it.start - it.travelMin - prev.end : 0;
   if (free >= 30) leg = t("자유 시간 {min}분 · 근처 산책·쉬기", { min: free }) + " · " + leg;
+  // 주말·연휴 고속도로 정체(예상)만큼 첫 도착이 늦다
+  if (i === 0 && day.jam) leg += `<span class="jam">${t("고속도로 정체 예상 +{min}분 ({dep} 출발 · 주말·연휴에 자주 막히는 시간대) · 일찍 출발하면 덜 막혀요", { min: day.jam.min, dep: day.jam.dep })}</span>`;
   const hours = hoursLabel(p, trip.days[dayIdx].date);
   return `
   <li class="leg">${leg}</li>
@@ -1130,6 +1132,11 @@ document.addEventListener("submit", async (e) => {
     </ul>
     ${r.ask.length ? `<p class="safe-ask">${t("예약 전에 물어볼 것: ")}${r.ask.map(esc).join(" · ")}</p>` : ""}`;
 });
+// 마지막 날 수도권으로 돌아가는 길: 일요일·연휴 마지막 날 오후 상행 정체 (예상)
+function backJamHTML(day) {
+  if (!day.jamBack) return "";
+  return `<li class="leg home jam">${t("돌아가는 길: {from}~{to} 상행 정체 예상 (일요일·연휴 마지막 날) · {from} 전이나 {to} 넘어 출발하면 덜 막혀요", day.jamBack)}</li>`;
+}
 function lodgingHTML(day) {
   const night = lodgingForDay(trip, day.dayIdx);
   if (!night || day.dayIdx >= state.input.days - 1) return "";

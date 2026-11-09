@@ -7,6 +7,8 @@ set -euo pipefail
 msg="$1"; shift
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+# 받은 자료가 크게 줄었으면(API 한도·장애) 그 파일은 지난 버전으로 되돌린다
+node "$(dirname "$0")/guard-shrink.mjs" "$@"
 git add -- "$@"
 if git diff --cached --quiet; then echo "바뀐 데이터 없음" >> "$GITHUB_STEP_SUMMARY"; exit 0; fi
 git commit -q -m "$msg"
