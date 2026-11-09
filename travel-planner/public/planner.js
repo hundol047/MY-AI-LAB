@@ -293,7 +293,23 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
     best.day.items = reorderDay(best.day.items, startPt, dayStart, di, dopts, end, ds);
   }
   delete best.day.tune;
+  stretchStays(best.day.items, best.day.date); // 링크로 복원·바꾸기 한 날도 같은 규칙
   return best.day;
+}
+
+// 그래도 다음 일정(주로 저녁)까지 1시간 넘게 비면 바로 앞 장소에 더 머문다 (최대 60분, 원래 머무는 시간까지, 운영시간 안)
+// 30분쯤은 쉬는·이동 여유로 남겨 둔다. 다음 일정 시각은 바뀌지 않는다
+function stretchStays(items, dateStr) {
+  for (let k = 1; k < items.length; k++) {
+    const prev = items[k - 1], gap = items[k].start - items[k].travelMin - prev.end;
+    if (gap < 60 || prev.kind !== "visit" || prev.place.cat === "festival") continue;
+    const h = hoursFor(prev.place, dateStr);
+    let ext = Math.min(gap - 30, 60, prev.end - prev.start, h.close - prev.end);
+    ext = Math.floor(ext / 5) * 5;
+    if (ext < 10 || !fitsHours(h, prev.start, prev.end + ext)) continue;
+    prev.end += ext;
+    prev.extra = ext;
+  }
 }
 
 // 음식 종류 (하루 두 번 같은 음식을 피하려고)
@@ -432,27 +448,30 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       const isFood = p.cat === "food";
       if (kind === "visit" && isFood) continue;
       if (kind !== "visit" && !isFood) continue;
-      if (p.cat === "cafe" && cafes >= cafeMax) continue;
+      // 저녁 전 빈 시간 채우기는 오후 카페(하루 2곳까지)·바다 한 곳을 더 허용한다 (쉬어 가기 좋은 곳)
+      if (p.cat === "cafe" && cafes >= (filler ? Math.max(cafeMax, 2) : cafeMax)) continue;
       if (p.group && groups.has(p.group)) continue;
       if ((opts.avoid || []).includes(p.cat) && !isFood) continue;
       if (p.cat === "cafe" && items.length && items[items.length - 1].place.cat === "cafe") continue;
       if (nightOnly && !p.tags.includes("night")) continue;
-      if (filler && (p.multi && p.cat !== "food" ? false : stayOf(p, opts) > 70)) continue;
+      if (filler && (p.multi && p.cat !== "food" ? false : stayOf(p, opts) > 90)) continue;
       if (isFood && dishes.has(dishOf(p))) continue;
-      if (p.cat === "sea" && seas >= (rain ? 1 : 2)) continue;
+      if (p.cat === "sea" && seas >= (rain ? 1 : 2) + (filler && !rain ? 1 : 0)) continue;
       // 점심 시간 직전이면 너무 긴 방문은 점심을 밀어내지 않도록 제한
       if (kind === "visit" && !hasLunch && t < LUNCH[0] && t + 30 + p.stay > LUNCH[1]) continue;
       const r = tryPlace(p, from, t, input, opts, end, dateStr);
       if (!r) continue;
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
-      if (filler && (r.tr.min > 20 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고 저녁 전에 끝나는 곳만
+      if (filler && (r.tr.min > 30 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고(30분 안) 저녁 전에 끝나는 곳만
       let v = baseScore(p, input, opts, rain, dateStr);
       v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
       if (r.tr.min > 50) v -= (r.tr.min - 50) * 0.12; // 한 번에 50분 넘는 이동은 더 피한다
       // 같은 지역 안에서 이어 가기: 지금 있는 지역(또는 이미 다녀온 지역)을 떠났다가 다시 오지 않게
       if (from.area && p.area === from.area) v += 1.2;
       else if (items.some((x) => x.place.area === p.area) && items.length && items[items.length - 1].place.area !== p.area) v -= 2;
+      // 빈 시간 채우기는 지금 있는 지역 안에서 (다른 지역에 들렀다 저녁 먹으러 되돌아오는 동선이 되지 않게)
+      if (filler && from.area && p.area !== from.area) v -= 3;
       v -= r.wait * 0.05;
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);

@@ -6,7 +6,7 @@ import { planTrip } from "../public/planner.js";
 
 const R = ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"];
 let days = 0;
-const c = { gap60: 0, zigzag: 0, farStart: 0, leg75: 0, drive4h: 0, noDinner: 0, noLunch: 0, sameDish: 0, lateDayTrip: 0, mealFirst: 0 };
+const c = { gap60: 0, zigzag: 0, farStart: 0, leg75: 0, drive4h: 0, noDinner: 0, noLunch: 0, sameDish: 0, lateDayTrip: 0, mealFirst: 0, cafe3: 0 };
 const DISH = /막국수|닭갈비|순두부|물회|추어탕|송어|곤드레|해장국|냉면/;
 for (const region of R) for (const who of ["couple", "family", "parents", "pet"]) for (const move of ["car", "taxi", "transit"])
   for (const likes of [["sea", "food"], ["culture"], ["nature", "cafe"]]) for (const date of ["2026-11-14", "2027-04-21"]) for (const nd of [1, 2, 3]) {
@@ -26,11 +26,12 @@ for (const region of R) for (const who of ["couple", "family", "parents", "pet"]
       if (new Set(ds).size < ds.length) c.sameDish++;
       if (nd === 1 && it.length && it[it.length - 1].end > 19 * 60 + 30) c.lateDayTrip++;
       if (it[0] && it[0].kind !== "visit") c.mealFirst++;
+      if (it.filter((x) => x.place.cat === "cafe").length >= 3) c.cafe3++;
     });
   }
 const pct = (k) => (c[k] / days) * 100;
-const LIMIT = { gap60: 14, zigzag: 14, farStart: 9, leg75: 8.5, drive4h: 6, noDinner: 0.5, noLunch: 0.5, sameDish: 0, lateDayTrip: 0, mealFirst: 0.5 };
-const NAME = { gap60: "60분 넘는 빈 시간", zigzag: "지역 왔다 갔다", farStart: "숙소에서 첫 장소 60분+", leg75: "한 번 이동 75분+", drive4h: "하루 이동 4시간+", noDinner: "숙박일 저녁 없음", noLunch: "점심 없음", sameDish: "같은 음식 두 번", lateDayTrip: "당일치기 19:30 넘김", mealFirst: "식사로 시작" };
+const LIMIT = { gap60: 1.5, zigzag: 14, farStart: 9, leg75: 8.5, drive4h: 6, noDinner: 0.5, noLunch: 0.5, sameDish: 0, lateDayTrip: 0, mealFirst: 0.5, cafe3: 0 };
+const NAME = { gap60: "60분 넘는 빈 시간", zigzag: "지역 왔다 갔다", farStart: "숙소에서 첫 장소 60분+", leg75: "한 번 이동 75분+", drive4h: "하루 이동 4시간+", noDinner: "숙박일 저녁 없음", noLunch: "점심 없음", sameDish: "같은 음식 두 번", lateDayTrip: "당일치기 19:30 넘김", mealFirst: "식사로 시작", cafe3: "카페 3곳 이상" };
 const over = Object.entries(LIMIT).filter(([k, lim]) => pct(k) > lim).map(([k, lim]) => `${NAME[k]} ${pct(k).toFixed(1)}% (기준 ${lim}% 이하)`);
 assert.deepEqual(over, [], `일정 품질 기준 초과: ${over.join(", ")}\n전체: ${Object.keys(LIMIT).map((k) => `${NAME[k]} ${pct(k).toFixed(1)}%`).join(" · ")}`);
 console.log(`ok - 일정 품질 ${days}일: ` + Object.keys(LIMIT).map((k) => `${NAME[k]} ${pct(k).toFixed(1)}%`).join(" · "));
