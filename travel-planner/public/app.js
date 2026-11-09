@@ -257,17 +257,14 @@ function renderHalfPkgs() {
   if (!b || (b.end && kstNow().date > b.end)) { box.hidden = true; return; }
   box.hidden = false;
   const pop = (ids) => ids.map((id) => PLACES.find((p) => p.id === id)).filter((p) => p && !["food", "cafe"].includes(p.cat) && !/ski/.test(p.id)).sort((x, y) => (y.pop || 0) - (x.pop || 0)).slice(0, 3);
-  box.innerHTML = `<h3>${t("💰 반값여행 코스")}</h3>
-    <p class="hp-lead">${t("{towns}에서 쓴 경비의 50%를 지역사랑상품권으로 돌려받아요 (1명 최대 10만 원, 2명 이상 최대 20만 원). 코스는 그 시군 안의 장소·숙소로만 짜요.", { towns: b.towns.map((x) => t(x)).join("·") })}</p>
+  // 한 줄 칸: 누르면 코스 목록이 펼쳐지고, 코스를 고르면 바로 일정을 만든다
+  const open = box.querySelector("details")?.open ? " open" : "";
+  box.innerHTML = `<details${open}><summary><b>${t("💰 반값여행 코스")}</b><span>${t("{towns} 경비 50% 환급", { towns: b.towns.map((x) => t(x)).join("·") })}</span><i aria-hidden="true">›</i></summary>
     <div class="hp-list">${b.packages.map((pk) => {
       const pk2 = halfPackage(pk.id);
-      return `<button type="button" class="hp" data-hp="${pk.id}">
-        <b>${t(pk.title)}</b><span class="hp-sub">${t(pk.sub)}</span>
-        <span class="hp-places">${pop(pk2.placeIds).map((p) => esc(placeName(p))).join(" · ")}</span>
-        <span class="hp-meta">${t("대상 장소 {n}곳", { n: pk2.placeIds.filter((id) => !PLACES.find((p) => p.id === id)?.petOnly).length })}${pk.lodging.length ? " · " + t("숙소도 {town} 안", { town: t(pk.town) }) : ""}</span>
-        <span class="hp-go">${t("이 코스로 일정 만들기")}</span></button>`;
+      return `<button type="button" class="hp" data-hp="${pk.id}"><b>${t(pk.title)}</b><span class="hp-sub">${t(pk.sub)}</span><span class="hp-meta">${pop(pk2.placeIds).map((p) => esc(placeName(p))).join(" · ")}</span><span class="hp-go" aria-hidden="true">›</span></button>`;
     }).join("")}</div>
-    <p class="hp-note">${t("그 시군과 이웃 시군 주민은 신청할 수 없어요 · 여행 전 사전 신청이 필요하고 회차·날짜는 시군마다 달라요")} <a href="${esc(b.link)}" target="_blank" rel="noopener">${t("지금 진행 중인 회차·신청 날짜 보기")}</a></p>`;
+    <p class="hp-note">${t("1명 최대 10만 원 · 2명 이상 최대 20만 원 · 그 시군과 이웃 시군 주민은 신청할 수 없어요")} <a href="${esc(b.link)}" target="_blank" rel="noopener">${t("신청·회차 보기")}</a></p></details>`;
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-hp]"); if (!b) return;
@@ -996,7 +993,7 @@ function renderStatsOnly() { if (trip.days.every((d) => d.road)) render(); }
 const DAY_MS = 864e5;
 const imgCache = store.get("img4") || {};
 let baked = {};
-const bakedReady = fetchT("photos.json", {}, 3000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => (baked = j));
+const bakedReady = fetchT("photos.json", {}, 3000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { baked = j; if (trip?.lodging && !$("#result").hidden) renderLodging(); return j; }); // 사진 없는 숙소의 주변 사진
 let photoApi = true; // 서버에 사진 키가 없으면 첫 요청 뒤로 건너뜀
 // 화면에 보일 이름: id나 한국어 이름으로 장소를 찾아 현재 언어로
 const nameOf = (id, ko) => { const p = (id && placeById(id)) || PLACES.find((x) => x.name === ko); return p ? placeName(p) : ko; };
@@ -1167,6 +1164,16 @@ const STAY_ART = (() => {
   };
   return Object.fromEntries(Object.entries(art).map(([k, v]) => [k, `url('data:image/svg+xml,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 56 56">${bg}${v}</svg>`).replace(/'/g, "%27")}')`])); // style="…" 안에 들어가므로 작은따옴표
 })();
+// 관광공사에 사진이 없는 숙소: 5km 안 가장 가까운 관광지(사진 있는 곳)의 사진을 "주변" 표시와 함께
+function nearPhoto(h) {
+  let best = null;
+  for (const p of PLACES) {
+    if (p.petOnly || ["food", "cafe"].includes(p.cat) || !baked[p.id]) continue;
+    const km = Math.hypot((p.lat - h.lat) * 111, (p.lng - h.lng) * 88);
+    if (km <= 5 && (!best || km < best.km)) best = { p, km, url: baked[p.id] };
+  }
+  return best;
+}
 function staysHTML(l) {
   const list = staysFor(l);
   if (!list.length) return "";
@@ -1176,7 +1183,7 @@ function staysHTML(l) {
   return `<div class="stays"><b>${t("이 지역 추천 숙소")}</b><ul>${list.map((h) => {
     const q = encodeURIComponent(h.name);
     return `<li>
-      <div class="stay-img" style="background-image:${h.photo ? `url('${h.photo}'), ` : ""}${art}"></div>
+      ${(() => { const near = h.photo ? null : nearPhoto(h); return `<div class="stay-img${near ? " near" : ""}" style="background-image:${h.photo ? `url('${h.photo}'), ` : near ? `url('${near.url}'), ` : ""}${art}"${near ? ` title="${esc(t("주변 사진 · {place}", { place: placeName(near.p) }))}"` : ""}>${near ? `<i>${t("주변")}</i>` : ""}</div>`; })()}
       <div class="stay-info"><strong>${esc(h.name)}</strong>
         <span>${h.view ? `<em>${t("바다·호수 전망")}</em> · ` : ""}${t("{km}km", { km: h.km })}</span></div>
       <div class="stay-acts">${priceLinks(h.name, true)}<a class="ghost small" href="https://map.naver.com/p/search/${q}" target="_blank" rel="noopener">${t("지도")}</a></div>
