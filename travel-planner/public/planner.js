@@ -108,6 +108,16 @@ const NEIGHBORS = {
 const inScope = (input, region) => region === regionOf(input) || (input.days > 1 && NEIGHBORS[regionOf(input)].includes(region));
 export const baseOf = (input) => REGIONS[regionOf(input)].base;
 
+// 반값여행 코스: 그 시군의 대상 장소(placeIds)와 숙소(lodging). 링크에는 코스 id만 담는다
+export function halfPackage(id) {
+  if (!id) return null;
+  for (const b of BENEFITS) {
+    const pk = (b.packages || []).find((x) => x.id === id);
+    if (pk) return { ...pk, placeIds: b.placesByTown[pk.town] || [], benefit: b };
+  }
+  return null;
+}
+
 // 그 권역의 장소 + 그날 열리는 확정 축제
 function candidates(input, opts = {}) {
   const r = regionOf(input);
@@ -121,6 +131,9 @@ function candidates(input, opts = {}) {
   const acc = opts.access || [];
   const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp));
   const ok = (p) => okWho(p) && okAccess(p);
+  // 반값여행 코스(opts.halfPkg)처럼 정해 둔 장소만 쓸 때 (축제는 그 시군 것인지 알 수 없어 뺀다)
+  const onlyIds = opts.onlyIds || halfPackage(opts.halfPkg)?.placeIds;
+  if (onlyIds) { const only = new Set(onlyIds); return PLACES.filter((p) => only.has(p.id) && ok(p)); }
   return [...PLACES.filter((p) => inScope(input, p.region) && ok(p)), ...fests];
 }
 
@@ -527,7 +540,7 @@ export function planTrip(input, opts = {}) {
   if (route) return planRoute(input, opts, route);
   const fixed = opts.lodgingId && LODGING.find((l) => l.id === opts.lodgingId);
   // 1차: 출발지 기준으로 일정을 짜서 여행 동선을 파악 → 동선 전체에 가장 알맞은 숙소 선택
-  const lodging = fixed ? lodgingInfo(input, fixed) : chooseLodging(input, planDays(input, opts, null));
+  const lodging = fixed ? lodgingInfo(input, fixed) : chooseLodging(input, planDays(input, opts, null), null, opts.lodgingOnly || halfPackage(opts.halfPkg)?.lodging);
   // 2차: 둘째 날부터는 그 숙소에서 출발하도록 다시 계산
   return finalize(planDays(input, opts, lodging), lodging);
 }
@@ -644,7 +657,7 @@ const TYPE_REASON = {
   hanok: "조용하고 온돌방이라 편안해요",
 };
 // 모든 밤의 "그날 마지막 장소 → 숙소 → 다음 날 첫 장소" 거리 합이 가장 작고, 동행·취향에 맞는 숙소 지역
-export function chooseLodging(input, days, only = null) {
+export function chooseLodging(input, days, only = null, allow = null) {
   const wanted = WHO_TYPES[input.who] || WHO_TYPES.solo;
   const legs = [];
   const regions = new Set([regionOf(input)]);
@@ -661,7 +674,7 @@ export function chooseLodging(input, days, only = null) {
   if (!legs.length) legs.push(baseOf(input));
   let best = null;
   for (const l of LODGING) {
-    if (!regions.has(l.region)) continue;
+    if (!regions.has(l.region) || (allow?.length && !allow.includes(l.id))) continue; // allow: 반값여행 코스처럼 그 시군 숙소만
     const km = legs.reduce((sum, p) => sum + distanceKm(p, l), 0) / legs.length;
     let v = -km * (drives(input.move) ? 0.25 : 0.6);
     const match = wanted.find((t) => l.types.includes(t));

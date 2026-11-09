@@ -33,6 +33,22 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "💰 반값여행 코스": "💰 Half-price travel courses",
+  "{towns}에서 쓴 경비의 50%를 지역사랑상품권으로 돌려받아요 (1명 최대 10만 원, 2명 이상 최대 20만 원). 코스는 그 시군 안의 장소·숙소로만 짜요.": "Get 50% of what you spend in {towns} back as local gift vouchers (up to ₩100,000 per person, ₩200,000 for 2+). These courses use only places and stays inside that county.",
+  "대상 장소 {n}곳": "{n} eligible places",
+  "숙소도 {town} 안": "stay also in {town}",
+  "이 코스로 일정 만들기": "Plan this course",
+  "그 시군과 이웃 시군 주민은 신청할 수 없어요 · 여행 전 사전 신청이 필요하고 회차·날짜는 시군마다 달라요": "Residents of that county and its neighbors can't apply · Apply before the trip; rounds and dates differ by county",
+  "반값여행 대상인 {town} 안의 장소·숙소로만 골랐어요": "Picked only places and stays inside {town}, eligible for half-price travel",
+  "평창 1박 2일": "Pyeongchang, 2 days 1 night",
+  "영월 1박 2일": "Yeongwol, 2 days 1 night",
+  "횡성 당일": "Hoengseong day trip",
+  "오대산·봉평·대관령": "Odaesan · Bongpyeong · Daegwallyeong",
+  "동강·청령포·별마로천문대": "Donggang · Cheongnyeongpo · Byeolmaro Observatory",
+  "횡성호·풍수원·한우": "Hoengseong Lake · Pungsuwon · Hanu beef",
+  "평창": "Pyeongchang",
+  "영월": "Yeongwol",
+  "횡성": "Hoengseong",
   "주변 사진": "Nearby photo",
   "주변 사진 · {place}": "Nearby photo · {place}",
   "🐾 동반 불가": "🐾 No pets",

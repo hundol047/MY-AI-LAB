@@ -657,3 +657,17 @@ body:not(.has-server) .needs-server { display: none !important; }
 .report-note { font-size: 12px; color: var(--sub); margin: 6px 0 10px; }
 .report-dlg .acts { justify-content: flex-end; }
 .place .acts { flex-wrap: wrap; }
+
+/* 반값여행 코스 (첫 화면) */
+.halfpkg { margin: 0 12px 12px; padding: 14px; }
+.halfpkg h3 { margin: 0 0 6px; font-size: 15px; }
+.halfpkg .hp-lead, .halfpkg .hp-note { margin: 0 0 10px; font-size: 13px; color: var(--sub); line-height: 1.45; }
+.halfpkg .hp-note { margin: 10px 0 0; font-size: 12px; }
+.hp-list { display: grid; gap: 8px; }
+.hp { display: grid; gap: 3px; text-align: left; width: 100%; padding: 12px; border-radius: 12px; border: 1px solid color-mix(in srgb, #c98a00 35%, transparent);
+  background: color-mix(in srgb, #ffd56a 16%, var(--surface)); color: var(--text); font: inherit; cursor: pointer; }
+.hp b { font-size: 15px; }
+.hp .hp-sub { font-size: 13px; font-weight: 600; }
+.hp .hp-places, .hp .hp-meta { font-size: 12px; color: var(--sub); }
+.hp .hp-go { font-size: 13px; font-weight: 700; color: #9a6400; margin-top: 2px; }
+@media (prefers-color-scheme: dark) { .hp .hp-go { color: #f0b84a; } .hp { border-color: color-mix(in srgb, #f0b84a 40%, transparent); } }

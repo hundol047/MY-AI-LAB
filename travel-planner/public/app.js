@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats } from "./planner.js";
+import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -127,6 +127,9 @@ $("#form").addEventListener("submit", async (e) => {
   const v = pendingVoice; pendingVoice = null;
   state = { input, opts: { pace: v?.pace || "normal", lessWalk: lessWalk || access.length > 0 || !!v?.lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...(v?.people ? { people: bookingPeople(v.people) } : {}), ...startOpts(input) } };
   if (v) { state.heard = v.heard; state.said = v.said; }
+  // 반값여행 코스로 시작: 그 시군 장소·숙소만 쓴다 (링크에는 코스 id만)
+  const hp = pendingPackage; pendingPackage = null;
+  if (hp) state.opts.halfPkg = hp.id;
   state.baseOpts = { ...state.opts }; // 일정 3개 비교의 기준 조건
   state.choice = "best";
   restoredFromLink = false;
@@ -166,6 +169,7 @@ async function thinkThrough(input, opts, voice) {
     t("강원 장소 {n}곳 중 여행 날짜에 문 여는 {open}곳을 골랐어요", { n: stats.candidates, open: stats.open }) + (stats.closed ? t(" · 쉬는 날 {c}곳 제외", { c: stats.closed }) : ""),
     ...(stats.crowded ? [t("붐빔 예상 {c}곳은 뒤로 미뤘어요 (관광공사 혼잡 예측)", { c: stats.crowded })] : []),
     ...(stats.festivals.length ? [t("여행 기간 축제도 살폈어요: {f}", { f: stats.festivals.slice(0, 2).map((f) => placeName(f)).join(", ") })] : []),
+    ...(opts.halfPkg ? [t("반값여행 대상인 {town} 안의 장소·숙소로만 골랐어요", { town: t(halfPackage(opts.halfPkg)?.town || "") })] : []),
     t("이동 시간과 운영시간을 맞춰 동선을 짰어요 · 영업시간 충돌 {c}건", { c: best.totals.conflicts }),
     t("성격이 다른 일정 3개를 비교했어요"),
   ];
@@ -242,6 +246,38 @@ $("#saveTripBtn").addEventListener("click", () => {
 let comparePick = new Set();
 // 저장한 일정 이름은 화면 언어로 그때그때 만든다 (예: "11월 14일 (토) · 춘천·철원 → 속초·양양 · 2박 3일 · 여유롭게")
 const savedName = (x) => [dateLabel(x.meta.date), x.meta.regions.map((r) => regionLabel(r, REGIONS[r].label)).join(" → "), t(DAYS_KO[x.meta.days]), x.meta.choice !== "best" ? t(OPT_NAME[x.meta.choice]) : ""].filter(Boolean).join(" · ");
+/* ---------- 반값여행 코스 ----------
+   평창·영월·횡성(반값여행 대상 시군) 안의 장소와 숙소만으로 짜는 코스. 누르면 지금 고른 날짜·동행·이동으로 바로 일정을 만든다.
+   시군 밖에서 쓴 돈은 환급되지 않아서, 코스 일정은 그 시군 밖으로 나가지 않는다 */
+let pendingPackage = null;
+function renderHalfPkgs() {
+  const box = $("#halfPkgs"); if (!box) return;
+  const b = BENEFITS.find((x) => x.packages);
+  if (!b || (b.end && kstNow().date > b.end)) { box.hidden = true; return; }
+  box.hidden = false;
+  const pop = (ids) => ids.map((id) => PLACES.find((p) => p.id === id)).filter((p) => p && !["food", "cafe"].includes(p.cat) && !/ski/.test(p.id)).sort((x, y) => (y.pop || 0) - (x.pop || 0)).slice(0, 3);
+  box.innerHTML = `<h3>${t("💰 반값여행 코스")}</h3>
+    <p class="hp-lead">${t("{towns}에서 쓴 경비의 50%를 지역사랑상품권으로 돌려받아요 (1명 최대 10만 원, 2명 이상 최대 20만 원). 코스는 그 시군 안의 장소·숙소로만 짜요.", { towns: b.towns.map((x) => t(x)).join("·") })}</p>
+    <div class="hp-list">${b.packages.map((pk) => {
+      const pk2 = halfPackage(pk.id);
+      return `<button type="button" class="hp" data-hp="${pk.id}">
+        <b>${t(pk.title)}</b><span class="hp-sub">${t(pk.sub)}</span>
+        <span class="hp-places">${pop(pk2.placeIds).map((p) => esc(placeName(p))).join(" · ")}</span>
+        <span class="hp-meta">${t("대상 장소 {n}곳", { n: pk2.placeIds.length })}${pk.lodging.length ? " · " + t("숙소도 {town} 안", { town: t(pk.town) }) : ""}</span>
+        <span class="hp-go">${t("이 코스로 일정 만들기")}</span></button>`;
+    }).join("")}</div>
+    <p class="hp-note">${t("그 시군과 이웃 시군 주민은 신청할 수 없어요 · 여행 전 사전 신청이 필요하고 회차·날짜는 시군마다 달라요")} <a href="${esc(b.link)}" target="_blank" rel="noopener">${t("지금 진행 중인 회차·신청 날짜 보기")}</a></p>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-hp]"); if (!b) return;
+  const pk = halfPackage(b.dataset.hp); if (!pk) return;
+  const cur = { region: pk.region, date: $("#date").value || tomorrow(), days: pk.days, who: segValue("who"), likes: [...document.querySelectorAll('.chips[data-name="likes"] .on')].map((x) => x.dataset.v), move: segValue("move") };
+  fillForm({ ...cur, route: [] });
+  pendingPackage = pk;
+  track("half_package", pk.id);
+  $("#form").requestSubmit();
+});
+
 function renderSaved() {
   const box = $("#saved"); if (!box) return;
   const list = savedTrips();
@@ -1936,6 +1972,7 @@ async function switchLang(l) {
   renderRouteRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
+  renderHalfPkgs();
   $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
   await renderGuideHistory();
 }
@@ -1947,6 +1984,7 @@ document.querySelector(".lang").addEventListener("click", (e) => {
 if (getLang() === "ko" || getLang() === "en") applyStatic();
 await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
 if (getLang() === "ja" || getLang() === "zh") applyStatic();
+if (getLang() !== "ko") renderHalfPkgs(); // 외국어 이름·문구를 받은 뒤 다시
 
 function openSnapshot(saved, extra = {}) {
   restoredFromLink = true;
@@ -1971,6 +2009,7 @@ function openSnapshot(saved, extra = {}) {
 
 renderPast();
 renderSaved();
+renderHalfPkgs();
 renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다

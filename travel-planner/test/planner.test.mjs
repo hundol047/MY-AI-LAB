@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { planTrip, swapItem, drives, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor } from "../public/planner.js";
 import { checkLodgingLocal, startLocal } from "../public/ai-local.js";
-import { PLACES } from "../public/data.js";
+import { PLACES, BENEFITS } from "../public/data.js";
 
 let runs = 0, carDays = 0, carItems = 0, lunchDays = 0, allDays = 0;
 function check(input, pace, rain) {
@@ -107,6 +107,25 @@ assert.equal(hoursFor(P("solhyang"), "2026-12-01").close, 17 * 60);
   assert.equal(b.find((x) => x.id === "b-incentive")?.status, "closed", "9/30 마감 사업은 종료");
   const pc = planTrip({ ...input, region: "pyeongchang" }, { must: ["sheep"] });
   assert.equal(benefitsFor(pc, { ...input, region: "pyeongchang" }).find((x) => x.id === "b-halfprice")?.status, "check");
+}
+// 반값여행: 대상 시군(평창·영월·횡성)의 앱 장소가 빠짐없이 목록에 있고, 코스 일정은 그 시군 장소·숙소만 쓴다
+{
+  const { readFileSync } = await import("node:fs");
+  const sigun = JSON.parse(readFileSync(new URL("../public/pet.json", import.meta.url), "utf8")).sigun;
+  const H = BENEFITS.find((b) => b.id === "b-halfprice");
+  for (const town of H.towns) {
+    const want = PLACES.filter((p) => sigun[p.id] === town && !p.petOnly).map((p) => p.id).sort();
+    assert.deepEqual([...H.placesByTown[town]].sort(), want, `${town} 반값여행 장소 목록 (data.js placesByTown)`);
+  }
+  for (const pk of H.packages) for (const move of ["car", "transit"]) {
+    const input = { region: pk.region, date: "2026-11-21", days: pk.days, who: "couple", likes: ["food", "nature"], move };
+    const tr = planTrip(input, { halfPkg: pk.id });
+    const ids = new Set(H.placesByTown[pk.town]);
+    assert.ok(tr.days.every((d) => d.items.length && d.items.every((it) => ids.has(it.id))), `${pk.id}/${move}: 대상 시군 밖 장소`);
+    if (pk.lodging.length) assert.ok(pk.lodging.includes(tr.lodging?.id), `${pk.id}/${move}: 숙소 ${tr.lodging?.id}`);
+    assert.equal(verify(tr.days), 0);
+    assert.ok(tr.days.every((d) => d.items.some((it) => it.kind === "lunch")), `${pk.id}/${move}: 점심`);
+  }
 }
 // 1박 전환: 당일치기보다 볼 곳이 늘고, 첫날 밤 코스가 생긴다
 {

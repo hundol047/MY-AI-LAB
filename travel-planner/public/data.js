@@ -414,7 +414,18 @@ export const BENEFITS = [
     id: "b-halfprice", kind: "program", title: "반값여행 (지역사랑 휴가지원)", start: null, end: "2026-12-31",
     towns: ["평창", "영월", "횡성"], regions: ["pyeongchang", "wonju"], needsNight: false,
     // 평창·영월·횡성에 있는 앱 장소 (관광공사 주소로 정한 시군, public/pet.json sigun · 권역 경계와 시군 경계가 달라 장소로 판단한다)
-    placeIds: ["pungsuwon","birch-museum","anheung-bread","cheongtaesan","hs-luge","welli-ski","jangneung","gossigul","byeolmaro","seondol","yoseonam","kimsatgat","young-dal","hyoseok-village","herbnara","yongpyong-ski","phoenix-ski","alpensia-ski","hs-forest","hs-byeongjibang","hs-deodeok","hs-hambat","hs-kkwong-mandu","hs-makguksu","hs-cafe","yw-gondre","yw-cafe","pc-makguksu","pc-cafe","hs-gwangam","hs-sundae","yw-hanwoo","yw-trout","pc-sanchae","pc-trout","pc-gohyang","pc-migayeon","yw-ogrann","sheep","samyang","ohsam","balwang","woljeongsa","cheongnyeongpo","hanbando","yw-market","bongpyeong","jinbu-food","hanwoo","hoengseong-lake"],
+    // 시군별 대상 장소 (관광공사 주소로 정한 시군, public/pet.json sigun). 장소를 더하면 test/planner.test.mjs가 빠진 곳을 알려 준다
+    placesByTown: {
+      평창: ["hyoseok-village", "herbnara", "yongpyong-ski", "phoenix-ski", "alpensia-ski", "pc-sangwonsa", "pc-sillok", "pc-hangang-source", "pc-sago", "pc-dalbit", "pc-heungjeong", "pc-mui", "pc-leeseungbok", "pc-jeonggangwon", "pc-bangadari", "pc-lavender", "pc-kensington", "pc-machu", "pc-botanic", "pc-skijump", "pc-olympic", "pc-seonjaryeong", "pc-doam", "pc-animal-farm", "pc-inart", "pc-buil", "pc-memil", "pc-hwangtae", "pc-napjak", "pc-yeonworil", "pc-7hundred", "pc-makguksu", "pc-cafe", "pc-sanchae", "pc-trout", "pc-gohyang", "pc-migayeon", "sheep", "samyang", "ohsam", "balwang", "woljeongsa", "bongpyeong", "jinbu-food"],
+      영월: ["jangneung", "gossigul", "byeolmaro", "seondol", "yoseonam", "kimsatgat", "young-dal", "yw-gondre", "yw-cafe", "yw-hanwoo", "yw-trout", "yw-ogrann", "cheongnyeongpo", "hanbando", "yw-market"],
+      횡성: ["pungsuwon", "birch-museum", "anheung-bread", "cheongtaesan", "hs-luge", "welli-ski", "hs-forest", "hs-byeongjibang", "hs-deodeok", "hs-hambat", "hs-kkwong-mandu", "hs-makguksu", "hs-cafe", "hs-gwangam", "hs-sundae", "hanwoo", "hoengseong-lake"],
+    },
+    // 반값여행 코스: 대상 시군 안의 장소·숙소만으로 짠 일정 (시군 밖에서 쓴 돈은 환급 대상이 아니라서)
+    packages: [
+      { id: "hp-pyeongchang", town: "평창", region: "pyeongchang", days: 2, lodging: ["l-jinbu", "l-yongpyong"], title: "평창 1박 2일", sub: "오대산·봉평·대관령" },
+      { id: "hp-yeongwol", town: "영월", region: "pyeongchang", days: 2, lodging: ["l-yeongwol"], title: "영월 1박 2일", sub: "동강·청령포·별마로천문대" },
+      { id: "hp-hoengseong", town: "횡성", region: "wonju", days: 1, lodging: [], title: "횡성 당일", sub: "횡성호·풍수원·한우" },
+    ],
     amount: 100000, how: "여행 경비의 50%를 지역사랑상품권으로 돌려받아요 (개인 최대 10만 원, 2인 이상 최대 20만 원)",
     steps: ["여행 전 사전 신청·승인", "여행 후 증빙 제출", "심사 후 지역사랑상품권 지급"],
     proofs: ["숙박 영수증", "식당 영수증", "체험시설 이용 증빙", "관광지 인증사진 2곳 이상"],
@@ -423,5 +434,7 @@ export const BENEFITS = [
     unconfirmed: true,
   },
 ];
+
+for (const b of BENEFITS) if (b.placesByTown) b.placeIds = Object.values(b.placesByTown).flat();
 
 export const SHOP_MALL = { name: "강원더몰", url: "https://www.gwdmall.kr" };
