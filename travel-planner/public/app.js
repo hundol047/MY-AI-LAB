@@ -602,7 +602,7 @@ function itemHTML(it, i, day) {
   <li class="item" data-i="${i}">
     <div class="time"><b>${fmt(it.start)}</b><span>${fmt(it.end)}</span></div>
     <article class="card place">
-      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em></div>
+      <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em>${p.photoAt ? `<i class="near" title="${esc(t("주변 사진 · {place}", { place: p.photoAt }))}">${t("주변 사진")}</i>` : ""}</div>
       <div class="info">
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : p.pet === false ? t("🐾 동반 불가") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>

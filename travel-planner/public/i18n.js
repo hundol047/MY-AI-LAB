@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "주변 사진": "Nearby photo",
+  "주변 사진 · {place}": "Nearby photo · {place}",
   "🐾 동반 불가": "🐾 No pets",
   "저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요": "There's time before dinner, so stay {min} min longer and take it easy",
   "자유 시간 {min}분 · 근처 산책·쉬기": "{min} min free time · stroll or rest nearby",

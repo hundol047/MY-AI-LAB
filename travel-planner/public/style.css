@@ -218,6 +218,10 @@ html, body { overflow-x: clip; }
   color: #fff; opacity: .9; text-shadow: 0 1px 2px rgba(0,0,0,.25);
 }
 .thumb.has-img em { display: none; }
+/* 자체 사진이 없어 그 거리·주변 명소 사진을 쓴 곳 (photoAt): 사진이 보일 때만 "주변 사진" 표시 */
+.thumb i.near { display: none; position: absolute; left: 4px; right: 4px; bottom: 4px; font-style: normal; font-size: 10px; font-weight: 700;
+  color: #fff; background: rgba(0,0,0,.55); border-radius: 6px; padding: 1px 4px; text-align: center; }
+.thumb.has-img i.near { display: block; }
 .thumb { transition: background-image .2s; }
 
 /* 축제 */
