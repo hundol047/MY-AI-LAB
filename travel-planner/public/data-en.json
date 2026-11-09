@@ -2031,5 +2031,161 @@
     "nameSrc": "app",
     "desc": "Yeongwol hand-made red-bean buns; open Friday to Sunday only",
     "descSrc": "app"
+  },
+  "pc-sangwonsa": {
+    "name": "Sangwonsa Temple (Odaesan)",
+    "nameSrc": "app",
+    "desc": "Thousand-year-old temple with a national-treasure bronze bell and a Manjusri statue",
+    "descSrc": "app"
+  },
+  "pc-sillok": {
+    "name": "National Annals of the Joseon Dynasty Museum",
+    "nameSrc": "app",
+    "desc": "Odaesan copies of the Joseon annals and royal protocols, returned after 110 years",
+    "descSrc": "app"
+  },
+  "pc-hangang-source": {
+    "name": "Hangang River Source Experience Center",
+    "nameSrc": "app",
+    "desc": "Story of Utongsu, the spring said to start the Hangang, with tea tasting",
+    "descSrc": "app"
+  },
+  "pc-sago": {
+    "name": "Odaesan Archive (Pyeongchang)",
+    "nameSrc": "app",
+    "desc": "One of five Joseon archives that guarded the royal annals, rebuilt in the forest",
+    "descSrc": "app"
+  },
+  "pc-dalbit": {
+    "name": "Hyoseok Moonlight Hill",
+    "nameSrc": "app",
+    "desc": "Hill themed on the moonlight of 'When Buckwheat Flowers Bloom', with the writer's restored birthplace",
+    "descSrc": "app"
+  },
+  "pc-heungjeong": {
+    "name": "Heungjeong Valley",
+    "nameSrc": "app",
+    "desc": "Clear, wide valley on the way to Herbnara, popular for summer wading",
+    "descSrc": "app"
+  },
+  "pc-mui": {
+    "name": "Mui Art Museum (Pyeongchang)",
+    "nameSrc": "app",
+    "desc": "Art museum in a former school, with a sculpture garden on the playground",
+    "descSrc": "app"
+  },
+  "pc-leeseungbok": {
+    "name": "Lee Seung-bok Memorial Hall",
+    "nameSrc": "app",
+    "desc": "Memorial and site of the 1968 armed infiltration incident",
+    "descSrc": "app"
+  },
+  "pc-jeonggangwon": {
+    "name": "Jeonggangwon Korean Traditional Food Culture Center",
+    "nameSrc": "app",
+    "desc": "Hanok village by Geumdang Valley with crock terraces and traditional cooking classes",
+    "descSrc": "app"
+  },
+  "pc-bangadari": {
+    "name": "Bangadari Mineral Spring (Mill Bridge)",
+    "nameSrc": "app",
+    "desc": "Carbonated spring at the end of a 10-minute fir forest walk",
+    "descSrc": "app"
+  },
+  "pc-lavender": {
+    "name": "Pyeongchang Lavender Farm",
+    "nameSrc": "app",
+    "desc": "Organic herb farm at 700 m; lavender blooms June–July",
+    "descSrc": "app"
+  },
+  "pc-kensington": {
+    "name": "Kensington French Garden",
+    "nameSrc": "app",
+    "desc": "Large French-style garden modeled on Villandry's embroidery garden",
+    "descSrc": "app"
+  },
+  "pc-machu": {
+    "name": "Alpaca Café Machu Picchu",
+    "nameSrc": "app",
+    "desc": "Feed alpacas and relax in the café near Phoenix Park",
+    "descSrc": "app"
+  },
+  "pc-botanic": {
+    "name": "Korea National Native Plant Garden",
+    "nameSrc": "app",
+    "desc": "Garden of rare and endemic Korean plants at the foot of Odaesan",
+    "descSrc": "app"
+  },
+  "pc-skijump": {
+    "name": "Alpensia Ski Jump Observatory",
+    "nameSrc": "app",
+    "desc": "Monorail up to the observatory atop the Olympic ski jump",
+    "descSrc": "app"
+  },
+  "pc-olympic": {
+    "name": "PyeongChang 2018 Olympic Memorial Hall",
+    "nameSrc": "app",
+    "desc": "Memorial hall on the site of the 2018 Winter Olympics opening and closing ceremonies",
+    "descSrc": "app"
+  },
+  "pc-seonjaryeong": {
+    "name": "Seonjaryeong Ridge",
+    "nameSrc": "app",
+    "desc": "Baekdudaegan ridge trail past wind turbines from Daegwallyeong, 3–4 hours round trip",
+    "descSrc": "app"
+  },
+  "pc-doam": {
+    "name": "Doamho Lake",
+    "nameSrc": "app",
+    "desc": "Lake filling a mountain valley at the top of the Namhangang, a scenic drive",
+    "descSrc": "app"
+  },
+  "pc-animal-farm": {
+    "name": "Forest Animal Farm (Daegwallyeong)",
+    "nameSrc": "app",
+    "desc": "Feed calves, rabbits and prairie dogs, with indoor and outdoor areas",
+    "descSrc": "app"
+  },
+  "pc-inart": {
+    "name": "INART Pyeongchang",
+    "nameSrc": "app",
+    "desc": "Immersive media-art exhibition at Mona Yongpyong, at the foot of Balwangsan",
+    "descSrc": "app"
+  },
+  "pc-buil": {
+    "name": "Buil Sikdang (Jinbu)",
+    "nameSrc": "app",
+    "desc": "Jinbu wild-greens set meal restaurant for over 50 years",
+    "descSrc": "app"
+  },
+  "pc-memil": {
+    "name": "Memilkkot Pil Muryeop",
+    "nameSrc": "app",
+    "desc": "Buckwheat local-food restaurant inside Lee Hyo-seok's birthplace",
+    "descSrc": "app"
+  },
+  "pc-hwangtae": {
+    "name": "Daegwallyeong Hwangtae Village (restaurant)",
+    "nameSrc": "app",
+    "desc": "Dried-pollack soup and grilled pollack set meals from 7 a.m.",
+    "descSrc": "app"
+  },
+  "pc-napjak": {
+    "name": "Napjak Sikdang",
+    "nameSrc": "app",
+    "desc": "Daegwallyeong squid-and-pork bulgogi since 1974",
+    "descSrc": "app"
+  },
+  "pc-yeonworil": {
+    "name": "Café Yeonworil",
+    "nameSrc": "app",
+    "desc": "Window views of green-onion fields and snow; potato cake and scallion bread",
+    "descSrc": "app"
+  },
+  "pc-7hundred": {
+    "name": "7HUNDRED Café",
+    "nameSrc": "app",
+    "desc": "Three-storey café in Hoenggye, Daegwallyeong, with cold brew and bread",
+    "descSrc": "app"
   }
 }

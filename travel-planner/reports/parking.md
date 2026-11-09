@@ -1,6 +1,6 @@
 # 주차 정보 (한국관광공사 소개정보)
 
-생성: node scripts/bake-parking.mjs. 붙인 곳 235곳 (가능 222 · 불가 13 · 무료 29 · 유료 1)
+생성: node scripts/bake-parking.mjs. 붙인 곳 257곳 (가능 242 · 불가 15 · 무료 33 · 유료 1)
 
 - sutasa: 가능  — 가능
 - alpaca-world: 가능  — 가능 (250대)
@@ -95,6 +95,28 @@
 - wj-rotonda: 가능  — 있음
 - wj-okhee: 가능  — 가능
 - wj-eunseok: 가능  — 가능
+- pc-sangwonsa: 가능  — 가능
+- pc-sillok: 가능 free — 2시간 무료
+- pc-hangang-source: 가능  — 가능
+- pc-dalbit: 가능  — 가능
+- pc-heungjeong: 가능  — 가능
+- pc-leeseungbok: 가능 free — 무료
+- pc-jeonggangwon: 가능  — 가능
+- pc-bangadari: 불가  — 불가능
+- pc-lavender: 가능  — 가능
+- pc-kensington: 가능  — 가능
+- pc-machu: 가능  — 가능
+- pc-botanic: 가능  — 가능 (약 소형 40대 / 대형 5대)
+- pc-skijump: 가능  — 가능
+- pc-olympic: 가능 free — 무료
+- pc-doam: 불가  — 불가능
+- pc-animal-farm: 가능  — 가능
+- pc-buil: 가능  — 가능
+- pc-memil: 가능  — 가능
+- pc-hwangtae: 가능  — 가능
+- pc-napjak: 가능  — 가능
+- pc-yeonworil: 가능  — 가능
+- pc-7hundred: 가능 free — 가능 요금 (무료)
 - dh-jjolmyeon: 가능 free — 가능요금 (무료)
 - dh-bakery: 불가  — 불가능
 - tb-cafe: 가능  — 가능
@@ -253,6 +275,10 @@
 - 휘닉스 평창 스키장: 주차 원문 비어 있음
 - 알펜시아 스키장: 주차 원문 비어 있음
 - 오크밸리 스키장: 소개정보를 받지 못함
+- 평창 오대산사고: 주차 원문 비어 있음
+- 평창무이예술관: 주차 원문 비어 있음
+- 선자령: 주차 원문 비어 있음
+- 이나트 평창: 주차 원문 비어 있음
 - 태백닭갈비: 주차 원문 비어 있음
 - 햇골막국수: 주차 원문 비어 있음
 - 정선황기막국수: 주차 원문 비어 있음

@@ -116,7 +116,7 @@ function candidates(input, opts = {}) {
   }));
   // 반려동물 동행: 목록에 있는 곳(pet) + 확인은 안 됐지만 야외인 자연·바다(카드에 "동반 확인 필요")만. 실내·식당·카페·문화시설은 목록에 있을 때만
   // 반려동물 동행 전용 장소(petOnly)는 반려동물 동행일 때만 쓴다
-  const okWho = (p) => input.who === "pet" ? p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
+  const okWho = (p) => input.who === "pet" ? p.pet !== false && (p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea"))) : !p.petOnly; // pet: false = 동반 불가로 확인된 곳(식물원·국립공원 안 등)
   // 휠체어·유모차: 오래 걷거나 산길인 곳(walk 3)은 빼고, 휠체어는 무장애 정보 없이 걷기가 있는 곳(walk 2)도 뺀다
   const acc = opts.access || [];
   const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp));
@@ -282,13 +282,16 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
   // 중심 지역 후보를 차례로 시도해 일정이 충분히 차는 곳을 고른다.
   // 식사만 두 번 있고 관광지가 1곳뿐인 날(긴 여행 뒷날, 대중교통으로 근처를 다 쓴 경우)은 다른 지역도 시도해 관광지가 더 많은 날을 쓴다
   const sights = (d) => d.items.filter((it) => it.kind === "visit").length;
-  const worth = (d) => Math.min(sights(d), 2) * 100 + d.items.length;
+  const meals = (d) => d.items.filter((it) => it.kind !== "visit").length;
+  // 식사(점심·저녁)도 관광지만큼 중요하게: 반려동물 동반 식당처럼 드문 곳은 먹을 수 있는 지역을 고른다
+  const worth = (d) => Math.min(sights(d), 2) * 100 + meals(d) * 100 + d.items.length;
+  const needMeals = dayIdx < input.days - 1 ? 2 : 1; // 숙박하는 날은 점심·저녁, 마지막 날은 점심
   let best = null;
   for (const key of anchors) {
     const trial = new Set(used);
     const day = buildDay(input, opts, dayIdx, trial, key, keep, exclude, keepOnly, start);
     if (!best || worth(day) > worth(best.day)) best = { day, trial };
-    if (day.items.length >= 3 && (sights(day) >= 2 || keepOnly)) break;
+    if (keepOnly || (day.items.length >= 3 && sights(day) >= 2 && meals(day) >= needMeals)) break;
   }
   for (const id of best.trial) used.add(id);
   if (best.day.tune) {
@@ -482,7 +485,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 하루 동선 밖. 다만 숙박하는 날 저녁은 숙소(그날 출발점) 근처 식당도 된다 — 돌아가는 길이라서
       const nearHome = kind === "dinner" && start && dayIdx < input.days - 1 && distanceKm(startPt, p) <= (drives(input.move) ? 12 : 6);
       // 저녁을 못 찾았을 때(대중교통·반려동물 동반처럼 식당이 드문 경우)는 60분 안이면 동선 밖 식당도 된다
-      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome && !(relax && r.tr.min <= (kind === "dinner" ? 60 : 45))) continue;
+      if (fromAnchor > (drives(input.move) ? 30 : 20) && !nearHome && !(relax && r.tr.min <= (kind === "visit" ? 45 : 60))) continue;
       if (fromAnchor > radius) v -= (fromAnchor - radius) * (drives(input.move) ? 1.2 : 1.5);
       if (p.cat === "cafe" && t >= toMin("14:00") && t <= toMin("17:00")) v += 1.5;
       if (p.tags.includes("night") && t >= toMin("18:30")) v += 1.5;
@@ -490,8 +493,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       cands.push({ p, r, v });
     }
     // 두 번째 차례는 저녁 식당을 넓게 찾을 때만
-    // 두 번째 차례(동선 밖까지 넓혀 찾기)는 저녁 식당, 그리고 근처 관광지를 다 써서 오후가 통째로 빌 때만
-    if (kind !== "dinner" && !(kind === "visit" && !nightOnly && !filler && visits < 2 && t < DINNER[0] - 60)) pass = 2;
+    // 두 번째 차례(동선 밖까지 넓혀 찾기)는 점심·저녁 식당, 그리고 근처 관광지를 다 써서 오후가 통째로 빌 때만
+    if (kind === "visit" && !(!nightOnly && !filler && visits < 2 && t < DINNER[0] - 60)) pass = 2;
     cands.sort((a, b) => b.v - a.v);
     // 숙박하는 날 저녁 전 마지막 방문: 끝난 뒤 저녁 먹을 곳에 제때 갈 수 있는 곳만 고른다
     const needDinner = kind === "visit" && !hasDinner && !nightOnly && end >= DINNER[1] && dayIdx < input.days - 1;

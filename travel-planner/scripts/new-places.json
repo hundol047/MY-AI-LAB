@@ -1059,6 +1059,240 @@
    "region": "wonju",
    "area": "wj_city",
    "cat": "cafe"
+  },
+  {
+   "id": "pc-sangwonsa",
+   "q": "상원사",
+   "title": "상원사(오대산)",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-sillok",
+   "q": "국립조선왕조실록박물관",
+   "title": "국립조선왕조실록박물관",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-hangang-source",
+   "q": "한강시원지체험관",
+   "title": "한강시원지체험관",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-sago",
+   "q": "평창 오대산사고",
+   "title": "평창 오대산사고",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-dalbit",
+   "q": "효석 달빛언덕",
+   "title": "효석 달빛언덕",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-heungjeong",
+   "q": "흥정계곡",
+   "title": "흥정계곡",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-mui",
+   "q": "평창무이예술관",
+   "title": "평창무이예술관",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-leeseungbok",
+   "q": "이승복기념관",
+   "title": "이승복기념관",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-jeonggangwon",
+   "q": "한국전통음식문화체험관",
+   "title": "한국전통음식문화체험관(정강원)",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-bangadari",
+   "q": "방아다리약수터",
+   "title": "방아다리약수터",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-lavender",
+   "q": "평창 라벤다팜",
+   "title": "평창 라벤다팜",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-kensington",
+   "q": "켄싱턴 프렌치 가든",
+   "title": "켄싱턴 프렌치 가든",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-machu",
+   "q": "알파카 체험카페 마추픽추",
+   "title": "알파카 체험카페 마추픽추",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-botanic",
+   "q": "국립한국자생식물원",
+   "title": "국립한국자생식물원",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-skijump",
+   "q": "평창 스키점프 전망대",
+   "title": "평창 스키점프 전망대",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-olympic",
+   "q": "2018 평창동계올림픽대회 및 동계패럴림픽대회 기념관",
+   "title": "2018 평창동계올림픽대회 및 동계패럴림픽대회 기념관",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-seonjaryeong",
+   "q": "선자령",
+   "title": "선자령",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-doam",
+   "q": "도암호",
+   "title": "도암호",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-animal-farm",
+   "q": "숲속에동물농장",
+   "title": "숲속에동물농장",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "nature"
+  },
+  {
+   "id": "pc-inart",
+   "q": "이나트",
+   "title": "이나트(INART) 평창",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "culture"
+  },
+  {
+   "id": "pc-buil",
+   "q": "부일식당",
+   "title": "부일식당",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "food"
+  },
+  {
+   "id": "pc-memil",
+   "q": "메밀꽃필무렵",
+   "title": "메밀꽃필무렵",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "food"
+  },
+  {
+   "id": "pc-hwangtae",
+   "q": "대관령황태촌",
+   "title": "대관령황태촌",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "food"
+  },
+  {
+   "id": "pc-napjak",
+   "q": "납작식당",
+   "title": "납작식당",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "food"
+  },
+  {
+   "id": "pc-yeonworil",
+   "q": "카페 연월일",
+   "title": "카페 연월일",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "odaesan",
+   "cat": "cafe"
+  },
+  {
+   "id": "pc-7hundred",
+   "q": "7HUNDRED",
+   "title": "7HUNDRED",
+   "sigun": "평창",
+   "region": "pyeongchang",
+   "area": "daegwallyeong",
+   "cat": "cafe"
   }
  ]
 }

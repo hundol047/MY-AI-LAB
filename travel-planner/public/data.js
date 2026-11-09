@@ -232,7 +232,7 @@ const PYEONGCHANG = [
     hours: ["09:00", "17:00"], lastEntry: "16:00", seasons: [{ months: [11, 12, 1, 2, 3, 4], hours: ["09:00", "16:30"], lastEntry: "15:30" }],
     closed: [], stay: 100, indoor: false, walk: 2, pop: 2, tags: ["kids", "senior"], wiki: "대관령 삼양목장", desc: "동해전망대와 풍력발전기 초원",
   },
-  { id: "ohsam", souvenir: "대관령 황태", name: "횡계 오삼불고기 거리", cat: "food", area: "daegwallyeong", lat: 37.6750, lng: 128.7080, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡계리", desc: "오징어·삼겹살 불고기" },
+  { id: "ohsam", group: "ohsam", souvenir: "대관령 황태", name: "횡계 오삼불고기 거리", cat: "food", area: "daegwallyeong", lat: 37.6750, lng: 128.7080, hours: ["11:00", "21:00"], multi: true, closed: [], stay: 60, indoor: true, walk: 1, pop: 2, tags: ["senior"], wiki: "횡계리", desc: "오징어·삼겹살 불고기" },
   { id: "balwang", risk: ["wind", "snow"], name: "발왕산 관광케이블카", cat: "nature", area: "odaesan", lat: 37.6303, lng: 128.6755, hours: ["09:00", "17:00"], lastEntry: "16:00", closed: [], stay: 90, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "발왕산", desc: "해발 1,458m까지 7.4km 케이블카" },
   { id: "woljeongsa", name: "월정사 전나무숲길", cat: "nature", area: "odaesan", lat: 37.7320, lng: 128.5920, hours: ["06:00", "18:00"], closed: [], stay: 70, indoor: false, walk: 2, pop: 3, tags: ["senior"], wiki: "월정사", desc: "전나무 1km 숲길 · 무료, 24시간 개방이지만 해 지기 전으로 배치" },
   { id: "arirang-market", souvenir: "정선 곤드레나물", name: "정선아리랑시장", cat: "food", area: "jeongseon", lat: 37.3790, lng: 128.6630, hours: ["09:00", "18:00"], multi: true, closed: [], stay: 70, indoor: true, walk: 2, pop: 3, tags: ["kids", "senior"], wiki: "정선아리랑시장", desc: "곤드레밥·콧등치기국수 · 2·7일 오일장" },

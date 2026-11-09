@@ -604,7 +604,7 @@ function itemHTML(it, i, day) {
     <article class="card place">
       <div class="thumb" data-photo="${p.id}" style="--c:${c.color}"><span>${i + 1}</span><em>${t(c.label)}</em></div>
       <div class="info">
-        <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
+        <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : p.pet === false ? t("🐾 동반 불가") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
         ${it.extra ? `<div class="check soft">${t("저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요", { min: it.extra })}</div>` : ""}

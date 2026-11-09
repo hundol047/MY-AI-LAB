@@ -4410,5 +4410,562 @@
   "desc": "동해 제철 재료와 감자로 차린 한상 · 목~일만 엶",
   "kto": "4020587",
   "wiki": "한섬"
+ },
+ "pc-sangwonsa": {
+  "name": "오대산 상원사",
+  "hours": [
+   "06:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "국보 동종과 문수보살상을 모신 천년 고찰 · 월정사에서 선재길로 이어짐"
+ },
+ "pc-sillok": {
+  "name": "국립조선왕조실록박물관",
+  "hours": [
+   "09:30",
+   "17:30"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:30",
+     "17:00"
+    ],
+    "lastEntry": "16:30"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "110년 만에 돌아온 오대산사고본 실록과 의궤 전시"
+ },
+ "pc-hangang-source": {
+  "name": "한강시원지체험관",
+  "hours": [
+   "09:30",
+   "17:30"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:30",
+     "17:00"
+    ],
+    "lastEntry": "16:30"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "한강이 시작되는 샘 우통수 이야기와 차 맛보기"
+ },
+ "pc-sago": {
+  "name": "평창 오대산사고",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "조선왕조실록을 지키던 다섯 사고 중 하나 · 숲속 복원 누각"
+ },
+ "pc-dalbit": {
+  "name": "효석달빛언덕",
+  "hours": [
+   "09:00",
+   "18:30"
+  ],
+  "lastEntry": "18:00",
+  "seasons": [
+   {
+    "months": [
+     10,
+     11,
+     12,
+     1,
+     2,
+     3,
+     4
+    ],
+    "hours": [
+     "09:00",
+     "17:30"
+    ],
+    "lastEntry": "17:00"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "메밀꽃 필 무렵의 달빛을 주제로 꾸민 언덕과 복원 생가 · 이효석문학관 통합권"
+ },
+ "pc-heungjeong": {
+  "name": "흥정계곡",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "허브나라 가는 길의 맑고 넓은 계곡 · 여름 물놀이"
+ },
+ "pc-mui": {
+  "name": "평창무이예술관",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "폐교를 고친 미술관 · 운동장 조각 정원과 도예 체험"
+ },
+ "pc-leeseungbok": {
+  "name": "이승복기념관",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "1968년 무장공비 사건 유적과 기념관"
+ },
+ "pc-jeonggangwon": {
+  "name": "정강원 한국전통음식문화체험관",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "금당계곡 옆 한옥 마을 · 장독대 구경과 전통음식 체험(예약)"
+ },
+ "pc-bangadari": {
+  "name": "방아다리약수 (밀브릿지)",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "전나무 숲길 10분 끝의 탄산 약수 · 입장료 있음",
+  "pet": false
+ },
+ "pc-lavender": {
+  "name": "평창 라벤다팜",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "해발 700m 유기농 허브 농장 · 라벤더는 6~7월"
+ },
+ "pc-kensington": {
+  "name": "켄싱턴 프렌치 가든",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "프랑스 빌랑드리 자수정원을 옮긴 2만 평 정원 · 진고개 길"
+ },
+ "pc-machu": {
+  "name": "알파카 체험카페 마추픽추",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [],
+  "stay": 50,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "알파카 먹이 주기와 카페 · 휘닉스파크 근처",
+  "pet": false
+ },
+ "pc-botanic": {
+  "name": "국립한국자생식물원",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2
+    ],
+    "hours": [
+     "09:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 70,
+  "indoor": false,
+  "walk": 2,
+  "pop": 1,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "오대산 자락의 희귀·특산 자생식물 정원",
+  "pet": false
+ },
+ "pc-skijump": {
+  "name": "알펜시아 스키점프 전망대",
+  "hours": [
+   "09:20",
+   "17:40"
+  ],
+  "lastEntry": "16:55",
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": false,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "모노레일로 오르는 올림픽 스키점프대 꼭대기 전망대",
+  "pet": false
+ },
+ "pc-olympic": {
+  "name": "평창동계올림픽 기념관",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "lastEntry": "17:30",
+  "closed": [
+   1
+  ],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "2018 동계올림픽·패럴림픽 개·폐회식장 자리의 기념관"
+ },
+ "pc-seonjaryeong": {
+  "name": "선자령",
+  "hours": [
+   "06:00",
+   "18:00"
+  ],
+  "lastEntry": "13:00",
+  "closed": [],
+  "stay": 180,
+  "indoor": false,
+  "walk": 3,
+  "pop": 2,
+  "tags": [],
+  "desc": "대관령에서 오르는 백두대간 능선 풍차길 · 왕복 약 3~4시간"
+ },
+ "pc-doam": {
+  "name": "도암호",
+  "hours": [
+   "06:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 30,
+  "indoor": false,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "산 사이 계곡을 채운 남한강 최상류 호수 · 드라이브 경치"
+ },
+ "pc-animal-farm": {
+  "name": "숲속에동물농장",
+  "hours": [
+   "09:30",
+   "18:00"
+  ],
+  "lastEntry": "17:00",
+  "seasons": [
+   {
+    "months": [
+     11,
+     12,
+     1,
+     2,
+     3
+    ],
+    "hours": [
+     "10:00",
+     "17:00"
+    ],
+    "lastEntry": "16:00"
+   }
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "송아지·토끼부터 프레리도그까지 먹이 주기 · 실내외 시설"
+ },
+ "pc-inart": {
+  "name": "이나트 평창",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "lastEntry": "18:00",
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "모나용평 발왕산 자락의 실감형 미디어아트 전시관"
+ },
+ "pc-buil": {
+  "name": "부일식당",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "50년 넘은 진부 산채백반 · 더덕·황태구이"
+ },
+ "pc-memil": {
+  "name": "메밀꽃필무렵",
+  "hours": [
+   "09:30",
+   "19:30"
+  ],
+  "lastEntry": "19:00",
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids",
+   "senior"
+  ],
+  "desc": "이효석 생가 안 메밀 향토음식점"
+ },
+ "pc-hwangtae": {
+  "name": "대관령황태촌",
+  "hours": [
+   "07:00",
+   "19:00"
+  ],
+  "lastEntry": "18:40",
+  "closed": [],
+  "stay": 50,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "황탯국·황태구이 한상 · 아침 7시부터"
+ },
+ "pc-napjak": {
+  "name": "납작식당",
+  "hours": [
+   "11:30",
+   "20:40"
+  ],
+  "breaks": [
+   [
+    "14:40",
+    "17:00"
+   ]
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "1974년부터 이어 온 대관령 오삼불고기 · 점심 주문 14:10까지",
+  "group": "ohsam"
+ },
+ "pc-yeonworil": {
+  "name": "카페 연월일",
+  "hours": [
+   "09:30",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "파밭·설경이 보이는 창가 · 감자케이크와 대파빵"
+ },
+ "pc-7hundred": {
+  "name": "7HUNDRED",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 40,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "대관령 횡계의 3층 카페 · 더치커피와 빵"
  }
 }

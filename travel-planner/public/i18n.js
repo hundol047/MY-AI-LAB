@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🐾 동반 불가": "🐾 No pets",
   "저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요": "There's time before dinner, so stay {min} min longer and take it easy",
   "자유 시간 {min}분 · 근처 산책·쉬기": "{min} min free time · stroll or rest nearby",
   "문을 닫았어요 (폐업·휴업)": "It's closed (shut down or on break)",

@@ -165,7 +165,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
   const fees = ctx.fees || {};
   const opts = ctx.opts || {};
   // 반려동물 동행이면 동반 가능한 곳만, 아니면 반려동물 전용 장소는 빼고 권한다
-  const whoOk = (p) => ctx.input?.who === "pet" ? !!p.pet || (!p.indoor && (p.cat === "nature" || p.cat === "sea")) : !p.petOnly;
+  const whoOk = (p) => ctx.input?.who === "pet" ? p.pet !== false && (!!p.pet || (!p.indoor && (p.cat === "nature" || p.cat === "sea"))) : !p.petOnly;
   const regions = new Set([ctx.input?.region, ...trip.days.flatMap((d) => d.items.map((i) => i.place.region))].filter(Boolean));
   const inTrip = new Set(trip.days.flatMap((d) => d.items.map((i) => i.id)));
   const info = (kind, answer) => ({ answer, changed: false, lang, kind });
