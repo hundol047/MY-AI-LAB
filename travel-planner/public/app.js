@@ -279,10 +279,90 @@ document.addEventListener("click", (e) => {
   $("#form").requestSubmit();
 });
 
+/* ---------- 다른 기기로 옮기기 ----------
+   로그인 없이: (1) 링크·QR — 최근 저장한 일정을 압축해 주소(#import=)에 담는다 (QR에 들어가는 만큼)
+              (2) 앱 서버가 있으면 6자리 코드 — 저장한 일정 전부를 10분 동안 맡기고 한 번 받으면 지운다 */
+const b64url = (bytes) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
+const unb64url = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/")), (c) => c.charCodeAt(0));
+async function packTrips(list) {
+  const raw = new TextEncoder().encode(JSON.stringify(list.map((x) => ({ id: x.id, meta: x.meta, savedAt: x.savedAt, snap: x.snap, extra: { baseOpts: x.extra?.baseOpts, choice: x.extra?.choice }, sum: x.sum }))));
+  if (!window.CompressionStream) return "j" + b64url(raw);
+  const z = new Uint8Array(await new Response(new Blob([raw]).stream().pipeThrough(new CompressionStream("deflate-raw"))).arrayBuffer());
+  return "z" + b64url(z);
+}
+async function unpackTrips(s) {
+  const bytes = unb64url(s.slice(1));
+  const raw = s[0] === "z" ? new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()) : bytes;
+  const list = JSON.parse(new TextDecoder().decode(raw));
+  return Array.isArray(list) ? list.filter((x) => x?.id && x?.snap?.input && x?.meta) : [];
+}
+function importTrips(list) {
+  const have = savedTrips(), ids = new Set(have.map((x) => x.id));
+  const add = list.filter((x) => !ids.has(x.id));
+  if (!add.length) return toast(list.length ? t("이미 있는 일정이에요") : t("옮긴 일정을 읽지 못했어요"));
+  if (!store.set("savedTrips", [...add, ...have].sort((a, b) => b.savedAt - a.savedAt).slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  renderSaved(); show("setup");
+  toast(t("일정 {n}개를 받았어요 · '저장한 일정'에서 열 수 있어요", { n: add.length }));
+  track("transfer_in", String(add.length));
+}
+const loadQR = () => window.qrcode ? Promise.resolve() : new Promise((ok, no) => { const sc = document.createElement("script"); sc.src = "vendor/qrcode/qrcode.js"; sc.onload = ok; sc.onerror = no; document.head.appendChild(sc); });
+const QR_MAX = 1800; // QR 한 장에 담을 주소 길이 (휴대폰 카메라로 읽기 쉬운 크기)
+async function openTransfer() {
+  const list = savedTrips(); if (!list.length) return;
+  let dlg = $("#transferDlg");
+  if (!dlg) { dlg = document.createElement("dialog"); dlg.id = "transferDlg"; dlg.className = "report-dlg transfer-dlg"; document.body.appendChild(dlg); }
+  // 최근 일정부터 QR에 들어가는 만큼
+  let n = list.length, url = "";
+  for (; n > 0; n--) { url = `${location.origin}${location.pathname}#import=${await packTrips(list.slice(0, n))}`; if (url.length <= QR_MAX) break; }
+  let qr = "";
+  try { await loadQR(); const q = window.qrcode(0, "L"); q.addData(url); q.make(); qr = q.createSvgTag({ cellSize: 3, margin: 2, scalable: true }); } catch { /* QR 없이 링크만 */ }
+  const server = document.body.classList.contains("has-server");
+  dlg.innerHTML = `<h3>${t("다른 기기로 옮기기")}</h3>
+    ${n ? `<div class="qr">${qr}</div><p class="hint">${t("다른 휴대폰 카메라로 찍거나 링크를 보내세요 · 최근 일정 {n}개", { n })}${n < list.length ? t(" (전부는 코드로)") : ""}</p>
+    <button class="ghost small" type="button" data-copy-link>${t("링크 복사")}</button>` : ""}
+    ${server ? `<div class="code-box"><button class="primary small" type="button" data-make-code>${t("6자리 코드 만들기 (일정 {n}개 전부 · 10분)", { n: list.length })}</button><b class="code" id="transferCode"></b></div>` : ""}
+    <div class="acts"><button class="ghost small" type="button" data-close-dlg>${t("닫기")}</button></div>`;
+  dlg.dataset.url = url;
+  dlg.showModal();
+  track("transfer_out");
+}
+document.addEventListener("click", async (e) => {
+  const tr = e.target.closest("[data-transfer]");
+  if (tr?.dataset.transfer === "send") return openTransfer();
+  if (tr?.dataset.transfer === "get") {
+    const code = (prompt(t("다른 기기에 나온 6자리 코드를 넣어 주세요")) || "").replace(/\D/g, "");
+    if (!/^\d{6}$/.test(code)) return code && toast(t("코드는 숫자 6자리예요"));
+    try {
+      const r = await fetchT(`api/transfer/${code}`, {}, 6000);
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) return toast(j.error || t("코드가 없거나 10분이 지났어요"));
+      importTrips(await unpackTrips(j.data));
+    } catch { toast(t("잠시 후 다시 해 주세요")); }
+    return;
+  }
+  const dlg = e.target.closest("#transferDlg"); if (!dlg) return;
+  if (e.target.closest("[data-close-dlg]")) return dlg.close();
+  if (e.target.closest("[data-copy-link]")) { try { await navigator.clipboard.writeText(dlg.dataset.url); toast(t("링크를 복사했어요")); } catch { prompt(t("링크 복사"), dlg.dataset.url); } return; }
+  if (e.target.closest("[data-make-code]")) {
+    try {
+      const r = await fetchT("api/transfer", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ data: await packTrips(savedTrips()) }) }, 8000);
+      const j = await r.json().catch(() => ({}));
+      if (!r.ok) return toast(j.error || t("잠시 후 다시 해 주세요"));
+      $("#transferCode").textContent = j.code.replace(/(\d{3})(\d{3})/, "$1 $2");
+      toast(t("다른 기기의 '코드로 받기'에 넣으세요 · 10분 안에 한 번"));
+    } catch { toast(t("잠시 후 다시 해 주세요")); }
+  }
+});
+
 function renderSaved() {
   const box = $("#saved"); if (!box) return;
   const list = savedTrips();
-  if (!list.length) { box.hidden = true; return; }
+  if (!list.length) {
+    // 새 기기: 저장한 일정이 없어도 서버가 있으면 "코드로 받기"를 보여 준다
+    box.hidden = !document.body.classList.contains("has-server");
+    box.innerHTML = `<p class="transfer-row">${t("다른 기기에서 옮긴 일정이 있나요?")} <button class="ghost small" type="button" data-transfer="get">${t("코드로 받기")}</button></p>`;
+    return;
+  }
   box.hidden = false;
   const won = (n) => `${Math.round(n / 10000)}${t("만 원")}`;
   box.innerHTML = `<h3>${t("저장한 일정")}</h3><ul class="saved-list">${list.map((x) => `<li>
@@ -291,6 +371,7 @@ function renderSaved() {
       <button class="ghost small" type="button" data-open-saved="${x.id}">${t("열기")}</button><button class="ghost small icon" type="button" data-del-saved="${x.id}" aria-label="${t("삭제")}" title="${t("삭제")}">✕</button>
     </li>`).join("")}</ul>
     ${list.length > 1 ? `<button class="ghost small" type="button" id="compareBtn" ${comparePick.size >= 2 ? "" : "disabled"}>${t("고른 일정 비교 ({n})", { n: comparePick.size })}</button>` : ""}
+    <button class="ghost small" type="button" data-transfer="send">${t("📱 다른 기기로 옮기기")}</button><button class="ghost small needs-server" type="button" data-transfer="get">${t("코드로 받기")}</button>
     <div id="compareBox"></div>`;
 }
 document.addEventListener("click", (e) => {
@@ -2058,7 +2139,13 @@ function openSnapshot(saved, extra = {}) {
   loadWeather();
 }
 (function boot() {
-  const fromHash = location.hash.length > 1 ? decodeState(location.hash.slice(1)) : null;
+  // 다른 기기에서 옮긴 일정 (#import=…): 저장한 일정에 합치고 첫 화면에 보여 준다
+  if (location.hash.startsWith("#import=")) {
+    const packed = location.hash.slice(8);
+    history.replaceState(null, "", location.pathname);
+    unpackTrips(packed).then((list) => importTrips(list)).catch(() => toast(t("옮긴 일정을 읽지 못했어요")));
+  }
+  const fromHash = location.hash.length > 1 && !location.hash.startsWith("#import=") ? decodeState(location.hash.slice(1)) : null;
   const saved = fromHash || null;
   if (saved && saved.input && PLACES.length) {
     openSnapshot(saved);
@@ -2077,7 +2164,7 @@ renderStartRow();
 // 예약·후기·가게 등록은 앱 서버(server.mjs)가 있어야 동작한다. GitHub Pages·안드로이드 앱처럼 서버가 없으면 그 버튼들을 숨긴다
 // (needs-server 클래스: 기본은 숨김, 서버가 응답하면 body.has-server로 보인다)
 fetchT("api/shops?region=gangneung", {}, 3000)
-  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); } })
+  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); } })
   .catch(() => {});
 
 // 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다

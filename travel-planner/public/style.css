@@ -678,3 +678,10 @@ body:not(.has-server) .needs-server { display: none !important; }
 .vote { display: inline-flex; gap: 4px; }
 .vote button.on { background: var(--brand-soft); border-color: var(--brand); color: var(--brand); font-weight: 700; }
 .parking.lots { color: var(--text); } .parking.lots small { color: var(--sub); }
+/* 다른 기기로 옮기기 */
+.transfer-dlg .qr { display: grid; place-items: center; margin: 8px auto; width: min(240px, 70vw); background: #fff; padding: 6px; border-radius: 10px; }
+.transfer-dlg .qr svg { width: 100%; height: auto; display: block; }
+.transfer-dlg .hint { font-size: 12px; color: var(--sub); text-align: center; margin: 4px 0 8px; }
+.transfer-dlg .code-box { margin-top: 12px; display: grid; gap: 8px; justify-items: center; }
+.transfer-dlg .code { font-size: 28px; letter-spacing: 4px; font-variant-numeric: tabular-nums; }
+.transfer-row { margin: 0; font-size: 13px; color: var(--sub); }

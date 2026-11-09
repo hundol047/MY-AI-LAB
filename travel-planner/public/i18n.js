@@ -33,6 +33,22 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "📱 다른 기기로 옮기기": "📱 Move to another device",
+  "코드로 받기": "Receive with code",
+  "다른 기기에서 옮긴 일정이 있나요?": "Moving plans from another device?",
+  "다른 기기로 옮기기": "Move to another device",
+  "다른 휴대폰 카메라로 찍거나 링크를 보내세요 · 최근 일정 {n}개": "Scan with the other phone's camera or send the link · latest {n} plans",
+  " (전부는 코드로)": " (use a code for all)",
+  "링크 복사": "Copy link",
+  "6자리 코드 만들기 (일정 {n}개 전부 · 10분)": "Make a 6-digit code (all {n} plans · 10 min)",
+  "닫기": "Close",
+  "다른 기기에 나온 6자리 코드를 넣어 주세요": "Enter the 6-digit code shown on the other device",
+  "코드는 숫자 6자리예요": "The code is 6 digits",
+  "코드가 없거나 10분이 지났어요": "Code not found or older than 10 minutes",
+  "다른 기기의 '코드로 받기'에 넣으세요 · 10분 안에 한 번": "Enter it in 'Receive with code' on the other device · once, within 10 min",
+  "옮긴 일정을 읽지 못했어요": "Couldn't read the moved plans",
+  "이미 있는 일정이에요": "You already have these plans",
+  "일정 {n}개를 받았어요 · '저장한 일정'에서 열 수 있어요": "Received {n} plans · open them from 'Saved plans'",
   "🅿️ 근처 주차장: {lot}": "🅿️ Parking nearby: {lot}",
   "{m}m": "{m} m",
   "{n}면": "{n} spaces",

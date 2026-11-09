@@ -41,6 +41,11 @@ try{
  assert.equal((await v({place:'no-such-place',voter:'voteraaaa1',vote:1})).status,400);
  assert.equal((await call('/api/votes','POST',{trip:'BAD KEY',place:'ojukheon',voter:'voteraaaa1',vote:1})).status,400);
  assert.equal((await v({place:'ojukheon',voter:'voteraaaa1',vote:5})).status,400);}
+// 기기 옮기기: 6자리 코드로 한 번만 받기, 없는 코드·빈 내용 거절
+{const r=await call('/api/transfer','POST',{data:'abc123'}); assert.equal(r.status,201); assert.match(r.data.code,/^\d{6}$/);
+ const g=await call(`/api/transfer/${r.data.code}`); assert.equal(g.status,200); assert.equal(g.data.data,'abc123');
+ assert.equal((await call(`/api/transfer/${r.data.code}`)).status,404,'두 번째는 없음');
+ assert.equal((await call('/api/transfer','POST',{data:''})).status,400);}
  assert.equal((await call('/api/admin/place-reports')).status,401);
  const pr=(await call('/api/admin/place-reports','GET',null,admin)).data; assert.equal(pr.length,1); assert.equal(pr[0].kind,'hours');
  const curve=createECDH('prime256v1');curve.generateKeys();const sub={endpoint:'https://fcm.googleapis.com/fcm/send/test-only',keys:{p256dh:curve.getPublicKey().toString('base64url'),auth:Buffer.alloc(16,1).toString('base64url')}};

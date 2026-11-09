@@ -8,6 +8,8 @@ const DIRECTORY=new URL('./public/directory.json',import.meta.url);let directory
 async function directoryHas(id){const {mtimeMs}=await stat(DIRECTORY);if(!directoryIds||mtimeMs!==directoryStamp){directoryIds=new Set(JSON.parse(await readFile(DIRECTORY,'utf8')).places.map(p=>String(p.id)));directoryStamp=mtimeMs;}return directoryIds.has(String(id));}
 const reply = (res,status,data) => res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store'}).end(JSON.stringify(data));
 export function serviceAPI({file,adminToken,pushSender=null}) {
+  // 기기 옮기기: 저장한 일정을 6자리 코드로 10분 동안 맡아 두고, 한 번 받으면 지운다 (디스크에 남기지 않음)
+  const transfers=new Map();
   const store=createServices(file), rates=new Map(), stats=createUsageStats(path.join(path.dirname(file),'usage-stats.json'));
   async function body(req) {
     if (!String(req.headers['content-type']||'').startsWith('application/json')) throw Object.assign(new Error('JSON 요청이 필요합니다.'),{status:415});
@@ -21,11 +23,11 @@ export function serviceAPI({file,adminToken,pushSender=null}) {
   const handler = async (req,res,url) => {
     const p=url.pathname;
     const offset=Math.max(0,parseInt(url.searchParams.get('offset'))||0),limit=50;
-    if (!/^\/api\/(bookings|admin|reviews|payments|shops|push-config|stats|place-reports|votes)(\/|$)/.test(p)) return false;
+    if (!/^\/api\/(bookings|admin|reviews|payments|shops|push-config|stats|place-reports|votes|transfer)(\/|$)/.test(p)) return false;
     try {
       if (req.headers.origin && req.headers.origin !== `http://${req.headers.host}` && req.headers.origin !== `https://${req.headers.host}`) return reply(res,403,{error:'다른 사이트의 요청은 허용하지 않습니다.'}),true;
-      if ((req.method !== 'GET' || p.startsWith('/api/admin')) && p!=='/api/stats') { // 집계는 예약 요청 한도를 쓰지 않게 따로 둔다
-        const now=Date.now(), key=req.socket.remoteAddress;
+      if ((req.method !== 'GET' || p.startsWith('/api/admin') || p.startsWith('/api/transfer')) && p!=='/api/stats') { // 옮기기 코드 조회도 횟수 제한 (6자리 코드 맞히기 방지) // 집계는 예약 요청 한도를 쓰지 않게 따로 둔다
+        const now=Date.now(), key=req.socket.remoteAddress+(p.startsWith('/api/transfer')?'|transfer':''); // 옮기기는 따로 센다
         for (const [k,v] of rates) if (v.until<now) rates.delete(k);
         const v=rates.get(key)||{n:0,until:now+60000}; v.n++; rates.set(key,v);
         if (v.n>30) return reply(res,429,{error:'요청이 많습니다. 잠시 후 다시 시도하세요.'}),true;
@@ -60,6 +62,18 @@ export function serviceAPI({file,adminToken,pushSender=null}) {
       else if (p==='/api/reviews' && req.method==='GET') reply(res,200,store.reviews(url.searchParams.get('place')||''));
       else if (p==='/api/reviews' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,201,store.addReview(b));}
       else if (p==='/api/place-reports' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,201,store.addPlaceReport(b));}
+      else if (p==='/api/transfer' && req.method==='POST') {
+        const b=await body(req), now=Date.now();
+        for (const [k,v] of transfers) if (v.until<now) transfers.delete(k);
+        if (typeof b.data!=='string' || !b.data || b.data.length>150000) reply(res,400,{error:'옮길 일정을 확인하세요.'});
+        else if (transfers.size>=500) reply(res,503,{error:'잠시 후 다시 시도하세요.'});
+        else { let code; do code=String(100000+Math.floor(Math.random()*900000)); while(transfers.has(code)); transfers.set(code,{data:b.data,until:now+600000}); reply(res,201,{code,expiresIn:600}); }
+      }
+      else if (/^\/api\/transfer\/\d{6}$/.test(p) && req.method==='GET') {
+        const code=p.split('/')[3], v=transfers.get(code);
+        if (!v || v.until<Date.now()) { transfers.delete(code); reply(res,404,{error:'코드가 없거나 10분이 지났어요.'}); }
+        else { transfers.delete(code); reply(res,200,{data:v.data}); }
+      }
       else if (p==='/api/votes' && req.method==='GET') reply(res,200,store.votes(url.searchParams.get('trip')||'',url.searchParams.get('voter')||''));
       else if (p==='/api/votes' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,200,store.vote(b));}
       else if (/^\/api\/reviews\/[^/]+\/report$/.test(p) && req.method==='POST') reply(res,201,store.report(p.split('/')[3],(await body(req)).reason));
