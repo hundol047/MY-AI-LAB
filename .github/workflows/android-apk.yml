@@ -37,6 +37,11 @@ jobs:
           KS_B64: ${{ secrets.ANDROID_KEYSTORE_B64 }}
         run: |
           if [ -n "$KS_B64" ]; then echo "$KS_B64" | base64 -d > "$RUNNER_TEMP/ohneul.p12"; echo "KEYSTORE_FILE=$RUNNER_TEMP/ohneul.p12" >> "$GITHUB_ENV"; fi
+      - name: 안드로이드 15 플랫폼·bundletool 준비 (Play 스토어 AAB용)
+        run: |
+          ls "$ANDROID_HOME/platforms" | grep -qE '^android-3[5-9]$' || yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-35" >/dev/null
+          curl -fsSL -o "$RUNNER_TEMP/bundletool.jar" https://github.com/google/bundletool/releases/download/1.17.2/bundletool-all-1.17.2.jar
+          echo "BUNDLETOOL=$RUNNER_TEMP/bundletool.jar" >> "$GITHUB_ENV"
       - name: APK 만들기
         env:
           KEYSTORE_PASS: ${{ secrets.ANDROID_KEYSTORE_PASS }}
@@ -45,7 +50,9 @@ jobs:
       - uses: actions/upload-artifact@v5
         with:
           name: ohneul-gangwon-apk
-          path: travel-planner/android/dist/ohneul-gangwon.apk
+          path: |
+            travel-planner/android/dist/ohneul-gangwon.apk
+            travel-planner/android/dist/ohneul-gangwon.aab
       - name: 릴리스에 올리기 (android-latest)
         env:
           GH_TOKEN: ${{ github.token }}
@@ -55,6 +62,7 @@ jobs:
             if gh release view android-latest >/dev/null 2>&1; then
               # 지우고 다시 만들면 그 사이 다운로드 주소가 잠깐 끊기므로, 파일만 덮어쓴다
               gh release upload android-latest travel-planner/android/dist/ohneul-gangwon.apk --clobber &&
+              { [ ! -s travel-planner/android/dist/ohneul-gangwon.aab ] || gh release upload android-latest travel-planner/android/dist/ohneul-gangwon.aab --clobber; } &&
               gh release edit android-latest --notes "$NOTES"
             else
               gh release create android-latest travel-planner/android/dist/ohneul-gangwon.apk \

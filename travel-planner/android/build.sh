@@ -15,6 +15,7 @@ echo "platform:    $PLATFORM"
 VERSION_CODE=${VERSION_CODE:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}
 VERSION_NAME=${VERSION_NAME:-1.0.$VERSION_CODE}
 B=build OUT=dist
+TARGET_SDK=35 # Google Play 새 앱·업데이트 요건 (안드로이드 15)
 rm -rf "$B" && mkdir -p "$B/classes" "$B/dex" "$B/assets/www" "$OUT"
 
 echo "1) 자바 → 클래스"
@@ -26,7 +27,7 @@ cp -r ../public/. "$B/assets/www/"
 echo "4) 리소스·매니페스트 → APK"
 "$BT/aapt2" compile --dir app/res -o "$B/res.zip"
 "$BT/aapt2" link -o "$B/base.apk" -I "$PLATFORM" --manifest app/AndroidManifest.xml -A "$B/assets" \
-  --min-sdk-version 24 --target-sdk-version 34 --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" --replace-version "$B/res.zip"
+  --min-sdk-version 24 --target-sdk-version "$TARGET_SDK" --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" --replace-version "$B/res.zip"
 (cd "$B/dex" && zip -q -0 ../base.apk classes.dex)
 echo "5) 정렬 (resources.arsc 비압축·4바이트 정렬)"
 "$BT/zipalign" -f -p 4 "$B/base.apk" "$B/aligned.apk"
@@ -46,3 +47,17 @@ fi
 # 빌드 번호가 versionCode에 들어갔는지 확인 (안 들어가면 같은 서명이어도 업데이트 설치가 막힌다)
 "$BT/aapt2" dump badging "$OUT/ohneul-gangwon.apk" | grep -q "versionCode='$VERSION_CODE'" || { echo "versionCode가 $VERSION_CODE가 아닙니다"; exit 1; }
 ls -la "$OUT/ohneul-gangwon.apk"
+# 7) Google Play 스토어용 AAB (BUNDLETOOL=bundletool-all.jar 경로가 있을 때만)
+#    같은 리소스를 protobuf 형식으로 다시 묶고, bundletool로 base 모듈 하나짜리 번들을 만든 뒤 같은 키(업로드 키)로 서명한다
+if [ -n "${BUNDLETOOL:-}" ] && [ -s "$BUNDLETOOL" ]; then
+  echo "7) Play 스토어용 AAB"
+  "$BT/aapt2" link --proto-format -o "$B/proto.apk" -I "$PLATFORM" --manifest app/AndroidManifest.xml -A "$B/assets" \
+    --min-sdk-version 24 --target-sdk-version "$TARGET_SDK" --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" --replace-version "$B/res.zip"
+  rm -rf "$B/mod" "$B/base.zip" && mkdir -p "$B/mod/manifest" "$B/mod/dex"
+  (cd "$B/mod" && unzip -q ../proto.apk && mv AndroidManifest.xml manifest/ && cp ../dex/classes.dex dex/ && zip -q -r ../base.zip .)
+  java -jar "$BUNDLETOOL" build-bundle --modules="$B/base.zip" --output="$OUT/ohneul-gangwon.aab" --overwrite
+  jarsigner -keystore "$KS" -storetype PKCS12 -storepass "$PASS" -sigalg SHA256withRSA -digestalg SHA-256 "$OUT/ohneul-gangwon.aab" ohneul >/dev/null
+  jarsigner -verify "$OUT/ohneul-gangwon.aab" | tail -1
+  java -jar "$BUNDLETOOL" validate --bundle="$OUT/ohneul-gangwon.aab" | head -5
+  ls -la "$OUT/ohneul-gangwon.aab"
+fi
