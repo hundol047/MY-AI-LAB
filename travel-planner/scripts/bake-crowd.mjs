@@ -11,7 +11,8 @@ const SIGUNGU = { 51110: "춘천시", 51130: "원주시", 51150: "강릉시", 51
 // 앱 권역 → 시군 (같은 이름의 다른 시군 관광지와 섞이지 않게)
 const REGION_SG = { gangneung: ["강릉시", "동해시", "삼척시"], seorak: ["속초시", "양양군", "고성군", "인제군"], chuncheon: ["춘천시", "화천군", "철원군", "홍천군", "양구군"], pyeongchang: ["평창군", "정선군", "영월군", "태백시"], wonju: ["원주시", "횡성군"] };
 // 이름 규칙으로 안 맞지만 같은 곳임을 사람이 확인한 짝 (앱 id → 관광공사 관광지명)
-const MANUAL = { "high1-ski": "하이원리조트", "yongpyong-ski": "모나용평", "phoenix-ski": "휘닉스 평창", "alpensia-ski": "알펜시아 리조트", woljeongsa: "오대산 월정사 전나무숲길", sogeumsan: "원주 소금산 출렁다리" };
+const MANUAL = { "high1-ski": "하이원리조트", "yongpyong-ski": "모나용평", "phoenix-ski": "휘닉스 평창", "alpensia-ski": "알펜시아 리조트", woljeongsa: "오대산 월정사 전나무숲길", sogeumsan: "원주 소금산 출렁다리",
+  "wj-gukhyeongsa": "국형사계곡", "pc-seonjaryeong": "선자령", songjeong: "송정해변(송정해수욕장)", taebaeksan: "태백산 국립공원", pungsuwon: "횡성 풍수원천주교회(풍수원성당)", "hanbando-island": "한반도섬전망대" };
 
 async function page(sg, pageNo) {
   const u = new URL("https://apis.data.go.kr/B551011/TatsCnctrRateService/tatsCnctrRatedList");
@@ -46,12 +47,18 @@ for (const x of rows) {
   spots.set(k, s);
 }
 const { PLACES } = await import("../public/data.js");
-const places = {}, missed = [];
+const places = {}, missed = [], fuzzyRows = [];
 for (const p of PLACES.filter((x) => !x.petOnly && !x.multi && x.cat !== "food" && x.cat !== "cafe")) {
   const pool = [...spots.values()].filter((s) => REGION_SG[p.region]?.includes(s.sg));
   const keys = [p.name, ...(p.alias || []), p.wiki].filter(Boolean).map(norm);
-  const s = MANUAL[p.id] ? pool.find((x) => x.name === MANUAL[p.id]) : pool.find((x) => keys.includes(x.key));
-  if (s) places[p.id] = { name: s.name, rates: s.rates };
+  let s = MANUAL[p.id] ? [...spots.values()].find((x) => x.name === MANUAL[p.id]) : pool.find((x) => keys.includes(x.key));
+  // 이름이 정확히 같지 않으면 한쪽이 다른 쪽을 품는 경우(예: "경포대" ↔ "강릉 경포대 누각")만, 3글자 이상이고 후보가 하나뿐일 때 맞춘다
+  let fuzzy = false;
+  if (!s && !MANUAL[p.id]) {
+    const hits = pool.filter((x) => x.key.length >= 3 && keys.some((k) => k.length >= 3 && (x.key.includes(k) || k.includes(x.key))));
+    if (hits.length === 1) { s = hits[0]; fuzzy = true; }
+  }
+  if (s) { places[p.id] = { name: s.name, rates: s.rates }; if (fuzzy) fuzzyRows.push(`- ${p.id} (${p.name}) ↔ ${s.name}`); }
   else missed.push(p.name);
 }
 const out = { builtAt: new Date().toISOString(), source: "한국관광공사 관광지 집중률 방문자 추이 예측 정보", places };
@@ -63,6 +70,7 @@ await writeFile(new URL("../reports/crowd.md", import.meta.url), [
   `생성: node scripts/bake-crowd.mjs. 강원 관광지 ${spots.size}곳 · 앱 장소와 맞춘 곳 ${ids.length}곳 · 못 맞춘 관광지형 장소 ${missed.length}곳.`, "",
   "집중률 70 이상이면서 그날 강원 평균보다 20 이상 높으면 '붐빔 예상'(일정 엔진이 그날 뒤로 미룸), 70 이상이면 '붐비는 날'로 카드에 표시한다.", "",
   "## 맞춘 곳", "", ...ids.map((id) => `- ${id}: ${places[id].name}`), "",
+  "## 이름 일부로 맞춘 곳 (확인용)", "", ...fuzzyRows, "",
   "## 집중률 자료에 없는 장소", "", missed.join(", "), "",
 ].join("\n"));
 console.log(`관광지 ${spots.size}곳 중 앱 장소 ${ids.length}곳 → public/crowd.json, reports/crowd.md`);

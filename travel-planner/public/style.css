@@ -490,6 +490,7 @@ body.offline .top::after {
 
 /* 앱 서버가 있을 때만 보이는 링크 (예약·후기·가게 등록) */
 body:not(.has-server) .needs-server { display: none !important; }
+body.has-server .no-server { display: none !important; }
 
 /* 통제·운휴 경고 (alerts.js) */
 .alert { margin-top: 4px; font-size: 12px; line-height: 1.5; padding: 6px 8px; border-radius: 8px; }

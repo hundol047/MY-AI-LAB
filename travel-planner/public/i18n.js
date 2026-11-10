@@ -33,6 +33,14 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "전화": "Call",
+  "네이버 지도 방문자 후기": "Visitor reviews on Naver Map",
+  "지금부터 다시 짜기": "Re-plan from now",
+  "☔ 비 와요 · 실내로": "☔ Raining · go indoors",
+  "남은 일정을 실내 위주로 바꿨어요": "Changed the rest of today to mostly indoor places",
+  "지금부터 남은 일정을 다시 짰어요": "Re-planned the rest of today from now",
+  "오늘은 더 갈 수 있는 곳이 없어요. 편히 쉬세요": "No more places fit today. Enjoy your rest",
+  "메뉴": "Menu",
   "개인정보처리방침": "Privacy policy",
   "이런 분께": "Good for",
   "저녁에": "evenings",

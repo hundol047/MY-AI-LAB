@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
+import { planTrip, swapItem, replanFromNow, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -737,7 +737,7 @@ function itemHTML(it, i, day) {
       </div>
       <div class="acts place-acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a>${voteHTML(p.id)}
+        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
       </div>
     </article>
   </li>`;
@@ -792,7 +792,8 @@ function renderToday() {
   }
   box.innerHTML = `<h3>${t("오늘 여행 중")}</h3>${body}
     <div class="acts"><button type="button" class="ghost small" id="todayGps">${todayHere ? t("내 위치 기준 · 다시 계산") : t("내 위치로 다시 계산")}</button>
-    ${s.dayIdx !== dayIdx ? `<button type="button" class="ghost small" data-goday="${s.dayIdx}">${t("오늘 일정 보기")}</button>` : ""}</div>`;
+    ${s.dayIdx !== dayIdx ? `<button type="button" class="ghost small" data-goday="${s.dayIdx}">${t("오늘 일정 보기")}</button>` : ""}
+    ${s.state !== "done" ? `<button type="button" class="ghost small" data-replan="${s.dayIdx}">${t("지금부터 다시 짜기")}</button><button type="button" class="ghost small" data-replan="${s.dayIdx}" data-rain="1">${t("☔ 비 와요 · 실내로")}</button>` : ""}</div>`;
 }
 setInterval(() => { if (trip && !$("#result").hidden) renderToday(); }, 60000);
 document.addEventListener("click", (e) => {
@@ -800,6 +801,16 @@ document.addEventListener("click", (e) => {
     if (!navigator.geolocation) return toast(t("이 기기에서는 위치를 쓸 수 없어요"));
     navigator.geolocation.getCurrentPosition((p) => { todayHere = { lat: p.coords.latitude, lng: p.coords.longitude }; renderToday(); track("trip_today"); },
       () => toast(t("위치를 가져오지 못했어요")), { enableHighAccuracy: false, timeout: 10000, maximumAge: 120000 });
+  }
+  // 늦었거나 비가 올 때: 지금 시각·위치부터 오늘 남은 일정을 다시 짠다 (다녀온 곳은 그대로)
+  const rp = e.target.closest("[data-replan]");
+  if (rp && trip) {
+    const di = Number(rp.dataset.replan), rain = !!rp.dataset.rain;
+    track(rain ? "trip_replan_rain" : "trip_replan");
+    trip = replanFromNow(trip, state.input, state.opts, di, kstNow().min, todayHere, rain);
+    dayIdx = di; render(); persist(); applyRoad(di);
+    const left = trip.days[di].items.filter((it) => it.start >= kstNow().min).length;
+    toast(left ? (rain ? t("남은 일정을 실내 위주로 바꿨어요") : t("지금부터 남은 일정을 다시 짰어요")) : t("오늘은 더 갈 수 있는 곳이 없어요. 편히 쉬세요"));
   }
   const g = e.target.closest("[data-goday]");
   if (g) { dayIdx = Number(g.dataset.goday); render(); }
@@ -841,6 +852,8 @@ function parkingLine(p) {
 // "이런 분께" 한 줄 (장소 자료의 동행 태그·걷는 양·시간대) + 관광공사 소개 첫 문장(한국어 화면, 누르면 펼침)
 let introData = null;
 fetchT("intro.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { introData = j?.places || null; if (trip && !$("#result").hidden && getLang() === "ko") render(); }).catch(() => {});
+let menuData = null;
+fetchT("menu.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { menuData = j?.places || null; if (trip && !$("#result").hidden && getLang() === "ko") render(); }).catch(() => {});
 function forLine(p) {
   if (p.cat === "festival") return "";
   const who = [];
@@ -849,9 +862,15 @@ function forLine(p) {
   if ((p.tags || []).includes("night")) who.push(t("저녁에"));
   if (p.walk === 1 && !["food", "cafe"].includes(p.cat)) who.push(t("걷기 적음"));
   if (p.walk === 3) who.push(t("많이 걸어요"));
-  const intro = getLang() === "ko" ? introData?.[p.id] : null;
-  if (!who.length && !intro) return "";
-  return `<div class="for">${who.length ? `<span>${t("이런 분께")} · ${who.slice(0, 2).join(" · ")}</span>` : ""}${intro ? `<button type="button" class="linkish" data-intro="${p.id}">${t("소개")}</button><p class="intro" hidden>${esc(intro)} <small>${t("관광공사")}</small></p>` : ""}</div>`;
+  const ko = getLang() === "ko";
+  const intro = ko ? introData?.[p.id] : null;
+  // 식당·카페: 대표 메뉴는 바로, 그 밖의 메뉴·포장·예약은 펼쳐서 (관광공사 음식점 소개정보, 한국어)
+  const m = ko ? menuData?.[p.id] : null;
+  const more = m ? [m.menu, m.pack && "포장 가능", m.reserve && `예약 ${m.reserve}`].filter(Boolean).join(" · ") : "";
+  const head = m?.first ? `<span>대표 메뉴 · ${esc(m.first)}</span>` : who.length ? `<span>${t("이런 분께")} · ${who.slice(0, 2).join(" · ")}</span>` : "";
+  const body = [intro && esc(intro), more && `${m.first ? "그 밖에 " : ""}${esc(more)}`, m?.tel && !p.tel && `<a href="tel:${esc(m.tel)}">${t("전화")} ${esc(m.tel)}</a>`].filter(Boolean).join("<br>");
+  if (!head && !body) return "";
+  return `<div class="for">${head}${body ? `<button type="button" class="linkish" data-intro="${p.id}">${t(m && !intro ? "메뉴" : "소개")}</button><p class="intro" hidden>${body} <small>${t("관광공사")}</small></p>` : ""}</div>`;
 }
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-intro]"); if (!b) return;

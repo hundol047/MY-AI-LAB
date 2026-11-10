@@ -430,7 +430,9 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   // 첫날 출발 시각을 정했으면 그 시각에 출발지를 떠난다 (06:00~12:00)
   const t0 = dayIdx === 0 && /^\d{2}:\d{2}$/.test(opts.startTime || "") ? toMin(opts.startTime) : null;
   // 06:00~18:00 (기차·버스 도착 시각으로 정한 경우 오후일 수 있다)
-  const dayStart = t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("18:00") ? t0 : win.start;
+  // 여행 중 "지금부터 다시 짜기": opts.resume = {at(분), lunch, dinner, cafes, visits} — 이미 다녀온 것은 빼고 지금 시각부터 채운다
+  const rs = opts.resume || null;
+  const dayStart = rs ? rs.at : t0 !== null && t0 >= toMin("06:00") && t0 <= toMin("18:00") ? t0 : win.start;
   const pace = opts.pace || "normal";
   const limit = PACE_LIMIT[pace];
   const pool = candidates(input, opts);
@@ -441,8 +443,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   const items = [];
   const startPt = start || BASE;
   // 첫날 수도권에서 차로 오면 주말·연휴 아침 정체만큼 늦게 도착한다 (첫 이동에 더함)
-  const jam = dayIdx === 0 ? jamGoing(startPt, anchor, dateStr, dayStart, input.move) : 0;
-  let from = startPt, t = dayStart + jam, hasLunch = false, hasDinner = false, nightCount = 0, visits = 0, cafes = 0, seas = 0, fillers = 0;
+  const jam = dayIdx === 0 && !rs ? jamGoing(startPt, anchor, dateStr, dayStart, input.move) : 0;
+  let from = startPt, t = dayStart + jam, hasLunch = !!rs?.lunch, hasDinner = !!rs?.dinner, nightCount = 0, visits = rs?.visits || 0, cafes = rs?.cafes || 0, seas = 0, fillers = 0;
   const dishes = new Set(); // 같은 음식(막국수·닭갈비…)은 하루 한 번
   const groups = new Set();
   const cafeMax = (input.likes || []).includes("cafe") ? 2 : 1;
@@ -647,6 +649,36 @@ export function swapItem(trip, input, opts, dayIdx, itemIdx, replacementId = nul
   if (replacementId && newDay.items[itemIdx]?.id !== replacementId) return trip;
   const night = lodgingForDay(trip, dayIdx);
   if (night && dayIdx < input.days - 1) { markReturn(newDay, night); if (trip.lodgings) newDay.lodging = night; } // 숙소는 그대로
+  const days = trip.days.slice();
+  days[dayIdx] = newDay;
+  return keepRoute(finalize(days, trip.lodging), trip);
+}
+
+// 여행 중: 지금 시각(nowMin)부터 그날 남은 일정을 다시 짠다. 이미 끝난(또는 진행 중인) 장소는 그대로 두고,
+// 지금 위치(here) 또는 마지막으로 들른 곳에서 출발한다. rain이면 그날을 실내 위주로 바꾼다
+export function replanFromNow(trip, input, opts, dayIdx, nowMin, here = null, rain = false) {
+  const day = trip.days[dayIdx];
+  if (!day) return trip;
+  const done = day.items.filter((it) => it.start < nowMin);
+  const last = done[done.length - 1];
+  const at = Math.max(nowMin, last ? last.end : 0);
+  const o = { ...opts, rainDays: (opts.rainDays || []).slice(), resume: {
+    at, lunch: done.some((it) => it.kind === "lunch"), dinner: done.some((it) => it.kind === "dinner"),
+    cafes: done.filter((it) => it.place.cat === "cafe").length, visits: done.filter((it) => it.kind === "visit").length } };
+  if (rain) o.rainDays[dayIdx] = true;
+  const used = new Set(done.map((it) => it.id));
+  trip.days.forEach((d, i) => { if (i !== dayIdx) d.items.forEach((it) => used.add(it.id)); });
+  const exclude = new Set(opts.exclude || []);
+  const usedAreas = trip.days.filter((_, i) => i !== dayIdx).map((d) => d.area);
+  const startPt = here || (last ? last.place : day.start) || null;
+  // 비가 오면 남은 시간은 실내 위주: 바깥 관광지(해변·산책로…)는 빼고 짠다. 실내만으로 하나도 못 채우면 원래대로
+  const outdoor = rain ? PLACES.filter((p) => !p.indoor && p.cat !== "food" && p.cat !== "festival").map((p) => p.id) : [];
+  let rest = planDay(input, o, dayIdx, new Set(used), usedAreas, [], new Set([...exclude, ...outdoor]), false, startPt);
+  if (rain && !rest.items.length) rest = planDay(input, o, dayIdx, used, usedAreas, [], exclude, false, startPt);
+  const newDay = { ...day, ...rest, items: [...done, ...rest.items], start: day.start, jam: day.jam, replanned: true };
+  if (here && rest.items[0]) newDay.items[done.length] = { ...rest.items[0], fromHere: true };
+  const night = lodgingForDay(trip, dayIdx);
+  if (night && dayIdx < input.days - 1) { markReturn(newDay, night); if (trip.lodgings) newDay.lodging = night; }
   const days = trip.days.slice();
   days[dayIdx] = newDay;
   return keepRoute(finalize(days, trip.lodging), trip);
