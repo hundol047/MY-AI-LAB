@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "개인정보처리방침": "Privacy policy",
   "이런 분께": "Good for",
   "저녁에": "evenings",
   "걷기 적음": "little walking",
