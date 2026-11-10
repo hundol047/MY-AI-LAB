@@ -33,6 +33,12 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "이런 분께": "Good for",
+  "저녁에": "evenings",
+  "걷기 적음": "little walking",
+  "많이 걸어요": "lots of walking",
+  "소개": "About",
+  "관광공사": "Korea Tourism Org.",
   "주변": "Nearby",
   "{towns} 경비 50% 환급": "50% back on spending in {towns}",
   "1명 최대 10만 원 · 2명 이상 최대 20만 원 · 그 시군과 이웃 시군 주민은 신청할 수 없어요": "Up to ₩100,000 per person · ₩200,000 for 2+ · Residents of that county and its neighbors can't apply",

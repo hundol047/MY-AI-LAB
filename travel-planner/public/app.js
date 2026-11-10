@@ -725,6 +725,7 @@ function itemHTML(it, i, day) {
         <div class="meta"><span class="tag" style="--c:${c.color}">${t(KIND[it.kind] || c.label)}</span>${p.indoor ? `<span class="tag soft">${t("실내")}</span>` : ""}${state.input.who === "pet" && p.cat !== "festival" ? `<span class="tag ${p.pet ? "pet" : "soft"}">${p.pet ? t("🐾 동반 가능") : p.pet === false ? t("🐾 동반 불가") : t("🐾 동반 확인 필요")}</span>` : ""}</div>
         <h3>${esc(placeName(p))}</h3>
         <p>${esc(placeDesc(p))}</p>
+        ${forLine(p)}
         ${state.opts.halfPkg && !(halfPackage(state.opts.halfPkg)?.placeIds || []).includes(p.id) ? `<div class="check soft">${t("반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)")}</div>` : ""}
         ${it.extra ? `<div class="check soft">${t("저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요", { min: it.extra })}</div>` : ""}
         ${(state.opts.access || []).length ? accessLine(p) : ""}
@@ -836,6 +837,27 @@ function parkingLine(p) {
   // 관광공사 원문이 "가능"뿐이면(대수·요금 없음) 근처 주차장도 함께
   return `<div class="parking ok" title="${esc(v.text)}">${t("🅿️ 주차 가능")}${cnt ? t(" · {n}대", { n: cnt }) : ""}${fee ? ` · ${fee}` : ""}</div>` + (!cnt && !fee ? lots : "");
 }
+
+// "이런 분께" 한 줄 (장소 자료의 동행 태그·걷는 양·시간대) + 관광공사 소개 첫 문장(한국어 화면, 누르면 펼침)
+let introData = null;
+fetchT("intro.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { introData = j?.places || null; if (trip && !$("#result").hidden && getLang() === "ko") render(); }).catch(() => {});
+function forLine(p) {
+  if (p.cat === "festival") return "";
+  const who = [];
+  if ((p.tags || []).includes("kids")) who.push(t("아이와"));
+  if ((p.tags || []).includes("senior")) who.push(t("부모님과"));
+  if ((p.tags || []).includes("night")) who.push(t("저녁에"));
+  if (p.walk === 1 && !["food", "cafe"].includes(p.cat)) who.push(t("걷기 적음"));
+  if (p.walk === 3) who.push(t("많이 걸어요"));
+  const intro = getLang() === "ko" ? introData?.[p.id] : null;
+  if (!who.length && !intro) return "";
+  return `<div class="for">${who.length ? `<span>${t("이런 분께")} · ${who.slice(0, 2).join(" · ")}</span>` : ""}${intro ? `<button type="button" class="linkish" data-intro="${p.id}">${t("소개")}</button><p class="intro" hidden>${esc(intro)} <small>${t("관광공사")}</small></p>` : ""}</div>`;
+}
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-intro]"); if (!b) return;
+  const pEl = b.parentElement.querySelector(".intro"); pEl.hidden = !pEl.hidden;
+  b.setAttribute("aria-expanded", String(!pEl.hidden));
+});
 
 // 사진 아래 짧은 주차 표시 (자세한 내용은 눌러서): 관광공사 원문 → 근처 주차장 순
 function parkingShort(p) {
