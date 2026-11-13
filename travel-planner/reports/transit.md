@@ -1,6 +1,6 @@
 # 오가는 길 시간표 (국토교통부 TAGO)
 
-생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261117·주말 20261114, 버스 기준일 20261113.
+생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261117·주말 20261121, 버스 기준일 20261114.
 
 - train 서울역 → 강릉역 weekday: 14편
 - train 강릉역 → 서울역 weekday: 14편
@@ -64,12 +64,12 @@
 - train 진부역 → 동대구역 weekend: 0편
 - train 서울역 → 원주역 weekday: 6편
 - train 원주역 → 서울역 weekday: 6편
-- train 서울역 → 원주역 weekend: 7편
-- train 원주역 → 서울역 weekend: 7편
+- train 서울역 → 원주역 weekend: 6편
+- train 원주역 → 서울역 weekend: 6편
 - train 청량리역 → 원주역 weekday: 21편
 - train 원주역 → 청량리역 weekday: 21편
-- train 청량리역 → 원주역 weekend: 22편
-- train 원주역 → 청량리역 weekend: 22편
+- train 청량리역 → 원주역 weekend: 21편
+- train 원주역 → 청량리역 weekend: 21편
 - train 상봉역 → 원주역 weekday: 2편
 - train 원주역 → 상봉역 weekday: 2편
 - train 상봉역 → 원주역 weekend: 2편
@@ -84,8 +84,8 @@
 - train 원주역 → 동대구역 weekend: 0편
 - express 동서울종합터미널 → 강릉 고속버스터미널 all: 12편
 - express 강릉 고속버스터미널 → 동서울종합터미널 all: 12편
-- express 서울고속버스터미널 → 강릉 고속버스터미널 all: 23편
-- express 강릉 고속버스터미널 → 서울고속버스터미널 all: 23편
+- express 서울고속버스터미널 → 강릉 고속버스터미널 all: 26편
+- express 강릉 고속버스터미널 → 서울고속버스터미널 all: 24편
 - intercity 동서울종합터미널 → 강릉 시외버스터미널 all: 13편
 - intercity 강릉 시외버스터미널 → 동서울종합터미널 all: 0편
 - intercity 서울고속버스터미널 → 강릉 시외버스터미널 all: 0편
@@ -100,12 +100,12 @@
 - intercity 강릉 시외버스터미널 → 부산동부터미널 all: 0편
 - intercity 대전복합터미널 → 강릉 시외버스터미널 all: 0편
 - intercity 강릉 시외버스터미널 → 대전복합터미널 all: 0편
-- express 동서울종합터미널 → 속초 고속버스터미널 all: 15편
+- express 동서울종합터미널 → 속초 고속버스터미널 all: 16편
 - express 속초 고속버스터미널 → 동서울종합터미널 all: 15편
-- express 서울고속버스터미널 → 속초 고속버스터미널 all: 48편
-- express 속초 고속버스터미널 → 서울고속버스터미널 all: 45편
-- intercity 동서울종합터미널 → 속초 시외버스터미널 all: 35편
-- intercity 속초 시외버스터미널 → 동서울종합터미널 all: 36편
+- express 서울고속버스터미널 → 속초 고속버스터미널 all: 50편
+- express 속초 고속버스터미널 → 서울고속버스터미널 all: 47편
+- intercity 동서울종합터미널 → 속초 시외버스터미널 all: 37편
+- intercity 속초 시외버스터미널 → 동서울종합터미널 all: 37편
 - intercity 서울고속버스터미널 → 속초 시외버스터미널 all: 0편
 - intercity 속초 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 속초 시외버스터미널 all: 0편
@@ -152,10 +152,10 @@
 - intercity 진부 시외버스터미널 → 대전복합터미널 all: 0편
 - express 동서울종합터미널 → 원주 고속버스터미널 all: 0편
 - express 원주 고속버스터미널 → 동서울종합터미널 all: 0편
-- express 서울고속버스터미널 → 원주 고속버스터미널 all: 99편
-- express 원주 고속버스터미널 → 서울고속버스터미널 all: 92편
-- intercity 동서울종합터미널 → 원주 시외버스터미널 all: 41편
-- intercity 원주 시외버스터미널 → 동서울종합터미널 all: 42편
+- express 서울고속버스터미널 → 원주 고속버스터미널 all: 97편
+- express 원주 고속버스터미널 → 서울고속버스터미널 all: 101편
+- intercity 동서울종합터미널 → 원주 시외버스터미널 all: 40편
+- intercity 원주 시외버스터미널 → 동서울종합터미널 all: 41편
 - intercity 서울고속버스터미널 → 원주 시외버스터미널 all: 0편
 - intercity 원주 시외버스터미널 → 서울고속버스터미널 all: 0편
 - intercity 상봉역 → 원주 시외버스터미널 all: 0편
