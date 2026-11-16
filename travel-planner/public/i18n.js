@@ -33,6 +33,15 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "출발 알림": "Departure alerts",
+  "출발 알림 {n}개를 맞췄어요. 여행 날 출발 시각에 알려 드릴게요": "Set {n} departure alerts. We'll remind you when it's time to leave",
+  "이미 지난 일정이라 맞출 알림이 없어요": "This plan is in the past, so there's nothing to remind",
+  "알림 권한을 허용해 주세요": "Please allow notifications",
+  "알림을 맞추지 못했어요": "Couldn't set alerts",
+  "오늘 여행 일정": "Today's trip",
+  "첫 일정 {place} {time} · {leave}까지 출발하면 돼요": "First stop {place} at {time} · leave by {leave}",
+  "15분 뒤 출발": "Leave in 15 minutes",
+  "다음: {place} {time} 도착 예정 · 이동 약 {min}분": "Next: {place}, arrive {time} · about {min} min",
   "💸 여행 경비 나누기 (누가 누구에게 얼마)": "💸 Split trip costs (who pays whom)",
   "일행{n}": "Friend {n}",
   "나": "Me",

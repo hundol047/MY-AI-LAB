@@ -12,6 +12,10 @@ import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.print.PrintAttributes;
+import android.print.PrintManager;
+import android.util.Base64;
+import java.io.OutputStream;
 import android.provider.CalendarContract;
 import android.speech.RecognizerIntent;
 import java.util.ArrayList;
@@ -44,6 +48,7 @@ import org.json.JSONObject;
  * - 서버 API(api/...)는 없으므로 404 → 앱이 간단 모드로 대체한다 (가게 등록은 숨김)
  * - 앱 밖 주소(카카오맵·네이버 등)는 휴대폰 브라우저나 해당 앱으로 연다
  * - "캘린더 저장"은 파일 대신 휴대폰 캘린더에 일정을 바로 넣는다 (웹뷰는 파일 내려받기를 못 함)
+ * - 정산 서류: 파일 저장은 "저장할 곳 고르기"(ACTION_CREATE_DOCUMENT), 인쇄·PDF는 PrintManager로
  * - "말하기"는 웹뷰에 음성 인식이 없어서 휴대폰 기본 음성 인식(RecognizerIntent)을 열고 결과를 window.__voiceResult로 넘긴다
  *   (음성 인식 앱이 마이크를 다루므로 이 앱은 마이크 권한이 필요 없다)
  */
@@ -54,6 +59,10 @@ public class MainActivity extends Activity {
     private static final int REQ_FILE = 2;
     private static final int REQ_CALENDAR = 3;
     private static final int REQ_VOICE = 4;
+    private static final int REQ_NOTIFY = 5;
+    private static final int REQ_SAVE = 6;
+    private byte[] pendingFile; // "저장할 곳"을 고르는 동안 기다리는 파일
+    private String pendingReminders; // 알림 권한을 묻는 동안 기다리는 알림 목록 (JSON)
 
     private WebView web;
     private ValueCallback<Uri[]> fileCallback;
@@ -219,6 +228,68 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** 여행 당일 출발 알림 예약: [{at(ms), title, text}] → window.__remindDone("ok:예약수" | "denied" | "error") */
+        @JavascriptInterface
+        public void scheduleReminders(final String json) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (Build.VERSION.SDK_INT >= 33 && checkSelfPermission("android.permission.POST_NOTIFICATIONS") != PackageManager.PERMISSION_GRANTED) {
+                        pendingReminders = json;
+                        requestPermissions(new String[]{"android.permission.POST_NOTIFICATIONS"}, REQ_NOTIFY);
+                        return;
+                    }
+                    int n = ReminderReceiver.schedule(MainActivity.this, json);
+                    remindDone(n < 0 ? "error" : "ok:" + n);
+                }
+            });
+        }
+
+        /** 파일 저장 (웹뷰는 내려받기를 못 하므로): 저장할 곳을 고르게 한 뒤 쓴다 → window.__saveDone("ok" | "cancel" | "error") */
+        @JavascriptInterface
+        public void saveFile(final String name, final String mime, final String base64) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        pendingFile = Base64.decode(base64, Base64.DEFAULT);
+                        Intent i = new Intent(Intent.ACTION_CREATE_DOCUMENT);
+                        i.addCategory(Intent.CATEGORY_OPENABLE);
+                        i.setType(mime == null || mime.isEmpty() ? "application/octet-stream" : mime);
+                        i.putExtra(Intent.EXTRA_TITLE, name);
+                        startActivityForResult(i, REQ_SAVE);
+                    } catch (Exception e) {
+                        pendingFile = null;
+                        saveDone("error");
+                    }
+                }
+            });
+        }
+
+        /** 지금 화면 인쇄 (PDF로 저장 포함) */
+        @JavascriptInterface
+        public void printPage(final String title) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    PrintManager pm = (PrintManager) getSystemService(PRINT_SERVICE);
+                    if (pm == null || web == null) return;
+                    String t = title == null || title.isEmpty() ? "오늘강원" : title;
+                    pm.print(t, web.createPrintDocumentAdapter(t), new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void cancelReminders() {
+            ReminderReceiver.cancelAll(MainActivity.this);
+        }
+
+        @JavascriptInterface
+        public boolean hasReminders() {
+            return true;
+        }
+
         @JavascriptInterface
         public void addToCalendar(final String json) {
             runOnUiThread(new Runnable() {
@@ -307,8 +378,25 @@ public class MainActivity extends Activity {
         }
     }
 
+    private void saveDone(final String result) {
+        if (web != null) web.evaluateJavascript("window.__saveDone && window.__saveDone(" + JSONObject.quote(result) + ")", null);
+    }
+
+    private void remindDone(final String result) {
+        if (web != null) web.evaluateJavascript("window.__remindDone && window.__remindDone(" + JSONObject.quote(result) + ")", null);
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] results) {
+        if (requestCode == REQ_NOTIFY) {
+            String json = pendingReminders;
+            pendingReminders = null;
+            boolean ok = results.length > 0 && results[0] == PackageManager.PERMISSION_GRANTED;
+            if (!ok || json == null) { remindDone("denied"); return; }
+            int n = ReminderReceiver.schedule(this, json);
+            remindDone(n < 0 ? "error" : "ok:" + n);
+            return;
+        }
         if (requestCode == REQ_CALENDAR) {
             boolean ok = results.length > 0;
             for (int r : results) ok &= r == PackageManager.PERMISSION_GRANTED;
@@ -338,6 +426,24 @@ public class MainActivity extends Activity {
                 if (list != null && !list.isEmpty()) text = list.get(0);
             }
             voiceDone(text);
+            return;
+        }
+        if (requestCode == REQ_SAVE) {
+            final byte[] bytes = pendingFile;
+            pendingFile = null;
+            if (resultCode != RESULT_OK || data == null || data.getData() == null || bytes == null) { saveDone("cancel"); return; }
+            final Uri uri = data.getData();
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    try (OutputStream out = getContentResolver().openOutputStream(uri)) {
+                        out.write(bytes);
+                        runOnUiThread(new Runnable() { @Override public void run() { saveDone("ok"); } });
+                    } catch (Exception e) {
+                        runOnUiThread(new Runnable() { @Override public void run() { saveDone("error"); } });
+                    }
+                }
+            }).start();
             return;
         }
         if (requestCode == REQ_FILE && fileCallback != null) {

@@ -29,3 +29,15 @@ for (const [now, rain] of [[13 * 60 + 10, false], [15 * 60, true]]) {
   assert.deepEqual(t2.days[1].items.map((it) => it.id), trip.days[1].items.map((it) => it.id), "다른 날은 그대로");
 }
 console.log("ok - 여행 중 모드 (지금 일정·출발 시각·위치 기준 재계산·마감 지각·지금부터 다시 짜기)");
+{
+  const { reminderList } = await import("../public/today.js");
+  const list = reminderList(trip);
+  const d0 = trip.days[0], f = d0.items[0];
+  assert.ok(list.length >= trip.days.length && list.length <= 60);
+  // 첫 알림: 첫날 첫 일정 출발 1시간 전 (한국 시간)
+  const kst = new Date(list[0].at + 9 * 3600e3);
+  assert.equal(kst.toISOString().slice(0, 10), d0.date);
+  assert.equal(kst.getUTCHours() * 60 + kst.getUTCMinutes(), f.start - f.travelMin - 60);
+  assert.ok(list.every((x, i) => !i || x.at >= list[i - 1].at), "시각 순서");
+  console.log(`ok - 출발 알림 ${list.length}개 (날마다 첫 일정 1시간 전 + 장소마다 출발 15분 전)`);
+}

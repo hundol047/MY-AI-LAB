@@ -5,7 +5,7 @@ import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "
 import { ORIGINS } from "./origins.js";
 import { sunTimes } from "./sun.js";
 import { alertsFor as weatherAlertsFor, kmaAlertsFor, OFFICIAL_CHECKS } from "./alerts.js";
-import { todayStatus, kstNow } from "./today.js";
+import { todayStatus, kstNow, reminderList } from "./today.js";
 import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
@@ -2235,6 +2235,22 @@ $("#icsBtn").addEventListener("click", () => {
   document.body.append(a); a.click();
   setTimeout(() => { a.remove(); URL.revokeObjectURL(a.href); }, 4000);
   toast(t("캘린더 파일을 받았어요. 파일을 열면 캘린더에 추가돼요"));
+});
+
+// 여행 당일 출발 알림 (안드로이드 앱에서만: 휴대폰 알림을 미리 예약. 웹은 예약 알림을 보낼 서버가 없어 숨김)
+if (window.OhneulApp?.scheduleReminders) $("#remindBtn").hidden = false;
+window.__remindDone = (res) => {
+  const [kind, n] = String(res).split(":");
+  if (kind === "ok") toast(Number(n) ? t("출발 알림 {n}개를 맞췄어요. 여행 날 출발 시각에 알려 드릴게요", { n }) : t("이미 지난 일정이라 맞출 알림이 없어요"));
+  else toast(kind === "denied" ? t("알림 권한을 허용해 주세요") : t("알림을 맞추지 못했어요"));
+};
+$("#remindBtn").addEventListener("click", () => {
+  if (!trip || !window.OhneulApp?.scheduleReminders) return;
+  track("reminders");
+  const list = reminderList(trip, (p) => placeName(p), fmt, {
+    today: t("오늘 여행 일정"), first: t("첫 일정 {place} {time} · {leave}까지 출발하면 돼요"), soon: t("15분 뒤 출발"), next: t("다음: {place} {time} 도착 예정 · 이동 약 {min}분"),
+  });
+  window.OhneulApp.scheduleReminders(JSON.stringify(list));
 });
 
 /* ---------- 알림 ---------- */

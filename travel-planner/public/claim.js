@@ -293,7 +293,7 @@ function openDoc(html) {
   o.hidden = false; document.body.classList.add("doc-open"); window.scrollTo(0, 0);
 }
 document.addEventListener("click", (e) => {
-  if (e.target.id === "docPrint") window.print();
+  if (e.target.id === "docPrint") { if (window.OhneulApp?.printPage) window.OhneulApp.printPage("반값여행 정산 서류"); else window.print(); } // 안드로이드 앱은 휴대폰 인쇄(PDF 저장)로
   if (e.target.id === "docClose") { $("#docOverlay").hidden = true; document.body.classList.remove("doc-open"); }
 });
 $("#makeDoc").addEventListener("click", () => openDoc(docHTML(analysis())));
@@ -322,9 +322,15 @@ $("#makeZip").addEventListener("click", async () => {
   files["00_정산신청서.html"] = strToU8(`<!doctype html><meta charset="utf-8"><title>정산 신청서</title><style>${css}</style>${docHTML(a).replace(/<img src="blob:[^"]*">/g, "")}`);
   files["00_신청내용_붙여넣기.txt"] = strToU8(pasteText(a));
   const zip = zipSync(files, { level: 0 });
+  const name = `반값여행_정산_${a.s.town}_${a.s.from || "날짜"}.zip`;
+  if (window.OhneulApp?.saveFile) { // 안드로이드 앱: 웹뷰는 내려받기를 못 하므로 "저장할 곳"을 골라 저장
+    let bin = ""; for (let i = 0; i < zip.length; i += 0x8000) bin += String.fromCharCode.apply(null, zip.subarray(i, i + 0x8000));
+    window.OhneulApp.saveFile(name, "application/zip", btoa(bin)); return;
+  }
   const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([zip], { type: "application/zip" }));
-  link.download = `반값여행_정산_${a.s.town}_${a.s.from || "날짜"}.zip`; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 60000);
+  link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 60000);
 });
+window.__saveDone = (r) => alert(r === "ok" ? "저장했어요. 신청 사이트에서 이 파일 안의 사진을 순서대로 올리세요." : r === "cancel" ? "저장을 취소했어요." : "저장하지 못했어요.");
 $("#clearAll").addEventListener("click", async () => {
   if (!confirm("올린 영수증·사진과 입력한 내용을 모두 지울까요?")) return;
   await tx("readwrite", (s) => s.clear()); items = []; localStorage.removeItem(SKEY); initTrip(); renderAll();

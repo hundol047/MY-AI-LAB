@@ -36,3 +36,26 @@ export function todayStatus(trip, now, here = null, move = "car") {
   const late = deadline != null && arrive > deadline;
   return { dayIdx, state: idx === 0 && cur < 0 && now.min < items[0].start ? "before" : "next", item: it, idx, leaveBy, travelMin, arrive, late, deadline };
 }
+
+/**
+ * 여행 당일 출발 알림 목록: 날마다 첫 일정 1시간 전 "오늘 일정" 한 번 + 장소마다 출발 15분 전 한 번.
+ * name(place) → 화면 언어 이름. 반환 [{at(ms), title, text}] (지난 시각 포함 — 예약할 때 앱이 거른다)
+ */
+export function reminderList(trip, name = (p) => p.name, fmtMin = (m) => `${String(Math.floor(m / 60)).padStart(2, "0")}:${String(m % 60).padStart(2, "0")}`, words = {}) {
+  const w = { today: "오늘 여행 일정", first: "첫 일정 {place} {time} · {leave}까지 출발하면 돼요", soon: "15분 뒤 출발", next: "다음: {place} {time} 도착 예정 · 이동 약 {min}분", ...words };
+  const fill = (s, o) => s.replace(/\{(\w+)\}/g, (_, k) => o[k] ?? "");
+  // 한국 시간 날짜 + 분 → 시각(ms)
+  const at = (date, min) => { const [y, m, d] = date.split("-").map(Number); return Date.UTC(y, m - 1, d, 0, 0) - 9 * 3600e3 + min * 60e3; };
+  const out = [];
+  for (const d of trip.days) {
+    const items = d.items; if (!items.length) continue;
+    const f = items[0], leave0 = f.start - (f.travelMin || 0);
+    out.push({ at: at(d.date, leave0 - 60), title: w.today, text: fill(w.first, { place: name(f.place), time: fmtMin(f.start), leave: fmtMin(leave0) }) });
+    for (const it of items.slice(1)) {
+      const leave = it.start - (it.travelMin || 0);
+      if ((it.travelMin || 0) < 5) continue; // 바로 옆이면 알리지 않음
+      out.push({ at: at(d.date, leave - 15), title: w.soon, text: fill(w.next, { place: name(it.place), time: fmtMin(it.start), min: it.travelMin }) });
+    }
+  }
+  return out.sort((a, b) => a.at - b.at).slice(0, 60);
+}
