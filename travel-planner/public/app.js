@@ -50,7 +50,8 @@ const store = {
 function encodeState(s) { return btoa(unescape(encodeURIComponent(JSON.stringify(s)))); }
 function decodeState(h) { try { return JSON.parse(decodeURIComponent(escape(atob(h)))); } catch { return null; } }
 function snapshot() {
-  return { input: state.input, opts: { ...state.opts, keep: trip.days.map((d) => d.items.map((i) => i.id)) } };
+  const { seen, ...opts } = state.opts; // 최근 본 장소 목록은 링크에 담지 않는다 (장소는 keep으로 복원)
+  return { input: state.input, opts: { ...opts, keep: trip.days.map((d) => d.items.map((i) => i.id)) } };
 }
 function persist() {
   const snap = snapshot();
@@ -131,12 +132,16 @@ $("#form").addEventListener("submit", async (e) => {
   const hp = pendingPackage; pendingPackage = null;
   if (hp) state.opts.halfPkg = hp.id;
   state.opts.voteKey = randomKey(10); // 같이 고르기(공유 링크 투표)용 일정 키 — 링크에 담겨 받은 사람도 같은 표를 본다
+  // 다양하게: 만들 때마다 다른 번호로 조금씩 다른 조합, 최근에 본 장소는 뒤로 미룬다
+  state.opts.seed = newSeed();
+  const seen = seenPlaces(input.region); if (seen.length) state.opts.seen = seen;
   state.baseOpts = { ...state.opts }; // 일정 3개 비교의 기준 조건
   state.choice = "best";
   restoredFromLink = false;
   dayIdx = 0;
   await thinkThrough(input, state.opts, !!v);
   rebuild();
+  rememberSeen();
   show("result");
   $("#thinking").hidden = true;
   loadWeather();
@@ -202,6 +207,16 @@ function whyText() {
   if (s.festivals.length) parts.push(t("여행 기간 축제({f})도 살폈어요.", { f: s.festivals.slice(0, 2).map((f) => placeName(f)).join(", ") }));
   return parts.join(" ");
 }
+// 다양하게: 권역마다 최근에 보여 준 관광지·식당(최대 40곳)을 기억해 다음 일정에서 조금 뒤로 미룬다 (기기 안에만 저장)
+const newSeed = () => 1 + Math.floor(Math.random() * 2e9);
+function seenPlaces(region) { const all = store.get("seenPlaces") || {}; return Array.isArray(all[region]) ? all[region] : []; }
+function rememberSeen() {
+  if (!trip || !state?.input?.region) return;
+  const all = store.get("seenPlaces") || {}, r = state.input.region;
+  const ids = trip.days.flatMap((d) => d.items.map((it) => it.id));
+  all[r] = [...new Set([...ids, ...(all[r] || [])])].slice(0, 40);
+  store.set("seenPlaces", all);
+}
 function renderOptions() {
   const box = $("#options"); if (!box) return;
   if (!state.baseOpts) { box.hidden = true; return; }
@@ -213,8 +228,23 @@ function renderOptions() {
       <span class="opt-stats">${t("{n}곳 · 이동 {m} · 걷기 {km}km", { n: o.places, m: minutesLabel(o.totals.moveMin), km: o.totals.walkKm })}</span>
       <span class="opt-hl">${o.highlights.map((n) => esc(placeName(PLACES.find((p) => p.name === n) || { name: n }))).join(" · ")}</span>
       ${halfPriceIn(o.trip) ? `<span class="opt-half">${t("💰 반값여행 대상 지역 포함")}</span>` : ""}
-      <span class="opt-pick">${state.choice === o.key ? t("지금 보는 일정") : t("이 일정으로")}</span></button>`).join("")}</div>`;
+      <span class="opt-pick">${state.choice === o.key ? t("지금 보는 일정") : t("이 일정으로")}</span></button>`).join("")}</div>
+    <button type="button" class="ghost small reroll" data-reroll>${t("🔀 다른 코스 3개 더 보기")}</button>`;
 }
+// 다른 코스 더 보기: 새 번호 + 지금 일정 3개에 나온 장소를 뒤로 미뤄 다시 짠다 (꼭 넣을 곳·조건은 그대로)
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("[data-reroll]") || !state?.baseOpts) return;
+  const shown = optionsFor(state.input, state.baseOpts).flatMap((o) => o.trip.days.flatMap((d) => d.items.map((it) => it.id)));
+  const seen = [...new Set([...shown, ...(state.baseOpts.seen || [])])].slice(0, 60);
+  const { lodgingId, ...base } = state.baseOpts;
+  state.baseOpts = { ...base, seed: newSeed(), seen };
+  state.opts = { ...state.baseOpts };
+  state.choice = "best"; dayIdx = 0;
+  track("plan_reroll");
+  rebuild(); rememberSeen();
+  $("#options")?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "start" });
+  toast(t("새 조합으로 다시 짰어요"));
+});
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-opt]"); if (!b || !state?.baseOpts) return;
   const o = optionsFor(state.input, state.baseOpts).find((x) => x.key === b.dataset.opt);

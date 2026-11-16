@@ -756,3 +756,6 @@ body:not(.has-server) .place .acts .needs-server { display: none; }
 .for .linkish { font-size: 12px; color: var(--sub); text-decoration: underline; padding: 0; background: none; border: 0; cursor: pointer; }
 .for .intro { flex-basis: 100%; margin: 4px 0 0; font-size: 12px; font-weight: 400; color: var(--text); line-height: 1.5; }
 .for .intro small { color: var(--sub); }
+
+/* 다른 코스 더 보기 */
+.options .reroll { display: block; width: 100%; margin-top: 10px; }

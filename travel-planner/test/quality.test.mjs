@@ -5,12 +5,13 @@ import assert from "node:assert/strict";
 import { planTrip } from "../public/planner.js";
 
 const R = ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"];
-let days = 0;
+let days = 0, combo = 0;
 const c = { gap60: 0, zigzag: 0, farStart: 0, leg75: 0, drive4h: 0, noDinner: 0, noLunch: 0, sameDish: 0, lateDayTrip: 0, mealFirst: 0, cafe3: 0 };
 const DISH = /막국수|닭갈비|순두부|물회|추어탕|송어|곤드레|해장국|냉면/;
 for (const region of R) for (const who of ["couple", "family", "parents", "pet"]) for (const move of ["car", "taxi", "transit"])
   for (const likes of [["sea", "food"], ["culture"], ["nature", "cafe"]]) for (const date of ["2026-11-14", "2027-04-21"]) for (const nd of [1, 2, 3]) {
-    const t = planTrip({ region, date, days: nd, who, likes, move }, {});
+    // 앱처럼 일정마다 다른 번호(seed)로 — 다양하게 골라도 품질 기준을 지켜야 한다
+    const t = planTrip({ region, date, days: nd, who, likes, move }, { seed: 1 + (combo++) * 7919 });
     t.days.forEach((d, i) => {
       days++;
       const it = d.items;
@@ -54,3 +55,18 @@ for (const region of R) for (const move of ["car", "taxi", "transit"]) for (cons
 }
 assert.ok(thinDays / (optTrips * 12) <= 0.01, `관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
 console.log(`ok - 3박 4일 일정 3개 × ${optTrips}건: 모두 1~4일차 · 관광지 1곳 이하인 날 ${thinDays}/${optTrips * 12}`);
+
+// 다양하게: 같은 조건이라도 번호(seed)가 다르면 다른 코스, 같으면 같은 코스 (링크·저장 복원)
+{
+  const input = { region: "gangneung", date: "2026-11-21", days: 2, who: "couple", likes: [], move: "car" };
+  const key = (t) => t.days.flatMap((d) => d.items.map((x) => x.id)).join();
+  const runs = Array.from({ length: 8 }, (_, i) => planTrip(input, { seed: 11 + i * 7919 }));
+  const distinct = new Set(runs.map(key)).size;
+  assert.ok(distinct >= 6, `번호마다 다른 코스여야 함: 8번 중 ${distinct}개`);
+  assert.equal(key(planTrip(input, { seed: 11 })), key(runs[0]), "같은 번호는 같은 코스");
+  const seen = runs[0].days.flatMap((d) => d.items.map((x) => x.id));
+  const next = planTrip(input, { seed: 11, seen });
+  const overlap = next.days.flatMap((d) => d.items).filter((x) => seen.includes(x.id)).length;
+  assert.ok(overlap < seen.length * 0.7, `최근 본 장소는 뒤로: 겹침 ${overlap}/${seen.length}`);
+  console.log(`ok - 다양한 코스: 같은 조건 8번 중 ${distinct}개가 서로 다름 · 최근 본 장소 겹침 ${overlap}/${seen.length}`);
+}

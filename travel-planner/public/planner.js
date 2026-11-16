@@ -196,8 +196,22 @@ function meanOn(dateStr) {
   return dayMean[dateStr];
 }
 export const crowdedOn = (id, dateStr) => { const c = crowdOn(id, dateStr); return c != null && c >= 70 && c - meanOn(dateStr) >= 20; };
+// 다양하게: 일정을 새로 만들 때마다 정해지는 번호(opts.seed)로 장소마다 작은 가산점(±1.2)을 줘서
+// 같은 조건이라도 매번 조금 다른 코스가 나온다. 번호가 같으면 늘 같은 일정 (링크·저장·테스트가 흔들리지 않음)
+// opts.seen: 최근에 보여 준 장소 — 조금 뒤로 미뤄 다음엔 다른 곳이 나오게 (꼭 넣을 곳·축제는 그대로)
+const JITTER = 1.2;
+function jitter(seed, id) {
+  let h = 2166136261 ^ seed;
+  for (let i = 0; i < id.length; i++) h = Math.imul(h ^ id.charCodeAt(i), 16777619);
+  h = Math.imul(h ^ (h >>> 15), 2246822507); h ^= h >>> 13;
+  return ((h >>> 0) / 4294967296 - 0.5) * 2 * JITTER;
+}
+const SEEN_CACHE = new WeakMap();
+const seenSet = (opts) => { const a = opts.seen; if (!a?.length) return null; let s = SEEN_CACHE.get(a); if (!s) SEEN_CACHE.set(a, (s = new Set(a))); return s; };
 function baseScore(p, input, opts, rain, dateStr = null) {
   let s = p.pop;
+  if (opts.seed && p.cat !== "festival") s += jitter(opts.seed, p.id);
+  if (seenSet(opts)?.has(p.id) && p.cat !== "festival" && !(opts.must || []).includes(p.id)) s -= 1.5;
   if (dateStr && crowdedOn(p.id, dateStr)) s -= 2 + (crowdOn(p.id, dateStr) - 70) / 15; // 70 → -2, 100 → -4
   if (p.cat === "festival") s += 10; // 여행 날짜에 열리는 축제는 최우선
   if (p.region !== regionOf(input)) s -= 5; // 고른 권역 우선
@@ -248,6 +262,10 @@ function pickAnchors(input, opts, rain, used, usedAreas, dateStr, from) {
     if (scores.length < 2) continue; // 볼거리가 거의 없는 지역은 하루 중심으로 삼지 않음
     let total = scores.reduce((a, b) => a + b, 0);
     if (usedAreas.includes(key)) total -= 6;
+    // 다양하게: 지역에도 작은 가산점(번호마다 다름), 최근 일정에서 많이 본 지역은 조금 뒤로 (정해진 중심지만 반복되지 않게)
+    if (opts.seed) total += jitter(opts.seed ^ 0x5bd1e995, key) * 1.5;
+    const seen = seenSet(opts);
+    if (seen) total -= Math.min(4, pool.filter((p) => p.area === key && seen.has(p.id)).length * 0.8);
     if (area.region !== regionOf(input)) total -= 6;
     const far = distanceKm(BASE, area);
     total -= drives(input.move) ? far * 0.2 : far * 0.4;
@@ -525,7 +543,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if (r.tr.min > 50) v -= (r.tr.min - 50) * 0.12; // 한 번에 50분 넘는 이동은 더 피한다
       // 같은 지역 안에서 이어 가기: 지금 있는 지역(또는 이미 다녀온 지역)을 떠났다가 다시 오지 않게
       if (from.area && p.area === from.area) v += 1.2;
-      else if (items.some((x) => x.place.area === p.area) && items.length && items[items.length - 1].place.area !== p.area) v -= 2;
+      else if (items.some((x) => x.place.area === p.area) && items.length && items[items.length - 1].place.area !== p.area) v -= 3;
       // 빈 시간 채우기는 지금 있는 지역 안에서 (다른 지역에 들렀다 저녁 먹으러 되돌아오는 동선이 되지 않게)
       if (filler && from.area && p.area !== from.area) v -= 3;
       v -= r.wait * 0.05;
