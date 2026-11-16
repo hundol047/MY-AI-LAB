@@ -271,7 +271,7 @@ html, body { overflow-x: clip; }
 .leg.home { color: var(--brand); }
 
 /* 혜택 내비 */
-.benefits, .overnight, .souvenirs, .shops, .past { padding: 14px 16px; margin-top: 12px; }
+.benefits, .overnight, .souvenirs, .shops, .past, .pet-info, .checks { padding: 14px 16px; margin-top: 12px; }
 .benefits h3, .overnight h3, .souvenirs h3, .shops h3 { margin: 0 0 10px; font-size: 15px; display: flex; flex-wrap: wrap; gap: 8px; align-items: baseline; }
 .benefits .sum { font-size: 13px; color: var(--ok); font-weight: 700; }
 .benefit-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
