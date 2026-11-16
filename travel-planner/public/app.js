@@ -6,6 +6,7 @@ import { ORIGINS } from "./origins.js";
 import { sunTimes } from "./sun.js";
 import { alertsFor as weatherAlertsFor, kmaAlertsFor, OFFICIAL_CHECKS } from "./alerts.js";
 import { todayStatus, kstNow } from "./today.js";
+import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
@@ -1518,8 +1519,58 @@ function renderCosts() {
       <span>${t("어린이")}</span><button type="button" class="ghost small" data-ppl="kids:-1" aria-label="-">−</button><b>${people.kids}</b><button type="button" class="ghost small" data-ppl="kids:1" aria-label="+">+</button>
     </div>
     <ul class="cost-rows">${e.rows.map((r) => `<li><div><b>${label[r.key]}</b><span>${detail(r)}</span></div><strong>${range(r.low, r.high)}</strong></li>`).join("")}</ul>
-    <p class="cost-note">${t("집에서 강원까지 오가는 교통비, 주차·통행료, 쇼핑은 빠져 있어요. 식사·숙박은 앱이 정한 평균 범위라 실제와 다를 수 있어요.")}</p>`;
+    <p class="cost-note">${t("집에서 강원까지 오가는 교통비, 주차·통행료, 쇼핑은 빠져 있어요. 식사·숙박은 앱이 정한 평균 범위라 실제와 다를 수 있어요.")}</p>
+    <details class="split" id="splitBox"${splitOpen ? " open" : ""}><summary>${t("💸 여행 경비 나누기 (누가 누구에게 얼마)")}</summary><div class="split-body"></div></details>`;
+  renderSplit();
 }
+// 여행 경비 나누기: 일행 이름과 누가 낸 돈을 적으면 가장 적은 송금으로 정산 (이 기기에만 저장)
+let splitOpen = false;
+const splitKey = () => `split:${state.input.region}:${state.input.date}`;
+function loadSplit() {
+  const v = store.get(splitKey());
+  if (v?.names?.length) return v;
+  const n = Math.max(2, (peopleNow().adults || 1) + (peopleNow().kids || 0));
+  return { names: Array.from({ length: n }, (_, i) => (i ? t("일행{n}", { n: i }) : t("나"))), exps: [] };
+}
+function renderSplit() {
+  const body = document.querySelector("#splitBox .split-body"); if (!body) return;
+  const sp = loadSplit();
+  const r = settle(sp.names, sp.exps.map((x) => ({ payer: x.payer, amount: x.amount, for: x.for })));
+  const opt = (sel) => sp.names.map((n) => `<option${n === sel ? " selected" : ""}>${esc(n)}</option>`).join("");
+  body.innerHTML = `
+    <label class="split-names">${t("일행 이름 (쉼표로 구분)")}<input data-split="names" value="${esc(sp.names.join(", "))}"></label>
+    <ul class="split-list">${sp.exps.map((x) => `<li data-sid="${x.id}"><select data-split="payer">${opt(x.payer)}</select><input data-split="label" value="${esc(x.label || "")}" placeholder="${t("어디에")}"><input data-split="amount" inputmode="numeric" value="${x.amount ? Number(x.amount).toLocaleString() : ""}" placeholder="${t("금액")}"><button type="button" class="ghost small" data-split-del="${x.id}" aria-label="${t("삭제")}">✕</button></li>`).join("")}</ul>
+    <button type="button" class="ghost small" data-split-add>${t("+ 낸 돈 적기")}</button>
+    ${r.total ? `<div class="split-result"><p>${t("모두 {total} · 한 사람당 {each}", { total: won(r.total), each: won(r.perHead) })}</p>
+      ${r.moves.length ? `<ul>${r.moves.map((m) => `<li><b>${esc(m.from)}</b> → <b>${esc(m.to)}</b> ${won(m.amount)}</li>`).join("")}</ul><button type="button" class="ghost small" data-split-copy>${t("정산 내용 복사")}</button>` : `<p>${t("주고받을 돈이 없어요")}</p>`}</div>` : ""}`;
+}
+function saveSplit(sp) { store.set(splitKey(), sp); renderSplit(); }
+document.addEventListener("toggle", (e) => { if (e.target.id === "splitBox") splitOpen = e.target.open; }, true);
+document.addEventListener("click", async (e) => {
+  if (!e.target.closest("#splitBox")) return;
+  const sp = loadSplit();
+  if (e.target.closest("[data-split-add]")) { sp.exps.push({ id: randomKey(6), payer: sp.names[0], label: "", amount: null }); saveSplit(sp); document.querySelector("#splitBox li:last-child [data-split=amount]")?.focus(); }
+  const del = e.target.closest("[data-split-del]"); if (del) { sp.exps = sp.exps.filter((x) => x.id !== del.dataset.splitDel); saveSplit(sp); }
+  if (e.target.closest("[data-split-copy]")) {
+    const r = settle(sp.names, sp.exps);
+    const text = [t("[여행 경비 정산] 모두 {total} · 한 사람당 {each}", { total: won(r.total), each: won(r.perHead) }), ...sp.exps.filter((x) => x.amount).map((x) => `- ${x.payer}: ${x.label || ""} ${won(x.amount)}`), "", ...r.moves.map((m) => `${m.from} → ${m.to} ${won(m.amount)}`)].join("\n");
+    try { await navigator.clipboard.writeText(text); toast(t("복사했어요")); } catch { prompt(t("아래 내용을 복사하세요"), text); }
+  }
+});
+document.addEventListener("change", (e) => {
+  const f = e.target.dataset?.split; if (!f) return;
+  const sp = loadSplit();
+  if (f === "names") {
+    const names = [...new Set(e.target.value.split(/[,，、]/).map((x) => x.trim()).filter(Boolean))].slice(0, 12);
+    if (names.length < 2) { toast(t("이름을 두 명 이상 적어 주세요")); renderSplit(); return; }
+    for (const x of sp.exps) if (!names.includes(x.payer)) x.payer = names[0];
+    sp.names = names;
+  } else {
+    const x = sp.exps.find((y) => y.id === e.target.closest("[data-sid]")?.dataset.sid); if (!x) return;
+    x[f] = f === "amount" ? Number(String(e.target.value).replace(/[^\d]/g, "")) || null : e.target.value;
+  }
+  saveSplit(sp);
+});
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-ppl]"); if (!b || !state) return;
   const [k, d] = b.dataset.ppl.split(":");

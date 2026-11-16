@@ -33,6 +33,20 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "💸 여행 경비 나누기 (누가 누구에게 얼마)": "💸 Split trip costs (who pays whom)",
+  "일행{n}": "Friend {n}",
+  "나": "Me",
+  "일행 이름 (쉼표로 구분)": "Names (comma-separated)",
+  "어디에": "For what",
+  "금액": "Amount",
+  "+ 낸 돈 적기": "+ Add a payment",
+  "모두 {total} · 한 사람당 {each}": "Total {total} · {each} each",
+  "정산 내용 복사": "Copy settlement",
+  "주고받을 돈이 없어요": "Nobody owes anything",
+  "[여행 경비 정산] 모두 {total} · 한 사람당 {each}": "[Trip cost split] Total {total} · {each} each",
+  "복사했어요": "Copied",
+  "아래 내용을 복사하세요": "Copy the text below",
+  "이름을 두 명 이상 적어 주세요": "Enter at least two names",
   "📄 여행 뒤 정산 서류 자동 작성 (영수증·사진만 올리기)": "📄 Auto-fill the refund claim after your trip (just upload receipts and photos)",
   "🔀 다른 코스 3개 더 보기": "🔀 Show 3 different plans",
   "새 조합으로 다시 짰어요": "Made a new combination",

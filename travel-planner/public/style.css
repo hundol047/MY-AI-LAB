@@ -759,3 +759,13 @@ body:not(.has-server) .place .acts .needs-server { display: none; }
 
 /* 다른 코스 더 보기 */
 .options .reroll { display: block; width: 100%; margin-top: 10px; }
+/* 여행 경비 나누기 */
+.split { margin-top: 12px; border-top: 1px solid var(--line); padding-top: 10px; }
+.split summary { cursor: pointer; font-weight: 700; }
+.split-names input, .split-list input, .split-list select { padding: 8px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: inherit; font: inherit; min-width: 0; }
+.split-names { display: block; margin: 10px 0; font-size: 13px; }
+.split-names input { display: block; width: 100%; box-sizing: border-box; margin-top: 4px; }
+.split-list { list-style: none; padding: 0; margin: 0 0 8px; }
+.split-list li { display: grid; grid-template-columns: 1fr 1.3fr 1fr auto; gap: 6px; margin-bottom: 6px; }
+.split-result { background: var(--bg); border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: 14px; }
+.split-result ul { padding-left: 18px; margin: 6px 0; }

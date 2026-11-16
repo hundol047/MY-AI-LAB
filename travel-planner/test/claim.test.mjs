@@ -59,3 +59,16 @@ assert.equal(nearestPlace({ lat: wol.lat + 0.002, lng: wol.lng }, pcPlaces).plac
 assert.equal(nearestPlace({ lat: 37.75, lng: 128.9 }, pcPlaces), null, "강릉 시내는 평창 대상 장소가 아님");
 assert.equal(fileNameFor("영수증", 1, { date: "2026-11-21", merchant: "봉평 메밀/막국수", amount: 27000 }), "01_영수증_2026-11-21_봉평메밀막국수_27000원.jpg");
 console.log("ok - 반값여행 정산 도우미 (영수증 읽기·인정 여부·환급 계산·사진 위치·파일 이름)");
+
+// 여행 경비 나누기: 가장 적은 송금으로 끝나게
+import { settle } from "../public/split.js";
+{
+  const r = settle(["가", "나", "다"], [{ payer: "가", amount: 90000 }, { payer: "나", amount: 30000 }, { payer: "다", amount: 0 }]);
+  assert.equal(r.total, 120000); assert.equal(r.perHead, 40000);
+  assert.deepEqual(r.moves, [{ from: "다", to: "가", amount: 40000 }, { from: "나", to: "가", amount: 10000 }]);
+  const r2 = settle(["가", "나"], [{ payer: "가", amount: 10000, for: ["나"] }]);
+  assert.deepEqual(r2.moves, [{ from: "나", to: "가", amount: 10000 }], "나만 먹은 것");
+  const r3 = settle(["가", "나", "다"], [{ payer: "가", amount: 10000 }]);
+  assert.equal(r3.moves.reduce((a, m) => a + m.amount, 0), 6680, "3,333.3원씩 → 10원 단위로 올림");
+  console.log("ok - 여행 경비 나누기 (최소 송금·일부만 나누기·10원 단위)");
+}
