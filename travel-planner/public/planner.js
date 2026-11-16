@@ -526,9 +526,11 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   // 확정된 장소 먼저 배치 (시간 재계산)
   for (const id of keep) {
     const p = byId(id);
-    if (!p) break;
+    // 추천 코스(opts.softKeep): 고른 날짜에 쉬거나 시간이 안 맞는 곳은 건너뛰고 다음 곳으로 (빈 시간은 아래에서 채운다)
+    if (!p) { if (opts.softKeep) continue; break; }
+    if (used.has(p.id) && opts.softKeep) continue;
     const r = tryPlace(p, from, t, input, opts, end, dateStr);
-    if (!r) break;
+    if (!r) { if (opts.softKeep) continue; break; }
     const kind = p.cat !== "food" ? "visit" : !hasLunch && r.start < toMin("15:00") ? "lunch" : "dinner";
     commit(p, r, kind);
   }
@@ -675,7 +677,7 @@ function planDays(input, opts, lodging, lodgingAt = null) {
     const keep = (opts.keep || [])[d] || [];
     // 첫날은 사용자가 정한 출발지(opts.start: {name, lat, lng})에서, 없으면 권역 기준점(역·터미널)에서 출발
     const start = d > 0 ? homeOf(night(d - 1)) : (validStart(opts.start) ? opts.start : null);
-    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0, start);
+    const day = planDay(input, opts, d, used, usedAreas, keep, new Set(opts.exclude || []), keep.length > 0 && !opts.softKeep, start);
     usedAreas.push(day.area);
     const l = night(d);
     if (l && d < input.days - 1) { markReturn(day, l); if (lodgingAt) day.lodging = l; }

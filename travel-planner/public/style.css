@@ -790,3 +790,19 @@ html.big #setup, html.big #result > :not(.layout), html.big #timeline { zoom: 1.
 .big-toggle { font-weight: 800; }
 .big-toggle[aria-pressed="true"] { background: var(--brand); color: #fff; }
 .hero-sub { margin: 8px 0 0; font-size: 15px; font-weight: 600; opacity: .95; }
+/* 추천 코스 */
+.courses { padding: 14px 16px; margin-top: 12px; }
+.courses h3 { margin: 0 0 4px; font-size: 16px; }
+.courses .sub, #optCourses .c-now { margin: 0 0 8px; font-size: 12.5px; color: var(--sub); line-height: 1.5; }
+.chips.cf { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; margin-bottom: 6px; scrollbar-width: none; }
+.chips.cf button { flex: none; }
+.c-count { margin: 6px 0; font-size: 13px; font-weight: 700; }
+.course-list { display: grid; gap: 8px; margin-bottom: 8px; }
+.course { position: relative; display: grid; gap: 3px; text-align: left; width: 100%; padding: 12px 34px 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: inherit; font: inherit; cursor: pointer; }
+.course b { font-size: 15px; }
+.course .c-top { font-size: 13px; color: var(--sub); }
+.course .c-badges { display: flex; flex-wrap: wrap; gap: 4px; }
+.course .c-badges i { font-style: normal; font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: color-mix(in srgb, var(--brand) 10%, var(--surface)); color: var(--brand); font-weight: 600; }
+.course .c-stats { font-size: 12px; color: var(--sub); }
+.course .hp-go { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 22px; color: var(--sub); }
+#optCourses h4 { margin: 12px 0 6px; font-size: 14px; }

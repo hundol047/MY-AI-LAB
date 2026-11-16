@@ -1,6 +1,6 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
 import { planTrip, swapItem, replanFromNow, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
-import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
+import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
 import { sunTimes } from "./sun.js";
@@ -138,10 +138,13 @@ $("#form").addEventListener("submit", async (e) => {
   const seen = seenPlaces(input.region); if (seen.length) state.opts.seen = seen;
   state.baseOpts = { ...state.opts }; // 일정 3개 비교의 기준 조건
   state.choice = "best";
+  // 추천 코스로 시작: 코스의 장소 순서를 고른 날짜에 맞춰 다시 확인 (쉬는 곳은 건너뛰고 빈 시간은 채움)
+  const course = pendingCourse; pendingCourse = null;
+  if (course) { Object.assign(state.opts, { keep: course.items, softKeep: true, course: course.id, ...(course.lodging ? { lodgingId: course.lodging } : {}) }); state.choice = "course"; }
   restoredFromLink = false;
   dayIdx = 0;
   await thinkThrough(input, state.opts, !!v);
-  rebuild();
+  rebuild(!!course);
   rememberSeen();
   show("result");
   $("#thinking").hidden = true;
@@ -230,7 +233,8 @@ function renderOptions() {
       <span class="opt-hl">${o.highlights.map((n) => esc(placeName(PLACES.find((p) => p.name === n) || { name: n }))).join(" · ")}</span>
       ${halfPriceIn(o.trip) ? `<span class="opt-half">${t("💰 반값여행 대상 지역 포함")}</span>` : ""}
       <span class="opt-pick">${state.choice === o.key ? t("지금 보는 일정") : t("이 일정으로")}</span></button>`).join("")}</div>
-    <button type="button" class="ghost small reroll" data-reroll>${t("🔀 다른 코스 3개 더 보기")}</button>`;
+    <button type="button" class="ghost small reroll" data-reroll>${t("🔀 다른 코스 3개 더 보기")}</button><div id="optCourses"></div>`;
+  renderOptCourses();
 }
 // 다른 코스 더 보기: 새 번호 + 지금 일정 3개에 나온 장소를 뒤로 미뤄 다시 짠다 (꼭 넣을 곳·조건은 그대로)
 document.addEventListener("click", (e) => {
@@ -281,7 +285,7 @@ const savedName = (x) => [dateLabel(x.meta.date), x.meta.regions.map((r) => regi
 /* ---------- 반값여행 코스 ----------
    평창·영월·횡성(반값여행 대상 시군) 안의 장소와 숙소만으로 짜는 코스. 누르면 지금 고른 날짜·동행·이동으로 바로 일정을 만든다.
    시군 밖에서 쓴 돈은 환급되지 않아서, 코스 일정은 그 시군 밖으로 나가지 않는다 */
-let pendingPackage = null;
+let pendingPackage = null, pendingCourse = null;
 function renderHalfPkgs() {
   const box = $("#halfPkgs"); if (!box) return;
   const b = BENEFITS.find((x) => x.packages);
@@ -304,6 +308,68 @@ document.addEventListener("click", (e) => {
   fillForm({ ...cur, route: [] });
   pendingPackage = pk;
   track("half_package", pk.id);
+  $("#form").requestSubmit();
+});
+
+/* ---------- 추천 코스 (미리 짜 둔 500개) ----------
+   지역·기간·동행·걷기 정도·테마로 거르면 맞는 코스가 나온다. 고르면 여행 날짜에 맞춰 운영시간·휴무를 다시 확인한다 */
+const THEME_KO = { sea: "바다", culture: "역사·문화", nature: "자연·산책", food: "맛집", cafe: "카페" };
+const SEASON_KO = { spring: "봄", summer: "여름", autumn: "가을", winter: "겨울" };
+const ACCESS_KO = { walker: "🦯 걷기 편한", wheelchair: "♿ 휠체어로" };
+let coursesData = null, courseFilter = { region: "", days: "", who: "", access: "", theme: "" }, courseShown = 6;
+async function loadCourses() {
+  if (!coursesData) coursesData = await fetchT("courses.json", {}, 8000).then((r) => (r.ok ? r.json() : null)).then((j) => j?.courses || []).catch(() => []);
+  return coursesData;
+}
+function courseTitle(c) {
+  const areas = [...new Set(c.areas)].slice(0, 2).map((a) => areaName(AREAS[a]?.name || a)).join("·");
+  return `${areas} ${t(THEME_KO[c.theme])} ${t(DAYS_KO[c.days])}`;
+}
+function courseCard(c) {
+  const top = c.top.map((id) => PLACES.find((p) => p.id === id)).filter(Boolean).map((p) => esc(placeName(p))).join(" · ");
+  const badges = [t(WHO_KO[c.who]), c.access ? t(ACCESS_KO[c.access]) : "", c.move === "transit" ? t("대중교통") : "", t("{s} 추천", { s: t(SEASON_KO[c.season]) })].filter(Boolean);
+  return `<button type="button" class="course" data-course="${c.id}"><b>${esc(courseTitle(c))}</b><span class="c-top">${top}</span>
+    <span class="c-badges">${badges.map((x) => `<i>${esc(x)}</i>`).join("")}</span>
+    <span class="c-stats">${t("{n}곳 · 이동 {m} · 걷기 약 {km}km", { n: c.stats.places, m: minutesLabel(c.stats.moveMin), km: c.stats.walkKm })}</span><span class="hp-go" aria-hidden="true">›</span></button>`;
+}
+const courseMatch = (c, f) => (!f.region || c.region === f.region) && (!f.days || c.days === Number(f.days)) && (!f.who || c.who === f.who) && (f.access === "" ? true : f.access === "none" ? !c.access : c.access === f.access) && (!f.theme || c.theme === f.theme);
+// 결과 화면: 같은 조건(지역·기간·동행·걷기)의 추천 코스 3개
+async function renderOptCourses() {
+  const box = $("#optCourses"); if (!box || !state?.input) return;
+  const list = await loadCourses(), inp = state.input, acc = (state.opts.access || []).find((a) => a === "walker" || a === "wheelchair") || "none";
+  const hit = list.filter((c) => c.id !== state.opts.course && courseMatch(c, { region: inp.region, days: String(inp.days), who: inp.who, access: acc, theme: "" }));
+  const cur = state.opts.course && list.find((c) => c.id === state.opts.course);
+  box.innerHTML = (cur ? `<p class="c-now">${t("추천 코스 \"{name}\"로 짰어요 · 여행 날짜의 운영시간에 맞춰 다시 확인했어요", { name: esc(courseTitle(cur)) })}</p>` : "")
+    + (hit.length ? `<h4>${t("이 조건의 추천 코스 {n}개", { n: hit.length })}</h4><div class="course-list">${hit.slice(0, 3).map(courseCard).join("")}</div>` : "");
+}
+async function renderCourses() {
+  const box = $("#courses"); if (!box) return;
+  const list = await loadCourses();
+  if (!list.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const f = courseFilter, hit = list.filter((c) => courseMatch(c, f));
+  const chip = (k, v, label) => `<button type="button" class="${f[k] === v ? "on" : ""}" data-cf="${k}:${v}">${esc(label)}</button>`;
+  const row = (k, opts) => `<div class="chips cf">${chip(k, "", t("전체"))}${opts.map(([v, l]) => chip(k, v, l)).join("")}</div>`;
+  box.innerHTML = `<h3>${t("추천 코스 {n}개", { n: list.length })}</h3><p class="sub">${t("조건을 고르면 맞는 코스만 보여요. 고르면 여행 날짜에 맞춰 운영시간·휴무를 다시 확인해요.")}</p>
+    ${row("access", [["walker", t("🦯 걷기 힘들어요")], ["wheelchair", t("♿ 휠체어")], ["none", t("상관없어요")]])}
+    ${row("region", Object.keys(REGIONS).map((r) => [r, regionLabel(r, REGIONS[r].label)]))}
+    ${row("who", Object.entries(WHO_KO).map(([k, v]) => [k, t(v)]))}
+    ${row("days", [["1", t("당일")], ["2", t("1박 2일")], ["3", t("2박 3일")]])}
+    ${row("theme", Object.entries(THEME_KO).map(([k, v]) => [k, t(v)]))}
+    <p class="c-count">${t("맞는 코스 {n}개", { n: hit.length })}</p>
+    <div class="course-list">${hit.slice(0, courseShown).map(courseCard).join("") || `<p class="sub">${t("맞는 코스가 없어요. 조건을 하나 풀어 보세요.")}</p>`}</div>
+    ${hit.length > courseShown ? `<button type="button" class="ghost small" data-cmore>${t("코스 더 보기 ({n}개 남음)", { n: hit.length - courseShown })}</button>` : ""}`;
+}
+document.addEventListener("click", async (e) => {
+  const cf = e.target.closest("[data-cf]");
+  if (cf) { const [k, v] = cf.dataset.cf.split(":"); courseFilter[k] = v; courseShown = 6; renderCourses(); return; }
+  if (e.target.closest("[data-cmore]")) { courseShown += 6; renderCourses(); return; }
+  const b = e.target.closest("[data-course]"); if (!b) return;
+  const c = (await loadCourses()).find((x) => x.id === b.dataset.course); if (!c) return;
+  fillForm({ region: c.region, date: $("#date").value || tomorrow(), days: c.days, who: c.who, move: c.move, likes: [c.theme], route: [] });
+  document.querySelectorAll('.chips[data-name="access"] button').forEach((x) => x.classList.toggle("on", x.dataset.v === c.access));
+  pendingCourse = c;
+  track("course", c.id);
   $("#form").requestSubmit();
 });
 
@@ -2370,7 +2436,7 @@ async function switchLang(l) {
   renderRouteRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
-  renderHalfPkgs();
+  renderHalfPkgs(); renderCourses();
   $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
   await renderGuideHistory();
 }
@@ -2382,7 +2448,7 @@ document.querySelector(".lang").addEventListener("click", (e) => {
 if (getLang() === "ko" || getLang() === "en") applyStatic();
 await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
 if (getLang() === "ja" || getLang() === "zh") applyStatic();
-if (getLang() !== "ko") renderHalfPkgs(); // 외국어 이름·문구를 받은 뒤 다시
+if (getLang() !== "ko") { renderHalfPkgs(); renderCourses(); } // 외국어 이름·문구를 받은 뒤 다시
 
 function openSnapshot(saved, extra = {}) {
   restoredFromLink = true;
@@ -2413,7 +2479,7 @@ function openSnapshot(saved, extra = {}) {
 
 renderPast();
 renderSaved();
-renderHalfPkgs();
+renderHalfPkgs(); renderCourses();
 renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다
