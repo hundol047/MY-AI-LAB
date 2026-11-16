@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "📄 여행 뒤 정산 서류 자동 작성 (영수증·사진만 올리기)": "📄 Auto-fill the refund claim after your trip (just upload receipts and photos)",
   "🔀 다른 코스 3개 더 보기": "🔀 Show 3 different plans",
   "새 조합으로 다시 짰어요": "Made a new combination",
   "전화": "Call",

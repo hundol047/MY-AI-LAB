@@ -1378,7 +1378,7 @@ function renderBenefits() {
         <p>${benefitText(b, "how")}</p>
         ${b.steps ? `<p class="b-steps">${benefitText(b, "steps").map((x, i) => `${i + 1}. ${x}`).join("  ")}</p>` : ""}
         ${b.note ? `<p class="b-note">${benefitText(b, "note")}</p>` : ""}
-        ${b.caps ? `<p class="b-est">${halfPriceEstimate(b)}</p>` : ""}
+        ${b.caps ? `<p class="b-est">${halfPriceEstimate(b)}</p><a class="ghost small claim-link" href="claim.html">${t("📄 여행 뒤 정산 서류 자동 작성 (영수증·사진만 올리기)")}</a>` : ""}
         ${b.link ? `<a class="ghost small" href="${esc(b.link)}" target="_blank" rel="noopener">${t("지금 진행 중인 회차·신청 날짜 보기")}</a>` : ""}
         ${need.length ? `<div class="proofs"><span>${t("증빙 {a}/{b}", { a: have, b: need.length })}</span>${need.map((p) => {
           const n = (proofs[b.id + ":" + p] || []).length;

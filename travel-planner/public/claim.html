@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>반값여행 정산 서류</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="services.css">
+<link rel="stylesheet" href="claim.css">
+</head>
+<body>
+<main class="service claim">
+  <a href="index.html" class="back">← 일정으로</a>
+  <h1>반값여행 정산 서류 자동 작성</h1>
+  <p class="sub">영수증과 여행 사진만 올리면 경비 내역서, 방문 인증 목록, 숙박이용확인서 양식, 제출용 파일 묶음을 만들어 드려요.
+    <b>모든 처리는 이 휴대폰 안에서만 해요</b> (서버로 보내지 않음). 영수증 글자 읽기는 틀릴 수 있으니 표에서 꼭 확인·수정하세요.</p>
+
+  <section class="card" id="tripBox">
+    <h2>1. 여행 정보</h2>
+    <div class="grid2">
+      <label>여행한 시군<select id="town"></select></label>
+      <label>인원<input id="people" type="number" min="1" max="20" value="2"></label>
+      <label>여행 시작일<input id="from" type="date"></label>
+      <label>여행 마지막 날<input id="to" type="date"></label>
+      <label>신청자 이름 (서류에만 들어가요, 선택)<input id="name" maxlength="20" autocomplete="name"></label>
+      <label>연락처 (선택)<input id="phone" maxlength="20" inputmode="tel" autocomplete="tel"></label>
+    </div>
+    <details class="rules"><summary>시군 공고 기준 (공고와 다르면 고치세요)</summary>
+      <p class="sub">기본값은 반값여행 공통 안내 기준이에요. 회차·시군마다 인정 결제수단, 최소 소비액, 환급 단위, 정산 기한이 다를 수 있어요.</p>
+      <div class="pay-rules">
+        <label class="chk"><input type="checkbox" data-pay="card" checked> 카드</label>
+        <label class="chk"><input type="checkbox" data-pay="cashReceipt" checked> 현금영수증</label>
+        <label class="chk"><input type="checkbox" data-pay="local" checked> 모바일 지역사랑상품권</label>
+      </div>
+      <div class="grid2">
+        <label>최소 소비액 (원, 없으면 0)<input id="minSpend" type="number" min="0" step="10000" value="0"></label>
+        <label>환급 단위 (원)<select id="unit"><option value="1000">1,000원</option><option value="5000">5,000원</option><option value="10000">10,000원</option></select></label>
+        <label>정산 기한 (여행 끝난 뒤 며칠 안)<input id="deadlineDays" type="number" min="1" max="60" value="10"></label>
+      </div>
+    </details>
+  </section>
+
+  <section class="card">
+    <h2>2. 영수증 올리기</h2>
+    <p class="sub">카드 영수증·현금영수증·지역사랑상품권 결제 화면 캡처를 올리세요. 날짜·가게·금액·결제수단을 읽어 표를 채워요. (처음 한 번은 글자 읽기 도구 약 6MB를 받아요)</p>
+    <label class="drop">📷 영수증 사진 고르기 (여러 장)<input id="receiptFiles" type="file" accept="image/*" multiple hidden></label>
+    <p id="ocrStatus" class="sub" role="status"></p>
+    <div class="table-wrap"><table id="receiptTable"><thead><tr><th></th><th>날짜</th><th>사용처</th><th>분류</th><th>결제</th><th>금액(원)</th><th>확인</th><th></th></tr></thead><tbody></tbody></table></div>
+    <button type="button" class="ghost small" id="addRow">+ 직접 한 줄 넣기</button>
+  </section>
+
+  <section class="card">
+    <h2>3. 방문 인증 사진</h2>
+    <p class="sub">관광지에서 찍은 사진을 올리세요. 사진에 담긴 촬영 날짜·위치로 어느 장소인지 맞춰요. 위치가 없는 사진은 장소를 골라 주세요.</p>
+    <label class="drop">🏞 여행 사진 고르기 (여러 장)<input id="photoFiles" type="file" accept="image/*" multiple hidden></label>
+    <div id="photoList" class="photo-list"></div>
+  </section>
+
+  <section class="card">
+    <h2>4. 숙박이용확인서</h2>
+    <p class="sub">숙박했다면 숙소에서 확인(서명·도장)을 받아 사진으로 올리세요. 아래 "양식 만들기"로 이름·날짜가 채워진 양식을 인쇄하거나 휴대폰 화면으로 보여 줄 수 있어요.</p>
+    <div class="grid2">
+      <label>숙소 이름<input id="stayName" maxlength="40"></label>
+      <label>숙소 주소<input id="stayAddr" maxlength="80"></label>
+    </div>
+    <button type="button" class="ghost small" id="stayForm">📝 숙박이용확인서 양식 만들기</button>
+    <label class="drop small">✅ 서명받은 확인서 사진 올리기<input id="stayFiles" type="file" accept="image/*" hidden></label>
+    <div id="stayList" class="photo-list"></div>
+  </section>
+
+  <section class="card" id="resultBox">
+    <h2>5. 결과</h2>
+    <div id="summary"></div>
+    <ul id="checklist" class="checklist"></ul>
+    <div class="acts">
+      <button type="button" id="makeDoc">📄 정산 신청서(경비 내역서) 보기·인쇄</button>
+      <button type="button" id="makeZip" class="ghost">🗂 제출용 파일 묶음 받기 (ZIP)</button>
+      <button type="button" id="copyText" class="ghost">📋 신청 사이트에 붙여 넣을 내용 복사</button>
+    </div>
+    <p class="sub">제출은 시군 반값여행 신청 사이트에서 본인 인증 후 직접 해야 해요 (본인 인증 때문에 앱이 대신 낼 수 없어요). 파일 묶음의 이름 순서대로 올리면 돼요.</p>
+    <a id="applyLink" class="ghost small" target="_blank" rel="noopener" href="https://korean.visitkorea.or.kr/dgtourcard/tour50.do">반값여행 신청·정산 사이트 열기</a>
+    <button type="button" class="ghost small danger" id="clearAll">이 정산 자료 모두 지우기</button>
+  </section>
+  <p class="sub foot">반값여행(지역사랑 휴가지원) 기준은 회차·시군 공고마다 달라요. 이 도구는 서류 작성을 돕는 것으로, 승인·환급 여부는 시군 심사로 정해져요.</p>
+</main>
+<div id="docOverlay" hidden></div>
+<script type="module" src="claim.js"></script>
+</body>
+</html>
