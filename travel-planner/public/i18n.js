@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "아이와 가기 좋아요": "Good with kids",
+  "부모님과 가기 좋아요": "Good with parents",
   "출발 알림": "Departure alerts",
   "출발 알림 {n}개를 맞췄어요. 여행 날 출발 시각에 알려 드릴게요": "Set {n} departure alerts. We'll remind you when it's time to leave",
   "이미 지난 일정이라 맞출 알림이 없어요": "This plan is in the past, so there's nothing to remind",

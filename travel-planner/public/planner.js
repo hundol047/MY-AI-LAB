@@ -538,6 +538,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
       if (filler && (r.tr.min > 30 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고(30분 안) 저녁 전에 끝나는 곳만
+      if ((nightOnly || (hasDinner && kind === "visit")) && r.tr.min > 30) continue; // 저녁 먹은 뒤는 가까운 곳만 (밤에 먼 길을 갔다 숙소로 되돌아오지 않게)
       let v = baseScore(p, input, opts, rain, dateStr);
       v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
       if (r.tr.min > 50) v -= (r.tr.min - 50) * 0.12; // 한 번에 50분 넘는 이동은 더 피한다

@@ -888,8 +888,10 @@ fetchT("menu.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => 
 function forLine(p) {
   if (p.cat === "festival") return "";
   const who = [];
-  if ((p.tags || []).includes("kids")) who.push(t("아이와"));
-  if ((p.tags || []).includes("senior")) who.push(t("부모님과"));
+  // 함께 가는 사람에 맞는 것만 (혼자·연인 여행 카드마다 "아이와·부모님과"가 붙지 않게)
+  const w = state?.input?.who;
+  if ((p.tags || []).includes("kids") && w === "family") who.push(t("아이와 가기 좋아요"));
+  if ((p.tags || []).includes("senior") && w === "parents") who.push(t("부모님과 가기 좋아요"));
   if ((p.tags || []).includes("night")) who.push(t("저녁에"));
   if (p.walk === 1 && !["food", "cafe"].includes(p.cat)) who.push(t("걷기 적음"));
   if (p.walk === 3) who.push(t("많이 걸어요"));
@@ -898,7 +900,7 @@ function forLine(p) {
   // 식당·카페: 대표 메뉴는 바로, 그 밖의 메뉴·포장·예약은 펼쳐서 (관광공사 음식점 소개정보, 한국어)
   const m = ko ? menuData?.[p.id] : null;
   const more = m ? [m.menu, m.pack && "포장 가능", m.reserve && `예약 ${m.reserve}`].filter(Boolean).join(" · ") : "";
-  const head = m?.first ? `<span>대표 메뉴 · ${esc(m.first)}</span>` : who.length ? `<span>${t("이런 분께")} · ${who.slice(0, 2).join(" · ")}</span>` : "";
+  const head = m?.first ? `<span>대표 메뉴 · ${esc(m.first)}</span>` : who.length ? `<span>${who.slice(0, 2).join(" · ")}</span>` : "";
   const body = [intro && esc(intro), more && `${m.first ? "그 밖에 " : ""}${esc(more)}`, m?.tel && !p.tel && `<a href="tel:${esc(m.tel)}">${t("전화")} ${esc(m.tel)}</a>`].filter(Boolean).join("<br>");
   if (!head && !body) return "";
   return `<div class="for">${head}${body ? `<button type="button" class="linkish" data-intro="${p.id}">${t(m && !intro ? "메뉴" : "소개")}</button><p class="intro" hidden>${body} <small>${t("관광공사")}</small></p>` : ""}</div>`;

@@ -87,7 +87,8 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = [], long
     seen.add(p.id);
     const f = fees[p.id];
     if (f) feeLow += f.adult * people.adults + f.child * people.kids;
-    else unknownFees.push(p);
+    // 해변·늘 열린 거리·산책로(24시간 개방)는 입장료가 없는 곳이라 "요금 정보 없음"으로 알리지 않는다
+    else if (!(p.cat === "sea" || (p.hours?.[0] === "00:00" && p.hours?.[1] >= "23:59"))) unknownFees.push(p);
   }
   rows.push({ key: "fees", low: feeLow, high: feeLow, detail: { known: seen.size - unknownFees.length } });
 
