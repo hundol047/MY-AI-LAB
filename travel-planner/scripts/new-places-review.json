@@ -4972,5 +4972,1130 @@
    "kids"
   ],
   "desc": "대관령 횡계의 3층 카페 · 더치커피와 빵"
+ },
+ "gn-sodol": {
+  "name": "소돌막국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "north",
+  "lat": 37.9029,
+  "lng": 128.8221,
+  "kto": "2870225",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "주문진 소돌항 앞 물막국수·수육",
+  "breaks": [
+   [
+    "15:30",
+    "16:30"
+   ]
+  ],
+  "lastEntry": "19:00"
+ },
+ "gn-samgyori": {
+  "name": "삼교리동치미막국수 본점",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "inland",
+  "lat": 37.7216,
+  "lng": 128.8824,
+  "kto": "2870175",
+  "hours": [
+   "10:20",
+   "20:30"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "동치미 국물에 말아 먹는 강릉 막국수",
+  "breaks": [
+   [
+    "15:00",
+    "17:30"
+   ]
+  ],
+  "lastEntry": "19:40"
+ },
+ "gn-songjeong-jjamppong": {
+  "name": "송정용짬뽕",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "anmok",
+  "lat": 37.7812,
+  "lng": 128.9312,
+  "kto": "2870295",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [],
+  "desc": "송정해변 근처 문어짬뽕",
+  "breaks": [
+   [
+    "15:00",
+    "16:00"
+   ]
+  ],
+  "lastEntry": "18:30"
+ },
+ "gn-garam-ongsimi": {
+  "name": "가람집옹심이",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "anmok",
+  "lat": 37.7611,
+  "lng": 128.9393,
+  "kto": "2868839",
+  "hours": [
+   "10:10",
+   "17:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "강릉 감자옹심이·감자전",
+  "lastEntry": "16:30"
+ },
+ "gn-dongil-jangkal": {
+  "name": "동일장칼국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "anmok",
+  "lat": 37.7659,
+  "lng": 128.9236,
+  "kto": "2868991",
+  "hours": [
+   "10:00",
+   "19:50"
+  ],
+  "closed": [
+   4
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [],
+  "desc": "강릉식 고추장 장칼국수",
+  "lastEntry": "19:00"
+ },
+ "gn-pungnyeon-galbi": {
+  "name": "강릉풍년갈비",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "gyeongpo",
+  "lat": 37.7851,
+  "lng": 128.9193,
+  "kto": "2845698",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "경포 근처 수제 돼지갈비·한우갈비"
+ },
+ "gn-jeongdongjin-bapjip": {
+  "name": "정동진밥집",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "south",
+  "lat": 37.6861,
+  "lng": 129.0359,
+  "kto": "2872467",
+  "hours": [
+   "09:30",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "정동진역 근처 생선구이 정식",
+  "breaks": [
+   [
+    "15:00",
+    "16:00"
+   ]
+  ],
+  "lastEntry": "19:30"
+ },
+ "gn-bonga-donghae-makguksu": {
+  "name": "본가동해막국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "north",
+  "lat": 37.8593,
+  "lng": 128.8317,
+  "kto": "2870140",
+  "hours": [
+   "10:30",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "주문진 비빔막국수·메밀전",
+  "breaks": [
+   [
+    "15:40",
+    "17:00"
+   ]
+  ],
+  "lastEntry": "19:00"
+ },
+ "gn-myeongseongok": {
+  "name": "명성옥",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "downtown",
+  "lat": 37.7406,
+  "lng": 128.9008,
+  "kto": "2868647",
+  "hours": [
+   "11:00",
+   "15:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "강릉 시내 우족탕·설렁탕 (점심 장사)"
+ },
+ "sc-cheongchosu-mulhoe": {
+  "name": "청초수물회",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.1921,
+  "lng": 128.5905,
+  "kto": "1936779",
+  "hours": [
+   "10:00",
+   "20:50"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 3,
+  "tags": [
+   "senior"
+  ],
+  "desc": "청초호 앞 해전물회·섭국",
+  "lastEntry": "20:00"
+ },
+ "sc-hamheung-naengmyeonok": {
+  "name": "함흥냉면옥",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.202,
+  "lng": 128.5899,
+  "kto": "2608621",
+  "hours": [
+   "10:30",
+   "20:30"
+  ],
+  "closed": [
+   4
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "속초 함흥냉면·수육",
+  "lastEntry": "20:00"
+ },
+ "sc-hwang-daegutang": {
+  "name": "황대구탕",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.1938,
+  "lng": 128.5394,
+  "kto": "2905643",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "속초 생대구탕·물곰탕",
+  "lastEntry": "19:20"
+ },
+ "sc-yeongsik-sundae": {
+  "name": "영식이네순대국밥",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2144,
+  "lng": 128.5959,
+  "kto": "2892088",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "속초 순대국밥"
+ },
+ "sr-wangga-surachung": {
+  "name": "왕가수라청",
+  "cat": "food",
+  "region": "seorak",
+  "area": "seoraksan",
+  "lat": 38.202,
+  "lng": 128.535,
+  "kto": "2892120",
+  "hours": [
+   "07:30",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "설악산 입구 황태더덕구이 정식"
+ },
+ "sr-beombawi-makguksu": {
+  "name": "범바위막국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "seoraksan",
+  "lat": 38.1869,
+  "lng": 128.5417,
+  "kto": "2892017",
+  "hours": [
+   "10:30",
+   "18:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "설악산 아래 메밀막국수·수육",
+  "lastEntry": "17:40"
+ },
+ "sc-jeongdeun": {
+  "name": "정든식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2119,
+  "lng": 128.5879,
+  "kto": "2892151",
+  "hours": [
+   "10:00",
+   "18:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "속초 장칼국수·장칼제비",
+  "breaks": [
+   [
+    "14:30",
+    "15:30"
+   ]
+  ],
+  "lastEntry": "17:40"
+ },
+ "sr-miga": {
+  "name": "미가",
+  "cat": "food",
+  "region": "seorak",
+  "area": "seoraksan",
+  "lat": 38.2017,
+  "lng": 128.535,
+  "kto": "2891983",
+  "hours": [
+   "08:00",
+   "16:00"
+  ],
+  "closed": [
+   4
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "설악산 입구 황태구이·더덕구이 정식",
+  "lastEntry": "15:30"
+ },
+ "sc-newyork-bakery": {
+  "name": "뉴욕제과 속초본점",
+  "cat": "cafe",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.201,
+  "lng": 128.5794,
+  "kto": "2609150",
+  "hours": [
+   "08:00",
+   "21:30"
+  ],
+  "closed": [],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "속초 오래된 빵집 · 오징어쌀빵"
+ },
+ "gs-seongjin": {
+  "name": "성진회관",
+  "cat": "food",
+  "region": "seorak",
+  "area": "goseong",
+  "lat": 38.444,
+  "lng": 128.4533,
+  "kto": "624962",
+  "hours": [
+   "07:30",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고성 거진항 생태찌개",
+  "breaks": [
+   [
+    "14:20",
+    "17:20"
+   ]
+  ],
+  "lastEntry": "19:00"
+ },
+ "gs-gyoam-makguksu": {
+  "name": "교암막국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2916,
+  "lng": 128.5444,
+  "kto": "2874249",
+  "hours": [
+   "10:00",
+   "16:30"
+  ],
+  "closed": [
+   4
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고성 교암 막국수·명태회무침",
+  "lastEntry": "16:00"
+ },
+ "gs-geumhwajeong": {
+  "name": "금화정막국수",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2858,
+  "lng": 128.544,
+  "kto": "2874262",
+  "hours": [
+   "10:00",
+   "17:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고성 동치미막국수·메밀전병",
+  "lastEntry": "16:30"
+ },
+ "gs-manseong-hoe": {
+  "name": "만성횟집",
+  "cat": "food",
+  "region": "seorak",
+  "area": "goseong",
+  "lat": 38.3274,
+  "lng": 128.5277,
+  "kto": "2874315",
+  "hours": [
+   "11:00",
+   "21:30"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "고성 세꼬시 물회",
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ]
+ },
+ "gs-haeoreum-saengseon": {
+  "name": "해오름거진항생선찜",
+  "cat": "food",
+  "region": "seorak",
+  "area": "goseong",
+  "lat": 38.4224,
+  "lng": 128.4625,
+  "kto": "2514823",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "거진항 코다리조림·생선찜",
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ]
+ },
+ "gs-ayat-coffee": {
+  "name": "아야트커피",
+  "cat": "cafe",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2748,
+  "lng": 128.5535,
+  "kto": "2837896",
+  "hours": [
+   "10:00",
+   "19:00"
+  ],
+  "closed": [],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "고성 바다 앞 흑임자커피 카페",
+  "lastEntry": "18:30"
+ },
+ "gs-nogwon": {
+  "name": "녹원식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.2905,
+  "lng": 128.5465,
+  "kto": "2874281",
+  "hours": [
+   "10:00",
+   "20:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "고성 생선모듬찜·가오리찜",
+  "lastEntry": "19:00"
+ },
+ "yy-hajomat": {
+  "name": "하조맛식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.02,
+  "lng": 128.7241,
+  "kto": "2892498",
+  "hours": [
+   "09:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "하조대 근처 생선구이 돌솥밥"
+ },
+ "yy-danyang-myeonok": {
+  "name": "단양면옥",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0755,
+  "lng": 128.6219,
+  "kto": "633536",
+  "hours": [
+   "11:00",
+   "19:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "양양 시내 함흥회냉면"
+ },
+ "yy-songi-village": {
+  "name": "송이버섯마을",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.065,
+  "lng": 128.6209,
+  "kto": "686158",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "양양 송이버섯 전골·불고기",
+  "breaks": [
+   [
+    "15:00",
+    "17:00"
+   ]
+  ]
+ },
+ "yy-dongjjok-sekkosi": {
+  "name": "동쪽바다 세꼬시",
+  "cat": "food",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0803,
+  "lng": 128.6693,
+  "kto": "2903606",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "양양 참가자미 세꼬시·섭국"
+ },
+ "yy-yeounpori-bakery": {
+  "name": "여운포리빵집",
+  "cat": "cafe",
+  "region": "seorak",
+  "area": "yangyang",
+  "lat": 38.0389,
+  "lng": 128.6946,
+  "kto": "2841480",
+  "hours": [
+   "09:00",
+   "18:00"
+  ],
+  "closed": [
+   3
+  ],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "양양 소금빵·깜빠뉴 빵집",
+  "lastEntry": "17:30"
+ },
+ "yy-bitgoeul": {
+  "name": "광주빛고을식당",
+  "cat": "food",
+  "region": "seorak",
+  "area": "sokcho",
+  "lat": 38.1217,
+  "lng": 128.6303,
+  "kto": "2903557",
+  "hours": [
+   "08:00",
+   "20:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "물곰탕·생대구탕"
+ },
+ "cc-myeongdong-sangol": {
+  "name": "명동산골닭갈비",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cc_city",
+  "lat": 37.8793,
+  "lng": 127.7278,
+  "kto": "699497",
+  "hours": [
+   "10:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "춘천 명동 철판닭갈비"
+ },
+ "cc-mebau-makguksu": {
+  "name": "메바우명가춘천막국수",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cc_city",
+  "lat": 37.8922,
+  "lng": 127.7239,
+  "kto": "2608622",
+  "hours": [
+   "10:30",
+   "20:30"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "senior"
+  ],
+  "desc": "춘천 순메밀막국수·들기름막국수",
+  "lastEntry": "20:00"
+ },
+ "cc-jangho-grill": {
+  "name": "장호더그릴(장호숯불닭갈비)",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cc_city",
+  "lat": 37.9294,
+  "lng": 127.7853,
+  "kto": "2795950",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 2,
+  "tags": [
+   "kids"
+  ],
+  "desc": "춘천 숯불닭갈비",
+  "lastEntry": "20:00"
+ },
+ "cc-sonsu-kalguksu": {
+  "name": "손수해물손칼국수",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "cc_city",
+  "lat": 37.862,
+  "lng": 127.7206,
+  "kto": "2035723",
+  "hours": [
+   "11:30",
+   "20:30"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "춘천 해물손칼국수·매생이 칼국수",
+  "breaks": [
+   [
+    "14:30",
+    "17:00"
+   ]
+  ]
+ },
+ "cc-owol-school": {
+  "name": "오월학교",
+  "cat": "cafe",
+  "region": "chuncheon",
+  "area": "cc_city",
+  "lat": 37.9715,
+  "lng": 127.6348,
+  "kto": "2708130",
+  "hours": [
+   "11:00",
+   "19:00"
+  ],
+  "closed": [
+   2
+  ],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "춘천 폐교 카페 · 들기름 파스타",
+  "breaks": [
+   [
+    "16:00",
+    "17:00"
+   ]
+  ],
+  "lastEntry": "18:30"
+ },
+ "nami-seomhyanggi": {
+  "name": "섬향기",
+  "cat": "food",
+  "region": "chuncheon",
+  "area": "nami",
+  "lat": 37.7901,
+  "lng": 127.5261,
+  "kto": "2558084",
+  "hours": [
+   "11:00",
+   "19:30"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "남이섬 안 철판닭갈비·막국수"
+ },
+ "wj-yangbanne": {
+  "name": "양반네",
+  "cat": "food",
+  "region": "wonju",
+  "area": "wj_city",
+  "lat": 37.3464,
+  "lng": 127.9297,
+  "kto": "134084",
+  "hours": [
+   "10:00",
+   "22:30"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "원주 한우 생갈비살·등심"
+ },
+ "wj-keungom": {
+  "name": "큰곰",
+  "cat": "food",
+  "region": "wonju",
+  "area": "wj_city",
+  "lat": 37.2754,
+  "lng": 128.0153,
+  "kto": "2891657",
+  "hours": [
+   "10:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior",
+   "kids"
+  ],
+  "desc": "원주 토종닭백숙·닭볶음탕"
+ },
+ "wj-ppyeodae-jjamppong": {
+  "name": "뼈대있는짬뽕",
+  "cat": "food",
+  "region": "wonju",
+  "area": "wj_city",
+  "lat": 37.3427,
+  "lng": 127.9658,
+  "kto": "2892283",
+  "hours": [
+   "11:00",
+   "15:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "원주 뼈짬뽕 (점심 장사)"
+ },
+ "wj-cafe264": {
+  "name": "카페 264",
+  "cat": "cafe",
+  "region": "wonju",
+  "area": "wj_city",
+  "lat": 37.339,
+  "lng": 127.938,
+  "kto": "3458390",
+  "hours": [
+   "11:00",
+   "22:00"
+  ],
+  "closed": [],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "원주 검은콩라떼 카페"
+ },
+ "sc-dongmak-makguksu": {
+  "name": "동막막국수",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "samcheok",
+  "lat": 37.3371,
+  "lng": 129.2398,
+  "kto": "2892150",
+  "hours": [
+   "10:00",
+   "14:00"
+  ],
+  "closed": [
+   1
+  ],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "senior"
+  ],
+  "desc": "삼척 물막국수 (점심 장사)",
+  "lastEntry": "13:30"
+ },
+ "dh-durebak": {
+  "name": "두레박고을",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4487,
+  "lng": 129.1652,
+  "kto": "2811522",
+  "hours": [
+   "11:30",
+   "20:50"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [],
+  "desc": "동해 낙지보쌈·낙지비빔밥",
+  "breaks": [
+   [
+    "14:40",
+    "17:00"
+   ]
+  ],
+  "lastEntry": "20:00"
+ },
+ "dh-seongwon-dakgalbi": {
+  "name": "성원닭갈비",
+  "cat": "food",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4447,
+  "lng": 129.178,
+  "kto": "2774725",
+  "hours": [
+   "11:00",
+   "21:00"
+  ],
+  "closed": [],
+  "stay": 60,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "동해·삼척식 물닭갈비"
+ },
+ "dh-agapao": {
+  "name": "아가파오",
+  "cat": "cafe",
+  "region": "gangneung",
+  "area": "donghae",
+  "lat": 37.4436,
+  "lng": 129.1656,
+  "kto": "4070892",
+  "hours": [
+   "08:00",
+   "21:00"
+  ],
+  "closed": [
+   0
+  ],
+  "stay": 45,
+  "indoor": true,
+  "walk": 1,
+  "pop": 1,
+  "tags": [
+   "kids"
+  ],
+  "desc": "동해 문어소금빵 빵집"
  }
 }

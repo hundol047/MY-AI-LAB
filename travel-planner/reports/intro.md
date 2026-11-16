@@ -1,6 +1,6 @@
 # 장소 소개 (한국관광공사 소개 첫 문장)
 
-생성: node scripts/bake-intro.mjs. 붙인 곳 283곳
+생성: node scripts/bake-intro.mjs. 붙인 곳 328곳
 
 ## 못 붙인 곳
 

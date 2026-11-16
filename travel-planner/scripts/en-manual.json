@@ -1165,5 +1165,185 @@
   "pc-7hundred": {
     "name": "7HUNDRED Café",
     "desc": "Three-storey café in Hoenggye, Daegwallyeong, with cold brew and bread"
+  },
+  "gn-sodol": {
+    "name": "Sodol Makguksu",
+    "desc": "Buckwheat noodles and boiled pork by Sodol Port, Jumunjin"
+  },
+  "gn-samgyori": {
+    "name": "Samgyori Dongchimi Makguksu",
+    "desc": "Gangneung buckwheat noodles in radish-kimchi broth"
+  },
+  "gn-songjeong-jjamppong": {
+    "name": "Songjeong Yong Jjamppong",
+    "desc": "Spicy seafood noodle soup with octopus near Songjeong Beach"
+  },
+  "gn-garam-ongsimi": {
+    "name": "Garamjip Ongsimi",
+    "desc": "Gangwon potato dumpling soup and potato pancakes"
+  },
+  "gn-dongil-jangkal": {
+    "name": "Dongil Jangkalguksu",
+    "desc": "Gangneung-style spicy knife-cut noodles"
+  },
+  "gn-pungnyeon-galbi": {
+    "name": "Gangneung Pungnyeon Galbi",
+    "desc": "Marinated pork and Korean beef ribs near Gyeongpo"
+  },
+  "gn-jeongdongjin-bapjip": {
+    "name": "Jeongdongjin Bapjip",
+    "desc": "Grilled fish set meals near Jeongdongjin Station"
+  },
+  "gn-bonga-donghae-makguksu": {
+    "name": "Bonga Donghae Makguksu",
+    "desc": "Spicy buckwheat noodles and buckwheat pancakes in Jumunjin"
+  },
+  "gn-myeongseongok": {
+    "name": "Myeongseongok",
+    "desc": "Ox-trotter and bone soups downtown, lunch only"
+  },
+  "sc-cheongchosu-mulhoe": {
+    "name": "Cheongchosu Mulhoe",
+    "desc": "Cold raw-seafood soup and mussel soup by Cheongchoho Lake"
+  },
+  "sc-hamheung-naengmyeonok": {
+    "name": "Hamheung Naengmyeonok",
+    "desc": "Hamheung-style cold noodles and boiled pork in Sokcho"
+  },
+  "sc-hwang-daegutang": {
+    "name": "Hwang Daegutang",
+    "desc": "Fresh cod soup and sea-snail-fish soup in Sokcho"
+  },
+  "sc-yeongsik-sundae": {
+    "name": "Yeongsik-i-ne Sundae Gukbap",
+    "desc": "Blood sausage and rice soup in Sokcho"
+  },
+  "sr-wangga-surachung": {
+    "name": "Wangga Surachung",
+    "desc": "Dried pollack and deodeok root set meals near Seoraksan"
+  },
+  "sr-beombawi-makguksu": {
+    "name": "Beombawi Makguksu",
+    "desc": "Buckwheat noodles and boiled pork below Seoraksan"
+  },
+  "sc-jeongdeun": {
+    "name": "Jeongdeun Sikdang",
+    "desc": "Spicy knife-cut noodles and hand-torn noodle soup in Sokcho"
+  },
+  "sr-miga": {
+    "name": "Miga",
+    "desc": "Grilled dried pollack and deodeok set meals near Seoraksan"
+  },
+  "sc-newyork-bakery": {
+    "name": "New York Bakery (Sokcho main)",
+    "desc": "Long-running Sokcho bakery with squid-shaped rice bread"
+  },
+  "gs-seongjin": {
+    "name": "Seongjin Hoegwan",
+    "desc": "Fresh pollack stew near Geojin Port, Goseong"
+  },
+  "gs-gyoam-makguksu": {
+    "name": "Gyoam Makguksu",
+    "desc": "Buckwheat noodles with spicy pollack in Gyoam, Goseong"
+  },
+  "gs-geumhwajeong": {
+    "name": "Geumhwajeong Makguksu",
+    "desc": "Radish-kimchi buckwheat noodles and buckwheat crepes"
+  },
+  "gs-manseong-hoe": {
+    "name": "Manseong Hoetjip",
+    "desc": "Bone-in sliced raw fish cold soup in Goseong"
+  },
+  "gs-haeoreum-saengseon": {
+    "name": "Haeoreum Geojinhang Saengseonjjim",
+    "desc": "Braised half-dried pollack and fish near Geojin Port"
+  },
+  "gs-ayat-coffee": {
+    "name": "Ayat Coffee",
+    "desc": "Seaside café in Goseong known for black-sesame coffee"
+  },
+  "gs-nogwon": {
+    "name": "Nogwon Sikdang",
+    "desc": "Assorted braised fish and skate in Goseong"
+  },
+  "yy-hajomat": {
+    "name": "Hajomat Sikdang",
+    "desc": "Grilled fish with stone-pot rice near Hajodae"
+  },
+  "yy-danyang-myeonok": {
+    "name": "Danyang Myeonok",
+    "desc": "Hamheung-style raw-fish cold noodles in Yangyang town"
+  },
+  "yy-songi-village": {
+    "name": "Songi Mushroom Village",
+    "desc": "Yangyang pine-mushroom hot pot and bulgogi"
+  },
+  "yy-dongjjok-sekkosi": {
+    "name": "Dongjjok Bada Sekkosi",
+    "desc": "Bone-in sliced flounder and mussel soup in Yangyang"
+  },
+  "yy-yeounpori-bakery": {
+    "name": "Yeounpori Bakery",
+    "desc": "Yangyang bakery known for salt bread"
+  },
+  "yy-bitgoeul": {
+    "name": "Gwangju Bitgoeul Sikdang",
+    "desc": "Moray-eel soup and fresh cod soup"
+  },
+  "cc-myeongdong-sangol": {
+    "name": "Myeongdong Sangol Dakgalbi",
+    "desc": "Iron-pan spicy chicken in Chuncheon Myeongdong"
+  },
+  "cc-mebau-makguksu": {
+    "name": "Mebau Myeongga Chuncheon Makguksu",
+    "desc": "Pure buckwheat and perilla-oil noodles in Chuncheon"
+  },
+  "cc-jangho-grill": {
+    "name": "Jangho The Grill",
+    "desc": "Charcoal-grilled chicken galbi in Chuncheon"
+  },
+  "cc-sonsu-kalguksu": {
+    "name": "Sonsu Haemul Sonkalguksu",
+    "desc": "Seafood and seaweed knife-cut noodles in Chuncheon"
+  },
+  "cc-owol-school": {
+    "name": "Owol School",
+    "desc": "Café and kitchen in a former school, Chuncheon"
+  },
+  "nami-seomhyanggi": {
+    "name": "Seomhyanggi (Nami Island)",
+    "desc": "Chicken galbi and buckwheat noodles inside Nami Island"
+  },
+  "wj-yangbanne": {
+    "name": "Yangbanne",
+    "desc": "Korean beef ribs and sirloin in Wonju"
+  },
+  "wj-keungom": {
+    "name": "Keungom",
+    "desc": "Native chicken boiled with herbs and spicy chicken stew"
+  },
+  "wj-ppyeodae-jjamppong": {
+    "name": "Ppyeodae Inneun Jjamppong",
+    "desc": "Jjamppong with pork bones, lunch only"
+  },
+  "wj-cafe264": {
+    "name": "Cafe 264",
+    "desc": "Wonju café known for black-bean latte"
+  },
+  "sc-dongmak-makguksu": {
+    "name": "Dongmak Makguksu",
+    "desc": "Samcheok buckwheat noodles, lunch only"
+  },
+  "dh-durebak": {
+    "name": "Durebak Goeul",
+    "desc": "Octopus with boiled pork and octopus bibimbap in Donghae"
+  },
+  "dh-seongwon-dakgalbi": {
+    "name": "Seongwon Dakgalbi",
+    "desc": "Soupy chicken galbi in the Donghae–Samcheok style"
+  },
+  "dh-agapao": {
+    "name": "Agapao",
+    "desc": "Donghae bakery known for octopus salt bread"
   }
 }

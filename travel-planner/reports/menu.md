@@ -1,6 +1,6 @@
 # 식당·카페 메뉴 (한국관광공사 음식점 소개정보)
 
-생성: node scripts/bake-menu.mjs. 붙인 곳 119곳
+생성: node scripts/bake-menu.mjs. 붙인 곳 164곳
 
 ## 못 붙인 곳
 
