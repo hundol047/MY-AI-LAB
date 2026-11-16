@@ -31,10 +31,11 @@ export const drives = (move) => move === "car" || move === "taxi";
 
 // 직선거리 × 도로 보정계수로 실제 이동시간 추정
 // 자동차는 주차·출발 준비 8분, 택시는 부르고 기다리는 4분을 더한다
-export function travel(a, b, move) {
+// walkMax: 걸어서 갈 최대 거리(km). 걷기 힘듦·휠체어는 0.3km — 그보다 멀면 차·버스로, 걷는 속도도 느리게(시속 3km)
+export function travel(a, b, move, walkMax = 1.2) {
   const road = distanceKm(a, b) * 1.35;
   if (road < 0.05) return { min: 0, mode: "same", km: 0 };
-  if (road <= 1.2) return { min: round5(road / 4.2 * 60), mode: "walk", km: road };
+  if (road <= walkMax) return { min: round5(road / (walkMax < 1 ? 3 : 4.2) * 60), mode: "walk", km: road };
   // 시내 구간은 느리고, 먼 거리는 국도·고속도로 속도
   // 먼 거리(60km 넘음, 예: 서울에서 출발): 자동차는 고속도로 85km/h, 그 밖(택시·대중교통)은 KTX·고속버스 80km/h + 타고 내리는 40분
   if (road > 60) {
@@ -129,7 +130,10 @@ function candidates(input, opts = {}) {
   const okWho = (p) => input.who === "pet" ? p.pet !== false && (p.pet || (!p.indoor && !p.multi && (p.cat === "nature" || p.cat === "sea"))) : !p.petOnly; // pet: false = 동반 불가로 확인된 곳(식물원·국립공원 안 등)
   // 휠체어·유모차: 오래 걷거나 산길인 곳(walk 3)은 빼고, 휠체어는 무장애 정보 없이 걷기가 있는 곳(walk 2)도 뺀다
   const acc = opts.access || [];
-  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp));
+  // 걷기 힘듦(walker): 오래 걷는 곳(walk 3)을 빼고, 조금 걷는 곳(walk 2)은 실내이거나 경사로가 있을 때만
+  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp)
+    && !(acc.includes("walker") && p.walk === 2 && !p.indoor && !p.access?.ramp)
+    && !(acc.includes("walker") && p.multi && p.cat === "food")); // 걷기 힘듦: 시장·먹거리 골목을 돌아다니는 끼니 대신 한 가게에서 앉아서
   const ok = (p) => okWho(p) && okAccess(p);
   // 반값여행 코스(opts.halfPkg)처럼 정해 둔 장소만 쓸 때 (축제는 그 시군 것인지 알 수 없어 뺀다)
   const onlyIds = opts.onlyIds || halfPackage(opts.halfPkg)?.placeIds;
@@ -227,7 +231,8 @@ function baseScore(p, input, opts, rain, dateStr = null) {
   if (input.who === "pet") s += p.pet ? 3 : -2; // 동반 가능이 확인된 곳 우선
   const acc = opts.access || [];
   if (acc.length && p.access) s += (p.access.ramp ? 2 : 0) + (p.access.toilet ? 1 : 0) + (acc.includes("wheelchair") && p.access.wheel ? 1 : 0) + (acc.includes("stroller") && (p.access.stroller || p.access.nursing) ? 1 : 0);
-  else if (acc.length && p.cat !== "festival") s -= 1; // 무장애 정보가 없는 곳은 뒤로
+  else if (acc.length && p.cat !== "festival") s -= acc.includes("wheelchair") && !["food", "cafe"].includes(p.cat) ? 2.5 : 1; // 무장애 정보가 없는 곳은 뒤로 (휠체어는 더)
+  if (acc.includes("walker")) { if (p.walk === 1) s += 1; if (p.indoor) s += 0.5; }
 
   if (opts.lessWalk) { if (p.walk === 3) s -= 5; else if (p.walk === 2) s -= 1; }
   if (rain || opts.indoor) {
@@ -239,6 +244,11 @@ function baseScore(p, input, opts, rain, dateStr = null) {
 }
 
 // 당일치기는 귀가를 생각해 19:30까지, 숙박하는 날은 밤 코스까지 21:00, 마지막 날은 18:00까지
+// 장소 안에서 걷는 거리 추정(m): 걷기 1(거의 평지·짧음) 200, 2(조금) 800, 3(오래·오르막) 2000. 축제는 행사장 안 500
+export const walkMeters = (p) => (p.cat === "festival" ? 500 : (p.cat === "food" || p.cat === "cafe") && !p.multi ? 100 : { 1: 200, 2: 800, 3: 2000 }[p.walk] ?? 500); // 식당·카페는 앉아 있는 곳
+// 하루 걷는 양(m): 장소 안 + 걸어서 가는 구간
+export const dayWalkMeters = (d) => d.items.reduce((a, it) => a + walkMeters(it.place) + (it.travelMode === "walk" ? Math.round((it.km || 0) * 1000) : 0), 0);
+
 function dayWindow(dayIdx, totalDays) {
   const start = toMin("10:00");
   let end = toMin("21:00");
@@ -291,7 +301,7 @@ function stayOf(p, opts) {
 }
 
 function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
-  const tr = travel(from, p, input.move);
+  const tr = travel(from, p, input.move, (opts.access || []).some((a) => a === "walker" || a === "wheelchair") ? 0.3 : 1.2);
   if (legMin !== null) tr.min = legMin;
   const arrive = t + tr.min;
   const h = hoursFor(p, dateStr);
@@ -364,7 +374,25 @@ export function planDay(input, opts, dayIdx, used, usedAreas, keep = [], exclude
   }
   delete best.day.tune;
   stretchStays(best.day.items, best.day.date); // 링크로 복원·바꾸기 한 날도 같은 규칙
+  if ((opts.access || []).some((a) => a === "walker" || a === "wheelchair")) applyRests(best.day.items, best.day.date, dayWindow(dayIdx, input.days).end, 15);
   return best.day;
+}
+
+// 걷기 힘듦·휠체어: 관광지를 두 곳 이어 간 뒤에는 쉬는 시간(rest분)을 둔다. 이미 빈 시간이 있으면 그대로 쓰고,
+// 없으면 뒤 일정을 미는데, 운영시간·하루 끝나는 시각을 넘기면 그 쉬는 시간은 넣지 않는다
+function applyRests(items, dateStr, end, rest) {
+  for (const it of items) delete it.restAfter;
+  for (let k = 1; k < items.length - 1; k++) {
+    const a = items[k - 1], b = items[k];
+    if (a.kind !== "visit" || b.kind !== "visit" || a.place.cat === "cafe" || b.place.cat === "cafe" || a.restAfter) continue;
+    const next = items[k + 1], gap = next.start - next.travelMin - b.end;
+    if (gap >= rest) { b.restAfter = rest; continue; }
+    const need = rest - gap, after = items.slice(k + 1);
+    const fits = after.every((x) => fitsHours(hoursFor(x.place, dateStr), x.start + need, x.end + need)) && after[after.length - 1].end + need <= end;
+    if (!fits) continue;
+    for (const x of after) { x.start += need; x.end += need; }
+    b.restAfter = rest;
+  }
 }
 
 // 그래도 다음 일정(주로 저녁)까지 1시간 넘게 비면 바로 앞 장소에 더 머문다 (최대 60분, 원래 머무는 시간까지, 운영시간 안)
@@ -467,10 +495,18 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   const groups = new Set();
   const cafeMax = (input.likes || []).includes("cafe") ? 2 : 1;
 
+  // 걷기 힘듦·휠체어: 하루 걷는(휠체어로 움직이는) 양을 정해 두고, 관광지를 두 곳 이어 가면 그 뒤에 쉬는 시간을 둔다
+  const accs = opts.access || [];
+  const walkBudget = accs.includes("walker") ? 1500 : accs.includes("wheelchair") ? 2000 : 0; // m
+  const restMin = accs.includes("walker") || accs.includes("wheelchair") ? 15 : 0;
+  let walked = 0;
   const commit = (p, r, kind) => {
+    const prevIt = items[items.length - 1];
     items.push({ id: p.id, place: p, kind, start: r.start, end: r.finish, travelMin: r.tr.min, travelMode: r.tr.mode, km: r.tr.km });
     used.add(p.id);
     from = p; t = r.finish;
+    walked += walkMeters(p) + (r.tr.mode === "walk" ? Math.round(r.tr.km * 1000) : 0);
+    if (restMin && kind === "visit" && prevIt?.kind === "visit" && prevIt.place.cat !== "cafe" && p.cat !== "cafe") { items[items.length - 1].restAfter = restMin; t += restMin; }
     if (kind === "lunch") hasLunch = true;
     else if (kind === "dinner") hasDinner = true;
     else visits++;
@@ -538,6 +574,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
       if (filler && (r.tr.min > 30 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고(30분 안) 저녁 전에 끝나는 곳만
+      if (walkBudget && kind === "visit" && walked + walkMeters(p) + (r.tr.mode === "walk" ? r.tr.km * 1000 : 0) + (hasLunch ? 0 : 100) + (hasDinner ? 0 : 100) > walkBudget) continue; // 오늘 걷는 양 한도 (남은 끼니 몫은 남겨 둠)
       if ((nightOnly || (hasDinner && kind === "visit")) && r.tr.min > 30) continue; // 저녁 먹은 뒤는 가까운 곳만 (밤에 먼 길을 갔다 숙소로 되돌아오지 않게)
       let v = baseScore(p, input, opts, rain, dateStr);
       v -= r.tr.min * (drives(input.move) ? 0.08 : 0.12);
@@ -548,6 +585,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 빈 시간 채우기는 지금 있는 지역 안에서 (다른 지역에 들렀다 저녁 먹으러 되돌아오는 동선이 되지 않게)
       if (filler && from.area && p.area !== from.area) v -= 3;
       v -= r.wait * 0.05;
+      if (walkBudget && r.tr.mode === "walk" && r.tr.km > 0.4) v -= (r.tr.km - 0.4) * 6; // 걷기 힘듦·휠체어: 400m 넘게 걸어가는 구간은 뒤로
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);
       const radius = drives(input.move) ? 6 : 4;
@@ -821,7 +859,7 @@ export function retimeDay(day, input, opts, legMins) {
     const r = tryPlace(it.place, from, Math.max(t, it.start - leg), input, opts, end + 60, day.date, leg);
     if (!r) return null;
     items.push({ ...it, start: r.start, end: r.finish, travelMin: leg, road: drives(it.travelMode) });
-    from = it.place; t = r.finish;
+    from = it.place; t = r.finish + (it.restAfter || 0); // 쉬는 시간은 그대로
   }
   return { ...day, items, road: true };
 }

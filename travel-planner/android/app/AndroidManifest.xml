@@ -17,6 +17,10 @@
         <intent>
             <action android:name="android.speech.action.RECOGNIZE_SPEECH" />
         </intent>
+        <!-- 일정 읽어 주기: 휴대폰 음성 엔진(TTS) 찾기 -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
     </queries>
     <application
         android:label="@string/app_name"

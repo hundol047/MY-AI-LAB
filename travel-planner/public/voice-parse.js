@@ -96,6 +96,8 @@ export function parseAccess(raw) {
   const out = [];
   if (/휠체어|wheelchair|車いす|車椅子|轮椅|輪椅/.test(t)) out.push("wheelchair");
   if (/유모차|stroller|pram|buggy|ベビーカー|婴儿车|嬰兒車|推车/.test(t)) out.push("stroller");
+  // 걷기 힘듦: 어르신 다리·무릎·지팡이·보행기 (휠체어면 휠체어 규칙이 더 엄격해서 따로 넣지 않는다)
+  if (!out.includes("wheelchair") && /걷기\s*(가\s*)?힘|걷는\s*게\s*힘|거동|다리\s*가?\s*불편|무릎\s*이?\s*(안\s*좋|아프|불편)|지팡이|보행기|walker|cane|limited mobility|歩くのが(大変|辛|つら)|杖|腿脚不便|行动不便|拐杖/.test(t)) out.push("walker");
   return out;
 }
 

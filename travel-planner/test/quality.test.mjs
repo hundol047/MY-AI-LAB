@@ -71,3 +71,24 @@ console.log(`ok - 3박 4일 일정 3개 × ${optTrips}건: 모두 1~4일차 · �
   assert.ok(overlap < seen.length * 0.7, `최근 본 장소는 뒤로: 겹침 ${overlap}/${seen.length}`);
   console.log(`ok - 다양한 코스: 같은 조건 8번 중 ${distinct}개가 서로 다름 · 최근 본 장소 겹침 ${overlap}/${seen.length}`);
 }
+
+// 걷기 힘듦·휠체어: 오래 걷는 곳 없음, 하루 걷는 양 한도(1.5km·2km)를 거의 지킴, 쉬는 시간, 운영시간 충돌 0
+{
+  const { dayWalkMeters, verify } = await import("../public/planner.js");
+  for (const [mode, budget] of [["walker", 1500], ["wheelchair", 2000]]) {
+    let days = 0, over = 0, rests = 0, far = 0, conf = 0, sights = 0;
+    for (const region of R) for (const move of ["car", "transit"]) for (const nd of [1, 2]) for (let sd = 1; sd < 4; sd++) {
+      const t = planTrip({ region, date: "2026-11-21", days: nd, who: "parents", move, likes: [] }, { access: [mode], lessWalk: true, seed: sd * 7919 });
+      conf += verify(t.days);
+      for (const d of t.days) {
+        days++; if (dayWalkMeters(d) > budget) over++;
+        for (const it of d.items) { if (it.restAfter) rests++; if (it.place.walk === 3) far++; if (it.kind === "visit") sights++; assert.ok(!(mode === "walker" && it.place.multi && it.place.cat === "food"), "걷기 힘듦: 시장 끼니 없음"); }
+      }
+    }
+    assert.equal(conf, 0, `${mode} 운영시간 충돌`); assert.equal(far, 0, `${mode} 오래 걷는 곳`);
+    assert.ok(over / days <= 0.05, `${mode} 걷는 양 한도 넘김 ${over}/${days}`);
+    assert.ok(rests >= days * 0.4, `${mode} 쉬는 시간이 너무 적음 ${rests}/${days}`);
+    assert.ok(sights / days >= 3, `${mode} 하루 관광지가 너무 적음`);
+    console.log(`ok - ${mode === "walker" ? "걷기 힘듦" : "휠체어"} ${days}일: 한도 넘김 ${over} · 쉬는 시간 ${rests}번 · 하루 관광지 ${(sights / days).toFixed(1)}곳 · 충돌 0`);
+  }
+}

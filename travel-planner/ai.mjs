@@ -159,7 +159,7 @@ export async function guide({ question, history, trip, lang: uiLang }) {
     additionalProperties: false,
   };
 
-  const system = `너는 강원도 여행 앱 "오늘강원"의 AI 가이드다. 사용자의 현재 일정과 아래 장소 데이터만 근거로 한국어로 답한다.
+  const system = `너는 강원도 여행 앱 "보폭"의 AI 가이드다. 사용자의 현재 일정과 아래 장소 데이터만 근거로 한국어로 답한다.
 규칙:
 - 장소는 주어진 목록에 있는 것만 말한다. 목록에 없는 가게·가격·전화번호는 지어내지 말고 "앱 데이터로는 확인할 수 없어요"라고 한다.
 - 운영시간은 데이터에 적힌 날짜별 시간만 쓴다.

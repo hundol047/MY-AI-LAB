@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, replanFromNow, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
+import { planTrip, swapItem, replanFromNow, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -452,7 +452,7 @@ $("#reportForm").addEventListener("submit", async (e) => {
   }
   if (!sent) {
     const title = `[장소 제보] ${p.name} (${p.id}) · ${REPORT_KIND[kind]}`;
-    const body = [`장소: ${p.name} (${p.id})`, `종류: ${REPORT_KIND[kind]}`, `내용: ${note || "-"}`, `여행 날짜: ${state?.input?.date || "-"}`, "", "(오늘강원 앱의 '정보가 달라요'에서 보냄)"].join("\n");
+    const body = [`장소: ${p.name} (${p.id})`, `종류: ${REPORT_KIND[kind]}`, `내용: ${note || "-"}`, `여행 날짜: ${state?.input?.date || "-"}`, "", "(보폭 앱의 '정보가 달라요'에서 보냄)"].join("\n");
     window.open(`https://github.com/hundol047/MY-AI-LAB/issues/new?labels=place-report&title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`, "_blank", "noopener");
   }
   store.set("reportedPlaces", [...new Set([...reported(), p.id])].slice(-200));
@@ -694,7 +694,7 @@ function render() {
   document.querySelectorAll("#quick button").forEach((b) => b.classList.toggle("on", !!active[b.dataset.q]));
 
   const day = trip.days[dayIdx];
-  $("#timeline").innerHTML = sunHTML(day) + busNoteHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
+  $("#timeline").innerHTML = sunHTML(day) + walkDayHTML(day) + busNoteHTML(day) + (day.items.length ? day.items.map((it, i) => itemHTML(it, i, day)).join("") : `<li class="empty">${t("조건에 맞는 장소가 없어요. 조건을 바꿔보세요.")}</li>`) + lodgingHTML(day) + backJamHTML(day);
   if (canVote() && votes.key !== state.opts.voteKey) loadVotes(); // 다른 일정(또는 받은 링크)을 열면 그 일정의 표를 받는다
   renderOptions();
   renderHeard();
@@ -704,6 +704,7 @@ function render() {
   renderOvernight();
   renderSouvenirs();
   renderCosts();
+  renderAccessInfo();
   renderChecks();
   renderToday();
   renderPet();
@@ -715,6 +716,16 @@ function render() {
 
 // 일출·일몰 (그날 첫 장소 기준) + 동해안에서 묵은 다음 날 아침 해돋이 제안 (숙소에서 가장 가까운 일출 명소, 해 뜨기 15분 전 도착)
 const SUNRISE_SPOTS = ["jeongdongjin", "gyeongpo-beach", "chuam", "yeonggeumjeong", "naksan-beach", "sokcho-beach"];
+// 걷기 힘듦·휠체어·덜 걷기: 이 날 걷는(휠체어로 움직이는) 양 추정과 쉬는 시간 수
+const accessMode = () => (state?.opts?.access || []).filter((a) => a === "walker" || a === "wheelchair");
+function walkDayHTML(day) {
+  const acc = accessMode();
+  if (!acc.length && !state?.opts?.lessWalk) return "";
+  const m = dayWalkMeters(day), rests = day.items.filter((it) => it.restAfter).length;
+  const km = (m / 1000).toFixed(1);
+  const what = acc.includes("wheelchair") ? t("♿ 이 날 휠체어로 움직이는 거리 약 {km}km", { km }) : t("🚶 이 날 걷는 양 약 {km}km", { km });
+  return `<li class="walkday">${what}${rests ? t(" · 쉬는 시간 {n}번", { n: rests }) : ""}<small>${t("장소 안 동선은 추정이에요. 주차장·입구에서 가까운 곳 위주로 골랐어요.")}</small></li>`;
+}
 function sunHTML(day) {
   const at = day.items[0]?.place || day.start;
   const s = at && sunTimes(day.date, at.lat, at.lng);
@@ -742,7 +753,8 @@ function itemHTML(it, i, day) {
   if (it.travelMode === "taxi" && it.km) leg += t(" · 약 {won}", { won: won(taxiFare(it.km)) });
   // 앞 장소를 나와 다음 장소에 도착하기까지 30분 넘게 비면 "자유 시간"으로 보여 준다 (저녁 시간 기다림·문 여는 시간 기다림)
   const prev = i > 0 ? day.items[i - 1] : null, free = prev ? it.start - it.travelMin - prev.end : 0;
-  if (free >= 30) leg = t("자유 시간 {min}분 · 근처 산책·쉬기", { min: free }) + " · " + leg;
+  if (prev?.restAfter) leg = t("☕ 쉬어 가기 {min}분 (앉아서 쉬기·화장실)", { min: free >= prev.restAfter ? free : prev.restAfter }) + " · " + leg;
+  else if (free >= 30) leg = t("자유 시간 {min}분 · 근처 산책·쉬기", { min: free }) + " · " + leg;
   // 주말·연휴 고속도로 정체(예상)만큼 첫 도착이 늦다
   if (i === 0 && day.jam) leg += `<span class="jam">${t("고속도로 정체 예상 +{min}분 ({dep} 출발 · 주말·연휴에 자주 막히는 시간대) · 일찍 출발하면 덜 막혀요", { min: day.jam.min, dep: day.jam.dep })}</span>`;
   const hours = hoursLabel(p, trip.days[dayIdx].date);
@@ -759,7 +771,7 @@ function itemHTML(it, i, day) {
         ${forLine(p)}
         ${state.opts.halfPkg && !(halfPackage(state.opts.halfPkg)?.placeIds || []).includes(p.id) ? `<div class="check soft">${t("반값여행 대상 시군 밖이라 이 끼니는 환급되지 않아요 (가까운 반려동물 동반 식당)")}</div>` : ""}
         ${it.extra ? `<div class="check soft">${t("저녁까지 시간이 있어 {min}분 더 여유 있게 머물러요", { min: it.extra })}</div>` : ""}
-        ${(state.opts.access || []).length ? accessLine(p) : ""}
+        ${(state.opts.access || []).length || state.opts.lessWalk ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}
         ${crowdLine(p, trip.days[dayIdx].date)}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
@@ -849,11 +861,22 @@ document.addEventListener("click", (e) => {
 
 // 무장애 편의시설 한 줄 (한국관광공사 무장애 여행 정보). 자세한 원문은 펼쳐 본다 (원문은 한국어)
 const ACCESS_LABEL = { wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
+// 걷는 양 (장소 안 동선 추정): 걷기 1 평지·짧게, 2 조금, 3 오래·오르막
+const WALK_LABEL = { 1: "평지 위주 · 짧게 (약 200m)", 2: "조금 걸어요 (약 800m)", 3: "많이 걸어요 (오르막·2km 이상)" };
 function accessLine(p) {
-  if (!p.access) return p.cat === "festival" ? "" : `<div class="access none">${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}</div>`;
+  if (p.cat === "festival") return "";
+  const food = ["food", "cafe"].includes(p.cat) && !p.multi;
+  const walk = food ? "" : `<span class="walk-lv w${p.walk}">🚶 ${t(WALK_LABEL[p.walk] || WALK_LABEL[2])}</span>`;
+  const own = parkingData?.[p.id]?.ok === true; // 장소 자체 주차장이 있으면 공영주차장 거리는 쓰지 않는다
+  const lot = own ? null : lotsData?.[p.id]?.[0];
+  const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
+  const tel = p.tel || menuData?.[p.id]?.tel;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span></div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
-  return `<details class="access"><summary>${tags.length ? `♿ ${tags.join(" · ")}` : t("무장애 정보 있음")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>`;
+  // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
+  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
+    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}</div>`;
 }
 
 // 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
@@ -893,8 +916,9 @@ function forLine(p) {
   if ((p.tags || []).includes("kids") && w === "family") who.push(t("아이와 가기 좋아요"));
   if ((p.tags || []).includes("senior") && w === "parents") who.push(t("부모님과 가기 좋아요"));
   if ((p.tags || []).includes("night")) who.push(t("저녁에"));
-  if (p.walk === 1 && !["food", "cafe"].includes(p.cat)) who.push(t("걷기 적음"));
-  if (p.walk === 3) who.push(t("많이 걸어요"));
+  const accShown = (state?.opts?.access || []).length || state?.opts?.lessWalk; // 그때는 아래 무장애 줄에 걷는 양이 따로 나온다
+  if (!accShown && p.walk === 1 && !["food", "cafe"].includes(p.cat)) who.push(t("걷기 적음"));
+  if (!accShown && p.walk === 3) who.push(t("많이 걸어요"));
   const ko = getLang() === "ko";
   const intro = ko ? introData?.[p.id] : null;
   // 식당·카페: 대표 메뉴는 바로, 그 밖의 메뉴·포장·예약은 펼쳐서 (관광공사 음식점 소개정보, 한국어)
@@ -1525,6 +1549,36 @@ function renderCosts() {
     <details class="split" id="splitBox"${splitOpen ? " open" : ""}><summary>${t("💸 여행 경비 나누기 (누가 누구에게 얼마)")}</summary><div class="split-body"></div></details>`;
   renderSplit();
 }
+// 휠체어·걷기 힘듦 이동 도움: 이 일정에서 휠체어 대여·장애인 화장실·장애인 주차가 있는 곳, 무장애 정보가 없는 곳, 기차·장애인 콜택시 안내
+function renderAccessInfo() {
+  const box = $("#accessInfo"); if (!box) return;
+  const acc = accessMode();
+  if (!trip || !acc.length) { box.hidden = true; return; }
+  box.hidden = false;
+  const seen = new Map();
+  for (const d of trip.days) for (const it of d.items) if (it.place.cat !== "festival" && !seen.has(it.place.id)) seen.set(it.place.id, it.place);
+  const ps = [...seen.values()];
+  const names = (f) => ps.filter(f).map((p) => esc(placeName(p)));
+  const row = (icon, label, list) => list.length ? `<li><b>${icon} ${label}</b> ${list.join(", ")}</li>` : "";
+  const sigMap = placeSigun || petData?.sigun;
+  // 시군 자료(pet.json의 장소별 시군)가 아직 없으면 받아서 다시 그린다 (장애인 콜택시는 시군마다 다르다)
+  if (!sigMap && !renderAccessInfo.loading) { renderAccessInfo.loading = true; fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j) { if (!petData) petData = j; placeSigun ||= j.sigun; renderAccessInfo(); } }).catch(() => {}); }
+  const sig = [...new Set(ps.map((p) => sigMap?.[p.id]).filter(Boolean))].slice(0, 3);
+  const taxi = (sig.length ? sig : ["강원"]).map((g) => `<a href="https://search.naver.com/search.naver?query=${encodeURIComponent(g + " 장애인콜택시")}" target="_blank" rel="noopener">${esc(g)}</a>`).join(" · ");
+  const unknown = names((p) => !p.access && !["food", "cafe"].includes(p.cat));
+  box.innerHTML = `<h3>${acc.includes("wheelchair") ? t("♿ 휠체어 이동 도움") : t("🦯 걷기 편한 여행 도움")}</h3>
+    <ul class="acc-list">
+      ${row("♿", t("휠체어 대여"), names((p) => p.access?.wheel))}
+      ${row("🚻", t("장애인 화장실"), names((p) => p.access?.toilet))}
+      ${row("🅿️", t("장애인 주차"), names((p) => p.access?.parking))}
+      ${row("🛗", t("엘리베이터"), names((p) => p.access?.elevator))}
+      ${unknown.length ? `<li class="warn"><b>❔ ${t("무장애 정보 없음")}</b> ${unknown.join(", ")} — ${t("계단·경사로를 전화로 미리 확인하세요")}</li>` : ""}
+    </ul>
+    <p class="sub">${t("🚆 KTX·ITX는 코레일 예매 때 휠체어석을 고를 수 있고, 역에서 타고 내릴 때 도움을 신청할 수 있어요 (코레일 고객센터 1544-7788).")}</p>
+    <p class="sub">${t("🚐 장애인 콜택시(특별교통수단)는 시군마다 미리 이용 등록이 필요해요. 여행 전에 등록 방법을 확인하세요:")} ${taxi}</p>
+    <p class="sub">${t("이 일정은 오래 걷는 곳을 빼고, 관광지를 두 곳 이어 가면 쉬는 시간을 넣었어요. 무장애 정보는 한국관광공사 자료예요.")}</p>`;
+}
+
 // 여행 경비 나누기: 일행 이름과 누가 낸 돈을 적으면 가장 적은 송금으로 정산 (이 기기에만 저장)
 let splitOpen = false;
 const splitKey = () => `split:${state.input.region}:${state.input.date}`;
@@ -2118,7 +2172,7 @@ function heardLabel(h) {
     case "people": { const [a, k] = h.ko.split(":").map(Number); return k ? t("어른 {a} · 아이 {k}", { a, k }) : t("어른 {a}", { a }); }
     case "move": return t(MOVE_KO[inp.move]);
     case "likes": return inp.likes.map((l) => t(LIKE_KO[l])).join(" · ");
-    case "access": return t(h.ko === "wheelchair" ? "♿ 휠체어" : "👶 유모차");
+    case "access": return t(h.ko === "wheelchair" ? "♿ 휠체어" : h.ko === "walker" ? "🦯 걷기 힘들어요" : "👶 유모차");
     case "start": return t("{name}에서 출발", { name: isForeign() ? (ORIGINS.find((o) => o.name === h.ko)?.nameEn || h.ko) : h.ko });
     case "time": return t("{t} 출발", { t: h.ko });
     case "pace": return t(h.ko === "relaxed" ? "여유롭게" : "더 알차게");
@@ -2253,6 +2307,40 @@ $("#remindBtn").addEventListener("click", () => {
     today: t("오늘 여행 일정"), first: t("첫 일정 {place} {time} · {leave}까지 출발하면 돼요"), soon: t("15분 뒤 출발"), next: t("다음: {place} {time} 도착 예정 · 이동 약 {min}분"),
   });
   window.OhneulApp.scheduleReminders(JSON.stringify(list));
+});
+
+/* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */
+// 큰 글씨: 지도는 빼고(터치 위치가 어긋나지 않게) 글과 카드만 키운다. 이 기기에 기억
+function applyBig(on) {
+  document.documentElement.classList.toggle("big", on);
+  $("#bigTextBtn")?.setAttribute("aria-pressed", String(on));
+}
+applyBig(!!store.get("bigText"));
+$("#bigTextBtn").addEventListener("click", () => { const on = !document.documentElement.classList.contains("big"); store.set("bigText", on); applyBig(on); track(on ? "big_on" : "big_off"); toast(on ? t("글씨를 크게 했어요") : t("글씨를 원래대로 했어요")); });
+// 일정 읽어 주기: 보고 있는 날의 일정을 소리로 (안드로이드 앱은 휴대폰 음성 엔진, 웹은 브라우저 음성)
+const SPEAK_LANG = { ko: "ko-KR", en: "en-US", ja: "ja-JP", zh: "zh-CN" };
+let speaking = false;
+function dayScript(d) {
+  const lines = [t("{n}일차 일정이에요.", { n: dayIdx + 1 })];
+  d.items.forEach((it, i) => {
+    const prev = d.items[i - 1];
+    if (prev?.restAfter) lines.push(t("{min}분 쉬어 가요.", { min: prev.restAfter }));
+    lines.push(t("{time}, {place}. {mode} {min}분.", { time: fmt(it.start), place: placeName(it.place), mode: t(MODE[it.travelMode]), min: it.travelMin }));
+  });
+  return lines.join(" ");
+}
+function stopSpeak() { speaking = false; if (window.OhneulApp?.stopSpeak) window.OhneulApp.stopSpeak(); else window.speechSynthesis?.cancel(); $("#speakBtn").textContent = "🔊"; }
+window.__speakDone = () => { speaking = false; $("#speakBtn").textContent = "🔊"; };
+$("#speakBtn").addEventListener("click", () => {
+  if (!trip) return;
+  if (speaking) return stopSpeak();
+  const text = dayScript(trip.days[dayIdx]), lang = SPEAK_LANG[getLang()] || "ko-KR";
+  track("speak");
+  if (window.OhneulApp?.speak) { speaking = true; window.OhneulApp.speak(text, lang); $("#speakBtn").textContent = "⏹"; return; }
+  if (!window.speechSynthesis) return toast(t("이 기기에서는 읽어 주기를 쓸 수 없어요"));
+  const u = new SpeechSynthesisUtterance(text); u.lang = lang; u.rate = 0.9;
+  u.onend = u.onerror = () => window.__speakDone();
+  speaking = true; $("#speakBtn").textContent = "⏹"; window.speechSynthesis.cancel(); window.speechSynthesis.speak(u);
 });
 
 /* ---------- 알림 ---------- */

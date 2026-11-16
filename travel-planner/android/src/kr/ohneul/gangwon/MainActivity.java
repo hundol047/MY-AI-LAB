@@ -18,6 +18,9 @@ import android.util.Base64;
 import java.io.OutputStream;
 import android.provider.CalendarContract;
 import android.speech.RecognizerIntent;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.UtteranceProgressListener;
+import java.util.Locale;
 import java.util.ArrayList;
 import android.view.Window;
 import android.webkit.GeolocationPermissions;
@@ -42,7 +45,7 @@ import org.json.JSONArray;
 import org.json.JSONObject;
 
 /**
- * 오늘강원 안드로이드 앱: 앱 파일(public/)을 APK 안(assets/www)에 넣고 웹뷰로 연다.
+ * 보폭 안드로이드 앱: 앱 파일(public/)을 APK 안(assets/www)에 넣고 웹뷰로 연다.
  * - 앱 파일은 https://appassets.androidplatform.net/ 주소로 APK 안에서 바로 읽어 준다 (인터넷 없이도 열림)
  * - 지도 타일·사진·날씨·도로 경로는 인터넷으로 받는다
  * - 서버 API(api/...)는 없으므로 404 → 앱이 간단 모드로 대체한다 (가게 등록은 숨김)
@@ -62,6 +65,9 @@ public class MainActivity extends Activity {
     private static final int REQ_NOTIFY = 5;
     private static final int REQ_SAVE = 6;
     private byte[] pendingFile; // "저장할 곳"을 고르는 동안 기다리는 파일
+    private TextToSpeech tts;   // 일정 읽어 주기 (휴대폰 음성 엔진)
+    private boolean ttsReady;
+    private String pendingSpeech, pendingLang;
     private String pendingReminders; // 알림 권한을 묻는 동안 기다리는 알림 목록 (JSON)
 
     private WebView web;
@@ -274,8 +280,47 @@ public class MainActivity extends Activity {
                 public void run() {
                     PrintManager pm = (PrintManager) getSystemService(PRINT_SERVICE);
                     if (pm == null || web == null) return;
-                    String t = title == null || title.isEmpty() ? "오늘강원" : title;
+                    String t = title == null || title.isEmpty() ? "보폭" : title;
                     pm.print(t, web.createPrintDocumentAdapter(t), new PrintAttributes.Builder().setMediaSize(PrintAttributes.MediaSize.ISO_A4).build());
+                }
+            });
+        }
+
+        /** 일정 읽어 주기: 휴대폰 음성 엔진으로 읽고, 다 읽으면 window.__speakDone() */
+        @JavascriptInterface
+        public void speak(final String text, final String lang) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    pendingSpeech = text;
+                    pendingLang = lang;
+                    if (tts == null) {
+                        tts = new TextToSpeech(MainActivity.this, new TextToSpeech.OnInitListener() {
+                            @Override
+                            public void onInit(int status) {
+                                ttsReady = status == TextToSpeech.SUCCESS;
+                                if (!ttsReady) { speakDone(); return; }
+                                tts.setOnUtteranceProgressListener(new UtteranceProgressListener() {
+                                    @Override public void onStart(String id) { }
+                                    @Override public void onDone(String id) { if ("last".equals(id)) speakDone(); }
+                                    @Override public void onError(String id) { speakDone(); }
+                                });
+                                speakPending();
+                            }
+                        });
+                    } else if (ttsReady) {
+                        speakPending();
+                    }
+                }
+            });
+        }
+
+        @JavascriptInterface
+        public void stopSpeak() {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (tts != null) tts.stop();
                 }
             });
         }
@@ -378,6 +423,35 @@ public class MainActivity extends Activity {
         }
     }
 
+    /** 기다리던 글을 읽는다. 엔진 한도(보통 4000자)를 넘지 않게 문장 단위로 나눠 차례로 넣는다 */
+    private void speakPending() {
+        String text = pendingSpeech;
+        pendingSpeech = null;
+        if (tts == null || text == null) return;
+        tts.setLanguage(Locale.forLanguageTag(pendingLang == null || pendingLang.isEmpty() ? "ko-KR" : pendingLang));
+        tts.setSpeechRate(0.9f);
+        int max = Math.max(200, TextToSpeech.getMaxSpeechInputLength() - 10);
+        java.util.List<String> parts = new java.util.ArrayList<>();
+        StringBuilder cur = new StringBuilder();
+        for (String sentence : text.split("(?<=[.!?。])\\s+")) {
+            if (cur.length() + sentence.length() + 1 > max && cur.length() > 0) { parts.add(cur.toString()); cur.setLength(0); }
+            cur.append(sentence).append(' ');
+        }
+        if (cur.length() > 0) parts.add(cur.toString());
+        for (int i = 0; i < parts.size(); i++) {
+            tts.speak(parts.get(i), i == 0 ? TextToSpeech.QUEUE_FLUSH : TextToSpeech.QUEUE_ADD, null, i == parts.size() - 1 ? "last" : "part" + i);
+        }
+    }
+
+    private void speakDone() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (web != null) web.evaluateJavascript("window.__speakDone && window.__speakDone()", null);
+            }
+        });
+    }
+
     private void saveDone(final String result) {
         if (web != null) web.evaluateJavascript("window.__saveDone && window.__saveDone(" + JSONObject.quote(result) + ")", null);
     }
@@ -468,6 +542,10 @@ public class MainActivity extends Activity {
 
     @Override
     protected void onDestroy() {
+        if (tts != null) {
+            tts.shutdown();
+            tts = null;
+        }
         if (web != null) {
             web.destroy();
             web = null;

@@ -149,10 +149,10 @@ export const SERVICE_TEXT = {
     "ja": "宿泊・ツアー予約申請",
     "zh": "住宿及旅游预订申请"
   },
-  "예약 신청 · 오늘강원": {
-    "en": "Booking request · Oneul Gangwon",
-    "ja": "予約申請・今日の江原",
-    "zh": "预订申请·今日江原"
+  "예약 신청 · 보폭": {
+    "en": "Booking request · Bopok",
+    "ja": "予約申請・ボポク",
+    "zh": "预订申请·步幅"
   },
   "기존 신청 조회·취소": {
     "en": "View or cancel a request",

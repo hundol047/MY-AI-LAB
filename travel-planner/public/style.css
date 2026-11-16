@@ -769,3 +769,24 @@ body:not(.has-server) .place .acts .needs-server { display: none; }
 .split-list li { display: grid; grid-template-columns: 1fr 1.3fr 1fr auto; gap: 6px; margin-bottom: 6px; }
 .split-result { background: var(--bg); border-radius: 10px; padding: 10px 12px; margin-top: 10px; font-size: 14px; }
 .split-result ul { padding-left: 18px; margin: 6px 0; }
+/* 걷기 힘듦·휠체어: 걷는 양·무장애 시설을 접지 않고 바로 */
+.access.yes, .access.none { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: baseline; }
+.access .walk-lv { font-weight: 600; }
+.access .walk-lv.w1 { color: #2e7d4f; }
+.access .walk-lv.w2 { color: #a0661b; }
+.access .walk-lv.w3 { color: var(--warn, #b3422f); }
+.access .acc-tags { color: var(--brand); font-weight: 600; }
+.access details { flex-basis: 100%; }
+#timeline li.walkday { list-style: none; margin: 0 0 10px; padding: 10px 12px; border-radius: 12px; background: color-mix(in srgb, var(--brand) 8%, var(--surface)); font-size: 13.5px; font-weight: 600; }
+#timeline li.walkday small { display: block; font-weight: 400; color: var(--sub); font-size: 12px; margin-top: 2px; }
+/* 휠체어·걷기 힘듦 이동 도움 */
+.access-info { padding: 14px 16px; margin-top: 12px; }
+.access-info h3 { margin: 0 0 8px; font-size: 15px; }
+.access-info .acc-list { list-style: none; padding: 0; margin: 0 0 8px; display: grid; gap: 6px; font-size: 13.5px; }
+.access-info .acc-list li.warn { color: var(--warn, #b3422f); }
+.access-info .sub { margin: 6px 0 0; font-size: 12.5px; color: var(--sub); line-height: 1.55; }
+/* 큰 글씨: 지도는 그대로 두고 글·카드만 */
+html.big #setup, html.big #result > :not(.layout), html.big #timeline { zoom: 1.15; }
+.big-toggle { font-weight: 800; }
+.big-toggle[aria-pressed="true"] { background: var(--brand); color: #fff; }
+.hero-sub { margin: 8px 0 0; font-size: 15px; font-weight: 600; opacity: .95; }

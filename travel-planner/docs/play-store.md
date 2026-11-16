@@ -1,4 +1,4 @@
-# Google Play 등록 준비물 (오늘강원)
+# Google Play 등록 준비물 (보폭)
 
 ## 1. 파일
 
@@ -16,13 +16,16 @@
 ## 2. 스토어 등록정보
 
 **앱 이름** (30자 이내)
-> 오늘강원 - 강원 여행 일정 만들기
+> 보폭 - 걷기 편한 강원 여행 일정
 
 **간단한 설명** (80자 이내)
-> 말하면 운영시간·휴무까지 맞춘 강원 여행 일정을 만들어 주는 무료 앱
+> 많이 걷지 않아도, 휠체어로도. 운영시간까지 맞춘 강원 여행 일정을 만들어 주는 무료 앱
 
 **자세한 설명**
-> 오늘강원은 강원 18개 시군 여행 일정을 만들어 주는 무료 앱입니다. 로그인 없이 바로 쓸 수 있어요.
+> 보폭은 "내 걸음에 맞춘" 강원 18개 시군 여행 일정을 만들어 주는 무료 앱입니다. 로그인 없이 바로 쓸 수 있어요.
+>
+> ■ 걷기 힘들어도, 휠체어로도
+> "🦯 걷기 힘들어요"나 "♿ 휠체어"를 고르면 오래 걷거나 계단·산길인 곳을 빼고, 하루 걷는 양을 정해 그 안에서 일정을 짜요. 관광지를 두 곳 이어 가면 쉬는 시간을 넣고, 300m가 넘는 거리는 걷지 않고 차로 이어요. 장소마다 걷는 양, 경사로·장애인 화장실·휠체어 대여·장애인 주차(한국관광공사 무장애 여행 정보), 주차장에서 입구까지 거리를 보여 줘요. 큰 글씨와 일정 읽어 주기도 있어요.
 >
 > ■ 말하면 일정이 나와요
 > "다음 주 토요일 부모님이랑 강릉 1박, 차로" 처럼 말하거나 쓰면 날짜·동행·이동수단에 맞는 일정을 만들어요. 성격이 다른 일정 3개(추천·여유롭게·색다른 코스)를 비교해 고를 수 있어요.
@@ -52,11 +55,11 @@
 > 정보 출처: 한국관광공사 TourAPI, 공공데이터포털, 기상청, 국토교통부 등. 임시 휴장·통제는 미리 알 수 없으니 출발 전 공식 안내를 확인해 주세요.
 
 **영어 (선택)**
-- Name: Oneul Gangwon - Trip Planner
-- Short: Say your trip and get a Gangwon plan matched to real opening hours. Free.
-- Full: Free trip planner for all 18 counties of Gangwon, Korea. Speak or type your trip and get a plan that respects closing days, break times, last entry and seasonal hours, with parking, crowd forecasts, weather alerts, train and bus times, pet- and wheelchair-friendly options, a 3D map, and Korean/English/Japanese/Chinese. No sign-up needed.
+- Name: Bopok - Easy-walking Gangwon trips
+- Short: Gangwon trip plans for limited walking and wheelchairs, matched to real opening hours.
+- Full: Free trip planner for all 18 counties of Gangwon, Korea, built for travelers who can't walk far or use a wheelchair: it skips long walks and stairs, keeps a daily walking budget, adds rest breaks, and shows ramps, accessible restrooms, wheelchair rental and parking for each stop. Large text and read-aloud included. Speak or type your trip and get a plan that respects closing days, break times, last entry and seasonal hours, with parking, crowd forecasts, weather alerts, train and bus times, pet- and wheelchair-friendly options, a 3D map, and Korean/English/Japanese/Chinese. No sign-up needed.
 
-**분류**: 앱 · 여행 및 지역정보 · 태그: 여행 플래너, 지도, 국내 여행
+**분류**: 앱 · 여행 및 지역정보 · 태그: 여행 플래너, 무장애 여행, 지도, 국내 여행
 **연락처 이메일**: (Play 개발자 계정의 이메일 — 직접 입력)
 **웹사이트**: https://hundol047.github.io/MY-AI-LAB/
 
@@ -85,7 +88,7 @@
 ## 4. 등록 순서
 
 1. Google Play Console 개발자 계정 만들기 (등록비 $25, 본인 인증)
-2. 앱 만들기 → 이름 "오늘강원", 기본 언어 한국어, 앱·무료
+2. 앱 만들기 → 이름 "보폭", 기본 언어 한국어, 앱·무료
 3. **비공개 테스트 트랙**에 AAB 올리기 — 2023년 11월 이후 만든 개인 계정은 **테스터 12명 이상이 14일 동안 연속으로 참여**해야 프로덕션(정식 출시)을 신청할 수 있습니다
 4. 위 등록정보·그래픽·앱 콘텐츠 설문 채우기
 5. 14일 뒤 프로덕션 출시 신청 → 검토(보통 수일)

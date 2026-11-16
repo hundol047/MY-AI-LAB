@@ -33,6 +33,35 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  " · 멀어요, 입구 앞 내려 주기 추천": " · far; drop off at the entrance",
+  "큰 글씨": "Large text",
+  "일정 읽어 주기": "Read the plan aloud",
+  "글씨를 크게 했어요": "Text enlarged",
+  "글씨를 원래대로 했어요": "Text size reset",
+  "{n}일차 일정이에요.": "Here is day {n}.",
+  "{min}분 쉬어 가요.": "Take a {min}-minute rest.",
+  "{time}, {place}. {mode} {min}분.": "{time}, {place}. {min} minutes by {mode}.",
+  "이 기기에서는 읽어 주기를 쓸 수 없어요": "Read-aloud isn't available on this device",
+  "♿ 휠체어 이동 도움": "♿ Wheelchair travel help",
+  "🦯 걷기 편한 여행 도움": "🦯 Easy-walking travel help",
+  "무장애 정보 없음": "No accessibility info",
+  "계단·경사로를 전화로 미리 확인하세요": "call ahead about stairs and ramps",
+  "🚆 KTX·ITX는 코레일 예매 때 휠체어석을 고를 수 있고, 역에서 타고 내릴 때 도움을 신청할 수 있어요 (코레일 고객센터 1544-7788).": "🚆 On KTX/ITX you can choose a wheelchair seat when booking with Korail and request boarding help at the station (Korail 1544-7788).",
+  "🚐 장애인 콜택시(특별교통수단)는 시군마다 미리 이용 등록이 필요해요. 여행 전에 등록 방법을 확인하세요:": "🚐 Accessible call taxis need advance registration in each city/county. Check how to register before your trip:",
+  "이 일정은 오래 걷는 곳을 빼고, 관광지를 두 곳 이어 가면 쉬는 시간을 넣었어요. 무장애 정보는 한국관광공사 자료예요.": "This plan skips long walks and adds a rest after every two sights. Accessibility info is from the Korea Tourism Organization.",
+  "내 보폭에 맞춘 여행 · 걷기 힘들어도, 휠체어로도": "Travel at your own pace · even if walking is hard, even by wheelchair",
+  "🦯 걷기 힘들어요": "🦯 Walking is hard",
+  "♿ 이 날 휠체어로 움직이는 거리 약 {km}km": "♿ About {km} km by wheelchair this day",
+  "🚶 이 날 걷는 양 약 {km}km": "🚶 About {km} km of walking this day",
+  " · 쉬는 시간 {n}번": " · {n} rest breaks",
+  "장소 안 동선은 추정이에요. 주차장·입구에서 가까운 곳 위주로 골랐어요.": "Walking inside each place is estimated. We chose places close to parking and entrances.",
+  "☕ 쉬어 가기 {min}분 (앉아서 쉬기·화장실)": "☕ {min}-min rest (sit down, restroom)",
+  "평지 위주 · 짧게 (약 200m)": "Mostly flat · short (about 200 m)",
+  "조금 걸어요 (약 800m)": "Some walking (about 800 m)",
+  "많이 걸어요 (오르막·2km 이상)": "Lots of walking (uphill, 2 km+)",
+  "주차장에서 약 {m}m": "About {m} m from parking",
+  "전화로 확인": "Call to check",
+  "자세히 (관광공사 원문)": "Details (KTO original, Korean)",
   "아이와 가기 좋아요": "Good with kids",
   "부모님과 가기 좋아요": "Good with parents",
   "출발 알림": "Departure alerts",
@@ -383,7 +412,7 @@ export const EN = {
   "대화 번역을 불러오지 못했어요. 원문을 표시합니다.": "Translation unavailable. Showing the original message.",
 
   // 머리글·첫 화면
-  "오늘강원": "Oneul Gangwon",
+  "보폭": "Bopok",
   "링크 공유": "Share",
   "캘린더 저장": "Calendar",
   "강원 여행 일정,<br>고르기만 하세요": "Your Gangwon trip,<br>just pick and go",
@@ -765,7 +794,7 @@ export function applyStatic(root = document) {
     el.title = t(el.dataset.koTitle);
     el.setAttribute("aria-label", el.title);
   });
-  document.title = t("오늘강원");
+  document.title = t("보폭");
   root.querySelectorAll("[data-lang]").forEach((b) => {
     const on = b.dataset.lang === lang;
     b.classList.toggle("on", on);

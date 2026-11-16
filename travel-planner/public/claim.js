@@ -273,7 +273,7 @@ function docHTML(a) {
   <h2>3. 첨부</h2>
   <ul><li>결제 영수증 ${a.receipts.filter((r) => r.it.blob).length}장</li><li>방문 인증 사진 ${a.proven.length}장</li>${nights(s) > 0 ? `<li>숙박이용확인서 ${a.stays.length ? "1부" : "(미첨부)"}</li>` : ""}</ul>
   <p class="sign">위와 같이 여행 경비 정산을 신청합니다.<br>${fmtD(today)}<br>신청인 ${esc(s.name) || "&nbsp;".repeat(16)} (서명)</p>
-  <p class="note">※ 오늘강원 앱이 영수증·사진으로 만든 초안입니다. 금액·사용처는 원본 영수증과 같은지 확인하세요. 인정 기준·환급액은 시군 공고와 심사로 정해집니다.</p>
+  <p class="note">※ 보폭 앱이 영수증·사진으로 만든 초안입니다. 금액·사용처는 원본 영수증과 같은지 확인하세요. 인정 기준·환급액은 시군 공고와 심사로 정해집니다.</p>
   </article>`;
 }
 function stayFormHTML(s) {
