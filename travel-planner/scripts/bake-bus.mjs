@@ -40,8 +40,10 @@ const dist = (a, b) => Math.round(Math.hypot((a.lat - b.lat) * 111000, (a.lng - 
 
 const { PLACES } = await import("../public/data.js");
 const spots = PLACES.filter((p) => p.lat && p.lng);
-const near = {}; // 장소 id → [{routeKey, stop, m}]
+const near = {}; // 장소 id → [{routeKey, stop, m, node, ord}]
+const CITY_OF = {}; // 장소 id → TAGO 도시 코드 (실시간 도착 조회용)
 const routes = new Map(); // `${city}:${routeid}` → {city, id, no, tp, first, last}
+const nstops = new Map(); // 노선마다 정류장 수 (순환 노선의 몇 정류장 뒤 계산)
 const log = [];
 for (const [city, name] of Object.entries(CITIES)) {
   const list = await call("getRouteNoList", { cityCode: city, numOfRows: "500", pageNo: "1" });
@@ -49,12 +51,13 @@ for (const [city, name] of Object.entries(CITIES)) {
   for (const r of list) {
     const stops = await call("getRouteAcctoThrghSttnList", { cityCode: city, routeId: r.routeid, numOfRows: "400", pageNo: "1" }).catch(() => []);
     const rk = `${city}:${r.routeid}`;
+    nstops.set(rk, stops.length);
     routes.set(rk, { city, id: r.routeid, no: String(r.routeno), tp: r.routetp || "", first: hm(r.startvehicletime), last: hm(r.endvehicletime) });
     let any = false;
     for (const p of spots) {
       let best = null;
-      for (const s of stops) { if (!s.gpslati) continue; const m = dist(p, { lat: +s.gpslati, lng: +s.gpslong }); if (m <= RADIUS && (!best || m < best.m)) best = { stop: s.nodenm, m }; }
-      if (best) { (near[p.id] ??= []).push({ rk, ...best }); any = true; }
+      for (const s of stops) { if (!s.gpslati) continue; const m = dist(p, { lat: +s.gpslati, lng: +s.gpslong }); if (m <= RADIUS && (!best || m < best.m)) best = { stop: s.nodenm, m, node: s.nodeid, ord: Number(s.nodeord) || 0 }; }
+      if (best) { (near[p.id] ??= []).push({ rk, ...best }); CITY_OF[p.id] ??= city; any = true; }
     }
     if (any) served++;
   }
@@ -95,7 +98,9 @@ for (const [id, list] of Object.entries(near)) {
   const top = rs[0];
   const shown = rs.slice(0, 6);
   // 요약의 막차는 카드에 보이는 노선 중에서 고른다 (안 보이는 노선의 막차를 쓰면 근거를 찾을 수 없다)
-  places[id] = { stop: top.stop, m: top.m, last: shown.reduce((a, r) => (r.last && r.last > a ? r.last : a), ""), routes: shown.map(({ no, tp, first, last, gap, stop, m }) => ({ no, tp, first, last, gap, stop, m })) };
+  // 엔진용: 노선(방면)마다 이 장소에서 타고 내리는 정류장 번호·순서 (실시간 도착 조회에도 쓴다)
+  const legs = list.map((x) => { const r = routes.get(x.rk); return r && (r.first || r.last) ? { r: r.id, no: r.no, node: x.node, ord: x.ord, n: nstops.get(x.rk) || 0, m: x.m, gap: r.gap || null, first: r.first, last: r.last } : null; }).filter(Boolean);
+  places[id] = { stop: top.stop, m: top.m, city: CITY_OF[id] || null, last: shown.reduce((a, r) => (r.last && r.last > a ? r.last : a), ""), routes: shown.map(({ no, tp, first, last, gap, stop, m }) => ({ no, tp, first, last, gap, stop, m })), legs };
 }
 if (!Object.keys(places).length) throw new Error("근처 버스를 하나도 찾지 못했습니다. 기존 파일을 유지합니다.");
 const out = { builtAt: new Date().toISOString(), source: "국토교통부 TAGO 버스노선정보", cities: Object.values(CITIES), radius: RADIUS, places };

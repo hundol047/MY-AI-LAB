@@ -33,6 +33,16 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🚌 {no}번 {n}정류장": "🚌 Bus {no}, {n} stops",
+  " · 기다림 약 {min}분": " · about {min} min wait",
+  "실시간 도착": "Live arrivals",
+  " · 한 번에 가는 버스가 없어 갈아타야 할 수 있어요 (길찾기로 확인)": " · no direct bus, you may need to transfer (check Directions)",
+  " 확인 중…": " checking…",
+  " {no}번 {min}분 뒤 ({n}정류장 전)": " Bus {no} in {min} min ({n} stops away)",
+  " {no}번은 곧 오는 차가 없어요 · 다른 버스: {list}": " No bus {no} coming soon · others: {list}",
+  "{no}번 {min}분": "{no} in {min} min",
+  " 곧 오는 버스가 없어요": " No buses coming soon",
+  " 실시간 정보를 받지 못했어요 (시간표 기준으로 보세요)": " Couldn't get live info (use the timetable)",
   "{s} 추천": "Best in {s}",
   "봄": "spring",
   "여름": "summer",

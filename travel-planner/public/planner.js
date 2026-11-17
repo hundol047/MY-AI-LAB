@@ -193,6 +193,28 @@ export function fitsHours(h, start, finish) {
 // 주말처럼 거의 모든 곳이 붐비는 날에는 피할 곳이 없으므로, 그날 강원 전체 평균보다 20 이상 더 붐비는 곳만 미룬다
 // (자료가 없는 장소가 유명한 장소보다 앞서지 않게)
 let CROWD = {}, dayMean = {};
+// 시내·농어촌버스 (bus.json의 장소별 노선·정류장 순서, TAGO 노선정보): 대중교통 일정에서 "같은 버스로 몇 정류장"을 계산한다
+let BUS = {};
+export function setBus(places) { BUS = places || {}; }
+// A에서 B까지 갈아타지 않고 가는 버스: 같은 노선(방면)에서 B의 정류장 순서가 A보다 뒤 · 그 시각에 다니는지(첫차~막차)
+// 걷기(정류장까지, 시속 4km) + 기다림(배차 간격의 절반, 최대 30분, 모르면 15분) + 타는 시간(정류장당 약 1.8분)
+export function busLeg(a, b, depMin) {
+  const la = a?.id && BUS[a.id]?.legs, lb = b?.id && BUS[b.id]?.legs;
+  if (!la || !lb) return null;
+  let best = null;
+  for (const x of la) for (const y of lb) {
+    if (x.r !== y.r) continue;
+    const n = y.ord - x.ord;
+    if (n <= 0 || n > 60) continue;
+    const toStop = Math.round(x.m / 67), wait = x.gap ? Math.min(30, Math.round(x.gap / 2)) : 15;
+    const board = depMin + toStop + wait;
+    if ((x.last && board > toMin(x.last)) || (x.first && board < toMin(x.first))) continue; // 그 시각엔 이 버스가 없다
+    const min = toStop + wait + Math.round(n * 1.8) + Math.round(y.m / 67);
+    if (!best || min < best.min) best = { min, no: x.no, stops: n, wait, route: x.r, node: x.node, city: BUS[a.id].city || null };
+  }
+  return best;
+}
+
 export function setCrowd(places) { CROWD = places || {}; dayMean = {}; }
 export const crowdOn = (id, dateStr) => CROWD[id]?.rates?.[dateStr] ?? null;
 function meanOn(dateStr) {
@@ -301,7 +323,12 @@ function stayOf(p, opts) {
 }
 
 function tryPlace(p, from, t, input, opts, end, dateStr, legMin = null) {
-  const tr = travel(from, p, input.move, (opts.access || []).some((a) => a === "walker" || a === "wheelchair") ? 0.3 : 1.2);
+  let tr = travel(from, p, input.move, (opts.access || []).some((a) => a === "walker" || a === "wheelchair") ? 0.3 : 1.2);
+  // 대중교통: 버스 노선 자료가 있는 두 장소면 실제 노선으로 (한 번에 가는 버스가 없으면 갈아타기 10분 더)
+  if (input.move === "transit" && tr.mode === "bus" && tr.km < 60 && legMin === null && BUS[from?.id] && BUS[p.id]) {
+    const bl = busLeg(from, p, t);
+    tr = bl ? { ...tr, min: round5(bl.min), bus: bl } : { ...tr, min: tr.min + 10, transfer: true };
+  }
   if (legMin !== null) tr.min = legMin;
   const arrive = t + tr.min;
   const h = hoursFor(p, dateStr);
@@ -502,7 +529,7 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
   let walked = 0;
   const commit = (p, r, kind) => {
     const prevIt = items[items.length - 1];
-    items.push({ id: p.id, place: p, kind, start: r.start, end: r.finish, travelMin: r.tr.min, travelMode: r.tr.mode, km: r.tr.km });
+    items.push({ id: p.id, place: p, kind, start: r.start, end: r.finish, travelMin: r.tr.min, travelMode: r.tr.mode, km: r.tr.km, ...(r.tr.bus ? { bus: r.tr.bus } : {}), ...(r.tr.transfer ? { transfer: true } : {}) });
     used.add(p.id);
     from = p; t = r.finish;
     walked += walkMeters(p) + (r.tr.mode === "walk" ? Math.round(r.tr.km * 1000) : 0);
@@ -587,6 +614,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       // 빈 시간 채우기는 지금 있는 지역 안에서 (다른 지역에 들렀다 저녁 먹으러 되돌아오는 동선이 되지 않게)
       if (filler && from.area && p.area !== from.area) v -= 3;
       v -= r.wait * 0.05;
+      if (r.tr.transfer) v -= 2; // 대중교통: 한 번에 가는 버스가 없는 곳은 뒤로 (갈아타기)
+      else if (r.tr.bus) v += 0.5;
       if (walkBudget && r.tr.mode === "walk" && r.tr.km > 0.4) v -= (r.tr.km - 0.4) * 6; // 걷기 힘듦·휠체어: 400m 넘게 걸어가는 구간은 뒤로
       if (kind !== "visit") v -= r.tr.min * 0.15; // 식사는 가까운 곳 우선
       const fromAnchor = distanceKm(anchor, p);

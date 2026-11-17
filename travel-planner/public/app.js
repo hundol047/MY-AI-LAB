@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, replanFromNow, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
+import { planTrip, swapItem, replanFromNow, setBus, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -143,6 +143,7 @@ $("#form").addEventListener("submit", async (e) => {
   if (course) { Object.assign(state.opts, { keep: course.items, softKeep: true, course: course.id, ...(course.lodging ? { lodgingId: course.lodging } : {}) }); state.choice = "course"; }
   restoredFromLink = false;
   dayIdx = 0;
+  if (input.move === "transit") await Promise.race([busReady, sleep(3000)]); // 버스 노선 자료를 받은 뒤 짠다 (최대 3초)
   await thinkThrough(input, state.opts, !!v);
   rebuild(!!course);
   rememberSeen();
@@ -817,6 +818,10 @@ function itemHTML(it, i, day) {
   const mode = t(MODE[it.travelMode]);
   let leg = i === 0 ? t("{start}에서 {mode} {min}분", { start: esc(startName(day.start, trip.lodging)), mode, min: it.travelMin }) : it.travelMode === "same" ? t("바로 옆") : t("{mode} {min}분", { mode, min: it.travelMin });
   if (it.travelMode === "taxi" && it.km) leg += t(" · 약 {won}", { won: won(taxiFare(it.km)) });
+  // 버스 노선으로 계산한 구간: 몇 번 버스로 몇 정류장 · 기다림 · (서버가 있으면) 실시간 도착
+  if (it.bus) leg += ` · <b class="bus-no">${t("🚌 {no}번 {n}정류장", { no: esc(it.bus.no), n: it.bus.stops })}</b>${t(" · 기다림 약 {min}분", { min: it.bus.wait })}`
+    + (it.bus.city && it.bus.node ? ` <button type="button" class="linkish needs-server" data-live="${esc(it.bus.city)}|${esc(it.bus.node)}|${esc(it.bus.no)}">${t("실시간 도착")}</button><span class="live-out"></span>` : "");
+  else if (it.transfer) leg += t(" · 한 번에 가는 버스가 없어 갈아타야 할 수 있어요 (길찾기로 확인)");
   // 앞 장소를 나와 다음 장소에 도착하기까지 30분 넘게 비면 "자유 시간"으로 보여 준다 (저녁 시간 기다림·문 여는 시간 기다림)
   const prev = i > 0 ? day.items[i - 1] : null, free = prev ? it.start - it.travelMin - prev.end : 0;
   if (prev?.restAfter) leg = t("☕ 쉬어 가기 {min}분 (앉아서 쉬기·화장실)", { min: free >= prev.restAfter ? free : prev.restAfter }) + " · " + leg;
@@ -897,7 +902,8 @@ function renderToday() {
     body = `<p>${t("다음: {place} {time}", { place: `<b>${name(s.item)}</b>`, time: fmt(s.item.start) })}</p>
       <p class="${s.late ? "warn" : ""}">${s.late ? t("⚠ 지금 출발해도 {arrive} 도착 · 입장 마감 {deadline}에 늦어요. '바꾸기'로 다른 곳을 고르세요", { arrive: fmt(s.arrive), deadline: fmt(s.deadline) })
         : left > 0 ? t("{leave}까지 출발하면 돼요 ({min}분 남음 · 이동 약 {travel}분)", { leave: fmt(s.leaveBy), min: left, travel: s.travelMin })
-        : t("지금 출발하세요 · 이동 약 {travel}분, {arrive} 도착", { travel: s.travelMin, arrive: fmt(s.arrive) })}</p>`;
+        : t("지금 출발하세요 · 이동 약 {travel}분, {arrive} 도착", { travel: s.travelMin, arrive: fmt(s.arrive) })}</p>
+      ${s.item.bus?.city && s.item.bus?.node ? `<p>${t("🚌 {no}번 {n}정류장", { no: esc(s.item.bus.no), n: s.item.bus.stops })} <button type="button" class="linkish needs-server" data-live="${esc(s.item.bus.city)}|${esc(s.item.bus.node)}|${esc(s.item.bus.no)}">${t("실시간 도착")}</button><span class="live-out"></span></p>` : ""}`;
   }
   box.innerHTML = `<h3>${t("오늘 여행 중")}</h3>${body}
     <div class="acts"><button type="button" class="ghost small" id="todayGps">${todayHere ? t("내 위치 기준 · 다시 계산") : t("내 위치로 다시 계산")}</button>
@@ -1027,7 +1033,8 @@ function crowdLine(p, dateStr) {
 // 장소 근처 시내·농어촌버스 (bus.json, 국토교통부 TAGO 버스노선정보 · 춘천·원주·횡성·태백·홍천·철원만)
 // 첫차·막차는 노선 기점 출발 시각이라 정류장 도착은 조금 늦다 → 막차 30분 전부터 경고한다
 let busData = null;
-fetchT("bus.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { busData = j; if (trip && state.input.move === "transit" && !$("#result").hidden) render(); }).catch(() => {});
+// 버스 노선 자료: 엔진이 대중교통 일정에서 "같은 버스로 몇 정류장"을 계산하도록 넘긴다 (대중교통 일정은 받은 뒤에 짠다)
+const busReady = fetchT("bus.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { busData = j; setBus(j?.places); if (trip && state.input.move === "transit" && !$("#result").hidden) render(); }).catch(() => {});
 // 시내버스 시간표 공개 자료(TAGO)가 없는 곳(강릉·속초·동해 등)에서 대중교통으로 다니는 날: 이동 시간이 예상임을 알리고 실제 버스는 길찾기로
 function busNoteHTML(day) {
   if (state.input.move !== "transit" || !day.items.length || !busData) return "";
@@ -2373,6 +2380,22 @@ $("#remindBtn").addEventListener("click", () => {
     today: t("오늘 여행 일정"), first: t("첫 일정 {place} {time} · {leave}까지 출발하면 돼요"), soon: t("15분 뒤 출발"), next: t("다음: {place} {time} 도착 예정 · 이동 약 {min}분"),
   });
   window.OhneulApp.scheduleReminders(JSON.stringify(list));
+});
+
+// 실시간 버스 도착 (앱 서버가 TAGO 버스도착정보로 받아 줌): 이 구간의 버스가 몇 분 뒤에 오는지
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-live]"); if (!b) return;
+  const [city, node, no] = b.dataset.live.split("|");
+  const out = b.nextElementSibling; out.textContent = t(" 확인 중…");
+  track("bus_live");
+  try {
+    const r = await fetchT(`api/bus/arrivals?city=${encodeURIComponent(city)}&node=${encodeURIComponent(node)}`, {}, 8000);
+    if (!r.ok) throw new Error(String(r.status));
+    const list = (await r.json()).list || [];
+    const mine = list.filter((x) => x.no === no), other = list.filter((x) => x.no !== no).slice(0, 2);
+    out.textContent = mine.length ? t(" {no}번 {min}분 뒤 ({n}정류장 전)", { no, min: mine[0].min, n: mine[0].stops })
+      : list.length ? t(" {no}번은 곧 오는 차가 없어요 · 다른 버스: {list}", { no, list: other.map((x) => t("{no}번 {min}분", { no: x.no, min: x.min })).join(", ") }) : t(" 곧 오는 버스가 없어요");
+  } catch { out.textContent = t(" 실시간 정보를 받지 못했어요 (시간표 기준으로 보세요)"); }
 });
 
 /* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */

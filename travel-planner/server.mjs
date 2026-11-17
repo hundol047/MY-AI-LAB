@@ -12,6 +12,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
 import { fetchWarnings } from "./scripts/kma-warnings.mjs";
+import { handleBusLive } from "./bus-live.mjs";
 import { PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -58,6 +59,9 @@ async function handle(req, res) {
   if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {
     return json(res, 410, {error:"LOCAL_GUIDE_ONLY", message:"Use the built-in travel guide. Menu entry is manual."});
   }
+
+  // 실시간 버스 도착·위치 (TAGO, 서버 키로만)
+  if (await handleBusLive(req, res, url, json)) return;
 
   // 기상특보: 서버의 TOUR_API_KEY(공공데이터포털 키)로 기상청 특보 현황을 받아 30분 동안 재사용한다 (키는 브라우저로 보내지 않는다)
   if (req.method === "GET" && url.pathname === "/api/warnings") {

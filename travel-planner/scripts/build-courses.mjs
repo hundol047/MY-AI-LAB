@@ -3,10 +3,13 @@
 // 코스는 장소 순서만 담고, 사용자가 고른 날짜에 맞춰 앱이 운영시간·휴무를 다시 확인한다 (쉬는 곳은 건너뛰고 빈 시간은 채움).
 // 실행: node scripts/build-courses.mjs [목표 개수=500]
 import { writeFile, mkdir } from "node:fs/promises";
-import { planTrip, verify, dayWalkMeters } from "../public/planner.js";
+import { planTrip, verify, dayWalkMeters, setBus } from "../public/planner.js";
+import { readFileSync } from "node:fs";
 import { FESTIVALS, AREAS } from "../public/data.js";
 
 const TARGET = Number(process.argv[2]) || 500;
+// 대중교통 코스는 버스 노선(같은 버스로 몇 정류장·막차)을 반영해 짠다 (앱과 같은 조건)
+setBus(JSON.parse(readFileSync(new URL("../public/bus.json", import.meta.url), "utf8")).places);
 const REGIONS = ["gangneung", "seorak", "chuncheon", "pyeongchang", "wonju"];
 const WHO = ["parents", "couple", "family", "solo", "pet"];
 const THEMES = { sea: ["sea"], culture: ["culture"], nature: ["nature"], food: ["food"], cafe: ["cafe"] };
