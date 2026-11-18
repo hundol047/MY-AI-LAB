@@ -820,7 +820,8 @@ function itemHTML(it, i, day) {
   if (it.travelMode === "taxi" && it.km) leg += t(" · 약 {won}", { won: won(taxiFare(it.km)) });
   // 버스 노선으로 계산한 구간: 몇 번 버스로 몇 정류장 · 기다림 · (서버가 있으면) 실시간 도착
   if (it.bus) leg += ` · <b class="bus-no">${t("🚌 {no}번 {n}정류장", { no: esc(it.bus.no), n: it.bus.stops })}</b>${t(" · 기다림 약 {min}분", { min: it.bus.wait })}`
-    + (it.bus.city && it.bus.node ? ` <button type="button" class="linkish needs-server" data-live="${esc(it.bus.city)}|${esc(it.bus.node)}|${esc(it.bus.no)}">${t("실시간 도착")}</button><span class="live-out"></span>` : "");
+    + (it.bus.city && it.bus.node ? ` <button type="button" class="linkish needs-server" data-live="${esc(it.bus.city)}|${esc(it.bus.node)}|${esc(it.bus.no)}">${t("실시간 도착")}</button><span class="live-out"></span>` : "")
+    + (it.bus.city && it.bus.route ? ` <button type="button" class="linkish needs-server" data-buspos="${esc(it.bus.city)}|${esc(it.bus.route)}|${esc(it.bus.no)}">${t("🗺 버스 위치")}</button>` : "");
   else if (it.transfer) leg += t(" · 한 번에 가는 버스가 없어 갈아타야 할 수 있어요 (길찾기로 확인)");
   // 앞 장소를 나와 다음 장소에 도착하기까지 30분 넘게 비면 "자유 시간"으로 보여 준다 (저녁 시간 기다림·문 여는 시간 기다림)
   const prev = i > 0 ? day.items[i - 1] : null, free = prev ? it.start - it.travelMin - prev.end : 0;
@@ -905,9 +906,10 @@ function renderToday() {
         : t("지금 출발하세요 · 이동 약 {travel}분, {arrive} 도착", { travel: s.travelMin, arrive: fmt(s.arrive) })}</p>
       ${s.item.bus?.city && s.item.bus?.node ? `<p>${t("🚌 {no}번 {n}정류장", { no: esc(s.item.bus.no), n: s.item.bus.stops })} <button type="button" class="linkish needs-server" data-live="${esc(s.item.bus.city)}|${esc(s.item.bus.node)}|${esc(s.item.bus.no)}">${t("실시간 도착")}</button><span class="live-out"></span></p>` : ""}`;
   }
-  box.innerHTML = `<h3>${t("오늘 여행 중")}</h3>${body}
+  box.innerHTML = `<h3>${t("오늘 여행 중")}</h3>${body}<div id="nearBusOut" class="near-bus"></div>
     <div class="acts"><button type="button" class="ghost small" id="todayGps">${todayHere ? t("내 위치 기준 · 다시 계산") : t("내 위치로 다시 계산")}</button>
     ${s.dayIdx !== dayIdx ? `<button type="button" class="ghost small" data-goday="${s.dayIdx}">${t("오늘 일정 보기")}</button>` : ""}
+    ${state.input.move === "transit" ? `<button type="button" class="ghost small needs-server" id="nearBus">${t("🚏 내 근처 버스")}</button>` : ""}
     ${s.state !== "done" ? `<button type="button" class="ghost small" data-replan="${s.dayIdx}">${t("지금부터 다시 짜기")}</button><button type="button" class="ghost small" data-replan="${s.dayIdx}" data-rain="1">${t("☔ 비 와요 · 실내로")}</button>` : ""}</div>`;
 }
 setInterval(() => { if (trip && !$("#result").hidden) renderToday(); }, 60000);
@@ -2396,6 +2398,47 @@ document.addEventListener("click", async (e) => {
     out.textContent = mine.length ? t(" {no}번 {min}분 뒤 ({n}정류장 전)", { no, min: mine[0].min, n: mine[0].stops })
       : list.length ? t(" {no}번은 곧 오는 차가 없어요 · 다른 버스: {list}", { no, list: other.map((x) => t("{no}번 {min}분", { no: x.no, min: x.min })).join(", ") }) : t(" 곧 오는 버스가 없어요");
   } catch { out.textContent = t(" 실시간 정보를 받지 못했어요 (시간표 기준으로 보세요)"); }
+});
+
+// 버스 위치: 이 노선의 버스가 지금 어디 있는지 지도에 🚌로 (TAGO 버스위치정보, 앱 서버 경유)
+let busMarkers = [];
+function clearBusMarkers() { for (const m of busMarkers) m.remove(); busMarkers = []; }
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-buspos]"); if (!b) return;
+  const [city, route, no] = b.dataset.buspos.split("|");
+  track("bus_pos");
+  try {
+    const r = await fetchT(`api/bus/locations?city=${encodeURIComponent(city)}&route=${encodeURIComponent(route)}`, {}, 8000);
+    if (!r.ok) throw new Error(String(r.status));
+    const list = (await r.json()).list || [];
+    clearBusMarkers();
+    if (!list.length) return toast(t("지금 다니는 {no}번 버스가 없어요", { no }));
+    const tip = (x) => t("{no}번 · {at} 부근", { no, at: x.at });
+    if (ml && window.maplibregl) {
+      for (const x of list) { const el = document.createElement("div"); el.className = "bus-pin"; el.textContent = "🚌"; el.title = tip(x); busMarkers.push(new maplibregl.Marker({ element: el }).setLngLat([x.lng, x.lat]).addTo(ml)); }
+    } else if (map && window.L) {
+      for (const x of list) busMarkers.push(L.marker([x.lat, x.lng], { icon: L.divIcon({ className: "bus-pin", html: "🚌", iconSize: [24, 24] }) }).addTo(map).bindTooltip(esc(tip(x))));
+    }
+    $("#map")?.scrollIntoView({ behavior: reduceMotion() ? "auto" : "smooth", block: "center" });
+    toast(t("{no}번 버스 {n}대를 지도에 표시했어요 (지금 위치)", { no, n: list.length }));
+  } catch { toast(t("버스 위치를 받지 못했어요")); }
+});
+// 오늘 여행 중: 내 위치 근처 정류장과 곧 오는 버스 (위치는 약 100m 단위로만 서버에 보낸다)
+document.addEventListener("click", (e) => {
+  if (!e.target.closest("#nearBus")) return;
+  const out = $("#nearBusOut");
+  if (!navigator.geolocation) return toast(t("이 기기에서는 위치를 쓸 수 없어요"));
+  out.textContent = t("근처 정류장을 찾는 중…");
+  navigator.geolocation.getCurrentPosition(async (pos) => {
+    track("bus_near");
+    try {
+      const r = await fetchT(`api/bus/near?lat=${pos.coords.latitude.toFixed(3)}&lng=${pos.coords.longitude.toFixed(3)}`, {}, 10000);
+      if (!r.ok) throw new Error(String(r.status));
+      const stops = (await r.json()).stops || [];
+      out.innerHTML = stops.length ? stops.slice(0, 2).map((st) => `<p><b>🚏 ${esc(st.name)}</b> ${t("약 {m}m", { m: st.m })}<br>${(st.list || []).slice(0, 5).map((x) => t("{no}번 {min}분", { no: esc(x.no), min: x.min })).join(" · ") || t("곧 오는 버스가 없어요")}</p>`).join("")
+        : `<p>${t("근처에 정류장이 없거나, 실시간 정보가 없는 지역이에요 (춘천·원주·태백·홍천·철원만)")}</p>`;
+    } catch { out.textContent = t("실시간 정보를 받지 못했어요"); }
+  }, () => { out.textContent = t("위치를 가져오지 못했어요"); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
 });
 
 /* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */

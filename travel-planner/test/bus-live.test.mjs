@@ -36,3 +36,23 @@ assert.equal(await handleBusLive(req(), {}, new URL("http://x/api/other"), json,
 const now = Date.now(); let n = 0; while (allow("9.9.9.9", now)) n++;
 assert.equal(n, 30);
 console.log("ok - 실시간 버스 서버 (입력 검사·도착 정리·20초 재사용·활용신청 전 503·요청 제한)");
+{
+  // 내 근처 정류장: 위치 범위 검사, 정류장 가까운 순 + 도착 예정
+  const { handleBusLive: h } = await import("../bus-live.mjs");
+  const res2 = [];
+  const j2 = (r, status, body) => res2.push({ status, body });
+  const near = async (u) => {
+    const s = String(u);
+    if (s.includes("getCrdntPrxmtSttnList")) { assert.ok(/gpsLati=37\.881&gpsLong=127\.729/.test(s), "위치는 소수 셋째 자리로"); return { ok: true, status: 200, json: async () => ({ response: { header: { resultCode: "00" }, body: { items: { item: [
+      { citycode: 32010, nodeid: "CCB250001885", nodenm: "인성병원", gpslati: 37.8815, gpslong: 127.7292 },
+      { citycode: 32010, nodeid: "CCB250001279", nodenm: "한국은행", gpslati: 37.8830, gpslong: 127.7300 }] } } } }) }; }
+    return { ok: true, status: 200, json: async () => ({ response: { header: { resultCode: "00" }, body: { items: { item: [{ routeno: 12, routeid: "CCB250001200", arrtime: 60, arrprevstationcnt: 2 }] } } } }) };
+  };
+  await h({ method: "GET", headers: {}, socket: { remoteAddress: "5.5.5.5" } }, {}, new URL("http://x/api/bus/near?lat=37.8813&lng=127.7286"), j2, "K", near);
+  assert.equal(res2.at(-1).status, 200);
+  assert.deepEqual(res2.at(-1).body.stops.map((x) => x.name), ["인성병원", "한국은행"]);
+  assert.equal(res2.at(-1).body.stops[0].list[0].no, "12");
+  await h({ method: "GET", headers: {}, socket: { remoteAddress: "5.5.5.5" } }, {}, new URL("http://x/api/bus/near?lat=10&lng=10"), j2, "K", near);
+  assert.equal(res2.at(-1).status, 400, "한국 밖 위치");
+  console.log("ok - 내 근처 정류장 (위치 반올림·가까운 순·도착 예정·범위 검사)");
+}

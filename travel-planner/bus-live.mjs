@@ -50,13 +50,34 @@ export function locations(city, route, key, fetchImpl) {
     .filter((x) => Number.isFinite(x.lat) && Number.isFinite(x.lng)).slice(0, 40));
 }
 
-// 서버 라우트: GET /api/bus/arrivals?city=&node=, GET /api/bus/locations?city=&route=
+// 내 위치 근처 정류장 (버스정류소정보) + 가까운 두 곳의 도착 예정: [{city, node, name, m, list}]
+// 위치는 소수 셋째 자리(약 100m)로 반올림해서 묻고 저장한다 (정확한 위치를 TAGO에 보내지 않고, 근처 사람끼리 결과를 다시 쓴다)
+export const validLatLng = (lat, lng) => Number.isFinite(lat) && Number.isFinite(lng) && lat > 33 && lat < 39 && lng > 124 && lng < 132;
+export function nearStops(lat, lng, key, fetchImpl) {
+  const la = lat.toFixed(3), ln = lng.toFixed(3);
+  return cached(`n:${la}:${ln}`, async () => {
+    const stops = (await tago("BusSttnInfoInqireService", "getCrdntPrxmtSttnList", { gpsLati: la, gpsLong: ln, numOfRows: "10" }, key, fetchImpl))
+      .map((x) => ({ city: String(x.citycode ?? ""), node: String(x.nodeid ?? ""), name: String(x.nodenm ?? ""), m: Math.round(Math.hypot((+x.gpslati - +la) * 111000, (+x.gpslong - +ln) * 88000)) }))
+      .filter((x) => validCity(x.city) && validId(x.node)).sort((a, b) => a.m - b.m).slice(0, 3);
+    for (const st of stops.slice(0, 2)) st.list = await arrivals(st.city, st.node, key, fetchImpl).catch(() => []);
+    return stops;
+  });
+}
+
+// 서버 라우트: GET /api/bus/arrivals?city=&node=, GET /api/bus/locations?city=&route=, GET /api/bus/near?lat=&lng=
 export async function handleBusLive(req, res, url, json, key = process.env.TOUR_API_KEY, fetchImpl) {
   const p = url.pathname;
-  if (req.method !== "GET" || (p !== "/api/bus/arrivals" && p !== "/api/bus/locations")) return false;
+  if (req.method !== "GET" || !["/api/bus/arrivals", "/api/bus/locations", "/api/bus/near"].includes(p)) return false;
   if (!key) { json(res, 503, { error: "BUS_LIVE_UNAVAILABLE" }); return true; }
   const ip = String(req.headers["x-forwarded-for"] || req.socket?.remoteAddress || "").split(",")[0].trim();
   if (!allow(ip)) { json(res, 429, { error: "TOO_MANY_REQUESTS" }); return true; }
+  if (p === "/api/bus/near") {
+    const lat = Number(url.searchParams.get("lat")), lng = Number(url.searchParams.get("lng"));
+    if (!validLatLng(lat, lng)) { json(res, 400, { error: "BAD_REQUEST" }); return true; }
+    try { json(res, 200, { at: new Date().toISOString(), stops: await nearStops(lat, lng, key, fetchImpl) }); }
+    catch { json(res, 503, { error: "BUS_LIVE_UNAVAILABLE" }); }
+    return true;
+  }
   const city = url.searchParams.get("city"), id = url.searchParams.get(p.endsWith("arrivals") ? "node" : "route");
   if (!validCity(city) || !validId(id)) { json(res, 400, { error: "BAD_REQUEST" }); return true; }
   try {

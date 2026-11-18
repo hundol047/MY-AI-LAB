@@ -809,3 +809,5 @@ html.big #setup, html.big #result > :not(.layout), html.big #timeline { zoom: 1.
 /* 버스 노선 구간 · 실시간 도착 */
 .leg .bus-no { color: var(--brand); }
 .leg .live-out { font-weight: 600; color: var(--brand); }
+.bus-pin { font-size: 22px; line-height: 1; filter: drop-shadow(0 1px 2px rgba(0,0,0,.35)); background: none !important; border: 0 !important; }
+.near-bus p { margin: 6px 0 0; font-size: 13px; line-height: 1.5; }

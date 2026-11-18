@@ -33,6 +33,17 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🗺 버스 위치": "🗺 Bus positions",
+  "지금 다니는 {no}번 버스가 없어요": "No bus {no} running right now",
+  "{no}번 · {at} 부근": "Bus {no} · near {at}",
+  "{no}번 버스 {n}대를 지도에 표시했어요 (지금 위치)": "Showing {n} bus(es) on route {no} on the map (live)",
+  "버스 위치를 받지 못했어요": "Couldn't get bus positions",
+  "🚏 내 근처 버스": "🚏 Buses near me",
+  "근처 정류장을 찾는 중…": "Finding nearby stops…",
+  "약 {m}m": "about {m} m",
+  "곧 오는 버스가 없어요": "No buses coming soon",
+  "근처에 정류장이 없거나, 실시간 정보가 없는 지역이에요 (춘천·원주·태백·홍천·철원만)": "No stops nearby, or live info isn't available here (Chuncheon, Wonju, Taebaek, Hongcheon, Cheorwon only)",
+  "실시간 정보를 받지 못했어요": "Couldn't get live info",
   "🚌 {no}번 {n}정류장": "🚌 Bus {no}, {n} stops",
   " · 기다림 약 {min}분": " · about {min} min wait",
   "실시간 도착": "Live arrivals",
