@@ -313,11 +313,11 @@ document.addEventListener("click", (e) => {
 });
 
 /* ---------- 추천 코스 (미리 짜 둔 500개) ----------
-   지역·기간·동행·걷기 정도·테마로 거르면 맞는 코스가 나온다. 고르면 여행 날짜에 맞춰 운영시간·휴무를 다시 확인한다 */
+   일정을 만들면(조건 고르기·말하기) 결과 화면에 그 조건에 맞는 코스 3개를 추천한다. 고르면 여행 날짜에 맞춰 운영시간·휴무를 다시 확인한다 */
 const THEME_KO = { sea: "바다", culture: "역사·문화", nature: "자연·산책", food: "맛집", cafe: "카페" };
 const SEASON_KO = { spring: "봄", summer: "여름", autumn: "가을", winter: "겨울" };
 const ACCESS_KO = { walker: "🦯 걷기 편한", wheelchair: "♿ 휠체어로" };
-let coursesData = null, courseFilter = { region: "", days: "", who: "", access: "", theme: "" }, courseShown = 6;
+let coursesData = null;
 async function loadCourses() {
   if (!coursesData) coursesData = await fetchT("courses.json", {}, 8000).then((r) => (r.ok ? r.json() : null)).then((j) => j?.courses || []).catch(() => []);
   return coursesData;
@@ -333,38 +333,23 @@ function courseCard(c) {
     <span class="c-badges">${badges.map((x) => `<i>${esc(x)}</i>`).join("")}</span>
     <span class="c-stats">${t("{n}곳 · 이동 {m} · 걷기 약 {km}km", { n: c.stats.places, m: minutesLabel(c.stats.moveMin), km: c.stats.walkKm })}</span><span class="hp-go" aria-hidden="true">›</span></button>`;
 }
-const courseMatch = (c, f) => (!f.region || c.region === f.region) && (!f.days || c.days === Number(f.days)) && (!f.who || c.who === f.who) && (f.access === "" ? true : f.access === "none" ? !c.access : c.access === f.access) && (!f.theme || c.theme === f.theme);
-// 결과 화면: 같은 조건(지역·기간·동행·걷기)의 추천 코스 3개
+// 결과 화면: 고른 조건·말한 조건에 가장 잘 맞는 추천 코스 3개 (미리 짜 둔 코스 중에서)
+// 지역은 같아야 하고, 걷기 조건(걷기 힘듦·휠체어)이 있으면 그것도 같아야 한다. 나머지(기간·동행·테마)는 많이 맞을수록 위로
+function rankCourses(list, inp, acc, exclude) {
+  const likes = inp.likes || [];
+  return list.filter((c) => c.id !== exclude && c.region === inp.region && (acc === "none" ? !c.access : c.access === acc))
+    .map((c) => ({ c, s: (c.days === inp.days ? 4 : c.days < inp.days ? 1 : 0) + (c.who === inp.who ? 3 : 0) + (likes.includes(c.theme) ? 2 : 0) + (c.move === (inp.move === "transit" ? "transit" : "car") ? 1 : 0) }))
+    .sort((a, b) => b.s - a.s || a.c.id.localeCompare(b.c.id)).map((x) => x.c);
+}
 async function renderOptCourses() {
   const box = $("#optCourses"); if (!box || !state?.input) return;
   const list = await loadCourses(), inp = state.input, acc = (state.opts.access || []).find((a) => a === "walker" || a === "wheelchair") || "none";
-  const hit = list.filter((c) => c.id !== state.opts.course && courseMatch(c, { region: inp.region, days: String(inp.days), who: inp.who, access: acc, theme: "" }));
+  const top = rankCourses(list, inp, acc, state.opts.course).slice(0, 3);
   const cur = state.opts.course && list.find((c) => c.id === state.opts.course);
   box.innerHTML = (cur ? `<p class="c-now">${t("추천 코스 \"{name}\"로 짰어요 · 여행 날짜의 운영시간에 맞춰 다시 확인했어요", { name: esc(courseTitle(cur)) })}</p>` : "")
-    + (hit.length ? `<h4>${t("이 조건의 추천 코스 {n}개", { n: hit.length })}</h4><div class="course-list">${hit.slice(0, 3).map(courseCard).join("")}</div>` : "");
-}
-async function renderCourses() {
-  const box = $("#courses"); if (!box) return;
-  const list = await loadCourses();
-  if (!list.length) { box.hidden = true; return; }
-  box.hidden = false;
-  const f = courseFilter, hit = list.filter((c) => courseMatch(c, f));
-  const chip = (k, v, label) => `<button type="button" class="${f[k] === v ? "on" : ""}" data-cf="${k}:${v}">${esc(label)}</button>`;
-  const row = (k, opts) => `<div class="chips cf">${chip(k, "", t("전체"))}${opts.map(([v, l]) => chip(k, v, l)).join("")}</div>`;
-  box.innerHTML = `<h3>${t("추천 코스 {n}개", { n: list.length })}</h3><p class="sub">${t("조건을 고르면 맞는 코스만 보여요. 고르면 여행 날짜에 맞춰 운영시간·휴무를 다시 확인해요.")}</p>
-    ${row("access", [["walker", t("🦯 걷기 힘들어요")], ["wheelchair", t("♿ 휠체어")], ["none", t("상관없어요")]])}
-    ${row("region", Object.keys(REGIONS).map((r) => [r, regionLabel(r, REGIONS[r].label)]))}
-    ${row("who", Object.entries(WHO_KO).map(([k, v]) => [k, t(v)]))}
-    ${row("days", [["1", t("당일")], ["2", t("1박 2일")], ["3", t("2박 3일")]])}
-    ${row("theme", Object.entries(THEME_KO).map(([k, v]) => [k, t(v)]))}
-    <p class="c-count">${t("맞는 코스 {n}개", { n: hit.length })}</p>
-    <div class="course-list">${hit.slice(0, courseShown).map(courseCard).join("") || `<p class="sub">${t("맞는 코스가 없어요. 조건을 하나 풀어 보세요.")}</p>`}</div>
-    ${hit.length > courseShown ? `<button type="button" class="ghost small" data-cmore>${t("코스 더 보기 ({n}개 남음)", { n: hit.length - courseShown })}</button>` : ""}`;
+    + (top.length ? `<h4>${t("조건에 맞는 추천 코스 3개")}</h4><div class="course-list">${top.map(courseCard).join("")}</div>` : "");
 }
 document.addEventListener("click", async (e) => {
-  const cf = e.target.closest("[data-cf]");
-  if (cf) { const [k, v] = cf.dataset.cf.split(":"); courseFilter[k] = v; courseShown = 6; renderCourses(); return; }
-  if (e.target.closest("[data-cmore]")) { courseShown += 6; renderCourses(); return; }
   const b = e.target.closest("[data-course]"); if (!b) return;
   const c = (await loadCourses()).find((x) => x.id === b.dataset.course); if (!c) return;
   fillForm({ region: c.region, date: $("#date").value || tomorrow(), days: c.days, who: c.who, move: c.move, likes: [c.theme], route: [] });
@@ -2502,7 +2487,7 @@ async function switchLang(l) {
   renderRouteRow();
   if (trip && !$("#result").hidden) render();
   renderPast();
-  renderHalfPkgs(); renderCourses();
+  renderHalfPkgs();
   $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
   await renderGuideHistory();
 }
@@ -2514,7 +2499,7 @@ document.querySelector(".lang").addEventListener("click", (e) => {
 if (getLang() === "ko" || getLang() === "en") applyStatic();
 await loadLang((u) => fetchT(u, {}, 4000)); // 외국어 화면이면 그 언어 자료(일본어·중국어 문구, 장소 이름)를 받은 뒤
 if (getLang() === "ja" || getLang() === "zh") applyStatic();
-if (getLang() !== "ko") { renderHalfPkgs(); renderCourses(); } // 외국어 이름·문구를 받은 뒤 다시
+if (getLang() !== "ko") renderHalfPkgs(); // 외국어 이름·문구를 받은 뒤 다시
 
 function openSnapshot(saved, extra = {}) {
   restoredFromLink = true;
@@ -2545,7 +2530,7 @@ function openSnapshot(saved, extra = {}) {
 
 renderPast();
 renderSaved();
-renderHalfPkgs(); renderCourses();
+renderHalfPkgs();
 renderStartRow();
 
 // 서버 없이 파일만 올린 주소(GitHub Pages 등)에서는 가게 등록이 안 되므로 링크를 숨긴다

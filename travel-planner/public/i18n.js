@@ -33,6 +33,7 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "조건에 맞는 추천 코스 3개": "3 ready-made plans that fit",
   "🗺 버스 위치": "🗺 Bus positions",
   "지금 다니는 {no}번 버스가 없어요": "No bus {no} running right now",
   "{no}번 · {at} 부근": "Bus {no} · near {at}",

@@ -791,12 +791,7 @@ html.big #setup, html.big #result > :not(.layout), html.big #timeline { zoom: 1.
 .big-toggle[aria-pressed="true"] { background: var(--brand); color: #fff; }
 .hero-sub { margin: 8px 0 0; font-size: 15px; font-weight: 600; opacity: .95; }
 /* 추천 코스 */
-.courses { padding: 14px 16px; margin-top: 12px; }
-.courses h3 { margin: 0 0 4px; font-size: 16px; }
-.courses .sub, #optCourses .c-now { margin: 0 0 8px; font-size: 12.5px; color: var(--sub); line-height: 1.5; }
-.chips.cf { display: flex; flex-wrap: nowrap; overflow-x: auto; gap: 6px; padding-bottom: 4px; margin-bottom: 6px; scrollbar-width: none; }
-.chips.cf button { flex: none; }
-.c-count { margin: 6px 0; font-size: 13px; font-weight: 700; }
+#optCourses .c-now { margin: 0 0 8px; font-size: 12.5px; color: var(--sub); line-height: 1.5; }
 .course-list { display: grid; gap: 8px; margin-bottom: 8px; }
 .course { position: relative; display: grid; gap: 3px; text-align: left; width: 100%; padding: 12px 34px 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: inherit; font: inherit; cursor: pointer; }
 .course b { font-size: 15px; }
