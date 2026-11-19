@@ -138,7 +138,7 @@ npm test
 
 ```
 server.mjs                정적 파일 + 사진 + 가게 등록(/api/shops, /api/qr)
-ai.mjs                    이전 AI 연동 코드 (앱·서버에서 사용하지 않음)
+claude.mjs                Claude AI (선택): 말한 여행 조건 해석만. 키가 없으면 꺼짐 (docs/claude-ai.md)
 data/shops.json           사장님이 등록한 가게
 public/owner.html         사장님 가게 등록 화면
 public/menu.html          다국어 QR 메뉴

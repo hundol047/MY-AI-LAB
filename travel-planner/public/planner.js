@@ -134,7 +134,8 @@ function candidates(input, opts = {}) {
   const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp)
     && !(acc.includes("walker") && p.walk === 2 && !p.indoor && !p.access?.ramp)
     && !(acc.includes("walker") && p.multi && p.cat === "food")); // 걷기 힘듦: 시장·먹거리 골목을 돌아다니는 끼니 대신 한 가게에서 앉아서
-  const ok = (p) => okWho(p) && okAccess(p);
+  // 현장 확인에서 "계단·턱 있었어요"가 나온 곳 (내가 남겼거나 여러 이용자가 남긴 곳, setAccessAvoid): 걷기·휠체어 모드에서 뺀다
+  const ok = (p) => okWho(p) && okAccess(p) && !(acc.length && ACCESS_AVOID.has(p.id) && !(opts.must || []).includes(p.id));
   // 반값여행 코스(opts.halfPkg)처럼 정해 둔 장소만 쓸 때 (축제는 그 시군 것인지 알 수 없어 뺀다)
   const onlyIds = opts.onlyIds || halfPackage(opts.halfPkg)?.placeIds;
   if (onlyIds) {
@@ -196,6 +197,9 @@ let CROWD = {}, dayMean = {};
 // 시내·농어촌버스 (bus.json의 장소별 노선·정류장 순서, TAGO 노선정보): 대중교통 일정에서 "같은 버스로 몇 정류장"을 계산한다
 let BUS = {};
 export function setBus(places) { BUS = places || {}; }
+// 현장 확인으로 계단·턱이 있다고 알려진 장소 id (화면이 기기 기록·서버 집계로 정한다)
+let ACCESS_AVOID = new Set();
+export function setAccessAvoid(ids) { ACCESS_AVOID = new Set(ids || []); }
 // A에서 B까지 갈아타지 않고 가는 버스: 같은 노선(방면)에서 B의 정류장 순서가 A보다 뒤 · 그 시각에 다니는지(첫차~막차)
 // 걷기(정류장까지, 시속 4km) + 기다림(배차 간격의 절반, 최대 30분, 모르면 15분) + 타는 시간(정류장당 약 1.8분)
 export function busLeg(a, b, depMin) {

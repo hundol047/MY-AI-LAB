@@ -80,3 +80,5 @@
   .claim #receiptTable input, .claim #receiptTable select { width: 100%; min-width: 0; }
   .claim #receiptTable tbody tr.bad, .claim #receiptTable tbody tr.soft { border-radius: 10px; padding: 10px 6px; }
 }
+.pre-checks { display: grid; gap: 6px; margin: 10px 0 4px; }
+.pre-checks .chk { font-weight: 600; }

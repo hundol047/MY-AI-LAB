@@ -1,7 +1,7 @@
 // 반값여행 정산 서류 자동 작성: 영수증 사진 → 글자 읽기(기기 안 Tesseract) → 경비 내역서, 여행 사진 → 촬영 날짜·위치 → 방문 인증 목록,
 // 숙박이용확인서 양식, 제출용 파일 묶음(ZIP). 사진·영수증은 이 기기(IndexedDB)에만 저장하고 어디에도 보내지 않는다.
 import { PLACES, BENEFITS, LODGING } from "./data.js";
-import { parseReceipt, checkReceipt, refundOf, nearestPlace, fileNameFor, PAYMENT_LABEL, CATEGORY_LABEL } from "./claim-parse.js";
+import { parseReceipt, checkReceipt, refundOf, nearestPlace, fileNameFor, duplicateReceipts, deadlineOf, PAYMENT_LABEL, CATEGORY_LABEL } from "./claim-parse.js";
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
@@ -51,6 +51,7 @@ function initTrip() {
   };
   if (!s.stayName && last?.opts?.lodgingId) { const l = LODGING.find((x) => x.id === last.opts.lodgingId); if (l) v.stayName = l.name; }
   for (const [k, val] of Object.entries(v)) if ($("#" + k)) $("#" + k).value = val;
+  $("#approved").checked = !!s.approved; $("#sameName").checked = !!s.sameName;
   const pays = s.payments || ["card", "cashReceipt", "local"];
   document.querySelectorAll("[data-pay]").forEach((c) => (c.checked = pays.includes(c.dataset.pay)));
 }
@@ -60,6 +61,7 @@ function settings() {
     name: $("#name").value.trim(), phone: $("#phone").value.trim(), stayName: $("#stayName").value.trim(), stayAddr: $("#stayAddr").value.trim(),
     minSpend: Number($("#minSpend").value) || 0, unit: Number($("#unit").value) || 1000, deadlineDays: Number($("#deadlineDays").value) || 10,
     payments: [...document.querySelectorAll("[data-pay]:checked")].map((c) => c.dataset.pay),
+    approved: $("#approved").checked, sameName: $("#sameName").checked,
   };
 }
 document.addEventListener("change", (e) => { if (e.target.closest("#tripBox, .card") && e.target.id && !e.target.type?.startsWith("file")) { saveS(settings()); renderAll(); } });
@@ -194,7 +196,20 @@ function analysis() {
   if (noLoc) todo.push(["info", `장소를 못 맞춘 사진 ${noLoc}장 — 장소를 골라 주세요`]);
   if (nights(s) > 0 && !stays.length) todo.push(["warn", "숙박했다면 숙박이용확인서(숙소 확인)를 올려 주세요"]);
   if (s.minSpend && okSum < s.minSpend) todo.push(["warn", `인정 금액이 최소 소비액 ${won(s.minSpend)}원보다 적어요`]);
-  if (s.to) { const dl = new Date(s.to); dl.setDate(dl.getDate() + s.deadlineDays); todo.push(["info", `정산 기한(공고 확인): ${dl.toISOString().slice(0, 10)}까지`]); }
+  // 자주 반려되는 이유를 미리 점검한다: 사전 승인 없음, 신청자·결제자 명의 다름, 같은 영수증 두 번, 기한 넘김, 인증 장소 부족
+  if (!s.approved) todo.push(["warn", "여행 전에 사전 신청·승인을 받아야 정산할 수 있어요. 승인 문자·메일을 확인하고 위에 체크하세요"]);
+  if (!s.sameName) todo.push(["warn", "신청자와 결제한 사람(카드·상품권 명의)이 다르면 반려될 수 있어요. 본인 명의 결제만 올리고 위에 체크하세요"]);
+  const dup = duplicateReceipts(receipts.map((r) => r.it.meta));
+  if (dup.length) todo.push(["warn", `같은 영수증으로 보이는 것이 ${dup.map((g) => g.map((i) => i + 1).join("·") + "번").join(", ")}에 있어요. 하나만 남기세요`]);
+  const places = new Set(proven.map((p) => p.meta.placeId)).size;
+  if (places === 1) todo.push(["info", "지역에 따라 관광지 2곳 인증 사진이 필요해요 (지금 1곳). 공고를 확인하세요"]);
+  const handHint = receipts.filter((r) => r.it.meta.payment === "simple").length;
+  if (handHint) todo.push(["warn", `손으로 쓴 영수증·간이영수증 ${handHint}장은 인정되지 않는 경우가 많아요. 가게에서 카드 전표나 현금영수증을 다시 받으세요`]);
+  const today = new Date(Date.now() + 9 * 3600000).toISOString().slice(0, 10);
+  const dl = deadlineOf(s.to, s.deadlineDays, today);
+  if (dl?.state === "over") todo.push(["warn", `정산 기한(${dl.date})이 지났을 수 있어요. 시군 공고의 기한을 바로 확인하세요`]);
+  else if (dl?.state === "soon") todo.push(["warn", dl.left === 0 ? `오늘(${dl.date})이 정산 마감일이에요` : `정산 마감까지 ${dl.left}일 남았어요 (${dl.date})`]);
+  else if (dl) todo.push(["info", `정산 기한(공고 확인): ${dl.date}까지`]);
   if (!todo.some((t) => t[0] === "warn")) todo.unshift(["ok", "필요한 서류가 다 모였어요. 신청서를 확인하고 제출하세요"]);
   return { s, receipts, okSum, allSum, photos, proven, stays, refund, todo };
 }

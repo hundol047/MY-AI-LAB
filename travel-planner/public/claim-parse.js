@@ -130,3 +130,29 @@ export function fileNameFor(kind, idx, { date, merchant, amount, place } = {}, e
   if (amount) parts.push(`${amount}원`);
   return parts.join("_") + "." + ext;
 }
+
+// 같은 영수증을 두 번 올린 것으로 보이는 것: 같은 날짜·같은 금액이고 가게 이름이 같거나(공백 무시) 한쪽이 비어 있음
+// 반려 사유 1순위라 미리 알려 준다. 돌려주는 값: 겹치는 영수증 묶음들(각 묶음은 받은 배열의 번호)
+export function duplicateReceipts(list) {
+  const norm = (s) => String(s || "").replace(/\s+/g, "");
+  const groups = [], used = new Set();
+  list.forEach((a, i) => {
+    if (used.has(i) || !a?.date || !a?.amount) return;
+    const g = [i];
+    list.forEach((b, j) => {
+      if (j <= i || used.has(j) || b?.date !== a.date || b?.amount !== a.amount) return;
+      const ma = norm(a.merchant), mb = norm(b.merchant);
+      if (!ma || !mb || ma === mb) g.push(j);
+    });
+    if (g.length > 1) { g.forEach((k) => used.add(k)); groups.push(g); }
+  });
+  return groups;
+}
+// 정산 기한: 여행 마지막 날 + N일. today는 "YYYY-MM-DD" (한국 날짜)
+export function deadlineOf(to, days, today) {
+  if (!to) return null;
+  const d = new Date(to + "T00:00:00Z"); d.setUTCDate(d.getUTCDate() + (Number(days) || 0));
+  const date = d.toISOString().slice(0, 10);
+  const left = Math.round((d - new Date(today + "T00:00:00Z")) / 86400000);
+  return { date, left, state: left < 0 ? "over" : left <= 2 ? "soon" : "ok" };
+}

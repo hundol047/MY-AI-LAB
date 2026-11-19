@@ -846,3 +846,21 @@ dialog.settings::backdrop { background: rgba(0,0,0,.35); }
 .set-links a + a { border-top: 1px solid var(--line); }
 .set-links a:active { background: var(--brand-soft); }
 .set-links i { font-style: normal; color: var(--sub); }
+/* 무장애가 확인된 숙소·근처 무장애 식당 */
+.acc-stays { border: 1px solid var(--brand-soft); background: var(--brand-soft); border-radius: 12px; padding: 10px 12px; margin-bottom: 10px; }
+.acc-stays .stay-info small { display: block; color: var(--brand); font-weight: 700; margin-top: 2px; }
+.acc-stays .stay-info details { font-size: 13px; margin-top: 4px; }
+.acc-stays .hint { font-size: 13px; color: var(--sub); margin: 6px 0 0; }
+.acc-alt { flex-basis: 100%; margin-top: 6px; padding: 8px 10px; border-radius: 10px; background: var(--brand-soft); font-size: 14px; }
+.acc-alt ul { margin: 4px 0 0; padding-left: 18px; }
+.acc-alt small { color: var(--brand); font-weight: 700; }
+.acc-alt details { font-size: 13px; }
+/* 현장 확인 (무장애) */
+.field-check { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-top: 8px; font-size: 13px; }
+.field-check details { width: 100%; }
+.field-check summary { color: var(--sub); cursor: pointer; padding: 4px 0; }
+.field-check .fc-btns { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 2px; }
+.field-check .others { color: var(--text); font-weight: 600; }
+.field-check .chip-btn { border: 1px solid var(--line); background: var(--surface); color: var(--text); border-radius: 999px; padding: 6px 10px; font: inherit; font-size: 13px; cursor: pointer; }
+.field-check .chip-btn.on { background: var(--brand); color: var(--on-brand); border-color: var(--brand); }
+.field-check small { width: 100%; color: var(--sub); }

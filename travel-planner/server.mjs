@@ -13,6 +13,7 @@ import { fileURLToPath } from "node:url";
 import { tourPhoto } from "./scripts/photo-sources.mjs";
 import { fetchWarnings } from "./scripts/kma-warnings.mjs";
 import { handleBusLive } from "./bus-live.mjs";
+import { aiRoutes } from "./claude.mjs";
 import { PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +21,8 @@ const PUBLIC = path.join(here, "public");
 const PORT = Number(process.env.PORT || 8080);
 let pushSender=null;
 try {pushSender=await createPushSender({keyFile:path.join(path.dirname(process.env.APP_DB_PATH || path.join(here,'.local','app.sqlite')),'vapid.json'),appURL:process.env.PUBLIC_APP_URL});}catch{console.error('웹 푸시 키를 초기화하지 못했습니다.');}
+// Claude AI (선택): ANTHROPIC_API_KEY가 있을 때만 말한 조건 해석에 쓴다. 사용 금액은 데이터 폴더의 ai-usage.json에 센다
+const handleAI = aiRoutes({ dataDir: path.dirname(process.env.APP_DB_PATH || path.join(here, ".local", "app.sqlite")) });
 const services = serviceAPI({file:process.env.APP_DB_PATH || path.join(here,".local","app.sqlite"),adminToken:process.env.ADMIN_API_TOKEN,pushSender});
 if(pushSender)startPushWorker(services.store,pushSender);
 try { const legacy=JSON.parse(await readFile(path.join(here,"data","shops.json"),"utf8")); if(Array.isArray(legacy))services.store.importShops(legacy); } catch { /* 기존 파일 없음: 새 승인 목록을 사용 */ }
@@ -54,6 +57,7 @@ async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
 
   if (await services(req,res,url)) return;
+  if (await handleAI(req, res, url, json)) return;
 
   // 내장 가이드만 사용한다. 예전 클라이언트 요청도 유료 모델로 전달하지 않는다.
   if (["/api/start", "/api/guide", "/api/guide-translate", "/api/lodging-check", "/api/menu-scan"].includes(url.pathname)) {

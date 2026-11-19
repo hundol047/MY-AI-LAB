@@ -16,6 +16,7 @@ export function createServices(file) {
     CREATE TABLE IF NOT EXISTS reviews(id TEXT PRIMARY KEY, place TEXT NOT NULL, state TEXT NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS reports(id TEXT PRIMARY KEY, review TEXT NOT NULL, reason TEXT NOT NULL, createdAt TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS place_reports(id TEXT PRIMARY KEY, place TEXT NOT NULL, kind TEXT NOT NULL, note TEXT NOT NULL, createdAt TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS access_reports(place TEXT NOT NULL, voter TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, PRIMARY KEY(place,voter,kind));
     CREATE TABLE IF NOT EXISTS votes(trip TEXT NOT NULL, place TEXT NOT NULL, voter TEXT NOT NULL, vote INTEGER NOT NULL, at TEXT NOT NULL, PRIMARY KEY(trip,place,voter));
     CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY, secret TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS shops(id TEXT PRIMARY KEY, state TEXT NOT NULL, fingerprint TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
@@ -180,6 +181,23 @@ export function createServices(file) {
       const KINDS = ['closed', 'hours', 'parking', 'location', 'other'];
       if (typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || (body.note != null && (typeof body.note !== 'string' || body.note.length > 500))) fail(400,'장소, 제보 종류, 500자 이내 설명을 확인하세요.');
       db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,String(body.note||'').trim(),new Date().toISOString()); return {received:true};
+    },
+    // 현장 확인 (무장애): 기기마다 무작위 id(voter)로 장소·종류당 하나. 개인정보 없음. 2년 지난 것은 세지 않는다
+    accessReport(body) {
+      const KINDS = ['stairs', 'ok', 'no_toilet'];
+      if (typeof body.voter !== 'string' || !/^[a-z0-9]{8,32}$/.test(body.voter) || typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || typeof body.on !== 'boolean') fail(400,'현장 확인 내용을 확인하세요.');
+      if (body.on) {
+        if (db.prepare('SELECT COUNT(*) n FROM access_reports WHERE voter=?').get(body.voter).n >= 300) fail(429,'이 기기의 현장 확인이 너무 많습니다.');
+        db.prepare('INSERT INTO access_reports VALUES(?,?,?,?) ON CONFLICT(place,voter,kind) DO UPDATE SET at=excluded.at').run(body.place, body.voter, body.kind, new Date().toISOString());
+      } else db.prepare('DELETE FROM access_reports WHERE place=? AND voter=? AND kind=?').run(body.place, body.voter, body.kind);
+      return { ok: true };
+    },
+    accessReports(places) {
+      const ids = [...new Set(places)].filter((x) => typeof x === 'string' && x && x.length <= 100).slice(0, 200);
+      const since = new Date(Date.now() - 730 * 86400000).toISOString(), out = {};
+      if (!ids.length) return out;
+      for (const r of db.prepare(`SELECT place, kind, COUNT(*) n FROM access_reports WHERE at>=? AND place IN (${ids.map(() => '?').join(',')}) GROUP BY place, kind`).all(since, ...ids)) (out[r.place] ??= {})[r.kind] = r.n;
+      return out;
     },
     placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
     // 같이 고르기: 공유한 일정(trip, 일정을 만들 때 정한 무작위 키)의 장소마다 👍/👎. voter는 그 기기의 무작위 id (개인정보 없음)

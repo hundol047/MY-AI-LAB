@@ -165,3 +165,30 @@ export function parseSpoken(text, today) {
   if (lessWalk && !access.length) heard.push({ key: "walk", ko: "less" });
   return { input, access, people, start, startTime, pace, lessWalk, heard, said: raw };
 }
+
+// Claude가 알아들은 조건(서버 claude.mjs의 sanitize를 거친 값)을 기기 안 해석 결과 위에 덮는다.
+// AI가 말하지 않은 항목은 기기 안 해석 값을 그대로 둔다. 화면의 "알아들은 조건"도 같이 고친다
+export function mergeHint(r, h) {
+  if (!h || typeof h !== "object") return r;
+  const input = { ...r.input, likes: [...(r.input.likes || [])] };
+  for (const k of ["region", "date", "days", "who", "move"]) if (h[k] != null) input[k] = h[k];
+  if (h.likes?.length) input.likes = [...h.likes];
+  if (h.avoid?.length) input.likes = input.likes.filter((x) => !h.avoid.includes(x));
+  if (!input.likes.length) input.likes = ["sea", "food"].filter((x) => !(h.avoid || []).includes(x));
+  if (h.route) input.route = [...h.route]; else if (h.region) delete input.route;
+  if (input.route) { input.route = input.route.slice(0, Math.min(3, input.days)); if (input.route.length < 2) delete input.route; }
+  const access = h.access?.length ? [...h.access] : r.access;
+  const people = h.people || r.people, pace = h.pace || r.pace, startTime = h.startTime || r.startTime;
+  const lessWalk = !!(r.lessWalk || h.lessWalk || access.length);
+  const keep = r.heard.filter((x) => !["date", "people", "access", "time", "pace", "walk", "note"].includes(x.key));
+  const old = (k) => r.heard.find((x) => x.key === k);
+  const heard = [...keep];
+  heard.splice(1, 0, { key: "date", ko: h.date || old("date")?.ko || "" });
+  if (people) heard.push({ key: "people", ko: `${people.adults}:${people.kids}` });
+  for (const a of access) heard.push({ key: "access", ko: a });
+  if (startTime) heard.push({ key: "time", ko: startTime });
+  if (pace) heard.push({ key: "pace", ko: pace });
+  if (lessWalk && !access.length) heard.push({ key: "walk", ko: "less" });
+  if (h.note) heard.push({ key: "note", ko: h.note });
+  return { ...r, input, access, people, pace, lessWalk, startTime, avoid: h.avoid || [], note: h.note || "", heard, ai: true };
+}

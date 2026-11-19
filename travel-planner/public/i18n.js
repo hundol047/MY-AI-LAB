@@ -33,6 +33,22 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🚧 계단·턱 있었어요": "🚧 There were steps or a ledge",
+  "♿ 휠체어로 다닐 만했어요": "♿ Wheelchair-friendly enough",
+  "🚻 장애인 화장실 없었어요": "🚻 No accessible restroom",
+  "{what} {n}명": "{what}: {n}",
+  "다녀왔다면 알려 주세요": "Been here? Let others know",
+  "이용자 현장 확인": "Visitor reports",
+  "계단·턱이 있다고 남긴 곳은 다음 일정부터 빼고 짜요": "Places you marked as having steps are left out of your next plans",
+  "고마워요. 다음 일정부터 이곳은 빼고 짤게요": "Thanks. We'll leave this place out of your next plans",
+  "고마워요. 다른 분들께 도움이 돼요": "Thanks. This helps other travelers",
+  "현장 확인을 지웠어요": "Report removed",
+  "장애인 객실": "Accessible room",
+  "근처 무장애 확인 식당": "Nearby restaurants with confirmed accessibility",
+  "무장애가 확인된 숙소": "Stays with confirmed accessibility",
+  "불러오는 중…": "Loading…",
+  "이 지역 10km 안에는 관광공사 무장애 정보가 등록된 숙소가 없어요. 예약 전에 전화로 객실·출입구를 확인하세요.": "No stays within 10 km have accessibility info from the Korea Tourism Organization. Call ahead to check the room and entrance.",
+  "한국관광공사 무장애 여행 정보 기준이에요. 장애인 객실은 수가 적으니 예약할 때 꼭 요청하세요.": "Based on Korea Tourism Organization accessibility data. Accessible rooms are few, so request one when booking.",
   "설정": "Settings",
   "화면": "Display",
   "화면 밝기": "Theme",

@@ -1,6 +1,6 @@
 // 모든 조건 조합에서 영업시간·휴무 충돌이 없는지, 하루 일정이 성립하는지 검사
 import assert from "node:assert/strict";
-import { planTrip, swapItem, drives, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor } from "../public/planner.js";
+import { planTrip, swapItem, drives, verify, retimeDay, hoursFor, parseRequestLocally, benefitsFor, overnightCompare, souvenirsFor, setAccessAvoid } from "../public/planner.js";
 import { checkLodgingLocal, startLocal } from "../public/ai-local.js";
 import { PLACES, BENEFITS } from "../public/data.js";
 
@@ -182,4 +182,17 @@ assert.deepEqual(parseRequestLocally("카페는 빼주세요").avoid, ["cafe"]);
 assert.equal(startLocal("다음 주 3박 4일 속초 택시로", "2026-11-04").days, 4);
 assert.equal(startLocal("4박 5일 강릉 여행", "2026-11-04").days, 5);
 assert.equal(startLocal("주말에 택시 타고 춘천", "2026-11-04").move, "taxi");
+// 현장 확인: 계단·턱이 있다고 알려진 곳은 걷기·휠체어 일정에서 빠지고, 보통 일정에는 남는다
+{
+  const inp = { region: "gangneung", date: "2026-11-14", days: 2, who: "parents", likes: [], move: "car" };
+  const ids = (tr) => tr.days.flatMap((d) => d.items.map((i) => i.id));
+  const before = ids(planTrip(inp, { access: ["wheelchair"], seed: 7 }));
+  const bad = before.filter((id) => !/^fest/.test(id)).slice(0, 3);
+  setAccessAvoid(bad);
+  const after = ids(planTrip(inp, { access: ["wheelchair"], seed: 7 }));
+  assert.ok(bad.every((id) => !after.includes(id)), "계단 제보 장소 제외");
+  const plain = ids(planTrip(inp, { seed: 7 }));
+  setAccessAvoid([]);
+  assert.deepEqual(plain, ids(planTrip(inp, { seed: 7 })), "보통 일정은 영향 없음");
+}
 console.log(`ok - ${runs}개 조합, 충돌 0건`);

@@ -24,3 +24,18 @@ try{
  s.close();s=createServices(file);assert.equal(s.get(b.id,token).status,'cancelled');assert.equal(s.get(b.id,token).quote.amount,10000);
  console.log('ok - 조회 권한·중복 접수·상태 전이·견적·취소·후기 검토·신고·재시작 보존');
 }finally{s.close();await rm(dir,{recursive:true,force:true});}
+// 현장 확인(무장애): 기기마다 장소·종류당 하나, 끄면 지워지고, 장소별로 센다
+{
+  const t=createServices(dir+'/acc.sqlite');
+  t.accessReport({place:'gyeongpo',voter:'aaaaaaaa1',kind:'stairs',on:true});
+  t.accessReport({place:'gyeongpo',voter:'aaaaaaaa1',kind:'stairs',on:true}); // 같은 기기가 두 번 눌러도 1
+  t.accessReport({place:'gyeongpo',voter:'bbbbbbbb2',kind:'stairs',on:true});
+  t.accessReport({place:'gyeongpo',voter:'bbbbbbbb2',kind:'ok',on:true});
+  assert.deepEqual(t.accessReports(['gyeongpo','none']),{gyeongpo:{stairs:2,ok:1}});
+  t.accessReport({place:'gyeongpo',voter:'bbbbbbbb2',kind:'stairs',on:false});
+  assert.deepEqual(t.accessReports(['gyeongpo']),{gyeongpo:{stairs:1,ok:1}});
+  assert.throws(()=>t.accessReport({place:'gyeongpo',voter:'x',kind:'stairs',on:true}),/현장 확인/);
+  assert.throws(()=>t.accessReport({place:'gyeongpo',voter:'aaaaaaaa1',kind:'name',on:true}),/현장 확인/);
+  t.close?.();
+}
+console.log('ok - 현장 확인 저장·집계');

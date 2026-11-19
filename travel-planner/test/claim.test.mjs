@@ -1,6 +1,6 @@
 // 반값여행 정산 도우미: 영수증 글자에서 값 뽑기·인정 여부·환급 계산·사진 위치 맞추기
 import assert from "node:assert/strict";
-import { parseReceipt, checkReceipt, refundOf, nearestPlace, fileNameFor, parseAmount, parsePayment } from "../public/claim-parse.js";
+import { parseReceipt, checkReceipt, refundOf, nearestPlace, fileNameFor, parseAmount, parsePayment, duplicateReceipts, deadlineOf } from "../public/claim-parse.js";
 import { PLACES, BENEFITS } from "../public/data.js";
 
 const card = `[카드매출전표] 고객용
@@ -58,6 +58,21 @@ const wol = PLACES.find((p) => p.id === "woljeongsa");
 assert.equal(nearestPlace({ lat: wol.lat + 0.002, lng: wol.lng }, pcPlaces).place.id, "woljeongsa");
 assert.equal(nearestPlace({ lat: 37.75, lng: 128.9 }, pcPlaces), null, "강릉 시내는 평창 대상 장소가 아님");
 assert.equal(fileNameFor("영수증", 1, { date: "2026-11-21", merchant: "봉평 메밀/막국수", amount: 27000 }), "01_영수증_2026-11-21_봉평메밀막국수_27000원.jpg");
+// 반려 방지: 같은 영수증 두 번, 정산 기한
+assert.deepEqual(duplicateReceipts([
+  { date: "2026-11-21", amount: 27000, merchant: "봉평메밀꽃 막국수" },
+  { date: "2026-11-21", amount: 120000, merchant: "더 펜션" },
+  { date: "2026-11-21", amount: 27000, merchant: "봉평메밀꽃막국수" },
+  { date: "2026-11-22", amount: 27000, merchant: "봉평메밀꽃막국수" },
+  { date: "2026-11-21", amount: 120000, merchant: "다른 가게" },
+]), [[0, 2]]);
+assert.deepEqual(duplicateReceipts([{ date: "2026-11-21", amount: 5000, merchant: "" }, { date: "2026-11-21", amount: 5000, merchant: "카페" }]), [[0, 1]]);
+assert.equal(deadlineOf("2026-11-22", 10, "2026-11-25").state, "ok");
+assert.equal(deadlineOf("2026-11-22", 10, "2026-11-25").date, "2026-12-02");
+assert.equal(deadlineOf("2026-11-22", 10, "2026-12-01").state, "soon");
+assert.equal(deadlineOf("2026-11-22", 10, "2026-12-02").left, 0);
+assert.equal(deadlineOf("2026-11-22", 10, "2026-12-03").state, "over");
+assert.equal(deadlineOf("", 10, "2026-12-03"), null);
 console.log("ok - 반값여행 정산 도우미 (영수증 읽기·인정 여부·환급 계산·사진 위치·파일 이름)");
 
 // 여행 경비 나누기: 가장 적은 송금으로 끝나게

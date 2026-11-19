@@ -1,5 +1,5 @@
 import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
-import { planTrip, swapItem, replanFromNow, setBus, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
+import { planTrip, swapItem, replanFromNow, setBus, setAccessAvoid, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
 import { ORIGINS } from "./origins.js";
@@ -127,7 +127,7 @@ $("#form").addEventListener("submit", async (e) => {
   const lessWalk = input.who === "parents";
   const access = accessNow();
   const v = pendingVoice; pendingVoice = null;
-  state = { input, opts: { pace: v?.pace || "normal", lessWalk: lessWalk || access.length > 0 || !!v?.lessWalk, prefer: [], avoid: [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...(v?.people ? { people: bookingPeople(v.people) } : {}), ...startOpts(input) } };
+  state = { input, opts: { pace: v?.pace || "normal", lessWalk: lessWalk || access.length > 0 || !!v?.lessWalk, prefer: [], avoid: v?.avoid?.length ? [...v.avoid] : [], exclude: [], rainDays: [], ...(access.length ? { access } : {}), ...(v?.people ? { people: bookingPeople(v.people) } : {}), ...startOpts(input) } };
   if (v) { state.heard = v.heard; state.said = v.said; }
   // 반값여행 코스로 시작: 그 시군 장소·숙소만 쓴다 (링크에는 코스 id만)
   const hp = pendingPackage; pendingPackage = null;
@@ -725,6 +725,7 @@ async function loadWeather() {
 
 function render() {
   const { input } = state;
+  if (accessMode().length) refreshAccCounts(trip.days.flatMap((d) => d.items.map((it) => it.id)));
   const nights = t(["당일", "1박 2일", "2박 3일", "3박 4일", "4박 5일"][input.days - 1] || `${input.days - 1}박 ${input.days}일`);
   $("#tripTitle").textContent = `${dateLabel(input.date)} · ${nights}`;
   const tot = trip.totals;
@@ -918,8 +919,105 @@ document.addEventListener("click", (e) => {
   if (g) { dayIdx = Number(g.dataset.goday); render(); }
 });
 
+/* 무장애 숙소·식당 (한국관광공사 무장애 여행 정보, scripts/bake-access-spots.mjs → access-spots.json)
+   걷기·휠체어 모드에서만 받는다. 원문에 적힌 항목만 보여 주고 지어내지 않는다 */
+let accessSpots = null, accessSpotsLoading = false;
+function loadAccessSpots() {
+  if (accessSpots || accessSpotsLoading) return;
+  accessSpotsLoading = true;
+  fetchT("access-spots.json", {}, 8000).then((r) => (r.ok ? r.json() : null)).then((j) => { accessSpots = j || { stays: [], food: [] }; if (trip && !$("#result").hidden) render(); }).catch(() => { accessSpotsLoading = false; });
+}
+const spotKm = (a, b) => Math.hypot((a.lat - b.lat) * 111, (a.lng - b.lng) * 88);
+const SPOT_SCORE = { room: 3, elevator: 2, toilet: 2, ramp: 1, parking: 1, wheel: 1 };
+function nearSpots(list, at, maxKm, n) {
+  return (list || []).map((x) => ({ ...x, km: spotKm(x, at) })).filter((x) => x.km <= maxKm)
+    .sort((a, b) => (a.km <= 1 ? 0 : 1) - (b.km <= 1 ? 0 : 1) || b.flags.reduce((s, f) => s + (SPOT_SCORE[f] || 0), 0) - a.flags.reduce((s, f) => s + (SPOT_SCORE[f] || 0), 0) || a.km - b.km).slice(0, n);
+}
+const spotTags = (x) => x.flags.filter((f) => ACCESS_LABEL[f]).map((f) => t(ACCESS_LABEL[f])).join(" · ");
+const distText = (km) => (km < 1 ? t("{m}m", { m: Math.round(km * 1000 / 10) * 10 }) : t("{km}km", { km: km.toFixed(1) }));
+function spotRaw(x) {
+  const raw = Object.entries(x.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
+  return raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul></details>` : "";
+}
+// 무장애 정보가 없는 식당 카드: 1km 안 무장애가 확인된 식당 2곳
+function nearAccessFood(p) {
+  if (!accessMode().length) return "";
+  loadAccessSpots();
+  const list = nearSpots(accessSpots?.food, p, 1, 2);
+  if (!list.length) return "";
+  return `<div class="acc-alt"><b>${t("근처 무장애 확인 식당")}</b><ul>${list.map((x) => `<li><a href="https://map.naver.com/p/search/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">${esc(x.name)}</a> · ${distText(x.km)}<br><small>♿ ${esc(spotTags(x))}</small>${spotRaw(x)}</li>`).join("")}</ul></div>`;
+}
+// 숙소 칸: 숙소 지역 10km 안 무장애가 확인된 숙소 3곳 (장애인 객실·엘리베이터 있는 곳 먼저)
+function accessStaysHTML(l) {
+  if (!accessMode().length || !Number.isFinite(l?.lat)) return "";
+  loadAccessSpots();
+  const list = nearSpots(accessSpots?.stays, l, 10, 3);
+  if (!accessSpots) return `<div class="stays acc-stays"><b>${t("무장애가 확인된 숙소")}</b><p class="hint">${t("불러오는 중…")}</p></div>`;
+  if (!list.length) return `<div class="stays acc-stays"><b>${t("무장애가 확인된 숙소")}</b><p class="hint">${t("이 지역 10km 안에는 관광공사 무장애 정보가 등록된 숙소가 없어요. 예약 전에 전화로 객실·출입구를 확인하세요.")}</p></div>`;
+  return `<div class="stays acc-stays"><b>${t("무장애가 확인된 숙소")}</b><ul>${list.map((x) => `<li>
+      <div class="stay-img" style="background-image:${x.photo ? `url('${esc(x.photo)}'), ` : ""}${STAY_ART.business}"></div>
+      <div class="stay-info"><strong>${esc(x.name)}</strong><span>${distText(x.km)}</span><small>♿ ${esc(spotTags(x))}</small>${spotRaw(x)}</div>
+      <div class="stay-acts">${priceLinks(x.name, true)}${x.tel ? `<a class="ghost small" href="tel:${esc(x.tel)}">${t("전화")}</a>` : ""}<a class="ghost small" href="https://map.naver.com/p/search/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">${t("지도")}</a></div>
+    </li>`).join("")}</ul><p class="hint">${t("한국관광공사 무장애 여행 정보 기준이에요. 장애인 객실은 수가 적으니 예약할 때 꼭 요청하세요.")}</p></div>`;
+}
+
+/* 현장 확인 (무장애): 다녀온 사람이 "계단·턱 있었어요 / 휠체어로 다닐 만했어요 / 장애인 화장실 없었어요"를 남긴다.
+   내 기록은 이 기기에만 저장하고, 계단·턱을 남긴 곳은 걷기·휠체어 일정에서 뺀다.
+   앱 서버가 있으면 이름 없이(기기 무작위 id) 서버에도 보내고, 여러 사람의 기록을 숫자로 보여 준다.
+   두 명 넘게 계단·턱을 남겼고 "다닐 만했어요"보다 많으면 그곳도 일정에서 뺀다 */
+const FIELD_KINDS = { stairs: "🚧 계단·턱 있었어요", ok: "♿ 휠체어로 다닐 만했어요", no_toilet: "🚻 장애인 화장실 없었어요" };
+const accMine = () => store.get("accMine") || {};
+let accCounts = {};
+const accAvoidIds = () => [
+  ...Object.entries(accMine()).filter(([, v]) => v.stairs).map(([id]) => id),
+  ...Object.entries(accCounts).filter(([, c]) => (c.stairs || 0) >= 2 && (c.stairs || 0) > (c.ok || 0)).map(([id]) => id),
+];
+setAccessAvoid(accAvoidIds());
+let accCountKey = "";
+function refreshAccCounts(ids) {
+  if (!document.body.classList.contains("has-server") || !ids.length) return;
+  const key = [...new Set(ids)].sort().join(",");
+  if (key === accCountKey) return;
+  accCountKey = key;
+  fetchT(`api/access-reports?places=${encodeURIComponent(key)}`, {}, 4000).then((r) => (r.ok ? r.json() : null)).then((j) => {
+    if (!j) return;
+    accCounts = { ...accCounts, ...j }; setAccessAvoid(accAvoidIds());
+    if (trip && !$("#result").hidden && Object.keys(j).length) render();
+  }).catch(() => {});
+}
+function fieldCheckHTML(p) {
+  if (p.cat === "festival") return "";
+  const mine = accMine()[p.id] || {}, c = accCounts[p.id] || {};
+  const others = Object.keys(FIELD_KINDS).filter((k) => c[k]).map((k) => t("{what} {n}명", { what: t(FIELD_KINDS[k]).replace(/^\S+\s/, ""), n: c[k] }));
+  const marked = Object.keys(mine).length > 0;
+  return `<div class="field-check">${others.length ? `<small class="others">👥 ${t("이용자 현장 확인")}: ${others.map(esc).join(" · ")}</small>` : ""}
+    <details${marked ? " open" : ""}><summary>${t("다녀왔다면 알려 주세요")}</summary><div class="fc-btns">${Object.entries(FIELD_KINDS).map(([k, label]) =>
+    `<button type="button" class="chip-btn${mine[k] ? " on" : ""}" data-accrep="${esc(p.id)}|${k}" aria-pressed="${mine[k] ? "true" : "false"}">${t(label)}</button>`).join("")}</div>
+    ${mine.stairs ? `<small>${t("계단·턱이 있다고 남긴 곳은 다음 일정부터 빼고 짜요")}</small>` : ""}</details></div>`;
+}
+document.addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-accrep]"); if (!b) return;
+  const [id, kind] = b.dataset.accrep.split("|");
+  const all = accMine(), mine = { ...(all[id] || {}) }, on = !mine[kind];
+  if (on) mine[kind] = new Date().toISOString().slice(0, 10); else delete mine[kind];
+  if (on && kind === "stairs") delete mine.ok;
+  if (on && kind === "ok") delete mine.stairs;
+  if (Object.keys(mine).length) all[id] = mine; else delete all[id];
+  store.set("accMine", all); setAccessAvoid(accAvoidIds());
+  track("access_report", kind);
+  render();
+  toast(on ? (kind === "stairs" ? t("고마워요. 다음 일정부터 이곳은 빼고 짤게요") : t("고마워요. 다른 분들께 도움이 돼요")) : t("현장 확인을 지웠어요"));
+  if (document.body.classList.contains("has-server")) {
+    const send = (k, v) => fetchT("api/access-reports", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ place: id, voter: voterId(), kind: k, on: v }) }, 5000).catch(() => {});
+    await send(kind, on);
+    if (on && kind === "stairs") await send("ok", false);
+    if (on && kind === "ok") await send("stairs", false);
+    accCountKey = ""; refreshAccCounts(trip ? trip.days.flatMap((d) => d.items.map((it) => it.id)) : [id]);
+  }
+});
+
 // 무장애 편의시설 한 줄 (한국관광공사 무장애 여행 정보). 자세한 원문은 펼쳐 본다 (원문은 한국어)
-const ACCESS_LABEL = { wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
+const ACCESS_LABEL = { room: "장애인 객실", wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
 // 걷는 양 (장소 안 동선 추정): 걷기 1 평지·짧게, 2 조금, 3 오래·오르막
 const WALK_LABEL = { 1: "평지 위주 · 짧게 (약 200m)", 2: "조금 걸어요 (약 800m)", 3: "많이 걸어요 (오르막·2km 이상)" };
 function accessLine(p) {
@@ -930,12 +1028,12 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span></div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
   return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
-    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}</div>`;
+    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${fieldCheckHTML(p)}</div>`;
 }
 
 // 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
@@ -1373,6 +1471,7 @@ function renderLodging() {
     <div class="booking-options"><label>${t("객실")}<input id="bookingRooms" type="number" min="1" max="${peopleNow().adults}" value="${bookingPeople(peopleNow()).rooms}"></label>
     ${bookingPeople(peopleNow()).ages.map((age,i)=>`<label>${t("어린이 {n} 나이",{n:i+1})}<select data-child-age="${i}"><option value="">${t("선택 필요")}</option>${Array.from({length:18},(_,a)=>`<option value="${a}" ${age===a?'selected':''}>${a}</option>`).join('')}</select></label>`).join('')}</div>
     ${bookingReason(l.query)}
+    ${accessStaysHTML(l)}
     ${staysHTML(l)}
     <div class="stay-main">
       ${priceLinks(l.query, false)}
@@ -2156,15 +2255,18 @@ $("#aiStart").addEventListener("submit", async (e) => {
   e.preventDefault();
   const text = $("#aiStartInput").value.trim(); if (!text) return;
   const btn = $("#aiStart button[type=submit]"); btn.disabled = true; btn.textContent = "…";
-  const { parseSpoken } = await voiceParser();
-  const r = parseSpoken(text, todayStr());
+  const { parseSpoken, mergeHint } = await voiceParser();
+  let r = parseSpoken(text, todayStr());
+  // 앱 서버에 Claude가 켜져 있으면 말을 한 번 더 알아듣게 한다 (늦거나 실패하면 기기 안 해석 그대로)
+  const hint = await askClaude(text);
+  if (hint) { r = mergeHint(r, hint); track("ai_understand"); }
   btn.disabled = false; btn.textContent = t("만들기");
   // 말한 조건을 폼에 옮기고(폼은 "직접 골라서 만들기"에 접혀 있다), 폼에 없는 조건(인원·속도)은 일정 만들 때 넘긴다
   fillForm(r.input);
   document.querySelectorAll('.chips[data-name="access"] button').forEach((b) => b.classList.toggle("on", r.access.includes(b.dataset.v)));
   if (r.start) setStart({ name: r.start.name, nameEn: r.start.nameEn, lat: r.start.lat, lng: r.start.lng });
   if (r.startTime) { store.set("startTime", r.startTime); $("#startTime").value = r.startTime; }
-  pendingVoice = { people: r.people, pace: r.pace, lessWalk: r.lessWalk, heard: r.heard, said: r.said };
+  pendingVoice = { people: r.people, pace: r.pace, lessWalk: r.lessWalk, avoid: r.avoid, heard: r.heard, said: r.said };
   track("voice_plan");
   $("#form").requestSubmit();
 });
@@ -2174,6 +2276,19 @@ $("#aiStart").addEventListener("submit", async (e) => {
    - 안드로이드 앱: 웹뷰에는 음성 인식이 없어서 앱의 기본 음성 인식(OhneulApp.startVoice)을 부르고 window.__voiceResult로 받는다
    - 둘 다 없거나 인터넷이 없으면 마이크를 숨기고 글로 쓰게 한다 */
 let pendingVoice = null;
+/* Claude (선택): 앱 서버에 ANTHROPIC_API_KEY가 있고 이번 달 한도 안일 때만 켜진다 (api/ai/status).
+   인터넷이 없거나(산간) 서버가 없으면(GitHub Pages·APK 단독) 부르지 않는다. 9초 안에 답이 없으면 기기 안 해석으로 진행 */
+let aiStatus = null;
+async function askClaude(text) {
+  if (!document.body.classList.contains("has-server") || navigator.onLine === false) return null;
+  aiStatus ??= fetchT("api/ai/status", {}, 3000).then((r) => (r.ok ? r.json() : {})).then((j) => !!j.enabled).catch(() => false);
+  if (!(await aiStatus)) return null;
+  try {
+    const r = await fetchT("api/ai/understand", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ text, today: todayStr(), lang: getLang() }) }, 9000);
+    if (r.status === 503) aiStatus = Promise.resolve(false); // 꺼짐·한도 넘음: 이번 실행 동안 다시 묻지 않는다
+    return r.ok ? (await r.json()).hint || null : null;
+  } catch { return null; }
+}
 const VOICE_LANG = { ko: "ko-KR", en: "en-US", ja: "ja-JP", zh: "zh-CN" };
 const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
 const nativeVoice = () => !!(window.OhneulApp && window.OhneulApp.startVoice && (!window.OhneulApp.hasVoice || window.OhneulApp.hasVoice()));
@@ -2245,6 +2360,7 @@ function heardLabel(h) {
     case "time": return t("{t} 출발", { t: h.ko });
     case "pace": return t(h.ko === "relaxed" ? "여유롭게" : "더 알차게");
     case "walk": return t("덜 걷고 싶어요");
+    case "note": return "💬 " + h.ko;
     default: return h.ko;
   }
 }

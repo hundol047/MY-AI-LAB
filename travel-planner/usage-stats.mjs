@@ -3,7 +3,7 @@
 import { readFile, writeFile, mkdir, rename } from "node:fs/promises";
 import path from "node:path";
 
-export const EVENTS = ["plan", "plan_region", "plan_days", "plan_move", "plan_who", "swap", "reorder", "add_place", "guide_ask", "share", "calendar", "lang", "start_custom", "trip_today", "warning_shown", "costs_open"];
+export const EVENTS = ["plan", "plan_region", "plan_days", "plan_move", "plan_who", "swap", "reorder", "add_place", "guide_ask", "share", "calendar", "lang", "start_custom", "trip_today", "warning_shown", "costs_open", "access_report", "ai_understand"];
 const VALUE = /^[a-z0-9_-]{1,24}$/; // 값은 고정된 선택지 이름만 (예: region=gangneung)
 
 export function createUsageStats(file) {

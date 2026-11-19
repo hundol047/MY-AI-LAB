@@ -2,24 +2,26 @@
 // 출력: public/access-data.js (ACCESS: {장소 id: {wheel, ramp, elevator, toilet, parking, stroller, nursing, text: {항목: 원문}}}), reports/access.md
 // 실행: TOUR_API_KEY=Decoding키 node scripts/bake-access.mjs
 import { writeFile, mkdir } from "node:fs/promises";
-import { candidates, tour, maxKmFor } from "./tour-api.mjs";
+import { candidates, tour, maxKmFor, km, judge } from "./tour-api.mjs";
+import { textOf, flagsOf } from "./access-flags.mjs";
 
 const key = process.env.TOUR_API_KEY;
 if (!key) { console.error("TOUR_API_KEY가 필요합니다"); process.exit(1); }
 const opts = { key, cache: true };
 const { PLACES } = await import("../public/data.js");
-const clean = (s) => String(s || "").replace(/<br\s*\/?>/gi, " / ").replace(/<[^>]+>/g, " ").replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/\s+/g, " ").trim();
-// 화면에 보여 줄 항목 (관광공사 필드 → 한국어 이름)
-const FIELDS = { parking: "주차", publictransport: "대중교통", route: "접근로", exit: "출입구", wheelchair: "휠체어", elevator: "엘리베이터", restroom: "화장실", stroller: "유모차", lactationroom: "수유실", babysparechair: "유아 의자" };
-// 원문에서 "있다/된다"를 읽는다 ("없음", "불가"는 아니라고 본다)
-// "턱이 없음"·"단차 없음"·"계단 없음"은 좋은 뜻이라 부정어로 보지 않는다
-const yes = (s, re) => { if (!s || !re.test(s)) return false; const t = s.replace(/(턱|단차|계단|문턱)\s*(이|가)?\s*없[음어고는]?/g, ""); return !/없음|불가|어려움|미설치/.test(t); };
-
 const ACCESS = {}, rows = [];
 // API가 실패하면(하루 호출 한도 등) 지난번 값을 그대로 둔다 — 실패를 "등록 안 됨"으로 덮어쓰지 않게
 const PREV = await import("../public/access-data.js").then((m) => m.ACCESS || {}).catch(() => ({}));
 let failed = 0;
 const FAIL = Symbol("fail");
+// 무장애 정보에 등록된 강원 목록 (관광지·문화·레포츠·숙박·음식·쇼핑). 국문 번호로 못 찾은 곳을 이름·위치로 한 번 더 찾는다.
+// 이름이 같거나 앞에 지역명만 더 붙은 경우만 (스키장 ↔ 같은 리조트 호텔처럼 비슷한 이름은 다른 시설로 본다)
+const WITH_LIST = [];
+for (const t of ["12", "14", "28", "32", "38", "39"]) WITH_LIST.push(...await tour("KorWithService2", "areaBasedList2", { lDongRegnCd: "51", contentTypeId: t, numOfRows: "1000", pageNo: "1" }, opts).catch(() => []));
+const withMatch = (p) => WITH_LIST
+  .map((it) => ({ it, d: km(p, { lat: Number(it.mapy), lng: Number(it.mapx) }), j: judge(p, it.title, it.contenttypeid) }))
+  .filter((x) => x.j.ok && x.j.score >= 2.5 && x.d <= 1.5)
+  .sort((a, b) => b.j.score - a.j.score || a.d - b.d)[0]?.it.contentid;
 for (const p of PLACES.filter((x) => !x.multi)) {
   // 장소 번호(contentid)는 국문 관광정보와 같다. 사진·운영시간에서 이미 받아 둔 국문 검색 결과(캐시)로 번호를 얻고,
   // 무장애 상세는 장소당 한 번만 부른다 (하루 호출 한도 보호)
@@ -29,24 +31,19 @@ for (const p of PLACES.filter((x) => !x.multi)) {
     if (list === FAIL) { failed++; if (PREV[p.id]) { ACCESS[p.id] = PREV[p.id]; rows.push({ p, why: "검색 실패 → 지난 값 유지" }); } else rows.push({ p, why: "검색 실패" }); continue; }
     id = list.find((c) => c.ok && c.km <= maxKmFor(p))?.contentid;
   }
+  const alt = withMatch(p);
+  if (!id) id = alt;
   if (!id) { rows.push({ p, why: "관광공사 항목 없음" }); continue; }
-  const res = await tour("KorWithService2", "detailWithTour2", { contentId: String(id) }, opts).catch(() => FAIL);
+  let res = await tour("KorWithService2", "detailWithTour2", { contentId: String(id) }, opts).catch(() => FAIL);
+  // 국문 번호에 무장애 정보가 없으면 무장애 목록에서 찾은 번호로 한 번 더
+  if (res !== FAIL && !res[0] && alt && String(alt) !== String(id)) { id = alt; res = await tour("KorWithService2", "detailWithTour2", { contentId: String(id) }, opts).catch(() => FAIL); }
   if (res === FAIL) { failed++; if (PREV[p.id]) { ACCESS[p.id] = PREV[p.id]; rows.push({ p, why: "무장애 조회 실패 → 지난 값 유지" }); } else rows.push({ p, why: "무장애 조회 실패" }); continue; }
   const [d] = res;
   if (!d) { rows.push({ p, why: "무장애 정보에 등록되지 않음" }); continue; }
   const m = { contentid: id };
-  const text = {};
-  for (const [f, label] of Object.entries(FIELDS)) { const v = clean(d[f]); if (v) text[label] = v; }
+  const text = textOf(d);
   if (!Object.keys(text).length) { rows.push({ p, why: "편의시설 항목이 비어 있음" }); continue; }
-  const a = {
-    wheel: yes(text["휠체어"], /대여|가능|있음/),
-    ramp: yes(`${text["접근로"] || ""} ${text["출입구"] || ""}`, /경사로|평탄|(턱|단차|계단|문턱)\s*(이|가)?\s*없|무단차|자동문|휠체어\s*(접근|이동)\s*가능/),
-    elevator: yes(text["엘리베이터"], /있음|설치|가능/),
-    toilet: yes(text["화장실"], /장애인|있음/),
-    parking: yes(text["주차"], /장애인|전용|주차/),
-    stroller: yes(text["유모차"], /대여|가능|있음/),
-    nursing: yes(text["수유실"], /있음|설치/),
-  };
+  const { room, ...a } = flagsOf(text);
   ACCESS[p.id] = { ...Object.fromEntries(Object.entries(a).filter(([, v]) => v)), kto: String(m.contentid), text };
   rows.push({ p, a });
   process.stdout.write(".");
