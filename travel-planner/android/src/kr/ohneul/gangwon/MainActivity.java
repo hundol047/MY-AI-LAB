@@ -17,6 +17,8 @@ import android.print.PrintManager;
 import android.util.Base64;
 import java.io.OutputStream;
 import android.provider.CalendarContract;
+import android.provider.DocumentsContract;
+import android.provider.MediaStore;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
@@ -64,6 +66,9 @@ public class MainActivity extends Activity {
     private static final int REQ_VOICE = 4;
     private static final int REQ_NOTIFY = 5;
     private static final int REQ_SAVE = 6;
+    private static final int REQ_TREE = 7;
+    private String pendingMany; // 폴더를 고르는 동안 기다리는 여러 파일 (안드로이드 9 이하)
+    private boolean pendingShare;
     private byte[] pendingFile; // "저장할 곳"을 고르는 동안 기다리는 파일
     private TextToSpeech tts;   // 일정 읽어 주기 (휴대폰 음성 엔진)
     private boolean ttsReady;
@@ -272,6 +277,15 @@ public class MainActivity extends Activity {
             });
         }
 
+        /** 여러 파일 한 번에 저장: [{name, mime, data(base64)}] → 다운로드/보폭 정산 폴더 (안드로이드 10+), 9 이하는 폴더를 골라서
+         *  끝나면 window.__saveDone("saved:개수" | "cancel" | "error") */
+        @JavascriptInterface
+        public void saveFiles(final String json) { saveMany(json, false); }
+
+        /** 여러 파일을 저장한 뒤 휴대폰 공유 창으로 (카카오톡·메일·드라이브에 바로 첨부) */
+        @JavascriptInterface
+        public void shareFiles(final String json) { saveMany(json, true); }
+
         /** 지금 화면 인쇄 (PDF로 저장 포함) */
         @JavascriptInterface
         public void printPage(final String title) {
@@ -452,6 +466,84 @@ public class MainActivity extends Activity {
         });
     }
 
+    private void saveMany(final String json, final boolean share) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= 29) { writeToDownloads(json, share); return; }
+                // 안드로이드 9 이하: 저장할 폴더를 한 번 고르게 한다 (권한 없이)
+                pendingMany = json; pendingShare = share;
+                try { startActivityForResult(new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE), REQ_TREE); }
+                catch (Exception e) { pendingMany = null; saveDone("error"); }
+            }
+        });
+    }
+
+    /** 안드로이드 10+: MediaStore 다운로드/보폭 정산 폴더에 쓰고, 공유면 그 파일들로 공유 창을 연다 */
+    private void writeToDownloads(final String json, final boolean share) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    JSONArray arr = new JSONArray(json);
+                    final ArrayList<Uri> uris = new ArrayList<>();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject f = arr.getJSONObject(i);
+                        ContentValues v = new ContentValues();
+                        v.put(MediaStore.MediaColumns.DISPLAY_NAME, f.getString("name"));
+                        v.put(MediaStore.MediaColumns.MIME_TYPE, f.optString("mime", "application/octet-stream"));
+                        v.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/보폭 정산");
+                        Uri u = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                        if (u == null) continue;
+                        try (OutputStream out = getContentResolver().openOutputStream(u)) { out.write(Base64.decode(f.getString("data"), Base64.DEFAULT)); }
+                        uris.add(u);
+                    }
+                    runOnUiThread(new Runnable() { @Override public void run() { afterMany(uris, share); } });
+                } catch (Exception e) {
+                    runOnUiThread(new Runnable() { @Override public void run() { saveDone("error"); } });
+                }
+            }
+        }).start();
+    }
+
+    /** 안드로이드 9 이하: 고른 폴더(tree)에 파일을 만든다 */
+    private void writeToTree(final Uri tree, final String json, final boolean share) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    Uri dir = DocumentsContract.buildDocumentUriUsingTree(tree, DocumentsContract.getTreeDocumentId(tree));
+                    JSONArray arr = new JSONArray(json);
+                    final ArrayList<Uri> uris = new ArrayList<>();
+                    for (int i = 0; i < arr.length(); i++) {
+                        JSONObject f = arr.getJSONObject(i);
+                        Uri u = DocumentsContract.createDocument(getContentResolver(), dir, f.optString("mime", "application/octet-stream"), f.getString("name"));
+                        if (u == null) continue;
+                        try (OutputStream out = getContentResolver().openOutputStream(u)) { out.write(Base64.decode(f.getString("data"), Base64.DEFAULT)); }
+                        uris.add(u);
+                    }
+                    runOnUiThread(new Runnable() { @Override public void run() { afterMany(uris, share); } });
+                } catch (Exception e) {
+                    runOnUiThread(new Runnable() { @Override public void run() { saveDone("error"); } });
+                }
+            }
+        }).start();
+    }
+
+    private void afterMany(ArrayList<Uri> uris, boolean share) {
+        if (uris.isEmpty()) { saveDone("error"); return; }
+        if (share) {
+            try {
+                Intent i = new Intent(Intent.ACTION_SEND_MULTIPLE);
+                i.setType("*/*");
+                i.putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris);
+                i.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                startActivity(Intent.createChooser(i, "반값여행 정산 서류 보내기"));
+            } catch (Exception ignored) { /* 공유할 앱이 없으면 저장만 */ }
+        }
+        saveDone("saved:" + uris.size());
+    }
+
     private void saveDone(final String result) {
         if (web != null) web.evaluateJavascript("window.__saveDone && window.__saveDone(" + JSONObject.quote(result) + ")", null);
     }
@@ -500,6 +592,13 @@ public class MainActivity extends Activity {
                 if (list != null && !list.isEmpty()) text = list.get(0);
             }
             voiceDone(text);
+            return;
+        }
+        if (requestCode == REQ_TREE) {
+            String json = pendingMany;
+            pendingMany = null;
+            if (resultCode != RESULT_OK || data == null || data.getData() == null || json == null) { saveDone("cancel"); return; }
+            writeToTree(data.getData(), json, pendingShare);
             return;
         }
         if (requestCode == REQ_SAVE) {

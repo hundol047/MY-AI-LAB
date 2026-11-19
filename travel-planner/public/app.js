@@ -837,7 +837,7 @@ function itemHTML(it, i, day) {
       </div>
       <div class="acts place-acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><button class="ghost small" type="button" data-report="${p.id}">${reported().has(p.id) ? t("제보함") : t("정보가 달라요")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
+        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
       </div>
     </article>
   </li>`;
@@ -1731,7 +1731,7 @@ function renderPast() {
 // 지도 라이브러리는 일정 화면을 처음 열 때 받는다 (첫 화면을 가볍게)
 let leafletLoading = null, mlLoading = null;
 let lastMapViewKey = null;
-let mapInteractive = false;
+let mapFull = false; // "크게 보기" (전체 화면 지도)
 let mapKind = null; // "3d"(MapLibre, 지형 입체) | "2d"(Leaflet, WebGL이 없거나 3D를 못 불러올 때)
 const loadScript = (src, css) => new Promise((resolve, reject) => {
   if (css) { const l = document.createElement("link"); l.rel = "stylesheet"; l.href = css; document.head.append(l); }
@@ -1838,7 +1838,9 @@ function drawMap3D(day) {
     ml = new maplibregl.Map({
       container: "map", attributionControl: { compact: true }, pitch: 55, bearing: -12, maxPitch: 75,
       center: [model.line[0][1], model.line[0][0]], zoom: 11,
-      dragPan: false, dragRotate: false, scrollZoom: false, touchZoomRotate: false, touchPitch: false, keyboard: false, doubleClickZoom: false, boxZoom: false,
+      // 화면 안에서는 두 손가락(컴퓨터는 Ctrl+휠)으로 움직이고, 한 손가락은 페이지 스크롤 · "크게 보기"에서는 한 손가락으로
+      cooperativeGestures: !mapFull, boxZoom: false,
+      locale: { "CooperativeGesturesHandler.WindowsHelpText": t("Ctrl 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MacHelpText": t("⌘ 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MobileHelpText": t("두 손가락으로 지도를 움직여요 · 크게 보기를 누르면 한 손가락으로") },
       style: {
         version: 8,
         sources: {
@@ -1926,7 +1928,8 @@ function spread3D() {
 let leafletPins = [];
 function drawMap2D(day) {
   if (!map) {
-    map = L.map("map", { zoomControl: false, dragging: false, touchZoom: false, scrollWheelZoom: false, doubleClickZoom: false, boxZoom: false, keyboard: false });
+    // 2D: 컴퓨터는 끌어서, 휴대폰은 두 손가락(핀치)으로 · "크게 보기"에서는 한 손가락으로도
+    map = L.map("map", { zoomControl: false, dragging: mapFull || !L.Browser.mobile, touchZoom: true, scrollWheelZoom: false, doubleClickZoom: true, boxZoom: false, keyboard: true });
     map.attributionControl.setPrefix(false);
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", { maxZoom: 19, attribution: "© OpenStreetMap" }).addTo(map);
     L.control.zoom({ position: "bottomright" }).addTo(map);
@@ -1959,15 +1962,20 @@ function spread2D() {
   declutter(pts).forEach((d, i) => { const el = leafletPins[i].getElement()?.querySelector(".pin3d"); if (el) placePin(el, d.dx, d.dy); });
 }
 
-$("#mapInteract").addEventListener("click", () => {
+// 크게 보기: 지도를 전체 화면으로, 한 손가락으로 움직인다. 닫으면 다시 두 손가락
+function setMapFull(on) {
   if (!map && !ml) return;
-  mapInteractive = !mapInteractive;
-  if (ml) for (const h of [ml.dragPan, ml.touchZoomRotate, ml.keyboard, ml.dragRotate, ml.touchPitch, ml.doubleClickZoom]) h[mapInteractive ? "enable" : "disable"]();
-  if (map) for (const handler of [map.dragging, map.touchZoom, map.keyboard]) handler[mapInteractive ? "enable" : "disable"]();
-  document.querySelector(".map-wrap").classList.toggle("map-active", mapInteractive);
-  $("#mapInteract").setAttribute("aria-pressed", String(mapInteractive));
-  $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
-});
+  mapFull = on;
+  document.querySelector(".map-wrap").classList.toggle("map-full", on);
+  document.body.classList.toggle("map-full-open", on);
+  if (ml) { ml.cooperativeGestures[on ? "disable" : "enable"](); setTimeout(() => ml.resize(), 60); }
+  if (map) { if (on || !L.Browser.mobile) map.dragging.enable(); else map.dragging.disable(); setTimeout(() => map.invalidateSize(), 60); }
+  $("#mapInteract").setAttribute("aria-pressed", String(on));
+  $("#mapInteract").textContent = on ? t("✕ 지도 닫기") : t("⛶ 크게 보기");
+  track(on ? "map_full" : "map_full_close");
+}
+$("#mapInteract").addEventListener("click", () => setMapFull(!mapFull));
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && mapFull) setMapFull(false); });
 // 내 위치 버튼 (3D·2D 공통). mark(ll): 지도에 표시하고 그 표시를 돌려준다
 let meMarker = null;
 function locateButton(mark) {
@@ -2426,6 +2434,57 @@ document.addEventListener("click", (e) => {
   }, () => { out.textContent = t("위치를 가져오지 못했어요"); }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 60000 });
 });
 
+/* ---------- 설정 ---------- */
+// 화면 밝기(휴대폰 설정·밝게·어둡게), 글씨 크기, 언어, 여행 기본값(이동 편의·이동수단), 기기에 저장된 것 지우기
+function applyTheme(th) {
+  if (th === "dark" || th === "light") document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme;
+  const dark = th === "dark" || (th !== "light" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#121414" : "#0b5e6b");
+}
+applyTheme(localStorage.getItem("theme") || "system");
+const defaults = () => store.get("defaults") || {};
+function applyDefaults() {
+  const d = defaults();
+  if (d.access !== undefined) document.querySelectorAll('.chips[data-name="access"] button').forEach((b) => b.classList.toggle("on", b.dataset.v === d.access));
+  if (d.move) document.querySelectorAll('.seg[data-name="move"] button').forEach((b) => { b.classList.toggle("on", b.dataset.v === d.move); b.setAttribute("aria-pressed", b.dataset.v === d.move); });
+}
+applyDefaults();
+function renderSettings() {
+  const cur = { theme: localStorage.getItem("theme") || "system", big: document.documentElement.classList.contains("big") ? "1" : "0", access: defaults().access ?? "", move: defaults().move || "car" };
+  document.querySelectorAll("#settings [data-set]").forEach((g) => g.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === cur[g.dataset.set])));
+  $("#setSavedCount").textContent = t("{n}개", { n: (store.get("savedTrips") || []).length });
+  // 버전: 오프라인 저장 이름(sw.js의 ohneul-gangwon-vNN)에서 번호만
+  fetchT("sw.js", {}, 3000).then((r) => (r.ok ? r.text() : "")).then((x) => { const v = (x.match(/ohneul-gangwon-v(\d+)/) || [])[1]; $("#setVersion").textContent = v ? t("버전 {v}", { v: `1.${v}` }) : ""; }).catch(() => {});
+}
+$("#settingsBtn").addEventListener("click", () => { renderSettings(); applyStatic(); $("#settings").showModal(); track("settings"); });
+$("#settingsClose").addEventListener("click", () => $("#settings").close());
+$("#settings").addEventListener("click", async (e) => {
+  if (e.target === $("#settings")) return $("#settings").close(); // 바깥(어두운 곳)을 누르면 닫기
+  const lb = e.target.closest("[data-lang]");
+  if (lb && lb.dataset.lang !== getLang()) { $("#settings").close(); return switchLang(lb.dataset.lang); }
+  const sb = e.target.closest("[data-set] button");
+  if (sb) {
+    const k = sb.closest("[data-set]").dataset.set, v = sb.dataset.v;
+    if (k === "theme") { try { v === "system" ? localStorage.removeItem("theme") : localStorage.setItem("theme", v); } catch { /* 저장 공간 없음 */ } applyTheme(v); }
+    if (k === "big") { store.set("bigText", v === "1"); applyBig(v === "1"); }
+    if (k === "access" || k === "move") { store.set("defaults", { ...defaults(), [k]: v }); applyDefaults(); }
+    renderSettings(); return;
+  }
+  const cb = e.target.closest("[data-clear]");
+  if (cb) {
+    const what = cb.dataset.clear;
+    const ask = { saved: t("저장한 일정을 모두 지울까요?"), seen: t("최근 본 장소 기록을 지울까요?"), claim: t("반값여행 정산에 올린 영수증·사진을 모두 지울까요?"), all: t("이 기기에 저장된 일정·설정·기록을 모두 지울까요?") }[what];
+    if (!confirm(ask)) return;
+    const dropClaim = () => new Promise((r) => { try { const q = indexedDB.deleteDatabase("ohneul-claim"); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch { r(); } });
+    if (what === "saved") { localStorage.removeItem("savedTrips"); renderSaved(); }
+    if (what === "seen") localStorage.removeItem("seenPlaces");
+    if (what === "claim") { await dropClaim(); localStorage.removeItem("claim:settings"); }
+    if (what === "all") { await dropClaim(); try { localStorage.clear(); } catch { /* 무시 */ } location.reload(); return; }
+    toast(t("지웠어요")); renderSettings();
+  }
+});
+window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener?.("change", () => applyTheme(localStorage.getItem("theme") || "system"));
+
 /* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */
 // 큰 글씨: 지도는 빼고(터치 위치가 어긋나지 않게) 글과 카드만 키운다. 이 기기에 기억
 function applyBig(on) {
@@ -2488,7 +2547,7 @@ async function switchLang(l) {
   if (trip && !$("#result").hidden) render();
   renderPast();
   renderHalfPkgs();
-  $("#mapInteract").textContent = t(mapInteractive ? "지도 이동 끄기" : "지도 이동 켜기");
+  $("#mapInteract").textContent = mapFull ? t("✕ 지도 닫기") : t("⛶ 크게 보기");
   await renderGuideHistory();
 }
 document.querySelector(".lang").addEventListener("click", (e) => {

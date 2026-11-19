@@ -78,17 +78,14 @@ function shrink(file, max = 1600, q = 0.82) {
     img.onerror = rej; img.src = URL.createObjectURL(file);
   });
 }
-// 글자 읽기 도구는 처음 쓸 때만 받는다 (버전 고정)
+// 글자 읽기 도구(Tesseract 5.1.1·한국어 자료)는 앱 안에 들어 있다 (인터넷·외부 서버 없이 이 기기에서만 읽음)
 let ocrWorker = null;
 async function ocr(blob, onStep) {
   if (!ocrWorker) {
-    onStep?.("글자 읽기 도구를 받는 중… (처음 한 번)");
-    await new Promise((res, rej) => { const s = document.createElement("script"); s.src = "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js"; s.onload = res; s.onerror = () => rej(new Error("글자 읽기 도구를 받지 못했어요. 인터넷 연결을 확인하세요")); document.head.append(s); });
-    ocrWorker = await window.Tesseract.createWorker("kor", 1, {
-      workerPath: "https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/worker.min.js",
-      corePath: "https://cdn.jsdelivr.net/npm/tesseract.js-core@5.1.1",
-      langPath: "https://cdn.jsdelivr.net/npm/@tesseract.js-data/kor@1.0.0/4.0.0_best_int",
-    });
+    onStep?.("글자 읽기 준비 중… (처음 한 번, 몇 초)");
+    if (!window.Tesseract) await new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = "vendor/tesseract/tesseract.min.js"; sc.onload = res; sc.onerror = () => rej(new Error("글자 읽기 도구를 열지 못했어요")); document.head.append(sc); });
+    const here = new URL("vendor/tesseract/", location.href).href;
+    ocrWorker = await window.Tesseract.createWorker("kor", 1, { workerPath: here + "worker.min.js", corePath: here + "core", langPath: here + "lang" });
   }
   const { data } = await ocrWorker.recognize(blob);
   return data.text || "";
@@ -320,6 +317,7 @@ $("#makeZip").addEventListener("click", async () => {
   for (const p of a.stays) files[fileNameFor("숙박이용확인서", ++n, { date: a.s.from, place: a.s.stayName })] = new Uint8Array(await p.blob.arrayBuffer());
   const css = await fetch("claim.css").then((r) => r.text()).catch(() => "");
   files["00_정산신청서.html"] = strToU8(`<!doctype html><meta charset="utf-8"><title>정산 신청서</title><style>${css}</style>${docHTML(a).replace(/<img src="blob:[^"]*">/g, "")}`);
+  try { files["00_정산신청서.pdf"] = new Uint8Array(await (await docPdf(a)).arrayBuffer()); } catch { /* PDF는 미리 보기·인쇄로 */ }
   files["00_신청내용_붙여넣기.txt"] = strToU8(pasteText(a));
   const zip = zipSync(files, { level: 0 });
   const name = `반값여행_정산_${a.s.town}_${a.s.from || "날짜"}.zip`;
@@ -330,7 +328,75 @@ $("#makeZip").addEventListener("click", async () => {
   const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([zip], { type: "application/zip" }));
   link.download = name; link.click(); setTimeout(() => URL.revokeObjectURL(link.href), 60000);
 });
-window.__saveDone = (r) => alert(r === "ok" ? "저장했어요. 신청 사이트에서 이 파일 안의 사진을 순서대로 올리세요." : r === "cancel" ? "저장을 취소했어요." : "저장하지 못했어요.");
+// 신청서 PDF: 신청서 화면을 그림으로 떠서 A4 쪽마다 넣는다 (html2canvas + jsPDF, 앱 안에 들어 있음)
+const loadJs = (src) => new Promise((res, rej) => { const sc = document.createElement("script"); sc.src = src; sc.onload = res; sc.onerror = rej; document.head.append(sc); });
+async function docPdf(a) {
+  if (!window.html2canvas) await loadJs("vendor/pdf/html2canvas.min.js");
+  if (!window.jspdf) await loadJs("vendor/pdf/jspdf.umd.min.js");
+  const box = document.createElement("div");
+  box.style.cssText = "position:fixed;left:-10000px;top:0;width:794px;background:#fff;padding:36px 40px;box-sizing:border-box";
+  box.innerHTML = docHTML(a);
+  document.body.append(box);
+  await Promise.all([...box.querySelectorAll("img")].map((im) => (im.complete ? 0 : new Promise((r) => { im.onload = im.onerror = r; }))));
+  const canvas = await window.html2canvas(box, { scale: 2, backgroundColor: "#ffffff", useCORS: true });
+  box.remove();
+  const pdf = new window.jspdf.jsPDF({ unit: "pt", format: "a4" });
+  const W = pdf.internal.pageSize.getWidth(), H = pdf.internal.pageSize.getHeight();
+  const pageH = Math.floor((canvas.width * H) / W); // A4 한 쪽에 들어가는 그림 높이(px)
+  for (let y = 0, pg = 0; y < canvas.height; y += pageH, pg++) {
+    const part = document.createElement("canvas"); part.width = canvas.width; part.height = Math.min(pageH, canvas.height - y);
+    part.getContext("2d").drawImage(canvas, 0, y, canvas.width, part.height, 0, 0, canvas.width, part.height);
+    if (pg) pdf.addPage();
+    pdf.addImage(part.toDataURL("image/jpeg", 0.92), "JPEG", 0, 0, W, (part.height * W) / canvas.width);
+  }
+  return pdf.output("blob");
+}
+// 첨부할 파일: 신청서 PDF + 인정되는 영수증 + 방문 인증 사진 + 숙박이용확인서 (신청 사이트에 올릴 순서대로 번호·이름)
+async function attachments(a) {
+  const out = [{ name: `00_정산신청서_${a.s.town}_${a.s.from || "날짜"}.pdf`, mime: "application/pdf", blob: await docPdf(a) }];
+  let n = 0;
+  for (const { it, chk } of a.receipts) if (it.blob && !chk.hard) out.push({ name: fileNameFor("영수증", ++n, it.meta), mime: "image/jpeg", blob: it.blob });
+  for (const p of a.proven) out.push({ name: fileNameFor("인증사진", ++n, { date: p.meta.date, place: byId.get(p.meta.placeId)?.name }), mime: "image/jpeg", blob: p.blob });
+  for (const p of a.stays) out.push({ name: fileNameFor("숙박이용확인서", ++n, { date: a.s.from, place: a.s.stayName }), mime: "image/jpeg", blob: p.blob });
+  return out;
+}
+const b64 = async (blob) => { const u = new Uint8Array(await blob.arrayBuffer()); let bin = ""; for (let i = 0; i < u.length; i += 0x8000) bin += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(bin); };
+const busy = (btn, on, label) => { btn.disabled = on; if (on) { btn.dataset.label = btn.textContent; btn.textContent = label; } else if (btn.dataset.label) btn.textContent = btn.dataset.label; };
+const download = (blob, name) => { const l = document.createElement("a"); l.href = URL.createObjectURL(blob); l.download = name; document.body.append(l); l.click(); l.remove(); setTimeout(() => URL.revokeObjectURL(l.href), 60000); };
+$("#makePdf").addEventListener("click", async (e) => {
+  const a = analysis(); if (!a.receipts.length) return alert("영수증을 먼저 올려 주세요.");
+  busy(e.target, true, "PDF 만드는 중…");
+  try {
+    const blob = await docPdf(a), name = `정산신청서_${a.s.town}_${a.s.from || "날짜"}.pdf`;
+    if (window.OhneulApp?.saveFile) window.OhneulApp.saveFile(name, "application/pdf", await b64(blob)); else download(blob, name);
+  } catch { alert("PDF를 만들지 못했어요. '신청서 미리 보기·인쇄'에서 PDF로 저장해 주세요."); }
+  busy(e.target, false);
+});
+// 모두 저장: 안드로이드 앱은 다운로드/보폭 정산 폴더에 한 번에, 웹은 휴대폰 공유(파일 보내기)가 되면 공유, 아니면 하나씩 내려받기
+$("#saveFiles").addEventListener("click", async (e) => {
+  const a = analysis(); if (!a.receipts.length) return alert("영수증을 먼저 올려 주세요.");
+  busy(e.target, true, "파일 준비 중…");
+  try {
+    const list = await attachments(a);
+    if (window.OhneulApp?.saveFiles) { window.OhneulApp.saveFiles(JSON.stringify(await Promise.all(list.map(async (f) => ({ name: f.name, mime: f.mime, data: await b64(f.blob) }))))); }
+    else { for (const f of list) { download(f.blob, f.name); await new Promise((r) => setTimeout(r, 350)); } alert(`${list.length}개 파일을 내려받았어요. 신청 사이트에서 번호 순서대로 올리세요.`); }
+  } catch { alert("파일을 저장하지 못했어요. '한 번에 묶어 받기(ZIP)'를 써 주세요."); }
+  busy(e.target, false);
+});
+// 바로 첨부·보내기: 휴대폰 공유 창으로 (카카오톡·메일·드라이브 등에 바로 첨부)
+const canShareFiles = () => { try { return !!navigator.canShare?.({ files: [new File([new Blob(["x"])], "x.pdf", { type: "application/pdf" })] }); } catch { return false; } };
+if (window.OhneulApp?.shareFiles || canShareFiles()) $("#shareFiles").hidden = false;
+$("#shareFiles").addEventListener("click", async (e) => {
+  const a = analysis(); if (!a.receipts.length) return alert("영수증을 먼저 올려 주세요.");
+  busy(e.target, true, "파일 준비 중…");
+  try {
+    const list = await attachments(a);
+    if (window.OhneulApp?.shareFiles) window.OhneulApp.shareFiles(JSON.stringify(await Promise.all(list.map(async (f) => ({ name: f.name, mime: f.mime, data: await b64(f.blob) })))));
+    else await navigator.share({ files: list.map((f) => new File([f.blob], f.name, { type: f.mime })), title: "반값여행 정산 서류" });
+  } catch (err) { if (err?.name !== "AbortError") alert("공유하지 못했어요. '첨부할 파일 모두 저장'을 써 주세요."); }
+  busy(e.target, false);
+});
+window.__saveDone = (r) => alert(String(r).startsWith("saved:") ? `${String(r).slice(6)}개 파일을 다운로드 폴더의 "보폭 정산"에 저장했어요. 신청 사이트의 파일 올리기에서 번호 순서대로 고르세요.` : r === "ok" ? "저장했어요. 신청 사이트에서 이 파일 안의 사진을 순서대로 올리세요." : r === "cancel" ? "저장을 취소했어요." : "저장하지 못했어요.");
 $("#clearAll").addEventListener("click", async () => {
   if (!confirm("올린 영수증·사진과 입력한 내용을 모두 지울까요?")) return;
   await tx("readwrite", (s) => s.clear()); items = []; localStorage.removeItem(SKEY); initTrip(); renderAll();
