@@ -4,8 +4,8 @@
   --text: #191919;
   --sub: #6b6b6b;
   --line: #e7e5df;
-  --brand: #0b5e6b;
-  --brand-soft: #e3f0f1;
+  --brand: #34479a;
+  --brand-soft: #eaedf9;
   --on-brand: #ffffff;
   --night: #6d28d9;
   --ok: #15803d;
@@ -17,13 +17,13 @@
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     --bg: #121414; --surface: #1b1e1f; --text: #ececec; --sub: #9aa0a2;
-    --line: #2b3032; --brand: #5fb8c4; --brand-soft: #173438; --ok: #4ade80; --warn: #f87171; --on-brand: #06262b; --night: #c4b5fd;
+    --line: #2b3032; --brand: #9aabf2; --brand-soft: #1f2647; --ok: #4ade80; --warn: #f87171; --on-brand: #0e1430; --night: #c4b5fd;
     --shadow: none; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
   --bg: #121414; --surface: #1b1e1f; --text: #ececec; --sub: #9aa0a2;
-  --line: #2b3032; --brand: #5fb8c4; --brand-soft: #173438; --ok: #4ade80; --warn: #f87171; --on-brand: #06262b; --night: #c4b5fd;
+  --line: #2b3032; --brand: #9aabf2; --brand-soft: #1f2647; --ok: #4ade80; --warn: #f87171; --on-brand: #0e1430; --night: #c4b5fd;
   --shadow: none; color-scheme: dark;
 }
 :root[data-theme="light"] { color-scheme: light; }
@@ -72,7 +72,7 @@ button { cursor: pointer; }
 .setup { max-width: 560px; margin: 0 auto; padding: 0 16px 48px; }
 .hero {
   position: relative; height: 220px; margin: 16px 0 -40px; border-radius: 22px; overflow: hidden;
-  background: var(--hero, none) center/cover, linear-gradient(135deg, #0b5e6b 0%, #2a8fa0 55%, #f2c27b 100%);
+  background: var(--hero, none) center/cover, linear-gradient(135deg, #2f3f86 0%, #5a6fc0 50%, #ff8f7a 100%);
 }
 .hero::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(0,0,0,.18) 0%, rgba(0,0,0,0) 28%, rgba(0,0,0,.05) 45%, rgba(0,0,0,.5)); }
 /* 오늘의 강원: 사진을 다 받은 뒤 서서히 (색 그라데이션 위로) */
@@ -188,7 +188,7 @@ html, body { overflow-x: clip; }
   width: 34px; height: 34px; display: grid; place-items: center; margin-bottom: 6px;
   background: #fff; color: #222; border: 2px solid rgba(0,0,0,.2); border-radius: 4px; background-clip: padding-box;
 }
-.locate:hover { color: #0b5e6b; }
+.locate:hover { color: #34479a; }
 .leaflet-control-attribution { font-size: 10px; }
 
 .toast {
@@ -253,7 +253,7 @@ html, body { overflow-x: clip; }
 /* AI */
 .ai-badge {
   display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px;
-  background: linear-gradient(135deg, #0b5e6b, #6d28d9); color: #fff; font-size: 12px; font-weight: 800; white-space: nowrap;
+  background: linear-gradient(135deg, #34479a, #f2668b); color: #fff; font-size: 12px; font-weight: 800; white-space: nowrap;
 }
 .ai-start { position: relative; z-index: 1; display: flex; align-items: center; gap: 8px; padding: 8px 8px 8px 12px; margin: 0 0 12px; }
 .ai-start input { flex: 1; min-width: 0; border: 0; background: transparent; padding: 10px 4px; outline: none; }
@@ -547,7 +547,7 @@ body.has-server .no-server { display: none !important; }
 .pin3d { position: relative; width: 0; height: 0; cursor: pointer; }
 .pin3d span {
   position: absolute; left: -15px; top: -15px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
-  background: var(--c, #0b5e6b); color: #fff; font-weight: 800; font-size: 14px; border: 2px solid #fff;
+  background: var(--c, #34479a); color: #fff; font-weight: 800; font-size: 14px; border: 2px solid #fff;
   box-shadow: 0 2px 8px rgba(0,0,0,.35); transition: transform .15s ease; z-index: 2;
 }
 .pin3d.base span { --c: #191919; width: 26px; height: 26px; left: -13px; top: -13px; font-size: 11px; opacity: .92; }

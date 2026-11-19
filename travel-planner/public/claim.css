@@ -8,7 +8,7 @@
 .claim .grid2 label { margin: 8px 0; font-size: 13.5px; }
 .claim .chk { display: inline-flex !important; align-items: center; gap: 6px; margin: 6px 14px 6px 0 !important; }
 .claim .chk input { width: auto !important; margin: 0 !important; }
-.claim .drop { display: block; text-align: center; padding: 18px; border: 2px dashed var(--brand, #0b5e6b); border-radius: 12px; color: var(--brand, #0b5e6b); font-weight: 700; cursor: pointer; }
+.claim .drop { display: block; text-align: center; padding: 18px; border: 2px dashed var(--brand, #34479a); border-radius: 12px; color: var(--brand, #34479a); font-weight: 700; cursor: pointer; }
 .claim .drop.small { padding: 12px; margin-top: 10px; }
 .claim .table-wrap { overflow-x: auto; margin: 10px -4px; }
 .claim table { width: 100%; border-collapse: collapse; font-size: 13px; }

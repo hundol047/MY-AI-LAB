@@ -1311,7 +1311,7 @@ function bookingReason(query) {
 // 사진이 없거나 못 받은 숙소는 숙소 종류 그림을 보여 준다 (사진 아래 층에 깔아 두어, 사진이 뜨면 가려진다)
 const STAY_ART = (() => {
   const bg = '<defs><linearGradient id="b" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e3f1ef"/><stop offset="1" stop-color="#f6ecdc"/></linearGradient></defs><rect width="56" height="56" fill="url(#b)"/>';
-  const T = "#0b5e6b", M = "#5f9b9a", A = "#f2a541", W = "#ffffff";
+  const T = "#34479a", M = "#8c9bd0", A = "#f2a541", W = "#ffffff";
   const art = {
     ocean: `<circle cx="42" cy="15" r="5" fill="${A}"/><rect x="14" y="14" width="20" height="28" rx="2" fill="${T}"/><g fill="${W}"><rect x="18" y="19" width="4" height="4"/><rect x="26" y="19" width="4" height="4"/><rect x="18" y="27" width="4" height="4"/><rect x="26" y="27" width="4" height="4"/></g><rect y="42" width="56" height="14" fill="${M}"/><path d="M4 47q4-3 8 0t8 0t8 0t8 0t8 0t8 0" fill="none" stroke="${W}" stroke-width="2" stroke-linecap="round"/>`,
     business: `<rect x="10" y="18" width="16" height="30" rx="2" fill="${M}"/><rect x="24" y="10" width="22" height="38" rx="2" fill="${T}"/><g fill="${W}"><rect x="28" y="15" width="4" height="4"/><rect x="37" y="15" width="4" height="4"/><rect x="28" y="23" width="4" height="4"/><rect x="37" y="23" width="4" height="4"/><rect x="28" y="31" width="4" height="4"/><rect x="37" y="31" width="4" height="4"/><rect x="14" y="23" width="3" height="3"/><rect x="19" y="23" width="3" height="3"/><rect x="14" y="30" width="3" height="3"/><rect x="19" y="30" width="3" height="3"/></g><rect y="48" width="56" height="8" fill="${M}" opacity=".5"/>`,
@@ -1899,7 +1899,7 @@ function drawMap3D(day) {
     else {
       ml.addSource("route", { type: "geojson", data: geo });
       ml.addLayer({ id: "route-casing", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#ffffff", "line-width": 8, "line-opacity": 0.9 } });
-      ml.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#0b5e6b", "line-width": 4.5 } });
+      ml.addLayer({ id: "route", type: "line", source: "route", layout: { "line-join": "round", "line-cap": "round" }, paint: { "line-color": "#34479a", "line-width": 4.5 } });
     }
     ml.setPaintProperty("route", "line-dasharray", model.known ? [1, 0] : [1.5, 1.5]);
   };
@@ -1941,7 +1941,7 @@ function drawMap2D(day) {
   layer = L.layerGroup().addTo(map);
   const model = mapModel(day);
   if (!day.items.length) return;
-  L.polyline(model.line, model.known ? { color: "#0b5e6b", weight: 5, opacity: 0.85 } : { color: "#0b5e6b", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
+  L.polyline(model.line, model.known ? { color: "#34479a", weight: 5, opacity: 0.85 } : { color: "#34479a", weight: 3, opacity: 0.6, dashArray: "6 6" }).addTo(layer);
   if (!model.known) applyRoad(dayIdx);
   leafletPins = [...model.marks].sort((a, b) => Number(!a.base) - Number(!b.base)).map((m, i) => {
     const el = pinEl(m);
@@ -2439,7 +2439,7 @@ document.addEventListener("click", (e) => {
 function applyTheme(th) {
   if (th === "dark" || th === "light") document.documentElement.dataset.theme = th; else delete document.documentElement.dataset.theme;
   const dark = th === "dark" || (th !== "light" && window.matchMedia?.("(prefers-color-scheme: dark)").matches);
-  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#121414" : "#0b5e6b");
+  document.querySelector('meta[name="theme-color"]')?.setAttribute("content", dark ? "#121414" : "#34479a");
 }
 applyTheme(localStorage.getItem("theme") || "system");
 const defaults = () => store.get("defaults") || {};

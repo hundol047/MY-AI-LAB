@@ -1,12 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 보폭 로고: 출발점에서 주황 도착점으로 이어지는 길 (public/icon.svg와 같은 모양, 가운데 안전 영역 안) -->
+<!-- 보폭 아이콘 앞판: 강원 산 위로 뜨는 해와 동해 (64 단위 그림을 보이는 가운데 72dp에 맞춤, 가장자리는 넉넉히 늘림) -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <group android:translateX="22.5" android:translateY="22">
-        <path android:pathData="M16,46 C26,46 28,32 36,30 S46,22 46,18"
-            android:strokeColor="#FFFFFFFF" android:strokeWidth="6" android:strokeLineCap="round" />
-        <path android:fillColor="#FFFFFFFF" android:pathData="M11,46a5,5 0 1,0 10,0a5,5 0 1,0 -10,0z" />
-        <path android:fillColor="#FFF2A541" android:pathData="M40,18a6,6 0 1,0 12,0a6,6 0 1,0 -12,0z" />
+    <group android:translateX="18" android:translateY="18" android:scaleX="1.125" android:scaleY="1.125">
+        <path android:fillColor="#FFFFFFFF" android:fillAlpha="0.18" android:pathData="M17,31a15,15 0 1,0 30,0a15,15 0 1,0 -30,0z" />
+        <path android:fillColor="#FFFFF7E6" android:pathData="M22,31a10,10 0 1,0 20,0a10,10 0 1,0 -20,0z" />
+        <path android:fillColor="#FF4A5FA8" android:pathData="M-16,52 L15,27 L25,36 L35,23 L51,38 L66,29 L80,36 V80 H-16z" />
+        <path android:fillColor="#FF2F3F86" android:pathData="M-16,53 L13,39 L25,46 L39,35 L66,50 L80,52 V80 H-16z" />
+        <path android:pathData="M-16,50 H80 V80 H-16z">
+            <aapt:attr name="android:fillColor">
+                <gradient android:type="linear" android:startX="0" android:startY="50" android:endX="0" android:endY="64"
+                    android:startColor="#FF2E8BD8" android:endColor="#FF1C4FA8" />
+            </aapt:attr>
+        </path>
+        <path android:strokeColor="#FFFFFFFF" android:strokeAlpha="0.85" android:strokeWidth="1.8" android:strokeLineCap="round"
+            android:pathData="M6,55.5 q4,-2.4 8,0 t8,0 M34,59 q4,-2.4 8,0 t8,0" />
     </group>
 </vector>
