@@ -920,3 +920,9 @@ body.v3d-open { overflow: hidden; }
 .v3d-pinbtns .v3d-btn { background: #f3f4f6; box-shadow: none; border: 1px solid #d1d5db; }
 .v3d-cross { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #fde047; font-size: 34px; font-weight: 900; text-shadow: 0 0 4px #000, 0 0 2px #000; pointer-events: none; }
 .v3d-sheet-close { float: right; width: 44px; height: 44px; margin: -6px -8px 0 8px; border: 0; border-radius: 50%; background: #f3f4f6; color: #111; font-size: 16px; font-weight: 800; cursor: pointer; }
+/* 장소 카드: 주변 걷기 정보 조사 (walk-info.json) */
+.walk-info { margin-top: 6px; padding: 8px 10px; border-radius: 10px; border: 1px dashed var(--line); font-size: 13px; line-height: 1.5; }
+.walk-info em { font-style: normal; font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: #e5e7eb; color: #374151; }
+.walk-info small { display: block; margin-top: 3px; opacity: .75; }
+.wi-bar { display: flex; height: 7px; margin: 5px 0 4px; border-radius: 4px; overflow: hidden; }
+.wi-bar .g0 { background: #16a34a; } .wi-bar .g1 { background: #f59e0b; } .wi-bar .g2 { background: #d92d20; }

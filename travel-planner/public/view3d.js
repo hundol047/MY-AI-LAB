@@ -64,6 +64,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
       <button type="button" class="v3d-btn" data-act="orbit" aria-pressed="true"></button>
       <button type="button" class="v3d-btn" data-act="base" aria-pressed="true"></button>
       <button type="button" class="v3d-btn" data-act="home"></button>
+      <button type="button" class="v3d-btn" data-act="wc"></button>
       <button type="button" class="v3d-btn" data-act="pin"></button>
       <button type="button" class="v3d-btn" data-act="legend" aria-expanded="false"></button>
     </div>
@@ -98,6 +99,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     q("orbit").setAttribute("aria-pressed", String(state.orbit));
     q("base").textContent = state.satellite ? t("🗺 지도로") : t("🛰 위성 사진으로");
     q("home").textContent = t("🎯 관광지로");
+    q("wc").textContent = t("🚻 가까운 화장실로");
     q("pin").textContent = t("📌 현장 확인 남기기");
     q("legend").textContent = t("ℹ️ 표시 설명");
   };
@@ -190,6 +192,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   // ---------- 걷기 정보: 계단·화장실 표시, 산책로 경사 ----------
   const here = [place.lng, place.lat];
   const chip = (cls, text, title) => { const d = document.createElement("div"); d.className = `v3d-chip ${cls}`; d.textContent = text; if (title) d.title = title; return d; };
+  let lastToilets = [], wcIdx = -1;
   let marks = [], pinMarks = [], official = null, found = { steps: 0, toilets: 0, paths: 0, unpaved: 0, sum: null };
   // 높이 0.5m 이하(바다·물 위로 읽힌 칸)는 '모름'으로 둔다: 해안 절벽·물가 데크는 30m 지형 자료가 바다 높이로 뭉개져 경사가 엉뚱하게 나온다
   const elevAt = (lng, lat) => { try { const z = map.queryTerrainElevation([lng, lat]); return z == null || z / EXAG <= 0.5 ? null : z / EXAG; } catch { return null; } };
@@ -221,12 +224,15 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     const sig = [steps.length, off.length, osm.length, nPaths, feats.length, sum.share?.join("/")].join("|");
     if (sig === walkSig) return;
     walkSig = sig;
+    // 가까운 화장실: 따라가는 중이면 내 위치에서, 아니면 관광지에서 가까운 순 (공식 자료 먼저 믿는다)
+    lastToilets = [...off, ...osm];
     marks.forEach((m) => m.remove());
+    const dTxt = (x) => ` ${distLabel(distM(x.at, here) / 1000)}`;
     const near = (list) => list.sort((a, b) => distM(a.at, here) - distM(b.at, here)).slice(0, MAX_MARKS);
     marks = [
       ...near(steps).map((x) => new maplibregl.Marker({ element: chip("steps", t("계단"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + dTxt(x), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?") + dTxt(x), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
     map.getSource("slope")?.setData({ type: "FeatureCollection", features: feats });
     found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, unpaved, sum };
@@ -288,6 +294,18 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     q("legend").setAttribute("aria-expanded", String(which === "legend"));
   };
   el.addEventListener("click", (e) => { if (e.target.closest(".v3d-sheet-close")) showSheet(null); });
+  // 가까운 화장실로: 누를 때마다 가까운 순으로 하나씩 보여 준다
+  q("wc").addEventListener("click", () => {
+    const from = state.me ? [state.me.lng, state.me.lat] : here;
+    const list = [...lastToilets].sort((a, b) => distM(a.at, from) - distM(b.at, from));
+    if (!list.length) return toast(t("이 주변 지도에는 화장실 표시가 없어요 · 시설에 물어보세요"));
+    wcIdx = (wcIdx + 1) % list.length;
+    const x = list[wcIdx];
+    if (state.following) setFollow(false);
+    stopOrbit();
+    map.flyTo({ center: x.at, zoom: 17.6, pitch: 55, duration: 1200, essential: true });
+    toast(`${x.official ? (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + " · " + t("공식") : t("🚻 화장실?") + " · " + t("미확인")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
+  });
   q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
 
   // 현장 확인 남기기: 따라가는 중이면 내 위치에, 아니면 화면 가운데(＋)에 표시를 남긴다. 이 기기에만 저장한다

@@ -74,3 +74,34 @@ assert.equal(toToilet({ ...row, toiletNm: " " }), null);
 assert.equal(nearPlaces([toToilet(row)], [{ lat: 37.8055, lng: 128.9085 }]).length, 1);
 assert.equal(nearPlaces([toToilet(row)], [{ lat: 37.75, lng: 128.9 }]).length, 0);
 console.log("ok - 공식 화장실 자료 읽기 (장애인 화장실은 변기 수가 있을 때만, 모름은 모름으로)");
+
+// 걷기 정보 조사(bake-walk-info): 지도 조각 경계에서 자르기, 맞닿은 계단 묶기, 고도 PNG 읽기, 조사 결과 파일
+const { clipLine, mergeTouching, decodePng, tilesAround, tileXY } = await import("../scripts/bake-walk-info.mjs");
+const P = (x, y) => ({ x, y });
+assert.deepEqual(clipLine([P(-100, 50), P(100, 50)], 0, 4096), [[P(0, 50), P(100, 50)]], "경계 밖 부분은 버림");
+assert.equal(clipLine([P(-50, -50), P(-10, -10)], 0, 4096).length, 0);
+assert.equal(clipLine([P(10, 10), P(5000, 10), P(5000, 30), P(10, 30)], 0, 4096).length, 2, "나갔다 들어오면 두 조각");
+assert.deepEqual(clipLine([P(1, 1), P(2, 2), P(3, 3)], 0, 4096), [[P(1, 1), P(2, 2), P(3, 3)]]);
+const g = mergeTouching([[[128.9, 37.8], [128.9001, 37.8]], [[128.90011, 37.8], [128.9002, 37.8]], [[128.95, 37.8], [128.9501, 37.8]]]);
+assert.equal(g.length, 2, "맞닿은 계단은 하나"); assert.equal(g.find((x) => x.length === 2).length, 2);
+assert.ok(tilesAround(128.9, 37.8, 450).length >= 1 && tilesAround(128.9, 37.8, 450).length <= 4);
+assert.equal(Math.floor(tileXY(128.6273, 38.1248)[0]), 14045);
+{ // 2×1 RGB PNG (필터 없음): 고도 = R*256 + G + B/256 - 32768
+  const { deflateSync } = await import("node:zlib");
+  const chunk = (name, data) => { const b = Buffer.alloc(12 + data.length); b.writeUInt32BE(data.length, 0); b.write(name, 4, "latin1"); data.copy(b, 8); return b; };
+  const ihdr = Buffer.alloc(13); ihdr.writeUInt32BE(2, 0); ihdr.writeUInt32BE(1, 4); ihdr[8] = 8; ihdr[9] = 2;
+  const png = Buffer.concat([Buffer.from([137, 80, 78, 71, 13, 10, 26, 10]), chunk("IHDR", ihdr), chunk("IDAT", deflateSync(Buffer.from([1, 128, 10, 0, 0, 5, 128]))), chunk("IEND", Buffer.alloc(0))]);
+  const t = decodePng(png);
+  assert.deepEqual([...t.px], [128, 10, 0, 128, 15, 128], "Sub 필터 풀기");
+}
+// 저장된 조사 결과: 비율 합 100, 가까운 거리 ≤ 둘레, 낙산사에는 계단이 잡혀 있어야 한다
+const { readFileSync } = await import("node:fs");
+const W = JSON.parse(readFileSync(new URL("../public/walk-info.json", import.meta.url), "utf8"));
+assert.ok(W.mapDate && W.radius === 400 && Object.keys(W.places).length > 200);
+for (const [id, v] of Object.entries(W.places)) {
+  if (v.sh) assert.equal(v.sh[0] + v.sh[1] + v.sh[2], 100, `${id} 경사 비율`);
+  if (v.st) assert.ok(v.stM <= W.radius && v.stLen > 0, `${id} 계단`); else assert.equal(v.stM, undefined);
+  if (v.wc) assert.ok(v.wcM <= W.radius, `${id} 화장실`);
+}
+assert.ok(W.places.naksansa.st >= 1 && W.places.naksansa.wc >= 1);
+console.log(`ok - 걷기 정보 조사표 (${Object.keys(W.places).length}곳, 지도 기준일 ${W.mapDate})`);

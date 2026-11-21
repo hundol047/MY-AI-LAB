@@ -1021,6 +1021,22 @@ document.addEventListener("click", async (e) => {
 const ACCESS_LABEL = { room: "장애인 객실", wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
 // 걷는 양 (장소 안 동선 추정): 걷기 1 평지·짧게, 2 조금, 3 오래·오르막
 const WALK_LABEL = { 1: "평지 위주 · 짧게 (약 200m)", 2: "조금 걸어요 (약 800m)", 3: "많이 걸어요 (오르막·2km 이상)" };
+// 장소 주변 걷기 정보 조사(walk-info.json, scripts/bake-walk-info.mjs): 둘레 400m의 걷는 길 경사·계단·화장실. 오픈스트리트맵 자료라 '미확인'으로 적는다
+let walkInfo = null;
+fetchT("walk-info.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { walkInfo = j?.places ? j : null; if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); }).catch(() => {});
+function walkInfoLine(p) {
+  const w = walkInfo?.places?.[p.id]; if (!w) return "";
+  const r = walkInfo.radius || 400;
+  if (!w.n && !w.st && !w.wc) return `<div class="walk-info none">🗺 ${t("주변 {r}m: 걷는 길·계단·화장실 지도 자료가 없어요 · 현장 확인이 필요해요", { r })}</div>`;
+  const bits = [];
+  if (w.sh) bits.push(`<span class="wi-bar" aria-hidden="true">${w.sh.map((v, i) => (v ? `<i class="g${i}" style="flex:${v}"></i>` : "")).join("")}</span>${t("걷는 길: 완만 {a}% · 조금 가파름 {b}% · 가파름 {c}%", { a: w.sh[0], b: w.sh[1], c: w.sh[2] })}`);
+  else if (w.n) bits.push(t("걷는 길의 경사를 아직 모르겠어요"));
+  else bits.push(t("걷는 길 지도 자료 없음"));
+  if (w.unp) bits.push(t("흙·자갈길 {n}%", { n: w.unp }));
+  bits.push(w.st ? t("계단 {n}곳 (가장 가까운 곳 {m}m)", { n: w.st, m: w.stM }) : t("계단 표시 없음"));
+  bits.push(w.wc ? t("화장실 {n}곳 (가장 가까운 곳 {m}m)", { n: w.wc, m: w.wcM }) + (w.wcAcc ? ` · ${t("♿ 장애인 화장실 {m}m", { m: w.wcAccM })}` : "") : t("화장실 표시 없음"));
+  return `<div class="walk-info">🗺 <b>${t("주변 {r}m 지도 자료", { r })}</b> <em>${t("미확인")}</em> ${bits.join(" · ")}<small>${t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 3D로 보기에서 위치를 확인하세요")}</small></div>`;
+}
 function accessLine(p) {
   if (p.cat === "festival") return "";
   const food = ["food", "cafe"].includes(p.cat) && !p.multi;
@@ -1029,12 +1045,12 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${fieldCheckHTML(p)}</div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
   return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
-    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${fieldCheckHTML(p)}</div>`;
+    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
 }
 
 // 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
