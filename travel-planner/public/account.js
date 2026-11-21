@@ -10,7 +10,11 @@ const root = $("#acct");
 let toastTimer = 0;
 const toast = (m) => { const el = $("#toast"); el.textContent = m; el.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove("show"), 2600); };
 const PW_MSG = { short: "비밀번호는 10자 이상이어야 해요", long: "비밀번호가 너무 길어요", weak: "너무 쉬운 비밀번호예요 · 문장처럼 길게 써 보세요" };
-const errText = (e) => t(e?.message && /[가-힣]/.test(e.message) ? e.message : "잠시 후 다시 시도하세요.");
+const errText = (e) => {
+  const m = e?.message || "", left = m.match(/남은 횟수 (\d+)번/);
+  if (left) return t("코드가 맞지 않아요 (남은 횟수 {n}번)", { n: left[1] });
+  return t(/[가-힣]/.test(m) ? m : "잠시 후 다시 시도하세요.");
+};
 
 const PRIVACY = () => `<aside class="acct-box">
   <b>🔒 ${t("운영자도 내 일정을 볼 수 없어요")}</b>
@@ -61,10 +65,36 @@ const views = {
       views.me();
     }); });
   },
-  signup() {
+  // 가입 1단계 (메일을 보낼 수 있는 서버): 이메일로 6자리 코드를 받아 본인 이메일인지 확인
+  async signup() {
+    const cfg = await A.config();
+    if (!cfg.verifyEmail) return views.signupForm();
     root.innerHTML = `<form class="card acct-card" id="f" novalidate><h2>${t("가입하기")}</h2>
-      <p>${t("가입하면 저장한 일정을 다른 휴대폰·컴퓨터에서도 볼 수 있어요.")}</p>
+      <ol class="acct-steps"><li class="on">${t("이메일 확인")}</li><li>${t("비밀번호 정하기")}</li><li>${t("복구 코드 보관")}</li></ol>
+      <p>${t("본인 이메일인지 확인하려고 6자리 코드를 보내 드려요.")}</p>
       ${field("email", "이메일", "email", 'autocomplete="username" inputmode="email" required')}
+      <div class="acct-code-in" hidden>${field("code", "확인 코드 (6자리)", "text", 'inputmode="numeric" autocomplete="one-time-code" maxlength="6" pattern="[0-9]*"')}<p class="acct-note">${t("메일이 안 보이면 스팸함을 확인하세요. 코드는 10분 동안 쓸 수 있어요.")}</p></div>
+      <p class="acct-err" role="alert"></p>
+      <button class="primary" type="submit" id="go">${t("확인 코드 받기")}</button>
+      <button class="linkish" type="button" id="resend" hidden>${t("코드 다시 받기")}</button>
+      <p class="acct-links"><a href="#" data-go="login">${t("이미 계정이 있어요 · 로그인")}</a></p></form>${PRIVACY()}`;
+    const f = $("#f"); let email = "", cool = 0;
+    let tick = 0;
+    const startCool = () => { const btn = $("#resend"); btn.hidden = false; cool = 60; btn.disabled = true; btn.textContent = t("코드 다시 받기 ({s}초)", { s: cool }); clearInterval(tick); tick = setInterval(() => { if (!document.body.contains(btn)) return clearInterval(tick); cool--; btn.textContent = cool > 0 ? t("코드 다시 받기 ({s}초)", { s: cool }) : t("코드 다시 받기"); if (cool <= 0) { btn.disabled = false; clearInterval(tick); } }, 1000); };
+    const send = async () => { await A.verifyStart(email, getLang()); f.querySelector(".acct-code-in").hidden = false; $("#email").readOnly = true; $("#go").textContent = t("확인"); f.querySelector(".acct-err").textContent = ""; toast(t("{email}(으)로 코드를 보냈어요", { email })); startCool(); setTimeout(() => $("#code").focus(), 50); };
+    $("#resend").onclick = () => run(f, send).then(() => { const r = $("#resend"); if (r && cool > 0) r.disabled = true; });
+    f.addEventListener("submit", (e) => { e.preventDefault(); run(f, async () => {
+      if (!email) { email = $("#email").value.trim(); if (!validEmail(email)) { email = ""; throw new Error("이메일 주소를 확인하세요."); } return send(); }
+      const ticket = await A.verifyCheck(email, $("#code").value);
+      views.signupForm(email, ticket);
+    }).then(() => { const r = $("#resend"); if (r && cool > 0) r.disabled = true; const em = $("#email"); if (em && em.type !== "hidden") em.readOnly = !!email; }); });
+  },
+  // 가입 2단계: 비밀번호 (메일 확인을 마쳤으면 이메일은 고정)
+  signupForm(verifiedEmail = "", ticket = "") {
+    root.innerHTML = `<form class="card acct-card" id="f" novalidate><h2>${t("가입하기")}</h2>
+      ${verifiedEmail ? `<ol class="acct-steps"><li class="done">${t("이메일 확인")}</li><li class="on">${t("비밀번호 정하기")}</li><li>${t("복구 코드 보관")}</li></ol><p class="acct-ok">✓ ${esc(verifiedEmail)} · ${t("확인된 이메일")}</p>` : ""}
+      <p>${t("가입하면 저장한 일정을 다른 휴대폰·컴퓨터에서도 볼 수 있어요.")}</p>
+      ${verifiedEmail ? `<input type="hidden" id="email" value="${esc(verifiedEmail)}" autocomplete="username">` : field("email", "이메일", "email", 'autocomplete="username" inputmode="email" required')}
       ${field("pw", "비밀번호 (10자 이상)", "password", 'autocomplete="new-password" required minlength="10"')}
       ${field("pw2", "비밀번호 한 번 더", "password", 'autocomplete="new-password" required')}
       <label class="acct-check"><input type="checkbox" id="agree"> <span>${t("비밀번호와 복구 코드를 모두 잃으면 운영자도 일정을 되찾아 줄 수 없다는 것을 알았어요")}</span></label>
@@ -80,7 +110,7 @@ const views = {
       if (pw !== $("#pw2").value) throw new Error("두 비밀번호가 달라요");
       if (!$("#agree").checked || !$("#policy").checked) throw new Error("두 가지에 동의해야 가입할 수 있어요");
       f.querySelector(".acct-err").textContent = t("안전하게 암호화하는 중… (몇 초 걸려요)");
-      views.code(await A.signup(email, pw));
+      views.code(await A.signup(email, pw, ticket));
     }); });
   },
   // 가입 직후 한 번만: 복구 코드
@@ -165,6 +195,8 @@ const views = {
     const when = s.lastSync ? new Date(s.lastSync).toLocaleString(getLang() === "ko" ? "ko-KR" : getLang()) : t("아직 안 함");
     root.innerHTML = `<section class="card acct-card"><h2>${t("내 계정")}</h2>
       <p class="acct-email">${esc(s.email)}</p>
+      <p class="${s.verified ? "acct-ok" : "acct-note"}">${s.verified ? `✓ ${t("확인된 이메일")}` : t("아직 확인하지 않은 이메일이에요")}</p>
+      <div id="vme"></div>
       <p class="acct-note">${t("마지막 동기화: {when}", { when: esc(when) })}${s.offline ? ` · ${t("지금은 서버에 연결할 수 없어요")}` : ""}</p>
       <div class="acct-row"><button class="primary" type="button" id="sync">${t("지금 동기화")}</button><a class="ghost" href="index.html">${t("앱으로 돌아가기")}</a></div></section>
       <form class="card acct-card" id="fpw" novalidate><h3>${t("비밀번호 바꾸기")}</h3>
@@ -178,6 +210,14 @@ const views = {
         <p>${t("계정과 서버에 있는 암호화된 일정이 바로 지워지고 되돌릴 수 없어요. 이 기기에 저장한 일정은 남아요.")}</p>
         ${field("dpw", "비밀번호 확인", "password", 'autocomplete="current-password"')}
         <p class="acct-err" role="alert"></p><button class="ghost danger" type="submit">${t("계정 삭제")}</button></form>${PRIVACY()}`;
+    if (!s.verified) A.config().then((cfg) => {
+      if (!cfg.verifyEmail) return;
+      const box = $("#vme");
+      box.innerHTML = `<form class="acct-vme" novalidate><button class="ghost" type="button" id="vsend">${t("이메일 확인하기")}</button><div hidden id="vin">${field("vcode", "확인 코드 (6자리)", "text", 'inputmode="numeric" autocomplete="one-time-code" maxlength="6"')}<button class="primary" type="submit">${t("확인")}</button></div><p class="acct-err" role="alert"></p></form>`;
+      const vf = box.querySelector("form");
+      $("#vsend").onclick = () => run(vf, async () => { await A.verifyMeStart(getLang()); $("#vin").hidden = false; toast(t("{email}(으)로 코드를 보냈어요", { email: s.email })); });
+      vf.onsubmit = (e) => { e.preventDefault(); run(vf, async () => { await A.verifyMeCheck($("#vcode").value); toast(t("이메일을 확인했어요")); views.me(); }); };
+    });
     $("#sync").onclick = (e) => run(e.target.closest("section"), async () => { const r = await A.sync(); toast(t("동기화했어요 · 저장한 일정 {n}개", { n: r?.saved ?? 0 })); views.me(); });
     $("#out").onclick = (e) => run(e.target.closest("section"), async () => { await A.logout($("#wipe").checked); toast(t("로그아웃했어요")); views.login(); });
     const fpw = $("#fpw");

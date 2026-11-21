@@ -49,7 +49,7 @@ function applyVault(v) {
 export async function status() {
   const k = await getKey();
   if (!k) return null;
-  try { const me = await api("GET", "me"); if (normEmail(me.email) !== k.email) throw 0; return { email: me.email, lastSync: k.lastSync || 0 }; }
+  try { const me = await api("GET", "me"); if (normEmail(me.email) !== k.email) throw 0; return { email: me.email, verified: !!me.verified, lastSync: k.lastSync || 0 }; }
   catch (e) { if (e?.status === 401 || e === 0) { await dropKey(); return null; } return { email: k.email, lastSync: k.lastSync || 0, offline: true }; }
 }
 
@@ -80,9 +80,15 @@ export function scheduleSync(onDone) {
 async function keep(email, wrapped, wrap) {
   await putKey({ email: normEmail(email), dataKey: await unwrapKey(wrapped, wrap, false), lastSync: 0 });
 }
-export async function signup(email, password) {
+/** 가입 전 이메일 확인: 6자리 코드를 메일로 → 코드가 맞으면 30분짜리 가입표(ticket) */
+export const verifyStart = (email, lang) => api("POST", "verify/start", { email, lang });
+export const verifyCheck = (email, code) => api("POST", "verify/check", { email, code: String(code).replace(/\D/g, "") }).then((r) => r.ticket);
+/** 로그인한 뒤 내 이메일 확인 */
+export const verifyMeStart = (lang) => api("POST", "verify/me/start", { lang });
+export const verifyMeCheck = (code) => api("POST", "verify/me/check", { code: String(code).replace(/\D/g, "") });
+export async function signup(email, password, ticket) {
   const s = await prepareSignup(email, password);
-  await api("POST", "signup", s.send);
+  await api("POST", "signup", { ...s.send, ...(ticket ? { ticket } : {}) });
   await putKey({ email: normEmail(email), dataKey: s.dataKey, lastSync: 0 });
   await sync();
   return s.recoveryCode;

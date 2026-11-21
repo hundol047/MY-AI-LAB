@@ -46,9 +46,33 @@ try {
   const pw = "강릉 바다 보러 가요 2026", email = "Me@Example.com";
   const sign = await C.prepareSignup(email, pw, FAST);
   assert.equal(JSON.stringify(sign.send).includes(pw), false, "비밀번호는 서버로 가지 않는다");
-  const s1 = acc.signup(sign.send);
+  // 이메일 확인: 코드 없이는 가입 안 됨 → 코드 메일 → 가입표 → 가입
+  assert.deepEqual(acc.config(), { mailReset: true, verifyEmail: true });
+  assert.throws(() => acc.signup(sign.send), { status: 403 }, "확인 없이 가입 안 됨");
+  const lastCode = () => mails.at(-1).text.match(/\b(\d{6})\b/)[1];
+  await acc.verifyStart({ email, lang: "ko" }).job();
+  assert.match(mails.at(-1).subject, /확인 코드/); assert.equal(mails.at(-1).to, "me@example.com");
+  const goodCode = lastCode(), badCode = goodCode === "123456" ? "654321" : "123456";
+  assert.throws(() => acc.verifyCheck({ email, code: badCode }), { status: 400, message: /남은 횟수 4번/ });
+  const { ticket } = acc.verifyCheck({ email: "ME@example.com", code: goodCode });
+  assert.throws(() => acc.verifyCheck({ email, code: goodCode }), { status: 400 }, "코드는 한 번만");
+  assert.throws(() => acc.signup({ ...sign.send, email: "other@x.kr", ticket }), { status: 403 }, "다른 이메일에는 못 씀");
+  assert.equal(acc.db.prepare("SELECT count(*) n FROM verify_tickets WHERE hash=?").get(ticket).n, 0, "가입표 원문 저장 안 함");
+  const s1 = acc.signup({ ...sign.send, ticket });
+  assert.equal(s1.account.verified, true);
+  assert.throws(() => acc.signup({ ...sign.send, ticket }), { status: 409 });
+  // 이미 가입한 이메일로 코드를 요청하면 코드 대신 안내 메일 (화면 응답은 같음)
+  const n0 = mails.length; const again = acc.verifyStart({ email }); assert.equal(again.sent, true); await again.job();
+  assert.equal(mails.length, n0 + 1); assert.match(mails.at(-1).subject, /이미 가입/); assert.equal(/\b\d{6}\b/.test(mails.at(-1).text), false);
+  // 틀린 코드 5번이면 그 코드는 끝, 한 시간 3번까지
+  await acc.verifyStart({ email: "brute@x.kr" }).job(); const real = lastCode();
+  for (let i = 0; i < 5; i++) assert.throws(() => acc.verifyCheck({ email: "brute@x.kr", code: String((Number(real) + 1 + i) % 1000000).padStart(6, "0") }), { status: 400 });
+  assert.throws(() => acc.verifyCheck({ email: "brute@x.kr", code: real }), { status: 400, message: /만료됐거나/ }, "5번 틀린 뒤엔 맞아도 안 됨");
+  acc.verifyStart({ email: "brute@x.kr" }); acc.verifyStart({ email: "brute@x.kr" });
+  assert.throws(() => acc.verifyStart({ email: "brute@x.kr" }), { status: 429 });
+  await acc.verifyStart({ email: "late@x.kr" }).job(); const lateCode = lastCode(); t += 11 * 6e4;
+  assert.throws(() => acc.verifyCheck({ email: "late@x.kr", code: lateCode }), { status: 400 }, "10분 지나면 만료"); t -= 11 * 6e4;
   assert.ok(s1.token.length > 30 && s1.account.email === "me@example.com");
-  assert.throws(() => acc.signup(sign.send), { status: 409 });
   assert.throws(() => acc.signup({ ...sign.send, email: "x@y.kr", auth: "nothex" }), { status: 400 });
   // 저장소에는 확인값 원문도, 일정 원문도 없다
   const row = acc.db.prepare("SELECT * FROM accounts").get();
@@ -89,11 +113,11 @@ try {
   assert.deepEqual(await C.openJSON(await C.unwrapKey(after.wrapped, k4.wrap), after.vault), { saved: [{ id: "a" }] });
   assert.throws(() => acc.recoverStart({ email, recoveryAuth: "2".repeat(64) }), { status: 401 });
   // 메일로 비밀번호 찾기: 없는 이메일도 같은 응답, 링크는 PUBLIC_APP_URL로, 30분·한 번만, 한 시간 3번까지, 서버 금고는 비움
-  assert.deepEqual(acc.config(), { mailReset: true });
+  assert.deepEqual(acc.config(), { mailReset: true, verifyEmail: true });
   const none = acc.resetRequest({ email: "nobody@x.kr" }); assert.equal(none.sent, true); assert.equal(none.job, null);
-  const rq = acc.resetRequest({ email: "ME@example.com", lang: "en" }); await rq.job();
-  assert.equal(mails.length, 1); assert.equal(mails[0].to, "me@example.com"); assert.match(mails[0].subject, /Reset/);
-  const link = mails[0].text.match(/https:\/\/bopok\.example\/account\.html#reset=([A-Za-z0-9_-]+)/); assert.ok(link, "링크 주소");
+  const rq = acc.resetRequest({ email: "ME@example.com", lang: "en" }); const m0 = mails.length; await rq.job();
+  assert.equal(mails.length, m0 + 1); assert.equal(mails.at(-1).to, "me@example.com"); assert.match(mails.at(-1).subject, /Reset/);
+  const link = mails.at(-1).text.match(/https:\/\/bopok\.example\/account\.html#reset=([A-Za-z0-9_-]+)/); assert.ok(link, "링크 주소");
   const resetTok = link[1];
   assert.equal(acc.db.prepare("SELECT count(*) n FROM reset_tokens WHERE hash=?").get(resetTok).n, 0, "토큰 원문은 저장 안 함");
   assert.deepEqual(acc.resetCheck({ token: resetTok }), { email: "me@example.com" });
@@ -107,7 +131,9 @@ try {
   assert.equal(acc.resetRequest({ email }).job, null, "한 시간에 3번까지");
   const tk = acc.db.prepare("SELECT hash FROM reset_tokens WHERE used=0 LIMIT 1").get(); assert.ok(tk);
   t += 31 * 6e4; assert.equal(acc.db.prepare("SELECT count(*) n FROM reset_tokens WHERE used=0 AND expires>?").get(t).n, 0, "30분 뒤 만료"); t -= 31 * 6e4;
-  const noMail = createAccounts(path.join(dir, "b.sqlite"), { pii }); assert.deepEqual(noMail.config(), { mailReset: false });
+  const noMail = createAccounts(path.join(dir, "b.sqlite"), { pii }); assert.deepEqual(noMail.config(), { mailReset: false, verifyEmail: false });
+  const nm = await C.prepareSignup("plain@x.kr", pw, FAST); const nmAcc = noMail.signup(nm.send); assert.equal(nmAcc.account.verified, false, "메일 없는 서버는 확인 없이 가입(확인 안 됨 표시)");
+  assert.throws(() => noMail.verifyStart({ email: "plain@x.kr" }), { status: 503 });
   assert.throws(() => noMail.resetRequest({ email }), { status: 503 });
   const rf2 = { token: acc.login({ email, auth: k5.auth }).token };
   // 세션 만료
@@ -127,7 +153,11 @@ try {
   let cookie = "";
   const call = async (method, p, b, extra = {}) => { const r = await fetch(base + p, { method, headers: { "content-type": "application/json", ...(cookie ? { cookie } : {}), ...extra }, body: b ? JSON.stringify(b) : undefined }); const sc = r.headers.get("set-cookie"); if (sc) cookie = sc.split(";")[0]; return { status: r.status, sc, j: await r.json() }; };
   const s = await C.prepareSignup("web@x.kr", pw, FAST);
-  const r1 = await call("POST", "/api/account/signup", s.send);
+  assert.equal((await call("POST", "/api/account/signup", s.send)).status, 403);
+  assert.deepEqual((await call("POST", "/api/account/verify/start", { email: "web@x.kr", lang: "en" })).j, { sent: true });
+  await new Promise((r) => setTimeout(r, 50)); assert.match(mails.at(-1).subject, /verification code/);
+  const vtk = (await call("POST", "/api/account/verify/check", { email: "web@x.kr", code: lastCode() })).j.ticket; assert.ok(vtk);
+  const r1 = await call("POST", "/api/account/signup", { ...s.send, ticket: vtk });
   assert.equal(r1.status, 201); assert.match(r1.sc, /HttpOnly; SameSite=Strict/); assert.doesNotMatch(r1.sc, /Secure/, "http에서는 Secure 없이");
   assert.equal((await call("GET", "/api/account/me")).j.email, "web@x.kr");
   assert.equal((await call("POST", "/api/account/login", { email: "web@x.kr", auth: "0".repeat(64) }, { origin: "https://evil.example" })).status, 403, "다른 사이트 요청 막기");
@@ -135,7 +165,7 @@ try {
   assert.equal((await call("GET", "/api/account/me")).status, 401);
   const r2 = await call("POST", "/api/account/login", { email: "web@x.kr", auth: (await C.passwordKeys("web@x.kr", pw, FAST.iter)).auth }, { "x-forwarded-proto": "https" });
   assert.equal(r2.status, 200); assert.match(r2.sc, /Secure/, "https 뒤에서는 Secure");
-  assert.deepEqual((await call("GET", "/api/account/config")).j, { mailReset: true });
+  assert.deepEqual((await call("GET", "/api/account/config")).j, { mailReset: true, verifyEmail: true });
   const before = mails.length; assert.deepEqual((await call("POST", "/api/account/reset/request", { email: "web@x.kr", lang: "ja" }, { host: "evil.example" })).j, { sent: true });
   await new Promise((r) => setTimeout(r, 50)); assert.equal(mails.length, before + 1); assert.match(mails.at(-1).text, /^.*\n\nhttps:\/\/bopok\.example\/account/s, "Host 머리글이 아니라 설정 주소로");
   assert.equal((await call("POST", "/api/account/delete", { auth: (await C.passwordKeys("web@x.kr", pw, FAST.iter)).auth })).j.deleted, true);

@@ -33,3 +33,19 @@ export function resetMail(lang, link) {
     html: `<div style="font-family:sans-serif;line-height:1.6;max-width:520px"><p>${esc(m.hi)}</p><p><a href="${esc(link)}" style="display:inline-block;padding:12px 18px;background:#34479a;color:#fff;border-radius:10px;text-decoration:none;font-weight:700">${esc(m.btn)}</a></p><p style="font-size:13px;color:#555">${esc(m.warn)}</p><p style="font-size:13px;color:#555">${esc(m.note)}</p></div>`,
   };
 }
+
+// 가입 이메일 확인 코드 (6자리, 10분) · 이미 가입한 이메일이면 코드 대신 "이미 가입돼 있어요" 안내 (가입 여부를 화면으로는 알 수 없게)
+const CODE = {
+  ko: { subject: "[보폭] 이메일 확인 코드", hi: "보폭 이메일 확인 코드예요. 10분 안에 앱에 입력하세요.", note: "직접 요청하지 않았다면 이 메일을 무시하세요. 이 코드를 누구에게도 알려 주지 마세요.", already: "이 이메일은 이미 보폭에 가입돼 있어요. 로그인하거나, 비밀번호가 생각나지 않으면 '비밀번호를 잊었어요'를 쓰세요.", alreadySubject: "[보폭] 이미 가입된 이메일이에요" },
+  en: { subject: "[Bopok] Email verification code", hi: "Here is your Bopok email verification code. Enter it in the app within 10 minutes.", note: "If you didn't ask for this, ignore this email. Never share this code.", already: "This email already has a Bopok account. Log in, or use 'Forgot password' if you can't remember it.", alreadySubject: "[Bopok] This email already has an account" },
+  ja: { subject: "[ボポク] メール確認コード", hi: "ボポクのメール確認コードです。10分以内にアプリに入力してください。", note: "心当たりがない場合はこのメールを無視してください。このコードは誰にも教えないでください。", already: "このメールはすでにボポクに登録されています。ログインするか、思い出せない場合は「パスワードを忘れました」を使ってください。", alreadySubject: "[ボポク] すでに登録済みのメールです" },
+  zh: { subject: "[步幅] 邮箱验证码", hi: "这是你的步幅邮箱验证码，请在10分钟内输入应用。", note: "如果不是你本人申请，请忽略此邮件。不要把验证码告诉任何人。", already: "该邮箱已注册步幅。请直接登录，如忘记密码请使用“忘记密码”。", alreadySubject: "[步幅] 该邮箱已注册" },
+};
+export function codeMail(lang, code) {
+  const m = CODE[lang] || CODE.ko;
+  return { subject: m.subject, text: `${m.hi}\n\n${code}\n\n${m.note}\n`, html: `<div style="font-family:sans-serif;line-height:1.6;max-width:520px"><p>${m.hi}</p><p style="font:800 32px/1.2 monospace;letter-spacing:.25em;padding:14px 18px;background:#eaedf9;border-radius:12px;display:inline-block">${code}</p><p style="font-size:13px;color:#555">${m.note}</p></div>` };
+}
+export function alreadyMail(lang) {
+  const m = CODE[lang] || CODE.ko;
+  return { subject: m.alreadySubject, text: `${m.already}\n\n${m.note}\n`, html: `<div style="font-family:sans-serif;line-height:1.6;max-width:520px"><p>${m.already}</p></div>` };
+}

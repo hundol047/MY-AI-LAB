@@ -988,3 +988,13 @@ dialog.welcome .linkish, .lock-box .linkish, .acct .linkish { background: none; 
 .acct > *, .acct-card, .acct-field, .acct-input { min-width: 0; }
 .acct-input input { width: 100%; }
 .acct a:not(.primary):not(.ghost) { color: var(--brand); font-weight: 700; text-underline-offset: 3px; }
+.acct-steps { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; counter-reset: s; font-size: 12.5px; }
+.acct-steps li { flex: 1; counter-increment: s; padding: 6px 4px; border-radius: 8px; background: var(--bg); color: var(--sub); text-align: center; font-weight: 700; }
+.acct-steps li::before { content: counter(s) ". "; }
+.acct-steps li.on { background: var(--brand); color: var(--on-brand); }
+.acct-steps li.done { background: var(--brand-soft); color: var(--brand); }
+.acct-steps li.done::before { content: "✓ "; }
+.acct-code-in input { letter-spacing: .35em; font-size: 22px !important; text-align: center; }
+.acct-vme { display: grid; gap: 8px; }
+.acct-vme #vin { display: grid; gap: 8px; }
+.acct-vme #vin[hidden] { display: none; }

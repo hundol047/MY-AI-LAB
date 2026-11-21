@@ -10,8 +10,9 @@ import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypt
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { createPII } from "./pii.mjs";
-import { createMailer, resetMail } from "./mailer.mjs";
+import { createMailer, resetMail, codeMail, alreadyMail } from "./mailer.mjs";
 
+const CODE_MIN = 10, CODE_TRIES = 5, CODE_PER_HOUR = 3, TICKET_MIN = 30;
 const SESSION_DAYS = 30, MAX_VAULT = 400_000, LOCK_FAILS = 10, LOCK_MIN = 15, RESET_MIN = 30, RESET_PER_HOUR = 3;
 const sha = (s) => createHash("sha256").update(String(s)).digest("hex");
 const HEX64 = /^[0-9a-f]{64}$/, WRAP = /^[A-Za-z0-9+/=]{16,24}\.[A-Za-z0-9+/=]{40,80}$/, SEALED = /^[A-Za-z0-9+/=]{16,24}\.[A-Za-z0-9+/=]{20,}$/;
@@ -34,12 +35,30 @@ export function createAccounts(file, { now = () => Date.now(), pii = createPII()
       fails INTEGER NOT NULL DEFAULT 0, lockUntil INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, account TEXT NOT NULL, expires INTEGER NOT NULL);
     CREATE INDEX IF NOT EXISTS sessions_account ON sessions(account);
-    CREATE TABLE IF NOT EXISTS reset_tokens(hash TEXT PRIMARY KEY, account TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL);`);
+    CREATE TABLE IF NOT EXISTS reset_tokens(hash TEXT PRIMARY KEY, account TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS verify_codes(emailIdx TEXT NOT NULL, purpose TEXT NOT NULL, codeHash TEXT NOT NULL, expires INTEGER NOT NULL, tries INTEGER NOT NULL DEFAULT 0, PRIMARY KEY(emailIdx, purpose));
+    CREATE TABLE IF NOT EXISTS verify_sends(emailIdx TEXT NOT NULL, at INTEGER NOT NULL);
+    CREATE TABLE IF NOT EXISTS verify_tickets(hash TEXT PRIMARY KEY, emailIdx TEXT NOT NULL, expires INTEGER NOT NULL);`);
+  // 이메일 확인 여부 칸 (예전 데이터베이스에도 붙인다)
+  if (!db.prepare("PRAGMA table_info(accounts)").all().some((c) => c.name === "verified")) db.exec("ALTER TABLE accounts ADD COLUMN verified INTEGER NOT NULL DEFAULT 0");
   const idx = (email) => pii.index(`email:${normEmail(email)}`);
   const q = {
     byEmailIdx: db.prepare("SELECT * FROM accounts WHERE emailIdx=?"),
     byId: db.prepare("SELECT * FROM accounts WHERE id=?"),
-    insert: db.prepare("INSERT INTO accounts(id,emailIdx,emailEnc,verifier,wrapped,rverifier,rwrapped,vault,version,created,updated) VALUES(?,?,?,?,?,?,?,NULL,0,?,?)"),
+    insert: db.prepare("INSERT INTO accounts(id,emailIdx,emailEnc,verifier,wrapped,rverifier,rwrapped,vault,version,created,updated,verified) VALUES(?,?,?,?,?,?,?,NULL,0,?,?,?)"),
+    setVerified: db.prepare("UPDATE accounts SET verified=1 WHERE id=?"),
+    putCode: db.prepare("INSERT INTO verify_codes(emailIdx,purpose,codeHash,expires,tries) VALUES(?,?,?,?,0) ON CONFLICT(emailIdx,purpose) DO UPDATE SET codeHash=excluded.codeHash, expires=excluded.expires, tries=0"),
+    getCode: db.prepare("SELECT * FROM verify_codes WHERE emailIdx=? AND purpose=?"),
+    tryCode: db.prepare("UPDATE verify_codes SET tries=tries+1 WHERE emailIdx=? AND purpose=?"),
+    dropCode: db.prepare("DELETE FROM verify_codes WHERE emailIdx=? AND purpose=?"),
+    sent: db.prepare("INSERT INTO verify_sends(emailIdx,at) VALUES(?,?)"),
+    sentSince: db.prepare("SELECT count(*) n FROM verify_sends WHERE emailIdx=? AND at>?"),
+    newTicket: db.prepare("INSERT INTO verify_tickets(hash,emailIdx,expires) VALUES(?,?,?)"),
+    ticket: db.prepare("SELECT * FROM verify_tickets WHERE hash=? AND expires>?"),
+    dropTicket: db.prepare("DELETE FROM verify_tickets WHERE hash=?"),
+    purgeVerify: db.prepare("DELETE FROM verify_codes WHERE expires<=?"),
+    purgeSends: db.prepare("DELETE FROM verify_sends WHERE at<=?"),
+    purgeTickets: db.prepare("DELETE FROM verify_tickets WHERE expires<=?"),
     reset: db.prepare("UPDATE accounts SET verifier=?, wrapped=?, rverifier=?, rwrapped=?, vault=NULL, version=version+1, updated=?, fails=0, lockUntil=0 WHERE id=?"),
     newToken: db.prepare("INSERT INTO reset_tokens(hash,account,expires,created) VALUES(?,?,?,?)"),
     token: db.prepare("SELECT * FROM reset_tokens WHERE hash=? AND used=0 AND expires>?"),
@@ -59,7 +78,24 @@ export function createAccounts(file, { now = () => Date.now(), pii = createPII()
   };
   const session = (id) => { const token = randomBytes(32).toString("base64url"); q.newSession.run(sha(token), id, now() + SESSION_DAYS * 864e5); return token; };
   const byEmail = (email) => q.byEmailIdx.get(idx(email));
-  const view = (a) => ({ email: pii.open(a.emailEnc), wrapped: a.wrapped, vault: a.vault, version: a.version, updated: a.updated });
+  const mailOn = () => !!(mailer && appUrl);
+  // 확인 코드: 6자리, 10분, 5번 틀리면 끝, 한 이메일에 한 시간 3번까지 보냄. 코드는 이메일 색인과 섞은 SHA-256만 저장
+  const codeHash = (ei, code) => sha(`${ei}:${code}`);
+  function sendCode(ei, purpose, to, lang) {
+    if (q.sentSince.get(ei, now() - 3600e3).n >= CODE_PER_HOUR) throw fail(429, "확인 코드를 너무 자주 요청했어요. 한 시간 뒤에 다시 해 주세요.");
+    const code = String(100000 + (randomBytes(4).readUInt32BE() % 900000));
+    q.putCode.run(ei, purpose, codeHash(ei, code), now() + CODE_MIN * 6e4); q.sent.run(ei, now());
+    const mail = codeMail(lang, code);
+    return () => mailer.send({ to, ...mail }).catch(() => console.error("이메일 확인 코드를 보내지 못했습니다 (SMTP 설정 확인)"));
+  }
+  function checkCode(ei, purpose, code) {
+    const r = q.getCode.get(ei, purpose);
+    if (!r || r.expires <= now() || r.tries >= CODE_TRIES) throw fail(400, "코드가 만료됐거나 여러 번 틀렸어요. 새 코드를 받아 주세요.");
+    const ok = /^\d{6}$/.test(String(code || "")) && timingSafeEqual(Buffer.from(codeHash(ei, String(code))), Buffer.from(r.codeHash));
+    if (!ok) { q.tryCode.run(ei, purpose); throw fail(400, `코드가 맞지 않아요 (남은 횟수 ${CODE_TRIES - r.tries - 1}번)`); }
+    q.dropCode.run(ei, purpose);
+  }
+  const view = (a) => ({ email: pii.open(a.emailEnc), verified: !!a.verified, wrapped: a.wrapped, vault: a.vault, version: a.version, updated: a.updated });
   function verify(a, auth, field = "verifier") {
     if (a && a.lockUntil > now()) throw fail(429, `로그인을 여러 번 틀려 ${LOCK_MIN}분 동안 잠겼어요.`);
     const ok = checkAuth(String(auth || ""), a?.[field]); // 없는 계정도 같은 계산을 한다
@@ -77,8 +113,15 @@ export function createAccounts(file, { now = () => Date.now(), pii = createPII()
       if (!validEmail(email)) throw fail(400, "이메일 주소를 확인하세요.");
       const auth = need(b, "auth", HEX64), wrapped = need(b, "wrapped", WRAP), rauth = need(b, "recoveryAuth", HEX64), rwrapped = need(b, "recoveryWrapped", WRAP);
       if (byEmail(email)) throw fail(409, "이미 가입한 이메일이에요. 로그인해 주세요.");
+      // 메일을 보낼 수 있는 서버에서는 이메일 확인(확인 코드 → 30분짜리 가입표)을 거쳐야 가입된다
+      let verified = 0;
+      if (mailOn()) {
+        const tk = typeof b.ticket === "string" && q.ticket.get(sha(b.ticket), now());
+        if (!tk || tk.emailIdx !== idx(email)) throw fail(403, "이메일 확인을 먼저 해 주세요.");
+        q.dropTicket.run(sha(b.ticket)); verified = 1;
+      }
       const id = randomBytes(12).toString("hex"), t = now();
-      q.insert.run(id, idx(email), pii.seal(email), hashAuth(auth), wrapped, hashAuth(rauth), rwrapped, t, t);
+      q.insert.run(id, idx(email), pii.seal(email), hashAuth(auth), wrapped, hashAuth(rauth), rwrapped, t, t, verified);
       return { token: session(id), account: view(q.byId.get(id)) };
     },
     login(b) {
@@ -126,8 +169,37 @@ export function createAccounts(file, { now = () => Date.now(), pii = createPII()
       q.dropSessions.run(a.id); q.dropTokens.run(a.id); q.remove.run(a.id);
       return { deleted: true };
     },
-    purge() { q.purgeSessions.run(now()); q.purgeTokens.run(now()); },
-    config: () => ({ mailReset: !!(mailer && appUrl) }),
+    purge() { q.purgeSessions.run(now()); q.purgeTokens.run(now()); q.purgeVerify.run(now()); q.purgeSends.run(now() - 3600e3); q.purgeTickets.run(now()); },
+    config: () => ({ mailReset: mailOn(), verifyEmail: mailOn() }),
+    // 가입 전 이메일 확인 1단계: 코드 보내기. 이미 가입한 이메일이면 코드 대신 안내 메일 (화면 응답은 같다)
+    verifyStart(b) {
+      const email = normEmail(b.email);
+      if (!validEmail(email)) throw fail(400, "이메일 주소를 확인하세요.");
+      if (!mailOn()) throw fail(503, "이 서버는 이메일 확인을 쓰지 않아요.");
+      const ei = idx(email), lang = ["ko", "en", "ja", "zh"].includes(b.lang) ? b.lang : "ko";
+      if (byEmail(email)) {
+        if (q.sentSince.get(ei, now() - 3600e3).n >= CODE_PER_HOUR) throw fail(429, "확인 코드를 너무 자주 요청했어요. 한 시간 뒤에 다시 해 주세요.");
+        q.sent.run(ei, now());
+        const mail = alreadyMail(lang);
+        return { sent: true, job: () => mailer.send({ to: email, ...mail }).catch(() => console.error("안내 메일을 보내지 못했습니다 (SMTP 설정 확인)")) };
+      }
+      return { sent: true, job: sendCode(ei, "signup", email, lang) };
+    },
+    // 2단계: 코드가 맞으면 30분짜리 가입표(ticket)를 준다 → signup에 함께 보낸다
+    verifyCheck(b) {
+      const email = normEmail(b.email), ei = idx(email);
+      checkCode(ei, "signup", b.code);
+      const ticket = randomBytes(32).toString("base64url");
+      q.newTicket.run(sha(ticket), ei, now() + TICKET_MIN * 6e4);
+      return { ticket };
+    },
+    // 로그인한 뒤 이메일 확인 (메일 설정 전에 가입한 계정)
+    verifyMeStart(a, b) {
+      if (!mailOn()) throw fail(503, "이 서버는 이메일 확인을 쓰지 않아요.");
+      if (a.verified) return { sent: true, job: null };
+      return { sent: true, job: sendCode(a.emailIdx, "me", pii.open(a.emailEnc), ["ko", "en", "ja", "zh"].includes(b.lang) ? b.lang : "ko") };
+    },
+    verifyMeCheck(a, b) { checkCode(a.emailIdx, "me", b.code); q.setVerified.run(a.id); return { verified: true }; },
     // 메일로 비밀번호 찾기 1단계: 있든 없든 같은 응답. 있으면 30분짜리 링크를 보낸다(한 시간에 3번까지). 메일은 응답 뒤에 보내 걸리는 시간으로도 알 수 없게
     resetRequest(b) {
       const email = normEmail(b.email);
@@ -153,7 +225,7 @@ export function createAccounts(file, { now = () => Date.now(), pii = createPII()
       const r = typeof b.token === "string" && q.token.get(sha(b.token), now());
       if (!r) throw fail(400, "링크가 만료됐거나 이미 썼어요. 다시 요청해 주세요.");
       q.reset.run(hashAuth(need(b, "newAuth", HEX64)), need(b, "newWrapped", WRAP), hashAuth(need(b, "recoveryAuth", HEX64)), need(b, "recoveryWrapped", WRAP), now(), r.account);
-      q.useTokens.run(r.account); q.dropSessions.run(r.account);
+      q.useTokens.run(r.account); q.dropSessions.run(r.account); q.setVerified.run(r.account); // 메일 링크를 열었으니 이메일도 확인된 것
       return { token: session(r.account), account: view(q.byId.get(r.account)) };
     },
   };
@@ -191,6 +263,8 @@ export function accountRoutes({ file, mailer = createMailer(), appUrl = process.
       if (M === "POST /api/account/signup") { const r = acc.signup(await body(req)); return reply(res, 201, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "POST /api/account/login") { const r = acc.login(await body(req)); return reply(res, 200, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "GET /api/account/config") return reply(res, 200, acc.config()), true;
+      if (M === "POST /api/account/verify/start") { const r = acc.verifyStart(await body(req)); reply(res, 200, { sent: true }); r.job?.(); return true; }
+      if (M === "POST /api/account/verify/check") return reply(res, 200, acc.verifyCheck(await body(req))), true;
       if (M === "POST /api/account/reset/request") { const r = acc.resetRequest(await body(req)); reply(res, 200, { sent: true }); r.job?.(); return true; }
       if (M === "POST /api/account/reset/check") return reply(res, 200, acc.resetCheck(await body(req))), true;
       if (M === "POST /api/account/reset/finish") { const r = acc.resetFinish(await body(req)); return reply(res, 200, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
@@ -199,6 +273,8 @@ export function accountRoutes({ file, mailer = createMailer(), appUrl = process.
       if (M === "POST /api/account/logout") { acc.logout(token); return reply(res, 200, { ok: true }, { "set-cookie": setCookie(req, "") }), true; }
       if (!me) throw fail(401, "로그인이 필요해요.");
       if (M === "GET /api/account/me") return reply(res, 200, acc.me(me)), true;
+      if (M === "POST /api/account/verify/me/start") { const r = acc.verifyMeStart(me, await body(req)); reply(res, 200, { sent: true }); r.job?.(); return true; }
+      if (M === "POST /api/account/verify/me/check") return reply(res, 200, acc.verifyMeCheck(me, await body(req))), true;
       if (M === "PUT /api/account/vault") return reply(res, 200, acc.saveVault(me, await body(req))), true;
       if (M === "POST /api/account/password") { const r = acc.changePassword(me, await body(req)); return reply(res, 200, { ok: true }, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "POST /api/account/delete") { acc.remove(me, await body(req)); return reply(res, 200, { deleted: true }, { "set-cookie": setCookie(req, "") }), true; }
