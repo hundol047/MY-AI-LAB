@@ -192,6 +192,90 @@
   "gamjabat": [],
   "windhill": [],
   "sogeumsan": [],
-  "bangyeri": []
+  "bangyeri": [],
+  "hc-market": [],
+  "anheung-bread": [],
+  "taebaek-food": [],
+  "yanggu-food": [],
+  "inje-food": [],
+  "anmok-coffee": [],
+  "central-market": [],
+  "jumunjin-market": [],
+  "sacheon-mulhoe": [],
+  "jeongdongjin-food": [],
+  "anmok-hoe": [],
+  "mukho-port": [],
+  "abai": [
+   {
+    "k": "주차",
+    "quote": "장애인 주차장 있음(2대)_무장애 편의시설",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   },
+   {
+    "k": "접근로",
+    "quote": "출입구까지 턱이 없어 휠체어 접근 가능함",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   },
+   {
+    "k": "출입구",
+    "quote": "주 출입구는 턱이 없어 휠체어 접근 가능함",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   },
+   {
+    "k": "엘리베이터",
+    "quote": "엘리베이터 있음",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   },
+   {
+    "k": "화장실",
+    "quote": "장애인 화장실 있음",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   },
+   {
+    "k": "기타",
+    "quote": "영유아가족 기타상세: 장애인 화장실 내 유아용 보호의자 있음",
+    "url": "https://access.visitkorea.or.kr/ms/detail.do?cotId=897e10af-a48c-486a-891b-5db153131bfd",
+    "src": "한국관광공사 열린관광 모두의 여행",
+    "date": "2026-09",
+    "title": "아바이마을"
+   }
+  ],
+  "sokcho-market": [],
+  "daepo": [],
+  "dongmyeong": [],
+  "yongdae": [],
+  "yangyang-market": [],
+  "geojin": [],
+  "dakgalbi": [],
+  "makguksu": [],
+  "nangman": [],
+  "dongsong": [],
+  "hwacheon-food": [],
+  "gangchon": [],
+  "ohsam": [],
+  "arirang-market": [],
+  "yw-market": [],
+  "bongpyeong": [],
+  "jinbu-food": [],
+  "taebaek-hanwoo": [],
+  "wj-market": [],
+  "hanwoo": [],
+  "guryong-food": [],
+  "ganhyeon-food": []
  }
 }

@@ -54,7 +54,9 @@ export function parseDetail(html) {
 if (process.argv[1]?.endsWith("research-access-web.mjs")) {
   const all = process.argv.includes("--all");
   const sigun = JSON.parse(await readFile(new URL("../public/pet.json", import.meta.url), "utf8")).sigun || {};
-  const targets = PLACES.filter((p) => !p.petOnly && p.cat !== "festival" && !p.multi && (all || !p.access));
+  const only = (process.argv.find((x) => x.startsWith("--only=")) || "").slice(7).split(",").filter(Boolean);
+  // 가게가 모인 거리·마을(multi)도 조사한다: judge가 그 거리·마을 자체로 등록된 것만 통과시킨다
+  const targets = PLACES.filter((p) => !p.petOnly && p.cat !== "festival" && (only.length ? only.includes(p.id) : all || !p.access));
   const places = {}, log = [];
   let found = 0, n = 0;
   for (const p of targets) {
@@ -85,6 +87,7 @@ if (process.argv[1]?.endsWith("research-access-web.mjs")) {
     const seen = new Set();
     places[p.id] = d.items.map((it) => ({ k: keyOf(it.label), quote: (keyOf(it.label) === "기타" ? `${it.label}: ` : "") + it.text, url: pg.url.replace(/^\/\//, "https://"), src: SRC, date: d.date, title: pick.title }))
       .filter((x) => { const k = x.k + "|" + x.quote; if (seen.has(k)) return false; seen.add(k); return true; });
+    if (!places[p.id].length) log.push(`${p.name} ← "${pick.title}": 누리집에 있지만 이동 관련 편의정보가 비어 있음`);
     if (places[p.id].length) { found++; log.push(`${p.name} ← "${pick.title}"(${pick.sigugun}, ${dist.toFixed(2)}km, ${pick.why}): ${places[p.id].length}개`); }
     if (n % 20 === 0) process.stdout.write(`${n}/${targets.length} `);
   }

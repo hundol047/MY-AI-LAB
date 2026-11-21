@@ -12,7 +12,7 @@ const BLOCK = /(blog\.|tistory|cafe\.naver|cafe\.daum|brunch\.co|namu\.wiki|wiki
 const PUBLIC = /(\.go\.kr|visitkorea\.or\.kr|knps\.or\.kr|foresttrip\.go\.kr|\.or\.kr|gwto\.or\.kr|\.gangwon\.kr)(\/|$|:)/i;
 export function checkItem(it, officialHosts = []) {
   if (!it || !KEYS.includes(it.k)) return "항목 이름";
-  if (typeof it.quote !== "string" || it.quote.trim().length < 4 || it.quote.length > 400 || !/[가-힣]/.test(it.quote)) return "인용문";
+  if (typeof it.quote !== "string" || it.quote.trim().length < 2 || it.quote.length > 400 || !/[가-힣]/.test(it.quote)) return "인용문";
   let host; try { const u = new URL(it.url); if (u.protocol !== "https:" && u.protocol !== "http:") return "주소"; host = u.hostname; } catch { return "주소"; }
   if (BLOCK.test(it.url)) return "허용하지 않는 출처";
   if (!PUBLIC.test(host + "/") && !officialHosts.some((h) => host === h || host.endsWith("." + h))) return "공식 출처 아님";

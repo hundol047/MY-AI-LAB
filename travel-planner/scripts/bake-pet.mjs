@@ -24,8 +24,11 @@ const rows = (await readFile(new URL("../data/pet-friendly-2025-11-07.csv", impo
 
 // 앱 장소의 시군: 관광공사 탐색 목록에서 가장 가까운 곳의 주소로 정한다
 const SG = ["춘천", "원주", "강릉", "동해", "태백", "속초", "삼척", "홍천", "횡성", "영월", "평창", "정선", "철원", "화천", "양구", "인제", "고성", "양양"];
+// 주소의 시군: "강원특별자치도 고성군 … 동해대로"처럼 길 이름에 다른 시 이름이 들어 있어도 도 이름 바로 뒤의 시·군만 읽는다
+// (2026-11-22: 청간정 등 4곳이 '동해대로' 때문에 동해로 잘못 들어가 있던 것을 고침)
+const sigunOfAddress = (addr) => { const m = String(addr).match(/강원(?:특별자치도|도)?\s*([가-힣]+?)(?:시|군)(?:\s|$)/); return m && SG.includes(m[1]) ? m[1] : SG.find((s) => String(addr).includes(s)) || null; };
 const dir = JSON.parse(await readFile(new URL("../public/directory.json", import.meta.url), "utf8")).places.filter((p) => p.source?.includes("TourAPI") && p.address);
-const sigunAt = (pt) => { let b = null, bd = Infinity; for (const q of dir) { const d = (q.lat - pt.lat) ** 2 + (q.lng - pt.lng) ** 2; if (d < bd) { bd = d; b = q; } } return SG.find((s) => b.address.includes(s)) || null; };
+const sigunAt = (pt) => { let b = null, bd = Infinity; for (const q of dir) { const d = (q.lat - pt.lat) ** 2 + (q.lng - pt.lng) ** 2; if (d < bd) { bd = d; b = q; } } return sigunOfAddress(b.address); };
 const sigun = Object.fromEntries(base.map((p) => [p.id, sigunAt(p)]));
 
 // 1) 앱 장소와 대조: 같은 시군, 식당·카페는 식음료끼리, 나머지는 관광지·체험끼리. 이름 규칙(사진 대조와 같은 규칙)에서

@@ -53,3 +53,20 @@ assert.equal(route.some((r) => r.key === "엘리베이터"), false, "조사에 �
 assert.deepEqual(indoorRoute({}), []);
 assert.doesNotMatch(route[0].text, /무장애 편의시설/);
 console.log("ok - 실내 길 안내 (조사 글 상태 읽기, 없는 칸은 만들지 않음)");
+
+// 웹 조사 자료: 허용 출처만, 항목 이름·인용문 검사, 저장된 자료는 모두 공식 출처·한국어 원문
+const { checkItem } = await import("../scripts/build-access-web.mjs");
+const ok = { k: "화장실", quote: "장애인 화장실 있음", url: "https://access.visitkorea.or.kr/ms/detail.do?cotId=x", src: "한국관광공사" };
+assert.equal(checkItem(ok), null);
+assert.equal(checkItem({ ...ok, url: "https://blog.naver.com/x/1" }), "허용하지 않는 출처");
+assert.equal(checkItem({ ...ok, url: "https://namu.wiki/w/낙산사" }), "허용하지 않는 출처");
+assert.equal(checkItem({ ...ok, url: "https://example.com/a" }), "공식 출처 아님");
+assert.equal(checkItem({ ...ok, url: "https://example.com/a" }, ["example.com"]), null, "그 시설의 공식 누리집으로 적어 둔 곳은 허용");
+assert.equal(checkItem({ ...ok, k: "분위기" }), "항목 이름");
+assert.equal(checkItem({ ...ok, quote: "accessible toilet" }), "인용문");
+const WEB = JSON.parse(readFileSync(new URL("../public/access-web.json", import.meta.url), "utf8"));
+for (const [id, items] of Object.entries(WEB.places)) { assert.ok(PLACES.some((p) => p.id === id), id); for (const it of items) assert.equal(checkItem({ ...it, quote: it.text }), null, `${id} ${it.k}`); }
+// 시군 표: 길 이름(동해대로) 때문에 고성·양양이 동해로 들어가면 안 된다
+const SG = JSON.parse(readFileSync(new URL("../public/pet.json", import.meta.url), "utf8")).sigun;
+assert.equal(SG.cheonggan, "고성"); assert.equal(SG["yy-donghae"], "양양");
+console.log(`ok - 웹 조사 자료 검사 (${Object.keys(WEB.places).length}곳, 공식 출처만) · 시군 표`);
