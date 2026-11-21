@@ -36,25 +36,28 @@ export function resample(line, step = 20) {
  * 산책로 한 줄을 경사 등급별 조각으로 나눈다.
  * line: [[lng, lat], …], elevAt(lng, lat) → 높이(m) 또는 null(자료 없음)
  * 고도 자료가 30m 간격이라 20m마다 점을 찍고 앞뒤 한 칸씩(약 40m)의 높이 차로 경사를 구한다.
- * 돌려주는 값: [{ coords, g }] — g는 0·1·2, 높이를 못 읽은 구간은 -1(모름)
+ * 돌려주는 값: [{ coords, g, pct }] — g는 0·1·2, 높이를 못 읽은 구간은 -1(모름). pct는 그 조각에서 가장 가파른 곳의 경사(%)
  */
 export function slopeSegments(line, elevAt, step = 20) {
   if (!Array.isArray(line) || line.length < 2) return [];
   const pts = resample(line, step);
   if (pts.length < 2) return [];
   const z = pts.map((p) => elevAt(p[0], p[1]));
-  const cls = [];
+  const cls = [], grade = [];
   for (let i = 0; i < pts.length - 1; i++) {
     const a = Math.max(0, i - 1), b = Math.min(pts.length - 1, i + 2);
     let run = 0; for (let k = a; k < b; k++) run += distM(pts[k], pts[k + 1]);
-    cls.push(z[a] == null || z[b] == null || Number.isNaN(z[a]) || Number.isNaN(z[b]) || run < 5 ? -1 : gradeClass(Math.abs(z[b] - z[a]) / run));
+    const known = !(z[a] == null || z[b] == null || Number.isNaN(z[a]) || Number.isNaN(z[b]) || run < 5);
+    grade.push(known ? Math.abs(z[b] - z[a]) / run : null);
+    cls.push(known ? gradeClass(grade[i]) : -1);
   }
   // 같은 등급이 이어지면 한 조각으로
   const out = [];
   for (let i = 0; i < cls.length; i++) {
     const lastSeg = out[out.length - 1];
-    if (lastSeg && lastSeg.g === cls[i]) lastSeg.coords.push(pts[i + 1]);
-    else out.push({ g: cls[i], coords: [pts[i], pts[i + 1]] });
+    const pct = grade[i] == null ? null : Math.round(grade[i] * 1000) / 10;
+    if (lastSeg && lastSeg.g === cls[i]) { lastSeg.coords.push(pts[i + 1]); if (pct != null) lastSeg.pct = Math.max(lastSeg.pct ?? 0, pct); }
+    else out.push({ g: cls[i], pct, coords: [pts[i], pts[i + 1]] });
   }
   return out;
 }
@@ -93,3 +96,20 @@ export function savePins(pins, storage = globalThis.localStorage) {
 export function toiletsNear(data, at, maxM = 700) {
   return (data?.items || []).filter((x) => distM([x.lng, x.lat], at) <= maxM);
 }
+
+// 주변 걷는 길 요약: 등급별 길이 비율(%). 높이를 아는 길만 100%로 보고, 모르는 길은 따로 센다
+// segs: [{ g, coords }] → { known(m), unknown(m), share: [완만%, 조금 가파름%, 가파름%] 또는 null, steepest(%) }
+export function walkSummary(segs) {
+  const m = [0, 0, 0]; let unknown = 0, steepest = 0;
+  for (const sg of segs) {
+    const len = lineLengthM(sg.coords);
+    if (sg.g >= 0) { m[sg.g] += len; if (sg.pct > steepest) steepest = sg.pct; } else unknown += len;
+  }
+  const known = m[0] + m[1] + m[2];
+  if (!(known > 0)) return { known: 0, unknown, share: null, steepest: 0 };
+  const share = m.map((x) => Math.round((x / known) * 100));
+  share[share.indexOf(Math.max(...share))] += 100 - (share[0] + share[1] + share[2]); // 반올림 오차는 가장 큰 칸에
+  return { known, unknown, share, steepest };
+}
+// 경사 %를 "1/12" 꼴로 (경사로 기준과 견줘 보기 쉽게)
+export const ratioLabel = (pct) => (pct >= 0.5 ? `1/${Math.max(1, Math.round(100 / pct))}` : "0");

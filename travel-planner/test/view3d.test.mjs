@@ -1,6 +1,6 @@
 // 장소 3D 걷기 정보: 경사 등급(편의법 1/12·1/18), 산책로 경사 나누기, 고도 모름 구간, 중복 제거, 현장 표시 저장
 import assert from "node:assert/strict";
-import { gradeClass, slopeSegments, resample, dedupe, distM, loadPins, savePins, toiletsNear, lineLengthM } from "../public/view3d-data.js";
+import { walkSummary, ratioLabel, gradeClass, slopeSegments, resample, dedupe, distM, loadPins, savePins, toiletsNear, lineLengthM } from "../public/view3d-data.js";
 
 assert.equal(gradeClass(0.03), 0); assert.equal(gradeClass(1 / 18), 0);
 assert.equal(gradeClass(0.07), 1); assert.equal(gradeClass(1 / 12), 1);
@@ -35,6 +35,16 @@ assert.deepEqual(seg.map((s) => s.g), [-1]);
 seg = slopeSegments(line, (lng) => (x(lng) > 200 ? null : 5));
 assert.ok(seg.some((s) => s.g === -1) && seg[0].g === 0);
 assert.deepEqual(slopeSegments([[128.9, 37.8]], () => 0), []);
+
+// 요약: 등급별 비율, 가장 가파른 곳, 모르는 길은 따로
+seg = slopeSegments(line, (lng) => Math.max(0, x(lng) - 200) * 0.12);
+let sum = walkSummary(seg);
+assert.equal(sum.share[0] + sum.share[1] + sum.share[2], 100);
+assert.ok(sum.share[0] >= 35 && sum.share[0] <= 55 && sum.share[2] >= 35, `비율 ${sum.share}`);
+assert.ok(sum.steepest > 11 && sum.steepest < 13, `가장 가파른 곳 ${sum.steepest}%`);
+sum = walkSummary(slopeSegments(line, () => null));
+assert.equal(sum.share, null); assert.ok(sum.unknown > 390);
+assert.equal(ratioLabel(8.3), "1/12"); assert.equal(ratioLabel(5.6), "1/18"); assert.equal(ratioLabel(0), "0");
 
 // 같은 계단이 지도 조각마다 잘려 나와도 하나로
 const d = dedupe([{ at: [128.9, 37.8] }, { at: [128.90005, 37.8] }, { at: [128.901, 37.8] }]);
