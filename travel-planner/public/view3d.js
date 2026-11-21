@@ -64,22 +64,34 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       <button type="button" class="v3d-close" aria-label="${t("닫기")}">✕</button>
     </div>
     <div class="v3d-bar">
-      <button type="button" class="v3d-btn" data-act="follow" aria-pressed="false"></button>
-      <button type="button" class="v3d-btn" data-act="orbit" aria-pressed="true"></button>
-      <button type="button" class="v3d-btn" data-act="base" aria-pressed="true"></button>
-      <button type="button" class="v3d-btn" data-act="home"></button>
-      <button type="button" class="v3d-btn" data-act="wc"></button>
-      <button type="button" class="v3d-btn" data-act="pin"></button>
-      <button type="button" class="v3d-btn" data-act="legend" aria-expanded="false"></button>
+      <button type="button" class="v3d-tool" data-act="follow" aria-pressed="false"></button>
+      <button type="button" class="v3d-tool" data-act="home"></button>
+      <button type="button" class="v3d-tool" data-act="orbit" aria-pressed="true"></button>
+      <button type="button" class="v3d-tool" data-act="view"></button>
+      <button type="button" class="v3d-tool" data-act="wc"></button>
+      <button type="button" class="v3d-tool" data-act="base" aria-pressed="true"></button>
+      <button type="button" class="v3d-tool" data-act="pin"></button>
+      <button type="button" class="v3d-tool" data-act="legend" aria-expanded="false"></button>
+    </div>
+    <div class="v3d-pad" role="group">
+      <button type="button" data-pad="in">＋</button><button type="button" data-pad="out">－</button>
+      <button type="button" data-pad="left">↺</button><button type="button" data-pad="right">↻</button>
+      <button type="button" data-pad="flat">⤒</button><button type="button" data-pad="low">⤓</button>
     </div>
     <div class="v3d-sheet" data-sheet="legend" hidden></div>
     <div class="v3d-sheet" data-sheet="pin" hidden></div>
     <div class="v3d-cross" hidden>＋</div>
-    <div class="v3d-sum"><div class="v3d-sum-main"></div><p class="v3d-warn"></p></div>
+    <button type="button" class="v3d-sum" aria-expanded="true"><span class="v3d-sum-main"></span><span class="v3d-warn"></span><i class="v3d-sum-fold" aria-hidden="true">▴</i></button>
     <div class="v3d-loading"></div>
     <p class="v3d-hint"></p>`;
   el.querySelector(".v3d-title b").textContent = place.name;
-  el.querySelector(".v3d-hint").textContent = t("한 손가락으로 움직이고, 두 손가락으로 기울이거나 돌려요");
+  el.querySelector(".v3d-hint").textContent = t("화면을 끌어 움직이고, 오른쪽 버튼으로 크게·돌리기·기울이기를 해요");
+  const PAD_LABEL = { in: "크게 보기", out: "작게 보기", left: "왼쪽으로 돌리기", right: "오른쪽으로 돌리기", flat: "위에서 내려다보기", low: "낮게 눕혀 보기" };
+  for (const b of el.querySelectorAll("[data-pad]")) { b.title = t(PAD_LABEL[b.dataset.pad]); b.setAttribute("aria-label", t(PAD_LABEL[b.dataset.pad])); }
+  el.querySelector(".v3d-pad").setAttribute("aria-label", t("지도 조작"));
+  // 요약 칸은 누르면 한 줄로 접힌다 (지도를 더 넓게)
+  el.querySelector(".v3d-sum").addEventListener("click", (e) => { const b = e.currentTarget, min = !b.classList.contains("min"); b.classList.toggle("min", min); b.setAttribute("aria-expanded", String(!min)); b.querySelector(".v3d-sum-fold").textContent = min ? "▾" : "▴"; });
+  const calm = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches; // '동작 줄이기'를 켠 기기: 저절로 돌거나 날아가지 않는다
   el.querySelector(".v3d-loading").textContent = t("3D 화면을 불러오는 중…");
   el.querySelector(".v3d-warn").textContent = t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 지도에 빠진 곳이 있을 수 있어요");
   document.body.append(el);
@@ -87,8 +99,9 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   const q = (act) => el.querySelector(`[data-act="${act}"]`);
   const distEl = el.querySelector(".v3d-dist");
 
-  const state = { following: false, orbit: true, satellite: true, watch: null, me: null, meMarker: null, heading: null, compass: null, raf: 0, last: 0, wake: null, lastTurn: 0, closed: false };
+  const state = { view: 0, following: false, orbit: !calm, satellite: true, watch: null, me: null, meMarker: null, heading: null, compass: null, raf: 0, last: 0, wake: null, lastTurn: 0, closed: false };
   let walkTimer = 0, walkSig = "", walkPoll = 0;
+  const padHoldRef = { id: 0 };
   const me = { stop() {}, el };
   open = me;
   el.querySelector(".v3d-close").addEventListener("click", closeView3D);
@@ -97,22 +110,25 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
 
   let map = null;
   const paint = () => {
-    q("follow").textContent = state.following ? t("📍 따라가는 중 · 끄기") : t("📍 내 위치 따라가기");
+    // 아이콘 + 짧은 이름 (긴 설명은 읽어 주기·길게 누르기용)
+    const tool = (act, icon, label, full) => { const b = q(act); b.innerHTML = `<i aria-hidden="true">${icon}</i><span></span>`; b.lastChild.textContent = t(label); b.title = t(full); b.setAttribute("aria-label", t(full)); };
+    tool("follow", "📍", state.following ? "따라가는 중" : "내 위치", state.following ? "📍 따라가는 중 · 끄기" : "📍 내 위치 따라가기");
     q("follow").setAttribute("aria-pressed", String(state.following));
-    q("orbit").textContent = state.orbit ? t("⏸ 멈춤") : t("⟳ 둘러보기");
+    tool("home", "🎯", "관광지", "🎯 관광지로");
+    tool("orbit", state.orbit ? "⏸" : "🔄", state.orbit ? "멈춤" : "둘러보기", state.orbit ? "⏸ 멈춤" : "⟳ 둘러보기");
     q("orbit").setAttribute("aria-pressed", String(state.orbit));
-    q("base").textContent = state.satellite ? t("🗺 지도로") : t("🛰 위성 사진으로");
-    q("home").textContent = t("🎯 관광지로");
-    q("wc").textContent = t("🚻 가까운 화장실로");
-    q("pin").textContent = t("📌 현장 확인 남기기");
-    q("legend").textContent = t("ℹ️ 표시 설명");
+    tool("view", "👁", ["비스듬히", "위에서", "낮게"][state.view], "보는 높이 바꾸기");
+    tool("wc", "🚻", "화장실", "🚻 가까운 화장실로");
+    tool("base", state.satellite ? "🗺" : "🛰", state.satellite ? "지도" : "위성 사진", state.satellite ? "🗺 지도로" : "🛰 위성 사진으로");
+    tool("pin", "📌", "현장 확인", "📌 현장 확인 남기기");
+    tool("legend", "ℹ️", "설명", "ℹ️ 표시 설명");
   };
   paint();
 
   me.stop = () => {
     state.closed = true;
     cancelAnimationFrame(state.raf);
-    clearTimeout(walkTimer); clearInterval(walkPoll);
+    clearTimeout(walkTimer); clearInterval(walkPoll); clearInterval(padHoldRef.id);
     if (state.watch != null) navigator.geolocation.clearWatch(state.watch);
     window.removeEventListener("deviceorientationabsolute", onCompass);
     window.removeEventListener("deviceorientation", onCompass);
@@ -129,7 +145,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     map = new maplibregl.Map({
       pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 고해상도 폰에서 3배로 그리면 느려지고 뜨거워진다 → 2배까지만
       container: el.querySelector(".v3d-map"), center, zoom: 13.6, pitch: 25, bearing: -50, maxPitch: 80, minZoom: 8, maxZoom: 19.5,
-      attributionControl: false, boxZoom: false,
+      attributionControl: false, boxZoom: false, canvasContextAttributes: { antialias: true }, // 건물·길 가장자리를 매끄럽게
       style: {
         version: 8,
         glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
@@ -143,7 +159,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         layers: [
           { id: "bg", type: "background", paint: { "background-color": "#dfe8e2" } },
           ...baseLayers({ lang: place.lang || "ko", visible: false }), // '지도' 모드 바탕 (위성 사진일 때는 숨김)
-          { id: "sat", type: "raster", source: "sat" },
+          { id: "sat", type: "raster", source: "sat", paint: { "raster-contrast": 0.08, "raster-saturation": 0.12, "raster-fade-duration": 200 } }, // 위성 사진을 조금 또렷하게
           { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.18, "hillshade-shadow-color": "#1f2a24" } }, // 위성 사진 위에서는 옅게(굴곡만 살린다), 지도에서는 진하게
           // 걷는 길(오픈스트리트맵, 미확인): 흰 테두리 + 회색 점선. 경사를 계산한 구간은 그 위에 색으로 덮는다
           { id: "paths-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["match", ["get", "surface"], "unpaved", "#8b5a2b", "#ffffff"], "line-width": ["interpolate", ["linear"], ["zoom"], 14, 4, 18, 9], "line-opacity": 0.9 } }, // 흙·자갈길은 갈색 테두리
@@ -157,7 +173,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
               "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#efe9dc", 30, "#ddd3c0", 100, "#c6baa4"],
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-              "fill-extrusion-opacity": 0.8,
+              "fill-extrusion-opacity": 0.6, // 위성 사진 위에서는 지붕이 비쳐 보이게 옅게 (지도 모드에서는 0.85)
             } },
           // 이름표: 길 이름과 주변 시설 이름 (어디가 어디인지 알아보게). 글꼴을 못 받으면 이름표만 빠진다
           { id: "road-label", type: "symbol", source: "ofm", "source-layer": "transportation_name", minzoom: 15,
@@ -174,7 +190,36 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   } catch { toast(t("이 기기에서는 3D 화면을 볼 수 없어요")); return closeView3D(); }
   // 위성 사진·건물을 못 받아도(오프라인 등) 받은 것만으로 보여 준다
   map.on("error", (e) => console.warn("3D", e?.error?.message || e));
-  map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+  map.addControl(new maplibregl.ScaleControl({ maxWidth: 90, unit: "metric" }), "bottom-left"); // 거리 감: "이만큼이 50m"
+  // 조작 버튼(오른쪽): 두 손가락을 쓰지 않아도 크게·작게·돌리기·기울이기. 누르고 있으면 계속 움직인다
+  const padStep = (k) => {
+    stopOrbit(); if (state.following && (k === "left" || k === "right")) setFollow(false);
+    const o = { duration: 260, essential: true };
+    if (k === "in") map.easeTo({ ...o, zoom: Math.min(map.getMaxZoom(), map.getZoom() + 0.5) });
+    if (k === "out") map.easeTo({ ...o, zoom: Math.max(map.getMinZoom(), map.getZoom() - 0.5) });
+    if (k === "left") map.easeTo({ ...o, bearing: map.getBearing() - 20 });
+    if (k === "right") map.easeTo({ ...o, bearing: map.getBearing() + 20 });
+    if (k === "flat") map.easeTo({ ...o, pitch: Math.max(0, map.getPitch() - 12) });
+    if (k === "low") map.easeTo({ ...o, pitch: Math.min(map.getMaxPitch(), map.getPitch() + 12) });
+  };
+  let padHold = 0;
+  const padStop = () => { clearInterval(padHold); padHold = 0; padHoldRef.id = 0; };
+  for (const b of el.querySelectorAll("[data-pad]")) {
+    b.addEventListener("pointerdown", (e) => { e.preventDefault(); padStop(); padStep(b.dataset.pad); padHold = padHoldRef.id = setInterval(() => padStep(b.dataset.pad), 280); });
+    for (const ev of ["pointerup", "pointerleave", "pointercancel"]) b.addEventListener(ev, padStop);
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); padStep(b.dataset.pad); } });
+    b.addEventListener("contextmenu", (e) => e.preventDefault()); // 길게 눌러도 메뉴가 뜨지 않게
+  }
+  // 보는 높이 3가지: 비스듬히 → 위에서(북쪽이 위, 지도처럼) → 낮게(걷는 눈높이에 가깝게)
+  const VIEWS = [{ pitch: 62, zoom: 16.2 }, { pitch: 0, zoom: 16, bearing: 0 }, { pitch: 76, zoom: 17.3 }];
+  q("view").addEventListener("click", () => {
+    stopOrbit(); state.view = (state.view + 1) % VIEWS.length; paint();
+    map.easeTo({ ...VIEWS[state.view], duration: calm ? 0 : 900, essential: true });
+    toast(t(["비스듬히 내려다봐요", "위에서 지도처럼 봐요 (북쪽이 위)", "낮게, 걷는 눈높이에 가깝게 봐요"][state.view]));
+  });
+  // 멀리서 보면 표시들이 겹치므로 작게 줄인다
+  const farCheck = () => el.classList.toggle("v3d-far", map.getZoom() < 15.4);
+  map.on("zoom", farCheck); farCheck();
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right"); // 아래쪽 버튼을 가리지 않게 위로
   // 출처는 처음 4초만 펼쳐 보이고 접는다 (ⓘ를 누르면 다시 펼쳐짐). 요약 칸을 가리지 않게
   setTimeout(() => el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"), 4000);
@@ -182,8 +227,14 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   // 들어가기: 멀리 위에서 내려다보다가 관광지로 내려앉는다 → 그 뒤 둘러보기 시작. 손을 대면 바로 멈춘다
   let intro = true;
   const endIntro = () => { intro = false; };
-  map.once("load", () => { if (state.closed) return; map.flyTo({ center, zoom: 16.2, pitch: 62, bearing: -20, duration: 2600, essential: true }); map.once("moveend", endIntro); });
-  setTimeout(endIntro, 6000);
+  // land: 관광지 앞에 선다 (한 번만). 지도가 준비되면 날아서, 그 전에 손을 대면 바로
+  let landed = false;
+  const land = (fly) => {
+    if (landed || state.closed) return; landed = true;
+    if (fly && !calm) { map.flyTo({ center, zoom: 16.2, pitch: 62, bearing: -20, duration: 2600, essential: true }); map.once("moveend", endIntro); setTimeout(endIntro, 4500); }
+    else { map.jumpTo({ center, zoom: 16.2, pitch: 62, bearing: -20 }); endIntro(); }
+  };
+  map.once("load", () => land(true));
   map.once("idle", () => el.querySelector(".v3d-loading")?.remove());
   setTimeout(() => el.querySelector(".v3d-loading")?.remove(), 12000);
 
@@ -370,7 +421,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   });
 
   // ---------- 둘러보기: 장소 둘레를 천천히 돈다. 손을 대면 멈춘다 ----------
-  const stopOrbit = () => { if (intro) { intro = false; map.stop(); } if (state.orbit) { state.orbit = false; paint(); } };
+  // 들어가는 중에 손을 대면 멀리서 멈추지 않고 바로 관광지 앞에 선다
+  const stopOrbit = () => { if (intro) { map.stop(); if (!landed) land(false); else if (map.getZoom() < 15.5) map.jumpTo({ center, zoom: 16.2, pitch: 62 }); intro = false; } if (state.orbit) { state.orbit = false; paint(); } };
   const tick = (now) => {
     if (state.closed) return;
     if (state.orbit && !state.following && !intro) {
@@ -479,12 +531,14 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     map.setLayoutProperty("sat", "visibility", state.satellite ? "visible" : "none");
     for (const id of baseLayerIds()) map.setLayoutProperty(id, "visibility", state.satellite ? "none" : "visible");
     map.setPaintProperty("hillshade", "hillshade-exaggeration", state.satellite ? 0.18 : 0.4);
+    map.setPaintProperty("buildings-3d", "fill-extrusion-opacity", state.satellite ? 0.6 : 0.85);
     for (const id of ["road-label", "poi-label"]) { map.setPaintProperty(id, "text-color", state.satellite ? "#ffffff" : "#1f2937"); map.setPaintProperty(id, "text-halo-color", state.satellite ? "rgba(0,0,0,.8)" : "rgba(255,255,255,.9)"); }
     paint();
   });
   q("home").addEventListener("click", () => {
     if (state.following) setFollow(false);
-    map.flyTo({ center, zoom: 16.2, pitch: 62, duration: 1200, essential: true });
+    stopOrbit(); state.view = 0; paint();
+    map.flyTo({ center, zoom: 16.2, pitch: 62, duration: calm ? 0 : 1200, essential: true });
   });
 
   // 위치 권한을 이미 준 경우에만 조용히 확인: 현장(2km 안)이면 바로 따라간다. 처음이면 버튼을 누를 때 묻는다

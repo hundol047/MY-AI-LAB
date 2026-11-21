@@ -1020,3 +1020,27 @@ h3.h4 { font-size: 14px; margin: 14px 0 8px; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .opt .opt-half { color: #fbbf24; } }
 :root[data-theme="dark"] .opt .opt-half { color: #fbbf24; }
 .walk-info em, .v3d-sheet em { white-space: nowrap; display: inline-block; }
+
+/* 3D 화면 조작 개선 (2026-11-21): 아래 도구 8개는 한눈에(4칸×2줄), 오른쪽 조작 버튼은 큼직하게, 요약은 눌러 접기 */
+.v3d-bar { left: 8px; right: 8px; bottom: calc(26px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; padding: 0; overflow: visible; }
+.v3d-tool { min-height: 54px; padding: 5px 2px; border: 0; border-radius: 14px; background: rgba(255,255,255,.96); color: #111; font: inherit; font-size: 12.5px; font-weight: 800; line-height: 1.15; box-shadow: 0 2px 8px rgba(0,0,0,.35); cursor: pointer; display: grid; justify-items: center; align-content: center; gap: 2px; touch-action: manipulation; }
+.v3d-tool i { font-style: normal; font-size: 19px; line-height: 1; }
+.v3d-tool span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 100%; }
+.v3d-tool:active, .v3d-pad button:active { transform: scale(.95); background: #dbe4ff; }
+.v3d-tool[data-act="follow"][aria-pressed="true"] { background: #2563eb; color: #fff; }
+.v3d-tool:focus-visible, .v3d-pad button:focus-visible, .v3d-close:focus-visible, .v3d-sum:focus-visible { outline: 3px solid #fde047; outline-offset: 2px; }
+.v3d-pad { position: absolute; right: 8px; bottom: calc(158px + env(safe-area-inset-bottom)); display: grid; grid-template-columns: repeat(2, 48px); gap: 6px; }
+.v3d-pad button { width: 48px; height: 48px; border: 0; border-radius: 14px; background: rgba(255,255,255,.96); color: #111; font-size: 24px; font-weight: 800; line-height: 1; box-shadow: 0 2px 8px rgba(0,0,0,.35); cursor: pointer; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; }
+.v3d-hint { left: 10px; right: 10px; bottom: calc(5px + env(safe-area-inset-bottom)); text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.v3d .maplibregl-ctrl-bottom-left { bottom: calc(152px + env(safe-area-inset-bottom)); left: 4px; }
+.v3d .maplibregl-ctrl-scale { background: rgba(255,255,255,.85); border-color: #111; color: #111; font-weight: 700; }
+.v3d-sum { display: block; width: auto; text-align: left; border: 0; font: inherit; font-size: 13px; pointer-events: auto; cursor: pointer; padding-right: 30px; }
+.v3d-sum-main, .v3d-warn { display: block; }
+.v3d-sum-fold { position: absolute; right: 10px; top: 8px; font-style: normal; color: #cbd5e1; }
+.v3d-sum.min .v3d-warn, .v3d-sum.min .v3d-bits { display: none; }
+.v3d-sum.min .v3d-barline { margin-bottom: 4px; }
+.v3d-far .v3d-chip { transform: scale(.78); transform-origin: bottom center; opacity: .92; }
+.v3d-sheet { bottom: calc(8px + env(safe-area-inset-bottom)); }
+@media (max-height: 620px) { .v3d-pad { grid-template-columns: repeat(2, 42px); } .v3d-pad button { width: 42px; height: 42px; font-size: 20px; } .v3d-tool { min-height: 46px; } .v3d-pad { bottom: calc(140px + env(safe-area-inset-bottom)); } }
+@media (min-width: 700px) { .v3d-bar { left: 50%; right: auto; transform: translateX(-50%); width: 560px; } }
+@media (prefers-reduced-motion: reduce) { .v3d-tool:active, .v3d-pad button:active { transform: none; } }
