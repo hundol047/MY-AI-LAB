@@ -33,3 +33,23 @@ assert.match(r.answer, /주출입구는 계단/);
 r = guideLocal("Are there toilets?", trip2, 0, { input: { region: "seorak" }, walkInfo, lang: "en" });
 assert.equal(r.kind, "access"); assert.match(r.answer, /Day 1/); assert.match(r.answer, /unverified|No official/);
 console.log("ok - 가이드 무장애 질문 (공식 조사·계단 주의·주변 지도 자료, 한국어·영어)");
+
+// 실내 길 안내: 조사 글의 상태 읽기 (가능·주의·어려움·안내), 조사에 없는 칸은 만들지 않음, 순서
+const { statusOf, indoorRoute } = await import("../public/access-steps.js");
+assert.equal(statusOf("주출입구는 턱이 없어 휠체어 접근 가능함_무장애 편의시설"), "ok");
+assert.equal(statusOf("장애인 화장실 있음(1층 안내데스크 왼쪽)"), "ok");
+assert.equal(statusOf("장애인 전용주차장(5면)"), "ok");
+assert.equal(statusOf("주출입구는 계단으로 이어져 휠체어 출입 어려움"), "no");
+assert.equal(statusOf("장애인 주차장 없음"), "no");
+assert.equal(statusOf("주출입구는 계단이 있으나 보조출입구에는 경사로가 있음"), "part");
+assert.equal(statusOf("엘리베이터 있음(낮은 높이의 조작버튼이 없어 휠체어 이용자가 사용하기 불편함)"), "part");
+assert.equal(statusOf("출입구까지 경사로가 설치되어 있음(가파름)"), "part");
+assert.equal(statusOf("여닫이문"), "info");
+assert.equal(statusOf("턱이 없음"), "ok"); assert.equal(statusOf("턱이 없음"), "ok", "두 번 불러도 같은 답");
+const route = indoorRoute(PLACES.find((p) => p.id === "gyeongpodae").access.text);
+assert.deepEqual(route.map((r) => r.key).filter((k) => ["접근로", "출입구"].includes(k)), ["접근로", "출입구"]);
+assert.equal(route.find((r) => r.key === "출입구").status, "no");
+assert.equal(route.some((r) => r.key === "엘리베이터"), false, "조사에 없는 칸은 만들지 않는다");
+assert.deepEqual(indoorRoute({}), []);
+assert.doesNotMatch(route[0].text, /무장애 편의시설/);
+console.log("ok - 실내 길 안내 (조사 글 상태 읽기, 없는 칸은 만들지 않음)");

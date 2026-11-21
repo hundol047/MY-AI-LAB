@@ -2151,13 +2151,22 @@ $("#timeline").addEventListener("click", (e) => {
   toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
 });
 
+// 장소 사진 여러 장: 관광공사 추가 사진(gallery.json, scripts/bake-gallery.mjs)이 있으면 그것, 없으면 카드에 쓰는 대표 사진 한 장
+let galleryData;
+async function placePhotos(p) {
+  galleryData ??= await fetchT("gallery.json", {}, 5000).then((r) => (r.ok ? r.json() : null)).then((j) => j?.places || {}).catch(() => ({}));
+  const g = (galleryData[p.id] || []).map((url) => ({ url, credit: t("한국관광공사") }));
+  if (g.length) return g;
+  const one = await photoFor(p).catch(() => "");
+  return one ? [{ url: one, credit: /visitkorea/.test(one) ? t("한국관광공사") : p.photoAt ? t("주변 사진 · {place}", { place: p.photoAt }) : "" }] : [];
+}
 // 3D로 보기: 그 장소를 전체 화면 3D로 (view3d.js). WebGL이 없는 기기는 안내만 한다
 $("#timeline").addEventListener("click", (e) => {
   const b = e.target.closest("[data-view3d]"); if (!b) return;
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
+  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {

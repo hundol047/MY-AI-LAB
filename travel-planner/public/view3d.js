@@ -6,6 +6,7 @@
 // 지형: AWS 공개 고도 자료, 건물: OpenFreeMap, 위성 사진: Esri World Imagery, 지도: OpenStreetMap
 const TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const SATELLITE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+import { indoorRoute } from "./access-steps.js";
 import { baseLayers, baseLayerIds, OFM_URL, OFM_ATTR } from "./basemap.js";
 import { walkSummary, ratioLabel, slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear } from "./view3d-data.js";
 const NEAR_KM = 2;       // 이 안에 있으면 "현장"으로 보고 바로 따라간다
@@ -45,7 +46,7 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, lat, lng, access?, walk?, lang? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
+ * place: { name, koName?, lat, lng, access?, walk?, lang?, photos?: () => Promise<[{url, credit}]> } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise, shared?: { voter } }
  */
@@ -66,9 +67,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     <div class="v3d-bar">
       <button type="button" class="v3d-tool" data-act="follow" aria-pressed="false"></button>
       <button type="button" class="v3d-tool" data-act="home"></button>
-      <button type="button" class="v3d-tool" data-act="orbit" aria-pressed="true"></button>
-      <button type="button" class="v3d-tool" data-act="view"></button>
+      <button type="button" class="v3d-tool v3d-tool-hi" data-act="indoor" aria-expanded="false"></button>
       <button type="button" class="v3d-tool" data-act="wc"></button>
+      <button type="button" class="v3d-tool" data-act="view"></button>
+      <button type="button" class="v3d-tool" data-act="orbit" aria-pressed="true"></button>
       <button type="button" class="v3d-tool" data-act="base" aria-pressed="true"></button>
       <button type="button" class="v3d-tool" data-act="pin"></button>
       <button type="button" class="v3d-tool" data-act="legend" aria-expanded="false"></button>
@@ -80,6 +82,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     </div>
     <div class="v3d-sheet" data-sheet="legend" hidden></div>
     <div class="v3d-sheet" data-sheet="pin" hidden></div>
+    <div class="v3d-sheet v3d-indoor" data-sheet="indoor" hidden></div>
     <div class="v3d-cross" hidden>＋</div>
     <button type="button" class="v3d-sum" aria-expanded="true"><span class="v3d-sum-main"></span><span class="v3d-warn"></span><i class="v3d-sum-fold" aria-hidden="true">▴</i></button>
     <div class="v3d-loading"></div>
@@ -122,6 +125,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     tool("base", state.satellite ? "🗺" : "🛰", state.satellite ? "지도" : "위성 사진", state.satellite ? "🗺 지도로" : "🛰 위성 사진으로");
     tool("pin", "📌", "현장 확인", "📌 현장 확인 남기기");
     tool("legend", "ℹ️", "설명", "ℹ️ 표시 설명");
+    tool("indoor", "🚪", "실내·사진", "🚪 실내 길 안내와 사진");
   };
   paint();
 
@@ -353,8 +357,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       ${acc ? `<h4>${t("한국관광공사 무장애 조사")} <em class="ok">${t("공식")}</em></h4><ul class="v3d-acc">${acc}</ul>` : `<p class="v3d-note">${t("이 장소는 한국관광공사 무장애 조사 자료가 없어요.")}</p>`}`;
   }
   drawLegend();
+  const indoorEl = el.querySelector('[data-sheet="indoor"]');
   const showSheet = (which) => {
-    legendEl.hidden = which !== "legend"; pinEl.hidden = which !== "pin";
+    legendEl.hidden = which !== "legend"; pinEl.hidden = which !== "pin"; indoorEl.hidden = which !== "indoor";
+    q("indoor").setAttribute("aria-expanded", String(which === "indoor"));
     cross.hidden = which !== "pin" || (state.following && !!state.me);
     q("legend").setAttribute("aria-expanded", String(which === "legend"));
   };
@@ -372,6 +378,37 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     toast(`${x.official ? (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + " · " + t("공식") : t("🚻 화장실?") + " · " + t("미확인")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
   });
   q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
+
+  // ---------- 실내·사진: 위성 사진으로는 건물 안이 보이지 않는다. 대신 확인된 것만으로 실내를 알려 준다 ----------
+  //  ① 실내 길 안내: 관광공사 무장애 조사 글을 "도착 → 들어가기 → 안에서" 순서의 칸으로 (조사에 없는 칸은 만들지 않음, 배치도가 아님)
+  //  ② 공식 사진  ③ 거리 사진(카카오맵 로드뷰)·방문자 사진(네이버 지도)으로 입구·실내를 실제 사진으로
+  const ST = { ok: ["✓", "가능"], part: ["!", "주의"], no: ["✕", "어려움"], info: ["i", "안내"] };
+  function drawIndoor() {
+    const route = indoorRoute(place.access || {});
+    const c = map.getCenter(), ko = place.koName || place.name;
+    const tiles = route.map((r, i) => `<li class="v3d-stop s-${r.status}" style="--i:${i}"><span class="v3d-stop-ic" aria-hidden="true">${r.icon}</span><div><b>${t(r.key)} <em class="b-${r.status}">${ST[r.status][0]} ${t(ST[r.status][1])}</em></b><p lang="ko">${escH(r.text)}</p></div></li>`).join("");
+    indoorEl.innerHTML = `<button type="button" class="v3d-sheet-close" aria-label="${t("닫기")}">✕</button>
+      <h4>🚪 ${t("실내 길 안내")} <em class="ok">${t("공식")}</em></h4>
+      ${route.length ? `<p class="v3d-note">${t("한국관광공사 무장애 조사에 적힌 내용을 들어가는 순서대로 놓았어요. 실제 건물 배치도는 아니고, 조사에 없는 것은 넣지 않았어요.")}</p>
+        <ol class="v3d-route"><li class="v3d-go" aria-hidden="true"><span class="v3d-walker">🧑‍🦽</span> ${t("출발")}</li>${tiles}<li class="v3d-go" aria-hidden="true">🏁 ${t("도착")}</li></ol>`
+      : `<p class="v3d-note"><b>${t("이 장소는 공식 실내 조사가 없어요.")}</b> ${t("아래 사진으로 입구와 실내를 확인하고, 계단·엘리베이터는 시설에 전화로 물어보세요.")}</p>`}
+      <h4>📷 ${t("사진으로 보기")}</h4>
+      <div class="v3d-photos" id="v3dPhotos"><p class="v3d-note">${t("사진을 불러오는 중…")}</p></div>
+      <div class="v3d-links">
+        <a class="v3d-link" href="https://map.kakao.com/link/roadview/${c.lat.toFixed(6)},${c.lng.toFixed(6)}" target="_blank" rel="noopener"><i aria-hidden="true">🚶</i><span><b>${t("거리 사진 (로드뷰)")}</b><small>${t("지금 보는 곳을 사람 눈높이 사진으로 · 입구의 계단·턱 확인")}</small></span></a>
+        <a class="v3d-link" href="https://map.naver.com/p/search/${encodeURIComponent(ko)}" target="_blank" rel="noopener"><i aria-hidden="true">🖼️</i><span><b>${t("방문자 사진 (네이버 지도)")}</b><small>${t("실내·화장실·출입구를 찍은 방문자 사진")}</small></span></a>
+        <a class="v3d-link" href="https://map.kakao.com/link/search/${encodeURIComponent(ko)}" target="_blank" rel="noopener"><i aria-hidden="true">📍</i><span><b>${t("카카오맵에서 보기")}</b><small>${t("사진·전화번호·실내 지도(있는 곳)")}</small></span></a>
+      </div>
+      <p class="v3d-note">${t("거리 사진·방문자 사진은 찍은 날짜가 오래됐을 수 있어요. 사진 속 날짜를 확인하세요.")}</p>`;
+    const box = indoorEl.querySelector("#v3dPhotos");
+    Promise.resolve(place.photos?.() || []).catch(() => []).then((list) => {
+      if (!box.isConnected) return;
+      box.innerHTML = list.length ? list.slice(0, 8).map((x) => `<figure><img src="${escH(x.url)}" alt="${escH(place.name)}" loading="lazy" referrerpolicy="no-referrer"><figcaption>${escH(x.credit || "")}</figcaption></figure>`).join("") : `<p class="v3d-note">${t("앱에 확인된 사진이 없어요. 아래 거리 사진·방문자 사진을 이용하세요.")}</p>`;
+      const none = () => { if (!box.querySelector("figure")) box.innerHTML = `<p class="v3d-note">${t("앱에 확인된 사진이 없어요. 아래 거리 사진·방문자 사진을 이용하세요.")}</p>`; };
+      box.querySelectorAll("img").forEach((im) => im.addEventListener("error", () => { im.closest("figure").remove(); none(); }));
+    });
+  }
+  q("indoor").addEventListener("click", () => { if (!indoorEl.hidden) return showSheet(null); stopOrbit(); drawIndoor(); showSheet("indoor"); });
 
   // 현장 확인 남기기: 따라가는 중이면 내 위치에, 아니면 화면 가운데(＋)에 표시를 남긴다. 이 기기에만 저장한다
   let pins = loadPins();
