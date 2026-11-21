@@ -238,6 +238,36 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
     return info("empty", L("바꿀 장소가 없습니다. 먼저 일정을 만들어 주세요.", "Create a plan first so I can change a place.", "先にプランを作成してください。", "请先生成行程。"));
   }
 
+  // 걷기·무장애 질문 ("거기 계단 있어?", "화장실 어디야?", "휠체어로 갈 수 있어?"): 앱에 있는 자료로만 답하고, 출처와 확인 수준을 함께 말한다
+  //  공식 = 한국관광공사 무장애 조사, 미확인 = 오픈스트리트맵(주변 400m 조사, walk-info.json). 없으면 없다고 말한다
+  if (/계단|화장실|경사|오르막|휠체어|엘리베이터|턱|장애인|stairs?|steps|toilet|restroom|slope|steep|wheelchair|elevator|階段|トイレ|坂|車いす|車椅子|エレベーター|台阶|楼梯|厕所|卫生间|坡|轮椅|电梯/i.test(question)) {
+    const W = ctx.walkInfo?.places || {}, R = ctx.walkInfo?.radius || 400;
+    const ps = (mentioned.length ? mentioned : ctx.walkInfo ? dayPlaces.filter((p) => p.cat && p.cat !== "festival") : []).slice(0, mentioned.length ? 3 : 4);
+    if (ps.length) {
+      const A = { wheel: L("휠체어 대여", "wheelchair rental", "車いす貸出", "轮椅租借"), ramp: L("경사로·턱 없음", "ramp / step-free", "スロープ・段差なし", "坡道·无门槛"), elevator: L("엘리베이터", "elevator", "エレベーター", "电梯"), toilet: L("장애인 화장실", "accessible toilet", "車いす対応トイレ", "无障碍卫生间"), parking: L("장애인 주차", "accessible parking", "障害者用駐車場", "无障碍停车") };
+      const lines = ps.map((p) => {
+        const a = p.access, w = W[p.id], out = [];
+        if (a) {
+          const tags = Object.keys(A).filter((k) => a[k]).map((k) => A[k]);
+          out.push(L("공식 조사", "Official survey", "公式調査", "官方调查") + ": " + (tags.length ? tags.join(sep) : L("편의시설 표시 없음", "no facilities listed", "設備の記載なし", "未列出设施")));
+          if (a.stepsWarn) out.push("⚠️ " + (lang === "ko" ? a.stepsWarn : L("", "the survey notes stairs (in Korean): ", "調査に階段の記載(韓国語): ", "调查提到台阶(韩文): ") + a.stepsWarn));
+          if (a.text?.["화장실"] && /화장실|toilet|トイレ|厕所|卫生间/i.test(question) && lang === "ko") out.push(`화장실 원문: ${a.text["화장실"]}`);
+        } else out.push(L("공식 무장애 조사 없음", "No official accessibility survey", "公式のバリアフリー調査なし", "无官方无障碍调查"));
+        if (w) {
+          const bits = [];
+          if (w.sh) bits.push(L(`걷는 길 완만 ${w.sh[0]}%·조금 가파름 ${w.sh[1]}%·가파름 ${w.sh[2]}%`, `paths ${w.sh[0]}% gentle, ${w.sh[1]}% fairly steep, ${w.sh[2]}% steep`, `歩道 緩やか${w.sh[0]}%・やや急${w.sh[1]}%・急${w.sh[2]}%`, `步道 平缓${w.sh[0]}%·稍陡${w.sh[1]}%·陡峭${w.sh[2]}%`));
+          bits.push(w.st ? L(`계단 ${w.st}곳(가장 가까운 곳 ${w.stM}m)`, `${w.st} stairs (nearest ${w.stM} m)`, `階段${w.st}か所(最寄り${w.stM}m)`, `台阶${w.st}处(最近${w.stM}米)`) : L("지도에 계단 표시 없음", "no stairs on the map", "地図に階段の表示なし", "地图上无台阶标记"));
+          bits.push(w.wc ? L(`화장실 ${w.wc}곳(가장 가까운 곳 ${w.wcM}m)`, `${w.wc} toilets (nearest ${w.wcM} m)`, `トイレ${w.wc}か所(最寄り${w.wcM}m)`, `卫生间${w.wc}处(最近${w.wcM}米)`) : L("지도에 화장실 표시 없음", "no toilets on the map", "地図にトイレの表示なし", "地图上无卫生间标记"));
+          out.push(L(`주변 ${R}m 지도(미확인)`, `Map within ${R} m (unverified)`, `周辺${R}mの地図(未確認)`, `周边${R}米地图(未核实)`) + ": " + bits.join(sep));
+        }
+        return `• ${nmK(p)} — ${out.join(" / ")}`;
+      });
+      const tail = L("지도 자료는 빠진 계단·화장실이 있을 수 있어요. 장소 카드의 '3D로 보기'에서 위치를 보고, 중요한 방문은 시설에 전화로 확인하세요.", "Map data may miss some stairs or toilets. Check locations with '3D view' on the place card and call ahead for important visits.", "地図データには抜けがあるかもしれません。カードの「3Dで見る」で位置を確認し、大事な訪問は施設に電話で確認してください。", "地图数据可能遗漏部分台阶或卫生间。请在卡片的“3D查看”中确认位置，重要出行请提前致电确认。");
+      const guarantee = GUIDE_TOPICS.find((x) => x.kind === "walk")?.answers[lang] || "";
+      return info("access", `${mentioned.length ? "" : dayLabel + " · "}${lines.join("\n")}\n${tail}${guarantee ? "\n" + guarantee : ""}`);
+    }
+  }
+
   // General guidance never invents current prices, availability or access guarantees.
   const topic = GUIDE_TOPICS.find(t => t.match.test(question));
   if (topic) return info(topic.kind, topic.answers[lang] || topic.answers.ko);

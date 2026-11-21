@@ -842,6 +842,7 @@ function itemHTML(it, i, day) {
         ${crowdLine(p, trip.days[dayIdx].date)}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
+        ${p.noticeKnownUntil && trip.days[dayIdx].date > p.noticeKnownUntil ? `<div class="alert warn">${t("매달 휴장일을 따로 공지하는 곳이에요 · 앱에는 {d}까지의 공지만 있어요. 출발 전 공식 공지를 확인하세요", { d: p.noticeKnownUntil.slice(5).replace("-", ".") })}${p.noticeUrl ? ` <a href="${esc(p.noticeUrl)}" target="_blank" rel="noopener">${t("공식 홈페이지")}</a>` : ""}</div>` : ""}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       </div>
       <div class="acts place-acts">
@@ -1056,7 +1057,7 @@ function accessLine(p) {
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
-  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
+  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${p.access.stepsWarn ? `<span class="acc-steps">⚠️ ${t("공식 조사: 계단 있음")} — ${esc(p.access.stepsWarn)}</span>` : ""}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
     ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
 }
 
@@ -2210,7 +2211,7 @@ async function runGuide(question, shown) {
   const currentDay = dayIdx, requestLang = getLang();
   const history = guideHistory.map(({q,a})=>({q,a}));
   if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000));
-  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history};
+  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history, walkInfo};
   bubble("me", shown);
   const wait = bubble("ai pending", t("생각 중"));
   const module = await localAI();
@@ -2771,6 +2772,18 @@ renderStartRow();
 fetchT("api/shops?region=gangneung", {}, 3000)
   .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); Acct.sync().then((x) => x && renderSaved()).catch(() => {}); } })
   .catch(() => {});
+
+// 아이폰·아이패드(사파리)에서는 앱스토어 앱 대신 '홈 화면에 추가'로 설치한다 → 처음 한 번 방법을 알려 준다 (닫으면 다시 안 보임)
+(() => {
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone || matchMedia?.("(display-mode: standalone)").matches;
+  if (!ios || standalone || window.OhneulApp || store.get("iosTipDone")) return;
+  const bar = document.createElement("div");
+  bar.className = "ios-tip"; bar.setAttribute("role", "note");
+  bar.innerHTML = `<img src="apple-touch-icon.png" alt="" width="40" height="40"><p><b>${t("아이폰에 앱처럼 설치하기")}</b><span>${t("사파리 아래쪽 공유 버튼(□↑) → '홈 화면에 추가'를 누르면 앱처럼 열리고, 인터넷이 약해도 볼 수 있어요.")}</span></p><button type="button" class="ghost small" aria-label="${t("닫기")}">✕</button>`;
+  bar.querySelector("button").addEventListener("click", () => { store.set("iosTipDone", true); bar.remove(); });
+  setTimeout(() => document.body.append(bar), 2500);
+})();
 
 // 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다
 if ("serviceWorker" in navigator) {

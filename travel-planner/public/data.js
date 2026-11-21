@@ -2,6 +2,7 @@ import { EXTRA_PLACES } from "./extra-places.js";
 import { MORE_PLACES } from "./places-more.js";
 import { PET_OK, PET_PLACES } from "./pet-places.js";
 import { ACCESS } from "./access-data.js";
+import { stepsOf } from "./access-steps.js";
 // 강릉 장소 데이터 (운영정보 확인: 2026년 11월)
 // hours: [열림, 닫힘], lastEntry: 입장·주문 마감, breaks: 브레이크타임 목록
 // closed: 정기 휴무 요일 (0=일 ... 6=토)
@@ -214,7 +215,7 @@ const CHUNCHEON = [
   { id: "nangman", souvenir: "춘천 닭갈비", name: "춘천 낭만시장", alias: ["춘천 중앙시장"], cat: "food", area: "cc_city", lat: 37.8810, lng: 127.7270, hours: ["09:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "춘천중앙시장", desc: "옛 중앙시장 먹거리" },
   { id: "dongsong", name: "철원 동송 식당가", photoAt: "동송전통시장", cat: "food", area: "cheorwon", lat: 38.2100, lng: 127.2120, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "동송읍", desc: "철원 오대쌀 밥집" },
   { id: "hwacheon-food", name: "화천읍 식당가", photoAt: "화천시장", cat: "food", area: "hwacheon", lat: 38.1060, lng: 127.7050, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["senior"], wiki: "화천읍", desc: "어죽·막국수" },
-  { id: "samak-cable", risk: ["wind"], name: "삼악산 호수케이블카", cat: "nature", area: "cc_city", lat: 37.8650, lng: 127.6920, hours: ["09:00", "18:00"], lastEntry: "17:00", closed: [], closedRanges: [["2026-11-24", "2026-11-25"]], /* 공식 홈페이지 "26년 11월 휴장안내"(2026-10-29) */ stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "삼악산", desc: "의암호 위를 지나는 3.6km 케이블카" },
+  { id: "samak-cable", risk: ["wind"], name: "삼악산 호수케이블카", cat: "nature", area: "cc_city", lat: 37.8650, lng: 127.6920, hours: ["09:00", "18:00"], lastEntry: "17:00", closed: [], closedRanges: [["2026-11-24", "2026-11-25"]], noticeKnownUntil: "2026-11-30", /* 공식 홈페이지 "26년 11월 휴장안내"(2026-10-29). 매달 휴장 공지 → noticeKnownUntil 뒤 날짜에는 카드에 "출발 전 휴장 공지 확인" */ stay: 60, indoor: true, walk: 1, pop: 3, tags: ["kids", "senior"], wiki: "삼악산", desc: "의암호 위를 지나는 3.6km 케이블카" },
   { id: "labor-party", name: "철원 노동당사", cat: "culture", area: "cheorwon", lat: 38.2552, lng: 127.2020, hours: ["00:00", "23:59"], closed: [], stay: 25, indoor: false, walk: 1, pop: 2, tags: ["senior"], wiki: "철원 노동당사", desc: "전쟁의 흔적이 남은 건물" },
   { id: "jiktang", name: "직탕폭포", cat: "nature", area: "cheorwon", lat: 38.2097, lng: 127.2659, hours: ["06:00", "19:00"], closed: [], stay: 25, indoor: false, walk: 1, pop: 1, tags: ["senior"], wiki: "직탕폭포", desc: "한국의 나이아가라" },
   { id: "gangchon", souvenir: "춘천 닭갈비", name: "강촌 닭갈비 식당가", photoAt: "강촌유원지", cat: "food", area: "nami", lat: 37.8130, lng: 127.6340, hours: ["10:00", "20:00"], multi: true, closed: [], stay: 50, indoor: true, walk: 1, pop: 1, tags: ["kids", "senior"], wiki: "강촌역", desc: "남이섬 가는 길 닭갈비·막국수" },
@@ -280,7 +281,11 @@ export const PLACES = [
 // 강원 반려동물 동반 시설 목록에 있는 장소 (scripts/bake-pet.mjs)
 for (const p of PLACES) if (PET_OK.includes(p.id)) p.pet = true;
 // 무장애 편의시설 (scripts/bake-access.mjs, 한국관광공사 무장애 여행 정보)
-for (const p of PLACES) if (ACCESS[p.id]) p.access = ACCESS[p.id];
+// 원문에 "주출입구는 계단" 같은 말이 있으면 계단 주의(stepsWarn)를 붙이고, 대체 길이 없다고 읽히면 '경사로·턱 없음'을 빼고 휠체어 일정에서 뺀다(stepsBlock)
+for (const p of PLACES) if (ACCESS[p.id]) {
+  const st = stepsOf(ACCESS[p.id].text);
+  p.access = st ? { ...ACCESS[p.id], stepsWarn: st.warn, ...(st.block ? { stepsBlock: true, ramp: false } : {}) } : ACCESS[p.id];
+}
 
 // 강원 축제
 // confirmed: 날짜가 발표된 축제 → 기간 중 같은 권역 여행이면 일정에 자동 포함

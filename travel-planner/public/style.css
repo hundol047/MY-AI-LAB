@@ -998,3 +998,8 @@ dialog.welcome .linkish, .lock-box .linkish, .acct .linkish { background: none; 
 .acct-vme { display: grid; gap: 8px; }
 .acct-vme #vin { display: grid; gap: 8px; }
 .acct-vme #vin[hidden] { display: none; }
+.acc-steps { display: block; margin-top: 4px; padding: 6px 9px; border-radius: 8px; background: color-mix(in srgb, var(--warn, #d92d20) 12%, transparent); color: var(--text); font-weight: 700; }
+.ios-tip { position: fixed; left: 12px; right: 12px; bottom: calc(12px + env(safe-area-inset-bottom)); z-index: 900; display: flex; align-items: center; gap: 10px; padding: 10px 10px 10px 12px; border-radius: 14px; background: var(--surface); color: var(--text); border: 1px solid var(--line); box-shadow: 0 8px 30px rgba(0,0,0,.2); max-width: 520px; margin: 0 auto; }
+.ios-tip img { border-radius: 9px; flex: none; }
+.ios-tip p { margin: 0; flex: 1; font-size: 13px; line-height: 1.4; }
+.ios-tip b { display: block; font-size: 14px; }
