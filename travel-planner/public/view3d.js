@@ -6,7 +6,8 @@
 // 지형: AWS 공개 고도 자료, 건물: OpenFreeMap, 위성 사진: Esri World Imagery, 지도: OpenStreetMap
 const TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const SATELLITE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-import { indoorRoute } from "./access-steps.js";
+import { indoorRoute, statusOf, INDOOR_ORDER } from "./access-steps.js";
+const WEB_ICON = { ...Object.fromEntries(INDOOR_ORDER), 기타: "📄" };
 import { baseLayers, baseLayerIds, OFM_URL, OFM_ATTR } from "./basemap.js";
 import { walkSummary, ratioLabel, slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear } from "./view3d-data.js";
 const NEAR_KM = 2;       // 이 안에 있으면 "현장"으로 보고 바로 따라간다
@@ -46,7 +47,8 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, koName?, lat, lng, access?, walk?, lang?, photos?: () => Promise<[{url, credit}]> } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
+ * place: { name, koName?, lat, lng, access?, walk?, lang?, photos?: () => Promise<[{url, credit}]>, web?: [{k, text, url, src, date}], webAt? }
+ *   web: 공식 조사가 없는 곳을 공식 누리집에서 찾아 옮긴 안내(access-web.json) — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise, shared?: { voter } }
  */
@@ -391,7 +393,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       <h4>🚪 ${t("실내 길 안내")} <em class="ok">${t("공식")}</em></h4>
       ${route.length ? `<p class="v3d-note">${t("한국관광공사 무장애 조사에 적힌 내용을 들어가는 순서대로 놓았어요. 실제 건물 배치도는 아니고, 조사에 없는 것은 넣지 않았어요.")}</p>
         <ol class="v3d-route"><li class="v3d-go" aria-hidden="true"><span class="v3d-walker">🧑‍🦽</span> ${t("출발")}</li>${tiles}<li class="v3d-go" aria-hidden="true">🏁 ${t("도착")}</li></ol>`
-      : `<p class="v3d-note"><b>${t("이 장소는 공식 실내 조사가 없어요.")}</b> ${t("아래 사진으로 입구와 실내를 확인하고, 계단·엘리베이터는 시설에 전화로 물어보세요.")}</p>`}
+      : (place.web || []).length ? "" : `<p class="v3d-note"><b>${t("이 장소는 공식 실내 조사가 없어요.")}</b> ${t("아래 사진으로 입구와 실내를 확인하고, 계단·엘리베이터는 시설에 전화로 물어보세요.")}</p>`}
+      ${(place.web || []).length ? `<h4>🔎 ${t("공식 누리집에서 찾은 안내")} <em class="b-info">${t("웹 조사")}</em></h4>
+        <p class="v3d-note">${t("공식 누리집·공공기관 자료의 문장을 그대로 옮겼어요 ({d} 확인). 찾지 못한 것은 넣지 않았어요. 출처를 눌러 원문을 확인할 수 있어요.", { d: escH(place.webAt || "") })}</p>
+        <ol class="v3d-route">${place.web.map((r) => { const stt = statusOf(r.text); return `<li class="v3d-stop s-${stt}"><span class="v3d-stop-ic" aria-hidden="true">${WEB_ICON[r.k] || "📄"}</span><div><b>${t(r.k)} <em class="b-${stt}">${ST[stt][0]} ${t(ST[stt][1])}</em></b><p lang="ko">${escH(r.text)}</p><a class="v3d-src" href="${escH(r.url)}" target="_blank" rel="noopener">${t("출처")}: ${escH(r.src || new URL(r.url).hostname)}${r.date ? ` · ${escH(r.date)}` : ""} ↗</a></div></li>`; }).join("")}</ol>` : ""}
       <h4>📷 ${t("사진으로 보기")}</h4>
       <div class="v3d-photos" id="v3dPhotos"><p class="v3d-note">${t("사진을 불러오는 중…")}</p></div>
       <div class="v3d-links">

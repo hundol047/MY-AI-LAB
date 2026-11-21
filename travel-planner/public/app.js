@@ -13,6 +13,7 @@ import { openView3D, closeView3D } from "./view3d.js";
 import { initPrivacy } from "./privacy-lock.js";
 import * as Acct from "./account-client.js";
 import { baseLayers, GLYPHS, OFM_URL, OFM_ATTR } from "./basemap.js";
+import { statusOf } from "./access-steps.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -1053,7 +1054,7 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
@@ -2151,6 +2152,14 @@ $("#timeline").addEventListener("click", (e) => {
   toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
 });
 
+// 공식 누리집에서 찾은 무장애 안내 (access-web.json, scripts/build-access-web.mjs): 관광공사 조사가 없는 관광지용. 원문 인용 + 출처
+let accessWeb = null;
+fetchT("access-web.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { accessWeb = j?.places ? j : null; if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); }).catch(() => {});
+function accessWebLine(p) {
+  const w = accessWeb?.places?.[p.id]; if (!w?.length) return "";
+  const bad = w.filter((x) => ["no", "part"].includes(statusOf(x.text)));
+  return `<span class="acc-web">🔎 ${t("공식 누리집 안내 {n}건", { n: w.length })} <em>${t("웹 조사")}</em>${bad.length ? ` · ⚠️ ${esc(bad[0].text)}` : ""} · ${t("'3D로 보기 → 실내·사진'에서 출처와 함께 볼 수 있어요")}</span>`;
+}
 // 장소 사진 여러 장: 관광공사 추가 사진(gallery.json, scripts/bake-gallery.mjs)이 있으면 그것, 없으면 카드에 쓰는 대표 사진 한 장
 let galleryData;
 async function placePhotos(p) {
@@ -2166,7 +2175,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
+  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {
