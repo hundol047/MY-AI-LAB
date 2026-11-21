@@ -6,8 +6,17 @@
 // 지형: AWS 공개 고도 자료, 건물: OpenFreeMap, 위성 사진: Esri World Imagery, 지도: OpenStreetMap
 const TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const SATELLITE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+import { slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear } from "./view3d-data.js";
 const NEAR_KM = 2;       // 이 안에 있으면 "현장"으로 보고 바로 따라간다
 const ORBIT_DEG_S = 5;   // 둘러보기 속도 (초당 도)
+const EXAG = 1.3;        // 지형을 조금 과장해 보여 준다 (경사 계산에서는 다시 나눈다)
+const PATH_FILTER = ["all", ["==", ["get", "class"], "path"], ["!=", ["get", "subclass"], "steps"]];
+const STEPS_FILTER = ["all", ["==", ["get", "class"], "path"], ["==", ["get", "subclass"], "steps"]];
+export const SLOPE_COLORS = ["#16a34a", "#f59e0b", "#d92d20"];
+const MARK_M = 700;      // 관광지에서 이 거리 안의 계단·화장실에만 표시를 붙인다
+const MAX_MARKS = 40;
+let toiletsData; // 공식 화장실 자료 (toilets.json). 없으면 null
+const loadToilets = () => (toiletsData !== undefined ? Promise.resolve(toiletsData) : fetch("toilets.json").then((r) => (r.ok ? r.json() : null)).catch(() => null).then((j) => (toiletsData = j?.items?.length ? j : null)));
 
 export function distKm(a, b) {
   const R = 6371, rad = Math.PI / 180;
@@ -34,7 +43,7 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, lat, lng, desc? }
+ * place: { name, lat, lng, access? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise }
  */
 export async function openView3D(place, { t, toast, loadMapLibre }) {
@@ -55,16 +64,24 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
       <button type="button" class="v3d-btn" data-act="orbit" aria-pressed="true"></button>
       <button type="button" class="v3d-btn" data-act="base" aria-pressed="true"></button>
       <button type="button" class="v3d-btn" data-act="home"></button>
+      <button type="button" class="v3d-btn" data-act="pin"></button>
+      <button type="button" class="v3d-btn" data-act="legend" aria-expanded="false"></button>
     </div>
+    <div class="v3d-sheet" data-sheet="legend" hidden></div>
+    <div class="v3d-sheet" data-sheet="pin" hidden></div>
+    <div class="v3d-cross" hidden>＋</div>
+    <p class="v3d-warn"></p>
     <p class="v3d-hint"></p>`;
   el.querySelector(".v3d-title b").textContent = place.name;
   el.querySelector(".v3d-hint").textContent = t("한 손가락으로 움직이고, 두 손가락으로 기울이거나 돌려요");
+  el.querySelector(".v3d-warn").textContent = t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 지도에 빠진 곳이 있을 수 있어요");
   document.body.append(el);
   document.body.classList.add("v3d-open");
   const q = (act) => el.querySelector(`[data-act="${act}"]`);
   const distEl = el.querySelector(".v3d-dist");
 
   const state = { following: false, orbit: true, satellite: true, watch: null, me: null, meMarker: null, heading: null, compass: null, raf: 0, last: 0, wake: null, lastTurn: 0, closed: false };
+  let walkTimer = 0, walkSig = "";
   const me = { stop() {}, el };
   open = me;
   el.querySelector(".v3d-close").addEventListener("click", closeView3D);
@@ -79,12 +96,15 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     q("orbit").setAttribute("aria-pressed", String(state.orbit));
     q("base").textContent = state.satellite ? t("🗺 지도로") : t("🛰 위성 사진으로");
     q("home").textContent = t("🎯 관광지로");
+    q("pin").textContent = t("📌 현장 확인 남기기");
+    q("legend").textContent = t("ℹ️ 표시 설명");
   };
   paint();
 
   me.stop = () => {
     state.closed = true;
     cancelAnimationFrame(state.raf);
+    clearTimeout(walkTimer);
     if (state.watch != null) navigator.geolocation.clearWatch(state.watch);
     window.removeEventListener("deviceorientationabsolute", onCompass);
     window.removeEventListener("deviceorientation", onCompass);
@@ -109,12 +129,20 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
           dem: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           ofm: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenFreeMap © OpenMapTiles" },
+          slope: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
         },
         layers: [
           { id: "bg", type: "background", paint: { "background-color": "#dfe8e2" } },
           { id: "osm", type: "raster", source: "osm", layout: { visibility: "none" } },
           { id: "sat", type: "raster", source: "sat" },
           { id: "hillshade", type: "hillshade", source: "hill", layout: { visibility: "none" }, paint: { "hillshade-exaggeration": 0.35, "hillshade-shadow-color": "#3a4a40" } },
+          // 걷는 길(오픈스트리트맵, 미확인): 흰 테두리 + 회색 점선. 경사를 계산한 구간은 그 위에 색으로 덮는다
+          { id: "paths-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": 6, "line-opacity": 0.85 } },
+          { id: "paths", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, paint: { "line-color": "#6b7280", "line-width": 3, "line-dasharray": [1.5, 1.5] } },
+          { id: "slope", type: "line", source: "slope", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-width": 4, "line-color": ["match", ["get", "g"], 0, SLOPE_COLORS[0], 1, SLOPE_COLORS[1], 2, SLOPE_COLORS[2], "#6b7280"] } },
+          // 계단(오픈스트리트맵, 미확인): 굵은 빨간 줄무늬
+          { id: "steps-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#ffffff", "line-width": 11 } },
+          { id: "steps", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#d92d20", "line-width": 7, "line-dasharray": [0.35, 0.35] } },
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
               "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#efe9dc", 30, "#ddd3c0", 100, "#c6baa4"],
@@ -123,7 +151,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
               "fill-extrusion-opacity": 0.8,
             } },
         ],
-        terrain: { source: "dem", exaggeration: 1.3 },
+        terrain: { source: "dem", exaggeration: EXAG },
         sky: { "sky-color": "#9fd0ee", "horizon-color": "#e6f2f8", "fog-color": "#e6f2f8", "sky-horizon-blend": 0.6, "horizon-fog-blend": 0.5, "fog-ground-blend": 0.2, "atmosphere-blend": 0.6 },
       },
     });
@@ -132,6 +160,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   map.on("error", (e) => console.warn("3D", e?.error?.message || e));
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right"); // 아래쪽 버튼을 가리지 않게 위로
+  map.once("idle", () => el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show")); // 처음엔 접어 둔다 (ⓘ를 누르면 펼쳐짐)
 
   // 관광지 표시: 이름표가 달린 핀
   const pin = document.createElement("div");
@@ -139,6 +168,109 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   pin.innerHTML = "<span></span><i></i>";
   pin.querySelector("span").textContent = place.name;
   new maplibregl.Marker({ element: pin, anchor: "bottom" }).setLngLat(center).addTo(map);
+
+  // ---------- 걷기 정보: 계단·화장실 표시, 산책로 경사 ----------
+  const here = [place.lng, place.lat];
+  const chip = (cls, text, title) => { const d = document.createElement("div"); d.className = `v3d-chip ${cls}`; d.textContent = text; if (title) d.title = title; return d; };
+  let marks = [], pinMarks = [], official = null, found = { steps: 0, toilets: 0, paths: 0, slope: false };
+  const elevAt = (lng, lat) => { try { const z = map.queryTerrainElevation([lng, lat]); return z == null ? null : z / EXAG; } catch { return null; } };
+  function refreshWalkInfo() {
+    if (state.closed || map.getZoom() < 14) return;
+    let tr = [], poi = [];
+    try { tr = map.querySourceFeatures("ofm", { sourceLayer: "transportation", filter: ["==", ["get", "class"], "path"] }); poi = map.querySourceFeatures("ofm", { sourceLayer: "poi", filter: ["==", ["get", "class"], "toilets"] }); } catch { return; }
+    const lines = (f) => (f.geometry.type === "MultiLineString" ? f.geometry.coordinates : f.geometry.type === "LineString" ? [f.geometry.coordinates] : []);
+    // 계단: 가운데 점에 "계단" 표시
+    const steps = dedupe(tr.filter((f) => f.properties.subclass === "steps").flatMap((f) => lines(f).map((c) => ({ at: lineMid(c) }))).filter((x) => distM(x.at, here) <= MARK_M), 12);
+    // 화장실: 공식 자료가 있으면 먼저, 그 30m 안의 오픈스트리트맵 화장실은 같은 곳으로 본다
+    const off = toiletsNear(official, here, MARK_M).map((x) => ({ at: [x.lng, x.lat], official: true, acc: !!x.acc, name: x.name, open: x.open }));
+    const osm = dedupe(poi.map((f) => ({ at: f.geometry.coordinates, name: f.properties.name })).filter((x) => distM(x.at, here) <= MARK_M), 20).filter((x) => !off.some((o) => distM(o.at, x.at) < 30));
+    // 산책로 경사: 지형 고도(약 30m 간격)로 어림. 높이를 못 읽은 구간은 회색 점선 그대로 둔다
+    const feats = [];
+    let nPaths = 0;
+    for (const f of tr) {
+      if (f.properties.subclass === "steps") continue;
+      for (const c of lines(f)) {
+        if (distM(lineMid(c), here) > MARK_M * 1.5) continue;
+        nPaths++;
+        if (feats.length > 1500) break;
+        for (const sg of slopeSegments(c, elevAt)) if (sg.g >= 0) feats.push({ type: "Feature", properties: { g: sg.g }, geometry: { type: "LineString", coordinates: sg.coords } });
+      }
+    }
+    // 바뀐 것이 없으면 다시 그리지 않는다 (다시 그리면 지도가 또 '그리기 끝'을 알려 와 되풀이된다)
+    const sig = [steps.length, off.length, osm.length, nPaths, feats.length].join("|");
+    if (sig === walkSig) return;
+    walkSig = sig;
+    marks.forEach((m) => m.remove());
+    const near = (list) => list.sort((a, b) => distM(a.at, here) - distM(b.at, here)).slice(0, MAX_MARKS);
+    marks = [
+      ...near(steps).map((x) => new maplibregl.Marker({ element: chip("steps", t("계단"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+    ];
+    map.getSource("slope")?.setData({ type: "FeatureCollection", features: feats });
+    found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, slope: feats.length > 0 };
+    drawLegend();
+  }
+  const queueWalk = () => { clearTimeout(walkTimer); walkTimer = setTimeout(refreshWalkInfo, 500); };
+  map.on("idle", queueWalk);
+  loadToilets().then((j) => { official = j; queueWalk(); });
+
+  // 표시 설명: 무엇이 공식이고 무엇이 미확인인지, 이 장소에서 찾은 개수
+  const legendEl = el.querySelector('[data-sheet="legend"]'), pinEl = el.querySelector('[data-sheet="pin"]'), cross = el.querySelector(".v3d-cross");
+  const escH = (x) => String(x ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  function drawLegend() {
+    const acc = Object.entries(place.access || {}).map(([k, v]) => `<li><b>${escH(k)}</b> ${escH(v)}</li>`).join("");
+    legendEl.innerHTML = `
+      <button type="button" class="v3d-sheet-close" aria-label="${t("닫기")}">✕</button>
+      <h4>${t("표시 설명")}</h4>
+      <ul class="v3d-legend">
+        <li><i class="ln" style="background:${SLOPE_COLORS[0]}"></i>${t("완만한 길 (경사 1/18 이하)")}</li>
+        <li><i class="ln" style="background:${SLOPE_COLORS[1]}"></i>${t("조금 가파른 길 (1/12 이하 · 밀어 줄 사람 필요)")}</li>
+        <li><i class="ln" style="background:${SLOPE_COLORS[2]}"></i>${t("가파른 길 (1/12 넘음 · 휠체어·보행기 어려움)")}</li>
+        <li><i class="ln dash"></i>${t("경사를 모르는 길")}</li>
+        <li><i class="ln steps"></i>${t("계단")} <em>${t("미확인")}</em></li>
+        <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
+        <li><span class="v3d-chip toilet">🚻?</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
+        <li><span class="v3d-chip mine">📌</span>${t("내가 현장에서 확인한 곳")}</li>
+      </ul>
+      <p class="v3d-count">${t("이 주변 지도 자료: 계단 {s}곳 · 화장실 {w}곳 · 걷는 길 {p}개", { s: found.steps, w: found.toilets, p: found.paths })}${official ? "" : ` · ${t("공식 화장실 자료는 아직 없어요")}`}</p>
+      <p class="v3d-note">${t("길·계단·'화장실?'은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
+      ${acc ? `<h4>${t("한국관광공사 무장애 조사")} <em class="ok">${t("공식")}</em></h4><ul class="v3d-acc">${acc}</ul>` : `<p class="v3d-note">${t("이 장소는 한국관광공사 무장애 조사 자료가 없어요.")}</p>`}`;
+  }
+  drawLegend();
+  const showSheet = (which) => {
+    legendEl.hidden = which !== "legend"; pinEl.hidden = which !== "pin";
+    cross.hidden = which !== "pin" || (state.following && !!state.me);
+    q("legend").setAttribute("aria-expanded", String(which === "legend"));
+  };
+  el.addEventListener("click", (e) => { if (e.target.closest(".v3d-sheet-close")) showSheet(null); });
+  q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
+
+  // 현장 확인 남기기: 따라가는 중이면 내 위치에, 아니면 화면 가운데(＋)에 표시를 남긴다. 이 기기에만 저장한다
+  let pins = loadPins();
+  function drawPins() {
+    pinMarks.forEach((m) => m.remove());
+    pinMarks = pins.filter((p) => distM([p.lng, p.lat], here) <= 3000).map((p) => {
+      const d = chip("mine", `${PIN_KINDS[p.kind].icon} ${t(PIN_KINDS[p.kind].ko)}`, `${t("내가 확인")} · ${p.date}`);
+      d.addEventListener("click", () => { if (confirm(t("이 표시를 지울까요?"))) { pins = pins.filter((x) => x !== p); savePins(pins); drawPins(); } });
+      return new maplibregl.Marker({ element: d, anchor: "bottom" }).setLngLat([p.lng, p.lat]).addTo(map);
+    });
+  }
+  drawPins();
+  q("pin").addEventListener("click", () => {
+    if (!pinEl.hidden) return showSheet(null);
+    const atMe = state.following && state.me;
+    pinEl.innerHTML = `<button type="button" class="v3d-sheet-close" aria-label="${t("닫기")}">✕</button><h4>${t("현장 확인 남기기")}</h4><p class="v3d-note">${atMe ? t("지금 내 위치에 남겨요.") : t("화면 가운데 ＋ 자리에 남겨요. 지도를 움직여 맞추세요.")} ${t("이 기기에만 저장돼요.")}</p>
+      <div class="v3d-pinbtns">${Object.entries(PIN_KINDS).map(([k, v]) => `<button type="button" class="v3d-btn" data-kind="${k}">${v.icon} ${t(v.ko)}</button>`).join("")}</div>`;
+    showSheet("pin");
+  });
+  pinEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-kind]"); if (!b) return;
+    const c = state.following && state.me ? state.me : { lat: map.getCenter().lat, lng: map.getCenter().lng };
+    pins.push({ kind: b.dataset.kind, lat: +c.lat.toFixed(6), lng: +c.lng.toFixed(6), date: new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) });
+    savePins(pins); drawPins(); showSheet(null);
+    toast(t("남겼어요 · 표시를 누르면 지울 수 있어요"));
+  });
 
   // ---------- 둘러보기: 장소 둘레를 천천히 돈다. 손을 대면 멈춘다 ----------
   const stopOrbit = () => { if (state.orbit) { state.orbit = false; paint(); } };

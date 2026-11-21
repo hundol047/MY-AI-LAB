@@ -887,3 +887,26 @@ body.v3d-open { overflow: hidden; }
 .v3d-me i { display: none; position: absolute; left: 50%; top: -16px; margin-left: -9px; border: 9px solid transparent; border-top: 0; border-bottom: 16px solid #2563eb; filter: drop-shadow(0 0 2px #fff); }
 .v3d-me.has-heading i { display: block; }
 .v3d .maplibregl-ctrl-top-right { top: calc(62px + env(safe-area-inset-top)); }
+/* 3D 걷기 정보: 계단·화장실 표시, 표시 설명, 현장 확인 */
+.v3d-chip { padding: 3px 8px; border-radius: 999px; background: #fff; color: #111; font-size: 12px; font-weight: 800; white-space: nowrap; border: 2px dashed #6b7280; box-shadow: 0 1px 5px rgba(0,0,0,.45); }
+.v3d-chip.steps { background: #d92d20; color: #fff; border-color: #fff; }
+.v3d-chip.toilet.official { border: 2px solid #1d4ed8; background: #1d4ed8; color: #fff; }
+.v3d-chip.mine { border: 2px solid #111; background: #fde047; cursor: pointer; }
+.v3d-warn { position: absolute; left: 10px; right: 64px; top: calc(66px + env(safe-area-inset-top)); margin: 0; padding: 6px 10px; border-radius: 10px; background: rgba(17,24,39,.78); color: #fff; font-size: 12px; line-height: 1.35; pointer-events: none; }
+.v3d .maplibregl-ctrl-top-right { top: calc(112px + env(safe-area-inset-top)); }
+.v3d-sheet { position: absolute; z-index: 5; left: 10px; right: 10px; bottom: calc(10px + env(safe-area-inset-bottom)); max-height: 70vh; overflow: auto; padding: 12px 14px; border-radius: 14px; background: rgba(255,255,255,.97); color: #111; box-shadow: 0 6px 24px rgba(0,0,0,.4); font-size: 14px; line-height: 1.45; }
+.v3d-sheet h4 { margin: 0 0 8px; font-size: 15px; }
+.v3d-sheet ul { margin: 0 0 8px; padding: 0; list-style: none; }
+.v3d-legend li { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+.v3d-legend .ln { flex: none; width: 34px; height: 6px; border-radius: 3px; }
+.v3d-legend .ln.dash { height: 0; border-top: 3px dashed #6b7280; border-radius: 0; }
+.v3d-legend .ln.steps { height: 8px; background: repeating-linear-gradient(90deg, #d92d20 0 4px, #fff 4px 8px); }
+.v3d-sheet em { font-style: normal; font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: #e5e7eb; color: #374151; }
+.v3d-sheet em.ok { background: #1d4ed8; color: #fff; }
+.v3d-note, .v3d-count { margin: 6px 0; font-size: 13px; color: #374151; }
+.v3d-count { font-weight: 700; color: #111; }
+.v3d-acc li { padding: 2px 0; font-size: 13px; }
+.v3d-pinbtns { display: flex; flex-wrap: wrap; gap: 6px; }
+.v3d-pinbtns .v3d-btn { background: #f3f4f6; box-shadow: none; border: 1px solid #d1d5db; }
+.v3d-cross { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); color: #fde047; font-size: 34px; font-weight: 900; text-shadow: 0 0 4px #000, 0 0 2px #000; pointer-events: none; }
+.v3d-sheet-close { float: right; width: 44px; height: 44px; margin: -6px -8px 0 8px; border: 0; border-radius: 50%; background: #f3f4f6; color: #111; font-size: 16px; font-weight: 800; cursor: pointer; }
