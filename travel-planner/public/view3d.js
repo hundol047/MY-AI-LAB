@@ -13,6 +13,7 @@ const EXAG = 1.3;        // 지형을 조금 과장해 보여 준다 (경사 계
 const PATH_FILTER = ["all", ["==", ["get", "class"], "path"], ["!=", ["get", "subclass"], "steps"]];
 const STEPS_FILTER = ["all", ["==", ["get", "class"], "path"], ["==", ["get", "subclass"], "steps"]];
 export const SLOPE_COLORS = ["#16a34a", "#f59e0b", "#d92d20"];
+const SUM_M = 400;       // 요약(경사 비율)은 장소 카드와 같은 둘레 400m의 길만 센다
 const MARK_M = 700;      // 관광지에서 이 거리 안의 계단·화장실에만 표시를 붙인다
 const MAX_MARKS = 40;
 let toiletsData; // 공식 화장실 자료 (toilets.json). 없으면 null
@@ -43,7 +44,8 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, lat, lng, access? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
+ * place: { name, lat, lng, access?, walk? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
+ *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise }
  */
 export async function openView3D(place, { t, toast, loadMapLibre }) {
@@ -84,7 +86,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   const distEl = el.querySelector(".v3d-dist");
 
   const state = { following: false, orbit: true, satellite: true, watch: null, me: null, meMarker: null, heading: null, compass: null, raf: 0, last: 0, wake: null, lastTurn: 0, closed: false };
-  let walkTimer = 0, walkSig = "";
+  let walkTimer = 0, walkSig = "", walkPoll = 0;
   const me = { stop() {}, el };
   open = me;
   el.querySelector(".v3d-close").addEventListener("click", closeView3D);
@@ -108,7 +110,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   me.stop = () => {
     state.closed = true;
     cancelAnimationFrame(state.raf);
-    clearTimeout(walkTimer);
+    clearTimeout(walkTimer); clearInterval(walkPoll);
     if (state.watch != null) navigator.geolocation.clearWatch(state.watch);
     window.removeEventListener("deviceorientationabsolute", onCompass);
     window.removeEventListener("deviceorientation", onCompass);
@@ -172,7 +174,8 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   map.on("error", (e) => console.warn("3D", e?.error?.message || e));
   map.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
   map.addControl(new maplibregl.AttributionControl({ compact: true }), "top-right"); // 아래쪽 버튼을 가리지 않게 위로
-  map.once("idle", () => el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show")); // 처음엔 접어 둔다 (ⓘ를 누르면 펼쳐짐)
+  // 출처는 처음 4초만 펼쳐 보이고 접는다 (ⓘ를 누르면 다시 펼쳐짐). 요약 칸을 가리지 않게
+  setTimeout(() => el.querySelector(".maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"), 4000);
 
   // 들어가기: 멀리 위에서 내려다보다가 관광지로 내려앉는다 → 그 뒤 둘러보기 시작. 손을 대면 바로 멈춘다
   let intro = true;
@@ -193,7 +196,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   const here = [place.lng, place.lat];
   const chip = (cls, text, title) => { const d = document.createElement("div"); d.className = `v3d-chip ${cls}`; d.textContent = text; if (title) d.title = title; return d; };
   let lastToilets = [], wcIdx = -1;
-  let marks = [], pinMarks = [], official = null, found = { steps: 0, toilets: 0, paths: 0, unpaved: 0, sum: null };
+  let marks = [], pinMarks = [], official = null, found = { steps: 0, toilets: 0, paths: 0, sumPaths: 0, unpaved: 0, sum: null };
   // 높이 0.5m 이하(바다·물 위로 읽힌 칸)는 '모름'으로 둔다: 해안 절벽·물가 데크는 30m 지형 자료가 바다 높이로 뭉개져 경사가 엉뚱하게 나온다
   const elevAt = (lng, lat) => { try { const z = map.queryTerrainElevation([lng, lat]); return z == null || z / EXAG <= 0.5 ? null : z / EXAG; } catch { return null; } };
   function refreshWalkInfo() {
@@ -208,15 +211,17 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     const osm = dedupe(poi.map((f) => ({ at: f.geometry.coordinates, name: f.properties.name })).filter((x) => distM(x.at, here) <= MARK_M), 20).filter((x) => !off.some((o) => distM(o.at, x.at) < 30));
     // 산책로 경사: 지형 고도(약 30m 간격)로 어림. 높이를 못 읽은 구간은 회색 점선 그대로 둔다
     const feats = [], segs = [];
-    let nPaths = 0, unpaved = 0;
+    let nPaths = 0, nSum = 0, unpaved = 0;
     for (const f of tr) {
       if (f.properties.subclass === "steps") continue;
       for (const c of lines(f)) {
         if (distM(lineMid(c), here) > MARK_M * 1.5) continue;
         nPaths++;
-        if (f.properties.surface === "unpaved") unpaved++;
+        if (f.properties.surface === "unpaved" && c.some((q) => distM(q, here) <= SUM_M)) unpaved++;
         if (feats.length > 1500) break;
-        for (const sg of slopeSegments(c, elevAt)) { segs.push(sg); if (sg.g >= 0) feats.push({ type: "Feature", properties: { g: sg.g, pct: sg.pct }, geometry: { type: "LineString", coordinates: sg.coords } }); }
+        const inSum = c.some((q) => distM(q, here) <= SUM_M);
+        if (inSum) nSum++;
+        for (const sg of slopeSegments(c, elevAt)) { if (inSum) segs.push(sg); if (sg.g >= 0) feats.push({ type: "Feature", properties: { g: sg.g, pct: sg.pct }, geometry: { type: "LineString", coordinates: sg.coords } }); }
       }
     }
     // 바뀐 것이 없으면 다시 그리지 않는다 (다시 그리면 지도가 또 '그리기 끝'을 알려 와 되풀이된다)
@@ -235,21 +240,23 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
       ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?") + dTxt(x), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
     map.getSource("slope")?.setData({ type: "FeatureCollection", features: feats });
-    found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, unpaved, sum };
+    found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, sumPaths: nSum, unpaved, sum };
     drawLegend(); drawSummary();
   }
   // 한눈에 보는 요약 (화면 위): 경사 비율 막대 + 계단·화장실·흙길 개수. 자료가 없으면 없다고 말한다
   const sumEl = el.querySelector(".v3d-sum-main");
   function drawSummary() {
-    const sh = found.sum?.share;
+    const w = place.walk;
+    const sh = w ? w.sh : found.sum?.share;
+    const nSteps = w ? w.st : found.steps, nWc = w ? w.wc : found.toilets;
     const bits = [
-      found.steps ? t("계단 {n}곳", { n: found.steps }) : t("계단 표시 없음"),
-      found.toilets ? t("화장실 {n}곳", { n: found.toilets }) : t("화장실 표시 없음"),
-      ...(found.unpaved ? [t("흙·자갈길 있음")] : []),
+      nSteps ? t("계단 {n}곳", { n: nSteps }) : t("계단 표시 없음"),
+      nWc ? t("화장실 {n}곳", { n: nWc }) : t("화장실 표시 없음"),
+      ...((w ? w.unp : found.unpaved) ? [t("흙·자갈길 있음")] : []),
     ];
-    sumEl.innerHTML = (!found.paths ? `<b>${t("이 주변은 걷는 길 지도 자료가 없어요 · 현장 확인이 필요해요")}</b>`
+    sumEl.innerHTML = (!(w ? w.n : found.sumPaths) ? `<b>${t("주변 {r}m에 걷는 길 지도 자료가 없어요 · 현장 확인이 필요해요", { r: SUM_M })}</b>`
       : sh ? `<div class="v3d-barline" role="img" aria-label="${t("완만 {a}% · 조금 가파름 {b}% · 가파름 {c}%", { a: sh[0], b: sh[1], c: sh[2] })}">${sh.map((v, i) => (v ? `<i style="flex:${v};background:${SLOPE_COLORS[i]}"></i>` : "")).join("")}</div>
-         <b>${t("걷는 길: 완만 {a}% · 조금 가파름 {b}% · 가파름 {c}%", { a: sh[0], b: sh[1], c: sh[2] })}</b>`
+         <b>${t("주변 {r}m 걷는 길: 완만 {a}% · 조금 가파름 {b}% · 가파름 {c}%", { r: SUM_M, a: sh[0], b: sh[1], c: sh[2] })}</b>`
       : `<b>${t("걷는 길의 경사를 아직 모르겠어요")}</b>`) + `<span class="v3d-bits">${bits.join(" · ")}</span>`;
   }
   // 길을 누르면 그 구간의 경사를 알려 준다
@@ -260,6 +267,10 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
       .setHTML(`<b>${t(GRADE_NAME[f.properties.g])}</b> · ${f.properties.pct > 20 ? t("경사 20% 넘음 (1/5보다 가파름)") : t("경사 약 {p}% ({r})", { p: Math.round(f.properties.pct), r: ratioLabel(f.properties.pct) })}<br><small>${t("지형 자료로 어림한 값")}</small>`).addTo(map);
   });
   map.on("click", "steps", (e) => new maplibregl.Popup({ closeButton: false, offset: 10, className: "v3d-pop" }).setLngLat(e.lngLat).setHTML(`<b>${t("계단")}</b><br><small>${t("오픈스트리트맵 자료 · 미확인")}</small>`).addTo(map));
+  if (place.walk) drawSummary(); else sumEl.innerHTML = `<b>${t("걷기 정보를 살펴보는 중…")}</b>`;
+  // 지도가 '그리기 끝'을 늦게 알려 오는 기기가 있어, 첫 결과가 나올 때까지는 4초마다 직접 살펴본다 (최대 2분)
+  let walkTries = 0;
+  walkPoll = setInterval(() => { if (state.closed || walkSig || ++walkTries > 30) return clearInterval(walkPoll); refreshWalkInfo(); }, 4000);
   const queueWalk = () => { clearTimeout(walkTimer); walkTimer = setTimeout(refreshWalkInfo, 500); };
   map.on("idle", queueWalk);
   loadToilets().then((j) => { official = j; queueWalk(); });

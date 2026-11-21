@@ -2138,7 +2138,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text }, { t, toast, loadMapLibre });
+  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id] }, { t, toast, loadMapLibre });
 });
 
 $("#quick").addEventListener("click", (e) => {
