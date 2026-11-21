@@ -9,13 +9,15 @@ cd "$(dirname "$0")"
 : "${ANDROID_HOME:?ANDROID_HOME(안드로이드 SDK 경로)이 필요합니다}"
 BT="$ANDROID_HOME/build-tools/$(ls "$ANDROID_HOME/build-tools" | sort -V | tail -1)"
 PLATFORM="$ANDROID_HOME/platforms/$(ls "$ANDROID_HOME/platforms" | grep -E '^android-[0-9]+$' | sort -V | tail -1)/android.jar"
+# targetSdk보다 낮은 플랫폼으로는 새 API(뒤로 가기·화면 가장자리)를 컴파일할 수 없다
+[ "$(basename "$(dirname "$PLATFORM")" | tr -dc 0-9)" -ge 36 ] || { echo "android-36 이상 플랫폼이 필요합니다: sdkmanager \"platforms;android-36\""; exit 1; }
 echo "build-tools: $BT"
 echo "platform:    $PLATFORM"
 
 VERSION_CODE=${VERSION_CODE:-$(git rev-list --count HEAD 2>/dev/null || echo 1)}
 VERSION_NAME=${VERSION_NAME:-1.0.$VERSION_CODE}
 B=build OUT=dist
-TARGET_SDK=35 # Google Play 새 앱·업데이트 요건 (안드로이드 15)
+TARGET_SDK=36 # Google Play 새 앱·업데이트 요건 (2026년 8월 31일부터 안드로이드 16 = API 36)
 rm -rf "$B" && mkdir -p "$B/classes" "$B/dex" "$B/assets/www" "$OUT"
 
 echo "1) 자바 → 클래스"

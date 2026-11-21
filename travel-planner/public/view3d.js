@@ -6,6 +6,7 @@
 // 지형: AWS 공개 고도 자료, 건물: OpenFreeMap, 위성 사진: Esri World Imagery, 지도: OpenStreetMap
 const TERRAIN = "https://s3.amazonaws.com/elevation-tiles-prod/terrarium/{z}/{x}/{y}.png";
 const SATELLITE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+import { baseLayers, baseLayerIds, OFM_URL, OFM_ATTR } from "./basemap.js";
 import { walkSummary, ratioLabel, slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear } from "./view3d-data.js";
 const NEAR_KM = 2;       // 이 안에 있으면 "현장"으로 보고 바로 따라간다
 const ORBIT_DEG_S = 5;   // 둘러보기 속도 (초당 도)
@@ -44,7 +45,7 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, lat, lng, access?, walk? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
+ * place: { name, lat, lng, access?, walk?, lang? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise }
  */
@@ -132,15 +133,14 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
         glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
         sources: {
           sat: { type: "raster", tiles: [SATELLITE], tileSize: 256, maxzoom: 18, attribution: "위성 사진: Esri, Maxar, Earthstar Geographics" },
-          osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" },
           dem: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
-          ofm: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenFreeMap © OpenMapTiles" },
+          ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
           slope: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
         },
         layers: [
           { id: "bg", type: "background", paint: { "background-color": "#dfe8e2" } },
-          { id: "osm", type: "raster", source: "osm", layout: { visibility: "none" } },
+          ...baseLayers({ lang: place.lang || "ko", visible: false }), // '지도' 모드 바탕 (위성 사진일 때는 숨김)
           { id: "sat", type: "raster", source: "sat" },
           { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.18, "hillshade-shadow-color": "#1f2a24" } }, // 위성 사진 위에서는 옅게(굴곡만 살린다), 지도에서는 진하게
           // 걷는 길(오픈스트리트맵, 미확인): 흰 테두리 + 회색 점선. 경사를 계산한 구간은 그 위에 색으로 덮는다
@@ -453,7 +453,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   q("base").addEventListener("click", () => {
     state.satellite = !state.satellite;
     map.setLayoutProperty("sat", "visibility", state.satellite ? "visible" : "none");
-    map.setLayoutProperty("osm", "visibility", state.satellite ? "none" : "visible");
+    for (const id of baseLayerIds()) map.setLayoutProperty(id, "visibility", state.satellite ? "none" : "visible");
     map.setPaintProperty("hillshade", "hillshade-exaggeration", state.satellite ? 0.18 : 0.4);
     for (const id of ["road-label", "poi-label"]) { map.setPaintProperty(id, "text-color", state.satellite ? "#ffffff" : "#1f2937"); map.setPaintProperty(id, "text-halo-color", state.satellite ? "rgba(0,0,0,.8)" : "rgba(255,255,255,.9)"); }
     paint();

@@ -9,7 +9,8 @@ import { todayStatus, kstNow, reminderList } from "./today.js";
 import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
-import { openView3D } from "./view3d.js";
+import { openView3D, closeView3D } from "./view3d.js";
+import { baseLayers, GLYPHS, OFM_URL, OFM_ATTR } from "./basemap.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -1959,16 +1960,17 @@ function drawMap3D(day) {
       locale: { "CooperativeGesturesHandler.WindowsHelpText": t("Ctrl 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MacHelpText": t("⌘ 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MobileHelpText": t("두 손가락으로 지도를 움직여요 · 크게 보기를 누르면 한 손가락으로") },
       style: {
         version: 8,
+        glyphs: GLYPHS,
         sources: {
-          osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" },
           dem: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           // 3D 건물: OpenFreeMap(무료, 키 없음)의 OpenMapTiles 벡터 지도 building 층 (render_height·render_min_height, m)
-          ofm: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenFreeMap © OpenMapTiles" },
+          // 바탕 지도·3D 건물: OpenFreeMap(무료, 키 없음, 앱 배포 허용)의 OpenMapTiles 벡터 지도 (basemap.js)
+          ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
         },
         layers: [
-          { id: "osm", type: "raster", source: "osm" },
-          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.35, "hillshade-shadow-color": "#3a4a40" } },
+          ...baseLayers({ lang: getLang(), dark: document.documentElement.dataset.theme === "dark" || (document.documentElement.dataset.theme !== "light" && !!window.matchMedia?.("(prefers-color-scheme: dark)").matches) }),
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.3, "hillshade-shadow-color": "#3a4a40" } },
           // 시내를 가까이 볼 때(13~) 건물이 솟아오른다. 높이가 없는 건물은 2층(6m)으로 본다
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
@@ -1983,6 +1985,7 @@ function drawMap3D(day) {
       },
     });
     ml.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    setTimeout(() => document.querySelector("#map .maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"), 4000); // 출처는 잠깐 보이고 접힘 (ⓘ로 다시)
     ml.addControl({ onAdd: () => locateButton((ll) => { ml.flyTo({ center: [ll[1], ll[0]], zoom: 14 }); return new maplibregl.Marker({ color: "#2563eb" }).setLngLat([ll[1], ll[0]]).addTo(ml); }), onRemove() {} }, "bottom-right");
     // 건물 자료를 못 받아도(오프라인 등) 지형 지도는 그대로 보인다
     ml.on("error", (e) => console.warn("지도", e?.error?.message || e));
@@ -2091,6 +2094,14 @@ function setMapFull(on) {
   track(on ? "map_full" : "map_full_close");
 }
 $("#mapInteract").addEventListener("click", () => setMapFull(!mapFull));
+// 휴대폰 '뒤로 가기'(안드로이드 앱이 부름): 열린 것부터 닫는다. 닫았으면 true
+window.__appBack = () => {
+  if (document.querySelector(".v3d")) { closeView3D(); return true; }
+  const dlg = [...document.querySelectorAll("dialog[open]")].pop();
+  if (dlg) { dlg.close(); return true; }
+  if (mapFull) { setMapFull(false); return true; }
+  return false;
+};
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && mapFull) setMapFull(false); });
 // 내 위치 버튼 (3D·2D 공통). mark(ll): 지도에 표시하고 그 표시를 돌려준다
 let meMarker = null;
@@ -2138,7 +2149,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id] }, { t, toast, loadMapLibre });
+  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre });
 });
 
 $("#quick").addEventListener("click", (e) => {
