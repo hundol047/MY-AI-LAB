@@ -21,6 +21,8 @@ export function createServices(file, { pii = createPII() } = {}) {
     CREATE TABLE IF NOT EXISTS access_reports(place TEXT NOT NULL, voter TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, PRIMARY KEY(place,voter,kind));
     CREATE TABLE IF NOT EXISTS votes(trip TEXT NOT NULL, place TEXT NOT NULL, voter TEXT NOT NULL, vote INTEGER NOT NULL, at TEXT NOT NULL, PRIMARY KEY(trip,place,voter));
     CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY, secret TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS access_pins(cell TEXT NOT NULL, kind TEXT NOT NULL, voter TEXT NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL, at TEXT NOT NULL, PRIMARY KEY(cell,kind,voter));
+    CREATE INDEX IF NOT EXISTS access_pins_pos ON access_pins(lat, lng);
     CREATE TABLE IF NOT EXISTS shops(id TEXT PRIMARY KEY, state TEXT NOT NULL, fingerprint TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS push_subscriptions(booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, PRIMARY KEY(booking,endpoint));
     CREATE TABLE IF NOT EXISTS push_outbox(id TEXT PRIMARY KEY, booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, nextAt INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0);`);
@@ -202,6 +204,23 @@ export function createServices(file, { pii = createPII() } = {}) {
         db.prepare('INSERT INTO access_reports VALUES(?,?,?,?) ON CONFLICT(place,voter,kind) DO UPDATE SET at=excluded.at').run(body.place, body.voter, body.kind, new Date().toISOString());
       } else db.prepare('DELETE FROM access_reports WHERE place=? AND voter=? AND kind=?').run(body.place, body.voter, body.kind);
       return { ok: true };
+    },
+    // 3D 화면 현장 확인 표시(계단·경사로·화장실): 위치는 약 11m 칸(소수 넷째 자리)으로 묶어 저장하고, 보여 줄 때는 칸·종류별 기기 수만 준다(기기 번호는 주지 않음)
+    accessPin(body) {
+      const KINDS = ['steps', 'ramp', 'toilet', 'atoilet'];
+      const lat = Number(body.lat), lng = Number(body.lng);
+      if (typeof body.voter !== 'string' || !/^[a-z0-9]{8,32}$/.test(body.voter) || !KINDS.includes(body.kind) || !(lat > 36.9 && lat < 38.7 && lng > 127 && lng < 129.5)) fail(400,'표시 내용을 확인하세요.');
+      const cell = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+      if (body.on === false) { db.prepare('DELETE FROM access_pins WHERE cell=? AND kind=? AND voter=?').run(cell, body.kind, body.voter); return { ok: true }; }
+      if (db.prepare("SELECT COUNT(*) n FROM access_pins WHERE voter=? AND at>=?").get(body.voter, new Date(Date.now() - 864e5).toISOString()).n >= 30) fail(429,'오늘은 표시를 너무 많이 남겼어요.');
+      db.prepare('INSERT INTO access_pins VALUES(?,?,?,?,?,?) ON CONFLICT(cell,kind,voter) DO UPDATE SET at=excluded.at').run(cell, body.kind, body.voter, Number(lat.toFixed(4)), Number(lng.toFixed(4)), new Date().toISOString());
+      return { ok: true };
+    },
+    accessPins(bbox) {
+      const [w, so, e, n] = String(bbox || '').split(',').map(Number);
+      if (![w, so, e, n].every(Number.isFinite) || e - w > 0.05 || n - so > 0.05 || e <= w || n <= so) fail(400,'범위를 확인하세요.');
+      const since = new Date(Date.now() - 730 * 864e5).toISOString();
+      return db.prepare('SELECT lat, lng, kind, COUNT(*) n FROM access_pins WHERE at>=? AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? GROUP BY cell, kind ORDER BY n DESC LIMIT 300').all(since, so, n, w, e);
     },
     accessReports(places) {
       const ids = [...new Set(places)].filter((x) => typeof x === 'string' && x && x.length <= 100).slice(0, 200);

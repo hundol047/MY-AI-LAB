@@ -107,8 +107,10 @@ function cjkTokens(name) {
   partCount ??= (() => { const m = new Map(); for (const p of PLACES) for (const x of new Set([...cjkParts(NAMES_JA[p.id]), ...cjkParts(NAMES_ZH[p.id])])) m.set(x, (m.get(x) || 0) + 1); return m; })();
   const base = name.replace(/[（(].*?[)）]/g, "");
   return [base, base.replace(CITY_CJK, ""), base.replace(/^カフェ[・\s]?/, ""), base.replace(/(の遊歩道|遊歩道|の道|環湖步道|环湖步道|步道|散歩道|湖水公園|湖水公园)$/, ""), ...cjkParts(name).filter((x) => partCount.get(x) === 1)]
-    .map((x) => x.replace(/[\s・·]/g, "").toLowerCase()).filter((x) => x.length >= 3 || /^[\u4e00-\u9fff]{2}$/.test(x));
+    .map((x) => x.replace(/[\s・·]/g, "").toLowerCase()).filter((x) => (x.length >= 3 || /^[\u4e00-\u9fff]{2}$/.test(x)) && !GENERIC_CJK.has(x));
 }
+// 가게 이름 조각이라도 그 자체가 일반 낱말이면 장소로 보지 않는다 ("コーヒーが飲みたい"는 'コーヒー ウンソクシ'가 아니라 카페 추천)
+const GENERIC_CJK = new Set(["コーヒー", "カフェ", "ベーカリー", "レストラン", "マーケット", "咖啡", "咖啡馆", "咖啡厅", "面包店", "餐厅", "市场", "市場"]);
 
 function findPlaces(norm, regions, namesEn, question = "") {
   const en = enTokens(namesEn);

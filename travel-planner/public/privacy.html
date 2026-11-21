@@ -53,6 +53,7 @@
   <tr><td>정보 오류 제보</td><td>장소, 제보 종류, 메모 (개인정보 받지 않음)</td><td>정보 수정에 사용</td></tr>
   <tr><td>무장애 현장 확인</td><td>장소, 확인 종류(계단·턱 있음 / 휠체어로 다닐 만함 / 장애인 화장실 없음), 기기마다 만든 무작위 번호 (개인정보 아님)</td><td>장소별 숫자로만 보여 주고, 2년 지난 기록은 세지 않음</td></tr>
   <tr><td>말로 일정 만들기의 AI 해석 (Claude, 운영자가 켠 경우에만)</td><td>입력하거나 말한 문장 (보내기 전에 전화번호·카드번호·주민등록번호·이메일·승인번호를 가림). 영수증·사진·위치는 보내지 않음</td><td>운영자 서버에 저장하지 않음. 해석을 위해 Anthropic(미국)에 전달되며, Anthropic의 상업 서비스 정책에 따라 처리됨. 꺼져 있거나 인터넷이 없으면 기기 안에서만 해석</td></tr>
+  <tr><td>장소 3D 화면의 현장 확인 표시 (계단·경사로·화장실)</td><td>표시 위치(약 11m 칸으로 묶음), 종류, 기기마다 만든 무작위 번호 (개인정보 아님, 언제·어디서 찍었는지는 보관하지 않고 남긴 날짜만)</td><td>다른 이용자에게는 칸·종류별 개수만 보임(기기 번호는 보이지 않음). 2년 지난 표시는 세지 않음. 내 표시를 누르면 지워짐</td></tr>
   <tr><td>같이 고르기(👍👎)</td><td>일정 키, 장소, 기기마다 만든 무작위 번호 (개인정보 아님)</td><td>180일 뒤 삭제</td></tr>
   <tr><td>계정 (로그인·가입, 선택)</td><td>이메일(데이터베이스에는 AES-256-GCM 암호문과 찾기용 HMAC 값으로만 저장), 비밀번호에서 기기 안에서 만든 확인값(비밀번호 자체는 보내지 않음, 서버는 이를 다시 scrypt로 감싸 저장), 저장한 일정·설정을 <b>기기 안에서 암호화한 것</b>(AES-256-GCM, 운영자는 열 수 없음), 가입·수정 시각, 로그인 세션(쿠키, 30일)</td><td>탈퇴하면 즉시 삭제. 위치·영수증·정산 서류는 계정에 올리지 않음. 비밀번호와 복구 코드를 모두 잃으면 운영자도 일정을 되찾을 수 없음</td></tr>
   <tr><td>다른 기기로 옮기기(6자리 코드)</td><td>저장한 일정</td><td>서버 메모리에 10분, 한 번 받으면 즉시 삭제 (디스크에 남기지 않음)</td></tr>
@@ -118,6 +119,7 @@
   <li>Place reports: place, report type and note (no personal data).</li>
   <li>Accessibility field reports: place, report type (steps/ledge, wheelchair-friendly, no accessible restroom) and a random per-device ID; shown only as counts, entries older than 2 years are not counted.</li>
   <li>AI understanding for "plan by voice" (Claude, only if the operator turns it on): the sentence you typed or said, with phone, card, resident registration numbers, emails and approval numbers masked first. Receipts, photos and location are never sent. Not stored on our server; passed to Anthropic (USA) for processing under its commercial terms. When off or offline, everything is understood on your device.</li>
+  <li>3D on-site notes (stairs, ramps, toilets): the spot rounded to about 11 m, the type and a random per-device ID; others only see counts per spot and type; notes older than 2 years are not counted; tap your note to delete it.</li>
   <li>Group voting (👍👎): plan key, place and a random per-device ID; deleted after 180 days.</li>
   <li>Account (sign-in, optional): your email, a check value derived on your device from your password (the password itself is never sent; the server wraps it again with scrypt), your saved plans and settings <b>encrypted on your device</b> (AES-256-GCM — the operator cannot open them), sign-up/update times and a login session cookie (30 days). Deleted immediately when you delete the account (Settings → Privacy → Account, or <code>account.html#delete</code>). Location, receipts and claim documents are never uploaded. If you lose both your password and recovery code, nobody can recover your plans.</li>
   <li>Encryption at rest: names and contacts in booking requests, account emails, report reasons and notes are stored encrypted with AES-256-GCM; the key is kept separately from the database and backups. Emails are looked up only by an HMAC value.</li>

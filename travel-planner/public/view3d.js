@@ -47,9 +47,10 @@ export function closeView3D() {
 /**
  * place: { name, lat, lng, access?, walk?, lang? } — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
- * deps: { t(문구), toast(msg), loadMapLibre() → Promise }
+ * deps: { t(문구), toast(msg), loadMapLibre() → Promise, shared?: { voter } }
  */
-export async function openView3D(place, { t, toast, loadMapLibre }) {
+export async function openView3D(place, { t, toast, loadMapLibre, shared = null }) {
+  // shared: { voter } — 앱 서버가 있을 때만. 현장 확인 표시를 무작위 기기 번호로 공유하고, 다른 이용자의 확인을 '👥 n명'으로 보여 준다
   closeView3D();
   const el = document.createElement("div");
   el.className = "v3d";
@@ -126,6 +127,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
   const center = [place.lng, place.lat];
   try {
     map = new maplibregl.Map({
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 고해상도 폰에서 3배로 그리면 느려지고 뜨거워진다 → 2배까지만
       container: el.querySelector(".v3d-map"), center, zoom: 13.6, pitch: 25, bearing: -50, maxPitch: 80, minZoom: 8, maxZoom: 19.5,
       attributionControl: false, boxZoom: false,
       style: {
@@ -293,6 +295,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
         <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
         <li><span class="v3d-chip toilet">🚻?</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip mine">📌</span>${t("내가 현장에서 확인한 곳")}</li>
+        ${shared ? `<li><span class="v3d-chip crowd">👥</span>${t("다른 이용자들이 현장에서 남긴 확인 (미확인)")}</li>` : ""}
       </ul>
       <p class="v3d-count">${t("이 주변 지도 자료: 계단 {s}곳 · 화장실 {w}곳 · 걷는 길 {p}개", { s: found.steps, w: found.toilets, p: found.paths })}${official ? "" : ` · ${t("공식 화장실 자료는 아직 없어요")}`}</p>
       <p class="v3d-note">${t("길·계단·'화장실?'은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
@@ -325,15 +328,36 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     pinMarks.forEach((m) => m.remove());
     pinMarks = pins.filter((p) => distM([p.lng, p.lat], here) <= 3000).map((p) => {
       const d = chip("mine", `${PIN_KINDS[p.kind].icon} ${t(PIN_KINDS[p.kind].ko)}`, `${t("내가 확인")} · ${p.date}`);
-      d.addEventListener("click", () => { if (confirm(t("이 표시를 지울까요?"))) { pins = pins.filter((x) => x !== p); savePins(pins); drawPins(); } });
+      d.addEventListener("click", () => { if (confirm(t("이 표시를 지울까요?"))) { pins = pins.filter((x) => x !== p); savePins(pins); drawPins(); sendPin(p, false); } });
       return new maplibregl.Marker({ element: d, anchor: "bottom" }).setLngLat([p.lng, p.lat]).addTo(map);
     });
   }
   drawPins();
+  // 다른 이용자의 확인 (서버가 있을 때): 보이는 범위의 칸·종류별 기기 수. 내 표시와 같은 칸은 내 표시가 덮는다
+  let crowdMarks = [], crowdTimer = 0, crowdKey = "";
+  function sendPin(p, on) {
+    if (!shared?.voter) return;
+    fetch("api/access-pins", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ lat: p.lat, lng: p.lng, kind: p.kind, voter: shared.voter, on }) })
+      .then((r) => { if (r.ok) { crowdKey = ""; loadCrowd(); } }).catch(() => {});
+  }
+  async function loadCrowd() {
+    if (!shared || state.closed || map.getZoom() < 15) return;
+    const b = map.getBounds(), c = map.getCenter(), half = 0.024;
+    const box = [Math.max(b.getWest(), c.lng - half), Math.max(b.getSouth(), c.lat - half), Math.min(b.getEast(), c.lng + half), Math.min(b.getNorth(), c.lat + half)].map((x) => x.toFixed(4)).join(",");
+    if (box === crowdKey) return; crowdKey = box;
+    const rows = await fetch(`api/access-pins?bbox=${box}`).then((r) => (r.ok ? r.json() : [])).catch(() => []);
+    if (state.closed) return;
+    crowdMarks.forEach((m) => m.remove());
+    crowdMarks = rows.filter((r) => PIN_KINDS[r.kind] && !pins.some((p) => p.kind === r.kind && p.lat.toFixed(4) === r.lat.toFixed(4) && p.lng.toFixed(4) === r.lng.toFixed(4) && r.n === 1)).map((r) => {
+      const d = chip("crowd", `👥 ${PIN_KINDS[r.kind].icon} ${t(PIN_KINDS[r.kind].ko)} · ${t("{n}명", { n: r.n })}`, t("다른 이용자들이 현장에서 남긴 확인 (미확인)"));
+      return new maplibregl.Marker({ element: d, anchor: "bottom" }).setLngLat([r.lng, r.lat]).addTo(map);
+    });
+  }
+  if (shared) map.on("idle", () => { clearTimeout(crowdTimer); crowdTimer = setTimeout(loadCrowd, 600); });
   q("pin").addEventListener("click", () => {
     if (!pinEl.hidden) return showSheet(null);
     const atMe = state.following && state.me;
-    pinEl.innerHTML = `<button type="button" class="v3d-sheet-close" aria-label="${t("닫기")}">✕</button><h4>${t("현장 확인 남기기")}</h4><p class="v3d-note">${atMe ? t("지금 내 위치에 남겨요.") : t("화면 가운데 ＋ 자리에 남겨요. 지도를 움직여 맞추세요.")} ${t("이 기기에만 저장돼요.")}</p>
+    pinEl.innerHTML = `<button type="button" class="v3d-sheet-close" aria-label="${t("닫기")}">✕</button><h4>${t("현장 확인 남기기")}</h4><p class="v3d-note">${atMe ? t("지금 내 위치에 남겨요.") : t("화면 가운데 ＋ 자리에 남겨요. 지도를 움직여 맞추세요.")} ${shared ? t("이 기기에 저장하고, 표시 위치(약 10m 단위)와 종류만 무작위 번호로 공유해 다른 이용자에게 보여요.") : t("이 기기에만 저장돼요.")}</p>
       <div class="v3d-pinbtns">${Object.entries(PIN_KINDS).map(([k, v]) => `<button type="button" class="v3d-btn" data-kind="${k}">${v.icon} ${t(v.ko)}</button>`).join("")}</div>`;
     showSheet("pin");
   });
@@ -341,7 +365,7 @@ export async function openView3D(place, { t, toast, loadMapLibre }) {
     const b = e.target.closest("[data-kind]"); if (!b) return;
     const c = state.following && state.me ? state.me : { lat: map.getCenter().lat, lng: map.getCenter().lng };
     pins.push({ kind: b.dataset.kind, lat: +c.lat.toFixed(6), lng: +c.lng.toFixed(6), date: new Date(Date.now() + 9 * 3600e3).toISOString().slice(0, 10) });
-    savePins(pins); drawPins(); showSheet(null);
+    savePins(pins); drawPins(); showSheet(null); sendPin(pins.at(-1), true);
     toast(t("남겼어요 · 표시를 누르면 지울 수 있어요"));
   });
 

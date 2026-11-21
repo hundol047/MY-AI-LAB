@@ -1,4 +1,4 @@
-import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
+import { recommendBooking, bookingPeople, bookingScope, AFFILIATE } from "./booking-links.js";
 import { planTrip, swapItem, replanFromNow, setBus, setAccessAvoid, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
@@ -231,7 +231,7 @@ function renderOptions() {
   if (!state.baseOpts) { box.hidden = true; return; }
   const list = optionsFor(state.input, state.baseOpts);
   box.hidden = false;
-  box.innerHTML = `<h3>${t("일정 3개 중에서 고르세요")}</h3><p class="why">${esc(whyText())}</p>
+  box.innerHTML = `<h2 class="opt-title">${t("일정 3개 중에서 고르세요")}</h2><p class="why">${esc(whyText())}</p>
     <div class="opt-list">${list.map((o) => `<button type="button" class="opt${state.choice === o.key ? " on" : ""}" data-opt="${o.key}">
       <b>${t(OPT_NAME[o.key])}</b><span class="opt-sub">${t(OPT_SUB[o.key])}</span>
       <span class="opt-stats">${t("{n}곳 · 이동 {m} · 걷기 {km}km", { n: o.places, m: minutesLabel(o.totals.moveMin), km: o.totals.walkKm })}</span>
@@ -354,7 +354,7 @@ async function renderOptCourses() {
   const top = rankCourses(list, inp, acc, state.opts.course).slice(0, 3);
   const cur = state.opts.course && list.find((c) => c.id === state.opts.course);
   box.innerHTML = (cur ? `<p class="c-now">${t("추천 코스 \"{name}\"로 짰어요 · 여행 날짜의 운영시간에 맞춰 다시 확인했어요", { name: esc(courseTitle(cur)) })}</p>` : "")
-    + (top.length ? `<h4>${t("조건에 맞는 추천 코스 3개")}</h4><div class="course-list">${top.map(courseCard).join("")}</div>` : "");
+    + (top.length ? `<h3 class="h4">${t("조건에 맞는 추천 코스 3개")}</h3><div class="course-list">${top.map(courseCard).join("")}</div>` : "");
 }
 document.addEventListener("click", async (e) => {
   const b = e.target.closest("[data-course]"); if (!b) return;
@@ -1410,7 +1410,7 @@ function priceLinks(query, compact = false) {
   // 숙소 목록의 각 줄은 예약 버튼만 (다른 플랫폼·요금 비교는 아래 큰 버튼에서 한 번만)
   if (compact) return `<div class="booking-choice">${main}</div>`;
   return `<div class="booking-choice">
-    ${main}
+    ${main}${AFFILIATE.on() ? `<small class="affiliate-note">${t("제휴 링크예요 · 예약하면 운영자가 수수료를 받을 수 있지만 가격은 같아요")}</small>` : ""}
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
       `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
     <details><summary>${t("확인한 요금 비교")}</summary>
@@ -1960,6 +1960,7 @@ function drawMap3D(day) {
   if (!day.items.length) return;
   if (!ml) {
     ml = new maplibregl.Map({
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 3배 화면도 2배로 그려 배터리·발열을 줄인다
       container: "map", attributionControl: { compact: true }, pitch: 55, bearing: -12, maxPitch: 75,
       center: [model.line[0][1], model.line[0][0]], zoom: 11,
       // 화면 안에서는 두 손가락(컴퓨터는 Ctrl+휠)으로 움직이고, 한 손가락은 페이지 스크롤 · "크게 보기"에서는 한 손가락으로
@@ -2156,7 +2157,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre });
+  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {

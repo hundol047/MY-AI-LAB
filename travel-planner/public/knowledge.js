@@ -650,6 +650,7 @@ export const EN_PHRASES = [
 
 // 영어로 흔히 부르는 이름 (소문자, 공백 없이). 관광공사 영문 이름과 다른 것만
 export const NICKS_EN = {
+  "jjamppong-tofu": ["jjamppong tofu", "jjamppongtofu", "jjamppong sundubu", "jjamppongsundubu", "spicy tofu"],
   "sea-trail": ["seatrail", "seasidetrail", "cliffwalk", "badabuchae"],
   "anmok-coffee": ["coffeestreet", "anmokcafe"],
   "central-market": ["centralmarket"],
