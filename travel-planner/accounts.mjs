@@ -3,12 +3,16 @@
 // 저장한 일정·설정은 기기에서 암호화된 채로만 오가므로 운영자도 내용을 볼 수 없다. 서버가 아는 것은 이메일과 가입·수정 시각뿐이다.
 // 세션: 무작위 토큰을 HttpOnly·SameSite=Strict 쿠키로 주고, 서버에는 토큰의 SHA-256만 저장한다 (30일).
 // 남용 막기: 한 IP는 1분에 20번, 한 이메일은 로그인 10번 틀리면 15분 잠금. 없는 이메일도 같은 시간이 걸리게 한다.
+// 이메일도 그대로 저장하지 않는다: 찾기용 HMAC 색인 + AES-256-GCM 암호문(pii.mjs). 데이터베이스만 빼 가서는 누가 가입했는지 알 수 없다.
+// 비밀번호 찾기: (1) 복구 코드 — 서버 일정 그대로, (2) 메일 링크(SMTP 설정 시) — 30분·한 번만 쓰는 토큰, 서버 일정은 지우고 그 기기 일정으로 다시 채움(종단간 암호화라 운영자가 풀어 줄 수 없음)
 import { DatabaseSync } from "node:sqlite";
 import { randomBytes, scryptSync, timingSafeEqual, createHash } from "node:crypto";
 import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
+import { createPII } from "./pii.mjs";
+import { createMailer, resetMail } from "./mailer.mjs";
 
-const SESSION_DAYS = 30, MAX_VAULT = 400_000, LOCK_FAILS = 10, LOCK_MIN = 15;
+const SESSION_DAYS = 30, MAX_VAULT = 400_000, LOCK_FAILS = 10, LOCK_MIN = 15, RESET_MIN = 30, RESET_PER_HOUR = 3;
 const sha = (s) => createHash("sha256").update(String(s)).digest("hex");
 const HEX64 = /^[0-9a-f]{64}$/, WRAP = /^[A-Za-z0-9+/=]{16,24}\.[A-Za-z0-9+/=]{40,80}$/, SEALED = /^[A-Za-z0-9+/=]{16,24}\.[A-Za-z0-9+/=]{20,}$/;
 const normEmail = (e) => String(e || "").trim().toLowerCase();
@@ -21,19 +25,28 @@ function checkAuth(auth, stored) {
   return timingSafeEqual(got, Buffer.from(h, "hex")) && !!stored;
 }
 
-export function createAccounts(file, now = () => Date.now()) {
+export function createAccounts(file, { now = () => Date.now(), pii = createPII(), mailer = null, appUrl = "" } = {}) {
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(file);
   db.exec(`PRAGMA journal_mode=WAL; PRAGMA busy_timeout=5000;
-    CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, verifier TEXT NOT NULL, wrapped TEXT NOT NULL,
+    CREATE TABLE IF NOT EXISTS accounts(id TEXT PRIMARY KEY, emailIdx TEXT UNIQUE NOT NULL, emailEnc TEXT NOT NULL, verifier TEXT NOT NULL, wrapped TEXT NOT NULL,
       rverifier TEXT NOT NULL, rwrapped TEXT NOT NULL, vault TEXT, version INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL, updated INTEGER NOT NULL,
       fails INTEGER NOT NULL DEFAULT 0, lockUntil INTEGER NOT NULL DEFAULT 0);
     CREATE TABLE IF NOT EXISTS sessions(hash TEXT PRIMARY KEY, account TEXT NOT NULL, expires INTEGER NOT NULL);
-    CREATE INDEX IF NOT EXISTS sessions_account ON sessions(account);`);
+    CREATE INDEX IF NOT EXISTS sessions_account ON sessions(account);
+    CREATE TABLE IF NOT EXISTS reset_tokens(hash TEXT PRIMARY KEY, account TEXT NOT NULL, expires INTEGER NOT NULL, used INTEGER NOT NULL DEFAULT 0, created INTEGER NOT NULL);`);
+  const idx = (email) => pii.index(`email:${normEmail(email)}`);
   const q = {
-    byEmail: db.prepare("SELECT * FROM accounts WHERE email=?"),
+    byEmailIdx: db.prepare("SELECT * FROM accounts WHERE emailIdx=?"),
     byId: db.prepare("SELECT * FROM accounts WHERE id=?"),
-    insert: db.prepare("INSERT INTO accounts(id,email,verifier,wrapped,rverifier,rwrapped,vault,version,created,updated) VALUES(?,?,?,?,?,?,NULL,0,?,?)"),
+    insert: db.prepare("INSERT INTO accounts(id,emailIdx,emailEnc,verifier,wrapped,rverifier,rwrapped,vault,version,created,updated) VALUES(?,?,?,?,?,?,?,NULL,0,?,?)"),
+    reset: db.prepare("UPDATE accounts SET verifier=?, wrapped=?, rverifier=?, rwrapped=?, vault=NULL, version=version+1, updated=?, fails=0, lockUntil=0 WHERE id=?"),
+    newToken: db.prepare("INSERT INTO reset_tokens(hash,account,expires,created) VALUES(?,?,?,?)"),
+    token: db.prepare("SELECT * FROM reset_tokens WHERE hash=? AND used=0 AND expires>?"),
+    tokensSince: db.prepare("SELECT count(*) n FROM reset_tokens WHERE account=? AND created>?"),
+    useTokens: db.prepare("UPDATE reset_tokens SET used=1 WHERE account=?"),
+    purgeTokens: db.prepare("DELETE FROM reset_tokens WHERE expires<=?"),
+    dropTokens: db.prepare("DELETE FROM reset_tokens WHERE account=?"),
     fails: db.prepare("UPDATE accounts SET fails=?, lockUntil=? WHERE id=?"),
     newSession: db.prepare("INSERT INTO sessions(hash,account,expires) VALUES(?,?,?)"),
     session: db.prepare("SELECT account FROM sessions WHERE hash=? AND expires>?"),
@@ -45,7 +58,8 @@ export function createAccounts(file, now = () => Date.now()) {
     remove: db.prepare("DELETE FROM accounts WHERE id=?"),
   };
   const session = (id) => { const token = randomBytes(32).toString("base64url"); q.newSession.run(sha(token), id, now() + SESSION_DAYS * 864e5); return token; };
-  const view = (a) => ({ email: a.email, wrapped: a.wrapped, vault: a.vault, version: a.version, updated: a.updated });
+  const byEmail = (email) => q.byEmailIdx.get(idx(email));
+  const view = (a) => ({ email: pii.open(a.emailEnc), wrapped: a.wrapped, vault: a.vault, version: a.version, updated: a.updated });
   function verify(a, auth, field = "verifier") {
     if (a && a.lockUntil > now()) throw fail(429, `로그인을 여러 번 틀려 ${LOCK_MIN}분 동안 잠겼어요.`);
     const ok = checkAuth(String(auth || ""), a?.[field]); // 없는 계정도 같은 계산을 한다
@@ -62,13 +76,13 @@ export function createAccounts(file, now = () => Date.now()) {
       const email = normEmail(b.email);
       if (!validEmail(email)) throw fail(400, "이메일 주소를 확인하세요.");
       const auth = need(b, "auth", HEX64), wrapped = need(b, "wrapped", WRAP), rauth = need(b, "recoveryAuth", HEX64), rwrapped = need(b, "recoveryWrapped", WRAP);
-      if (q.byEmail.get(email)) throw fail(409, "이미 가입한 이메일이에요. 로그인해 주세요.");
+      if (byEmail(email)) throw fail(409, "이미 가입한 이메일이에요. 로그인해 주세요.");
       const id = randomBytes(12).toString("hex"), t = now();
-      q.insert.run(id, email, hashAuth(auth), wrapped, hashAuth(rauth), rwrapped, t, t);
+      q.insert.run(id, idx(email), pii.seal(email), hashAuth(auth), wrapped, hashAuth(rauth), rwrapped, t, t);
       return { token: session(id), account: view(q.byId.get(id)) };
     },
     login(b) {
-      const a = q.byEmail.get(normEmail(b.email));
+      const a = byEmail(b.email);
       verify(a, b.auth);
       return { token: session(a.id), account: view(a) };
     },
@@ -94,13 +108,13 @@ export function createAccounts(file, now = () => Date.now()) {
     },
     // 복구 1단계: 복구 코드 확인값이 맞으면 '복구 코드로 감싼 자료 키'를 준다
     recoverStart(b) {
-      const a = q.byEmail.get(normEmail(b.email));
+      const a = byEmail(b.email);
       verify(a, b.recoveryAuth, "rverifier");
       return { recoveryWrapped: a.rwrapped };
     },
     // 복구 2단계: 새 비밀번호로 감싼 자료 키를 저장하고 모든 기기를 로그아웃한 뒤 새로 로그인
     recoverFinish(b) {
-      const a = q.byEmail.get(normEmail(b.email));
+      const a = byEmail(b.email);
       verify(a, b.recoveryAuth, "rverifier");
       q.password.run(hashAuth(need(b, "newAuth", HEX64)), need(b, "newWrapped", WRAP), now(), a.id);
       q.dropSessions.run(a.id);
@@ -109,17 +123,46 @@ export function createAccounts(file, now = () => Date.now()) {
     // 탈퇴: 비밀번호 확인 후 계정·금고·세션을 바로 지운다 (되돌릴 수 없음)
     remove(a, b) {
       verify(a, b.auth);
-      q.dropSessions.run(a.id); q.remove.run(a.id);
+      q.dropSessions.run(a.id); q.dropTokens.run(a.id); q.remove.run(a.id);
       return { deleted: true };
     },
-    purge() { q.purgeSessions.run(now()); },
+    purge() { q.purgeSessions.run(now()); q.purgeTokens.run(now()); },
+    config: () => ({ mailReset: !!(mailer && appUrl) }),
+    // 메일로 비밀번호 찾기 1단계: 있든 없든 같은 응답. 있으면 30분짜리 링크를 보낸다(한 시간에 3번까지). 메일은 응답 뒤에 보내 걸리는 시간으로도 알 수 없게
+    resetRequest(b) {
+      const email = normEmail(b.email);
+      if (!validEmail(email)) throw fail(400, "이메일 주소를 확인하세요.");
+      if (!mailer || !appUrl) throw fail(503, "메일로 비밀번호 찾기를 쓸 수 없어요. 복구 코드를 써 주세요.");
+      const a = byEmail(email);
+      if (!a || q.tokensSince.get(a.id, now() - 3600e3).n >= RESET_PER_HOUR) return { sent: true, job: null };
+      const token = randomBytes(32).toString("base64url");
+      q.newToken.run(sha(token), a.id, now() + RESET_MIN * 6e4, now());
+      const link = `${appUrl.replace(/\/+$/, "")}/account.html#reset=${token}`;
+      const mail = resetMail(["ko", "en", "ja", "zh"].includes(b.lang) ? b.lang : "ko", link);
+      const job = () => mailer.send({ to: pii.open(a.emailEnc), ...mail }).catch(() => console.error("비밀번호 재설정 메일을 보내지 못했습니다 (SMTP 설정 확인)"));
+      return { sent: true, job };
+    },
+    // 2단계: 링크의 토큰이 살아 있으면 이메일을 알려 준다 (새 키를 만들 때 이메일이 소금으로 쓰인다)
+    resetCheck(b) {
+      const r = typeof b.token === "string" && q.token.get(sha(b.token), now());
+      if (!r) throw fail(400, "링크가 만료됐거나 이미 썼어요. 다시 요청해 주세요.");
+      return { email: pii.open(q.byId.get(r.account).emailEnc) };
+    },
+    // 3단계: 새 비밀번호·새 복구 코드로 바꾸고, 열 수 없게 된 서버 금고는 비운다. 모든 기기 로그아웃 후 이 기기만 로그인
+    resetFinish(b) {
+      const r = typeof b.token === "string" && q.token.get(sha(b.token), now());
+      if (!r) throw fail(400, "링크가 만료됐거나 이미 썼어요. 다시 요청해 주세요.");
+      q.reset.run(hashAuth(need(b, "newAuth", HEX64)), need(b, "newWrapped", WRAP), hashAuth(need(b, "recoveryAuth", HEX64)), need(b, "recoveryWrapped", WRAP), now(), r.account);
+      q.useTokens.run(r.account); q.dropSessions.run(r.account);
+      return { token: session(r.account), account: view(q.byId.get(r.account)) };
+    },
   };
 }
 
 // ---------- HTTP: /api/account/... ----------
 const COOKIE = "bopok_s";
-export function accountRoutes({ file }) {
-  const acc = createAccounts(file);
+export function accountRoutes({ file, mailer = createMailer(), appUrl = process.env.PUBLIC_APP_URL || "" }) {
+  const acc = createAccounts(file, { mailer, appUrl });
   const hits = new Map();
   setInterval(() => acc.purge(), 6 * 3600e3).unref?.();
   const reply = (res, status, data, headers = {}) => res.writeHead(status, { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...headers }).end(JSON.stringify(data));
@@ -147,6 +190,10 @@ export function accountRoutes({ file }) {
       const M = `${req.method} ${p}`;
       if (M === "POST /api/account/signup") { const r = acc.signup(await body(req)); return reply(res, 201, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "POST /api/account/login") { const r = acc.login(await body(req)); return reply(res, 200, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
+      if (M === "GET /api/account/config") return reply(res, 200, acc.config()), true;
+      if (M === "POST /api/account/reset/request") { const r = acc.resetRequest(await body(req)); reply(res, 200, { sent: true }); r.job?.(); return true; }
+      if (M === "POST /api/account/reset/check") return reply(res, 200, acc.resetCheck(await body(req))), true;
+      if (M === "POST /api/account/reset/finish") { const r = acc.resetFinish(await body(req)); return reply(res, 200, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "POST /api/account/recover/start") return reply(res, 200, acc.recoverStart(await body(req))), true;
       if (M === "POST /api/account/recover/finish") { const r = acc.recoverFinish(await body(req)); return reply(res, 200, r.account, { "set-cookie": setCookie(req, r.token) }), true; }
       if (M === "POST /api/account/logout") { acc.logout(token); return reply(res, 200, { ok: true }, { "set-cookie": setCookie(req, "") }), true; }

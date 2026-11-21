@@ -987,3 +987,4 @@ dialog.welcome .linkish, .lock-box .linkish, .acct .linkish { background: none; 
 .acct-input .linkish { padding: 0 12px; text-decoration: none; font-size: 13px; }
 .acct > *, .acct-card, .acct-field, .acct-input { min-width: 0; }
 .acct-input input { width: 100%; }
+.acct a:not(.primary):not(.ghost) { color: var(--brand); font-weight: 700; text-underline-offset: 3px; }

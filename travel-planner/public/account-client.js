@@ -1,6 +1,6 @@
 // 계정 (브라우저 쪽): 로그인·가입·복구·동기화. 앱 서버가 있을 때만 쓸 수 있다 (accounts.mjs).
 // 자료 키는 '꺼낼 수 없는 키'로 이 기기 IndexedDB에만 두고, 일정은 이 키로 암호화한 뒤에만 서버로 보낸다.
-import { passwordKeys, recoveryKeys, prepareSignup, unwrapKey, wrapKey, sealJSON, openJSON, mergeVault, normEmail } from "./account-crypto.js";
+import { passwordKeys, recoveryKeys, newRecoveryCode, newDataKey, prepareSignup, unwrapKey, wrapKey, sealJSON, openJSON, mergeVault, normEmail } from "./account-crypto.js";
 
 const DB = "bopok-account", OS = "k";
 function idb(mode, fn) {
@@ -102,6 +102,24 @@ export async function recover(email, code, newPassword) {
   await api("POST", "recover/finish", { email, recoveryAuth: rk.auth, newAuth: pk.auth, newWrapped: wrapped });
   await keep(email, wrapped, pk.wrap);
   return sync();
+}
+/** 메일로 비밀번호 찾기 (서버에 SMTP가 설정된 경우): 있든 없든 같은 응답 */
+export const config = () => api("GET", "config").catch(() => ({ mailReset: false }));
+export const requestReset = (email, lang) => api("POST", "reset/request", { email, lang });
+export const checkReset = (token) => api("POST", "reset/check", { token });
+/**
+ * 메일 링크로 새 비밀번호: 예전 자료 키는 비밀번호·복구 코드 없이는 풀 수 없으므로(종단간 암호화) 새 자료 키·새 복구 코드를 만든다.
+ * 서버 금고는 비워지고, 이 기기에 저장된 일정으로 다시 채운다. 새 복구 코드를 돌려준다.
+ */
+export async function resetWithToken(token, newPassword) {
+  const { email } = await checkReset(token);
+  const pk = await passwordKeys(email, newPassword), code = newRecoveryCode(), rk = await recoveryKeys(email, code);
+  const dataKey = await newDataKey();
+  const wrapped = await wrapKey(dataKey, pk.wrap);
+  await api("POST", "reset/finish", { token, newAuth: pk.auth, newWrapped: wrapped, recoveryAuth: rk.auth, recoveryWrapped: await wrapKey(dataKey, rk.wrap) });
+  await keep(email, wrapped, pk.wrap);
+  await sync();
+  return code;
 }
 export async function changePassword(current, next) {
   const k = await getKey(); if (!k) throw new Error("로그인이 필요해요.");

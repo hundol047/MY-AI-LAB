@@ -49,7 +49,7 @@ const views = {
       ${field("pw", "비밀번호", "password", 'autocomplete="current-password" required')}
       <p class="acct-err" role="alert"></p>
       <button class="primary" type="submit">${t("로그인")}</button>
-      <p class="acct-links"><a href="#" data-go="signup">${t("처음이에요 · 가입하기")}</a> · <a href="#" data-go="recover">${t("비밀번호를 잊었어요")}</a></p>
+      <p class="acct-links"><a href="#" data-go="signup">${t("처음이에요 · 가입하기")}</a> · <a href="#" data-go="forgot">${t("비밀번호를 잊었어요")}</a></p>
       <a class="ghost" href="index.html">${t("계정 없이 계속하기")}</a></form>${PRIVACY()}`;
     const f = $("#f");
     f.addEventListener("submit", (e) => { e.preventDefault(); run(f, async () => {
@@ -96,6 +96,50 @@ const views = {
     $("#dl").onclick = () => { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([`보폭 복구 코드 / Bopok recovery code\n\n${code}\n`], { type: "text/plain" })); a.download = "bopok-recovery-code.txt"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 1000); };
     $("#kept").onchange = (e) => ($("#done").disabled = !e.target.checked);
     $("#done").onclick = () => views.me();
+  },
+  // 비밀번호 찾기: 메일 링크(서버에 메일 설정이 있을 때) 또는 복구 코드
+  async forgot() {
+    const cfg = await A.config();
+    if (!cfg.mailReset) return views.recover();
+    root.innerHTML = `<form class="card acct-card" id="f" novalidate><h2>${t("비밀번호 찾기")}</h2>
+      <p>${t("가입한 이메일로 비밀번호를 다시 정하는 링크를 보내 드려요 (30분 동안 한 번만 쓸 수 있어요).")}</p>
+      ${field("email", "이메일", "email", 'autocomplete="username" inputmode="email" required')}
+      <p class="acct-note">${t("메일로 다시 정하면 서버에 암호화해 둔 일정은 지워지고, 그 기기에 저장된 일정으로 다시 채워져요. 복구 코드가 있으면 복구 코드로 하세요 — 서버 일정이 그대로 남아요.")}</p>
+      <p class="acct-err" role="alert"></p>
+      <button class="primary" type="submit">${t("메일 받기")}</button>
+      <p class="acct-links"><a href="#" data-go="recover">${t("복구 코드로 하기")}</a> · <a href="#" data-go="login">${t("로그인으로 돌아가기")}</a></p></form>`;
+    const f = $("#f");
+    f.addEventListener("submit", (e) => { e.preventDefault(); run(f, async () => {
+      const email = $("#email").value.trim();
+      if (!validEmail(email)) throw new Error("이메일 주소를 확인하세요.");
+      await A.requestReset(email, getLang());
+      root.innerHTML = `<section class="card acct-card"><h2>${t("메일을 확인하세요")}</h2>
+        <p>${t("가입한 이메일이라면 몇 분 안에 링크가 도착해요. 스팸함도 확인해 주세요. 링크는 30분 동안 쓸 수 있어요.")}</p>
+        <a class="ghost" href="#" data-go="login">${t("로그인으로 돌아가기")}</a></section>`;
+    }); });
+  },
+  // 메일 링크로 열었을 때: account.html#reset=토큰 (주소 끝 # 뒤라 서버 기록·다른 사이트로 새지 않는다)
+  async reset(token) {
+    history.replaceState(null, "", location.pathname); // 토큰을 주소창·방문 기록에 남기지 않는다
+    let email;
+    try { ({ email } = await A.checkReset(token)); } catch (e) {
+      root.innerHTML = `<section class="card acct-card"><h2>${t("링크를 쓸 수 없어요")}</h2><p>${esc(errText(e))}</p><a class="primary" href="#" data-go="forgot">${t("다시 요청하기")}</a></section>`; return;
+    }
+    root.innerHTML = `<form class="card acct-card" id="f" novalidate><h2>${t("새 비밀번호 정하기")}</h2>
+      <p class="acct-email">${esc(email)}</p>
+      ${field("pw", "새 비밀번호 (10자 이상)", "password", 'autocomplete="new-password" required')}
+      ${field("pw2", "비밀번호 한 번 더", "password", 'autocomplete="new-password" required')}
+      <p class="acct-note">${t("서버에 암호화해 둔 일정은 지워지고, 이 기기에 저장된 일정으로 다시 채워져요. 새 복구 코드를 드려요.")}</p>
+      <p class="acct-err" role="alert"></p>
+      <button class="primary" type="submit">${t("새 비밀번호로 바꾸기")}</button></form>`;
+    const f = $("#f");
+    f.addEventListener("submit", (e) => { e.preventDefault(); run(f, async () => {
+      const pw = $("#pw").value;
+      const p = passwordProblem(pw, email); if (p) throw new Error(PW_MSG[p]);
+      if (pw !== $("#pw2").value) throw new Error("두 비밀번호가 달라요");
+      f.querySelector(".acct-err").textContent = t("안전하게 암호화하는 중… (몇 초 걸려요)");
+      views.code(await A.resetWithToken(token, pw));
+    }); });
   },
   recover() {
     root.innerHTML = `<form class="card acct-card" id="f" novalidate><h2>${t("비밀번호 다시 정하기")}</h2>
@@ -159,4 +203,7 @@ const server = await fetch("api/account/me", { credentials: "same-origin" }).the
 if (!server) views.noServer();
 else if (location.hash === "#signup") views.signup();
 else if (location.hash === "#recover") views.recover();
+else if (location.hash.startsWith("#reset=")) views.reset(location.hash.slice(7));
 else views.me(); // 로그인 안 했으면 로그인 화면 (계정 삭제 링크 #delete도 로그인부터)
+// 이미 계정 화면을 연 채로 메일 링크를 눌러도(같은 페이지 # 이동) 새 비밀번호 화면으로
+addEventListener("hashchange", () => { if (location.hash.startsWith("#reset=")) views.reset(location.hash.slice(7)); else if (location.hash === "#delete") views.me(); });

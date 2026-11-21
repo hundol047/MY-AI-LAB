@@ -1,6 +1,9 @@
 # Render 블루프린트: 저장소를 연결하면 travel-planner 앱 서버를 만든다 (API-SETUP.md "앱 서버 올리기" 참고)
 # - 후기·예약 신청·가게 등록 데이터가 재시작 후에도 남도록 디스크(/var/data)에 SQLite를 둔다 (디스크는 유료 플랜에서만 붙는다)
 # - TOUR_API_KEY·PUBLIC_APP_URL은 Render 화면에서 직접 넣는다 (저장소에 키를 넣지 않음)
+# - DATA_ENCRYPTION_KEY: 이메일·이름·연락처를 데이터베이스에 암호화해 저장하는 키. Render가 만들어 주며, 디스크·백업과 따로 보관된다.
+#   절대 바꾸거나 지우지 말 것(바꾸면 저장된 개인정보를 읽을 수 없다). 다른 곳에도 한 부 적어 둔다
+# - SMTP_URL·MAIL_FROM: 메일로 비밀번호 찾기 (예: smtps://아이디:앱비밀번호@smtp.naver.com:465). 없으면 복구 코드로만 찾는다
 services:
   - type: web
     name: ohneul-gangwon
@@ -23,4 +26,10 @@ services:
       - key: TOUR_API_KEY
         sync: false
       - key: PUBLIC_APP_URL
+        sync: false
+      - key: DATA_ENCRYPTION_KEY
+        generateValue: true
+      - key: SMTP_URL
+        sync: false
+      - key: MAIL_FROM
         sync: false
