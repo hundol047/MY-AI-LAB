@@ -5,9 +5,11 @@ import { mkdirSync, chmodSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { REGIONS } from './public/data.js';
 import { validateBooking } from './bookings.mjs';
+import { createPII } from './pii.mjs';
 const digest = s => createHash('sha256').update(String(s)).digest('hex');
 export function equalSecret(a, b) { return !!a && !!b && timingSafeEqual(Buffer.from(digest(a)), Buffer.from(digest(b))); }
-export function createServices(file) {
+// 예약 신청(이름·연락처)·신고 사유·제보 메모는 암호화해 저장한다 (pii.mjs). 데이터베이스·백업 파일만으로는 읽을 수 없다
+export function createServices(file, { pii = createPII() } = {}) {
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(file);
   chmodSync(file, 0o600);
@@ -23,16 +25,25 @@ export function createServices(file) {
     CREATE TABLE IF NOT EXISTS push_subscriptions(booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, PRIMARY KEY(booking,endpoint));
     CREATE TABLE IF NOT EXISTS push_outbox(id TEXT PRIMARY KEY, booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, nextAt INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0);`);
   const fail = (status, message) => { throw Object.assign(new Error(message), {status}); };
+  // 예전에 그대로 저장된 개인정보를 한 번 암호화해 옮겨 담는다 (이미 암호화된 줄은 건너뜀)
+  {
+    const up = [['bookings','payload','id'],['reports','reason','id'],['place_reports','note','id']];
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      for (const [t,col,key] of up) for (const r of db.prepare(`SELECT ${key} k, ${col} v FROM ${t}`).all()) if (r.v && !pii.isSealed(r.v)) db.prepare(`UPDATE ${t} SET ${col}=? WHERE ${key}=?`).run(pii.seal(r.v), r.k);
+      db.exec('COMMIT');
+    } catch (e) { db.exec('ROLLBACK'); throw e; }
+  }
   function booking(id) {
     const row = db.prepare('SELECT * FROM bookings WHERE id=?').get(id);
     if (!row) fail(404, '신청을 찾을 수 없습니다.');
-    return { row, data: JSON.parse(row.payload) };
+    return { row, data: pii.openJSON(row.payload) };
   }
   const forgetPush = id => {db.prepare('DELETE FROM push_subscriptions WHERE booking=?').run(id);db.prepare('DELETE FROM push_outbox WHERE booking=?').run(id);};
   const save = b => {
     db.exec('BEGIN IMMEDIATE');
     try {
-      db.prepare('UPDATE bookings SET payload=? WHERE id=?').run(JSON.stringify(b),b.id);
+      db.prepare('UPDATE bookings SET payload=? WHERE id=?').run(pii.sealJSON(b),b.id);
       for(const p of db.prepare('SELECT * FROM push_subscriptions WHERE booking=?').all(b.id)) {
         // One latest-state notification per booking/browser avoids obsolete queued alerts.
         db.prepare('DELETE FROM push_outbox WHERE booking=? AND endpoint=?').run(b.id,p.endpoint);
@@ -69,7 +80,7 @@ export function createServices(file) {
       // Only terminal bookings past their last update are eligible. Active cases stay available.
       let deleted=0;
       for(const {payload} of db.prepare('SELECT payload FROM bookings').all()) {
-        const b=JSON.parse(payload), last=b.history.at(-1)?.at || b.createdAt;
+        const b=pii.openJSON(payload), last=b.history.at(-1)?.at || b.createdAt;
         if(['cancelled','rejected'].includes(b.status) && new Date(last).getTime()<now-retentionDays*86400000) {
           db.prepare('DELETE FROM bookings WHERE id=?').run(b.id);db.prepare('DELETE FROM recovery WHERE id=?').run(b.id);forgetPush(b.id);deleted++;
         }
@@ -127,12 +138,12 @@ export function createServices(file) {
       const existing = db.prepare('SELECT * FROM bookings WHERE requestKey=?').get(key);
       if (existing) {
         authorize(existing, token);
-        const b = JSON.parse(existing.payload);
+        const b = pii.openJSON(existing.payload);
         if (JSON.stringify(b.request) !== JSON.stringify(valid)) fail(409, '기존 요청과 내용이 다릅니다. 새 신청으로 접수하세요.');
         return { id:b.id, status:b.status };
       }
       const b = {id:randomUUID(), request:valid, status:'received', createdAt:new Date().toISOString(), history:[{status:'received',at:new Date().toISOString(),message:'예약 검토 신청을 접수했습니다.'}], quote:null};
-      db.prepare('INSERT INTO bookings VALUES(?,?,?,?)').run(b.id,digest(token),key,JSON.stringify(b));
+      db.prepare('INSERT INTO bookings VALUES(?,?,?,?)').run(b.id,digest(token),key,pii.sealJSON(b));
       if(body.recoveryKey)db.prepare('INSERT INTO recovery VALUES(?,?)').run(b.id,digest(body.recoveryKey));
       return {id:b.id,status:b.status};
     },
@@ -144,7 +155,7 @@ export function createServices(file) {
       b.status = b.status === 'confirmed' ? 'cancel_requested' : 'cancelled';
       b.history.push({status:b.status,at:new Date().toISOString(),message:b.status === 'cancel_requested' ? '업체 취소 확인을 요청했습니다. 취소 확정 전입니다.' : '예약 검토 신청을 철회했습니다.'}); save(b); return b;
     },
-    listBookings(offset=0,limit=50) { return db.prepare('SELECT payload FROM bookings ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>JSON.parse(r.payload)); },
+    listBookings(offset=0,limit=50) { return db.prepare('SELECT payload FROM bookings ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>pii.openJSON(r.payload)); },
     update(id, body) {
       const {data:b}=booking(id);
       const next = {received:['reviewing','rejected','cancelled'],reviewing:['confirmed','rejected','cancelled'],confirmed:['cancel_requested'],cancel_requested:['cancelled','confirmed'],rejected:[],cancelled:[]};
@@ -173,14 +184,14 @@ export function createServices(file) {
     report(id,reason) {
       if (typeof reason !== 'string' || reason.trim().length < 3 || reason.length > 500) fail(400,'신고 사유를 3~500자로 입력하세요.');
       if (!db.prepare("SELECT id FROM reviews WHERE id=? AND state='published'").get(id)) fail(404,'후기가 없습니다.');
-      db.prepare('INSERT INTO reports VALUES(?,?,?,?)').run(randomUUID(),id,reason.trim(),new Date().toISOString()); return {received:true};
+      db.prepare('INSERT INTO reports VALUES(?,?,?,?)').run(randomUUID(),id,pii.seal(reason.trim()),new Date().toISOString()); return {received:true};
     },
-    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>({...r,reason:pii.open(r.reason)})); },
     // 장소 정보 오류 제보 (문 닫음·시간 다름·주차·위치 등). 개인정보는 받지 않는다
     addPlaceReport(body) {
       const KINDS = ['closed', 'hours', 'parking', 'location', 'other'];
       if (typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || (body.note != null && (typeof body.note !== 'string' || body.note.length > 500))) fail(400,'장소, 제보 종류, 500자 이내 설명을 확인하세요.');
-      db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,String(body.note||'').trim(),new Date().toISOString()); return {received:true};
+      db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,pii.seal(String(body.note||'').trim())||'',new Date().toISOString()); return {received:true};
     },
     // 현장 확인 (무장애): 기기마다 무작위 id(voter)로 장소·종류당 하나. 개인정보 없음. 2년 지난 것은 세지 않는다
     accessReport(body) {
@@ -199,7 +210,7 @@ export function createServices(file) {
       for (const r of db.prepare(`SELECT place, kind, COUNT(*) n FROM access_reports WHERE at>=? AND place IN (${ids.map(() => '?').join(',')}) GROUP BY place, kind`).all(since, ...ids)) (out[r.place] ??= {})[r.kind] = r.n;
       return out;
     },
-    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>({...r,note:pii.open(r.note)})); },
     // 같이 고르기: 공유한 일정(trip, 일정을 만들 때 정한 무작위 키)의 장소마다 👍/👎. voter는 그 기기의 무작위 id (개인정보 없음)
     vote(body) {
       const ok = (s, n) => typeof s === 'string' && new RegExp(`^[a-z0-9]{8,${n}}$`).test(s);
