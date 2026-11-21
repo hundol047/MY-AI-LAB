@@ -926,3 +926,64 @@ body.v3d-open { overflow: hidden; }
 .walk-info small { display: block; margin-top: 3px; opacity: .75; }
 .wi-bar { display: flex; height: 7px; margin: 5px 0 4px; border-radius: 4px; overflow: hidden; }
 .wi-bar .g0 { background: #16a34a; } .wi-bar .g1 { background: #f59e0b; } .wi-bar .g2 { background: #d92d20; }
+
+/* ---------- 처음 열 때 안내 · 앱 잠금 · PIN 창 (privacy-lock.js) ---------- */
+dialog.welcome { border: 0; border-radius: 20px; padding: 28px 22px 18px; width: min(420px, calc(100vw - 32px)); background: var(--surface); color: var(--text); text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+dialog.welcome::backdrop { background: rgba(10,16,40,.55); backdrop-filter: blur(3px); }
+dialog.welcome img { border-radius: 18px; }
+dialog.welcome h2 { margin: 12px 0 2px; font-size: 22px; }
+.welcome-sub { margin: 0 0 14px; color: var(--sub); }
+.welcome-list { list-style: none; margin: 0 0 18px; padding: 0; text-align: left; display: grid; gap: 8px; }
+.welcome-list li { position: relative; padding: 10px 12px 10px 38px; border-radius: 12px; background: var(--brand-soft); font-size: 14.5px; line-height: 1.45; }
+.welcome-list li::before { content: "✓"; position: absolute; left: 13px; top: 9px; font-weight: 900; color: var(--brand); }
+dialog.welcome .primary, dialog.welcome .ghost { display: block; width: 100%; margin-top: 8px; min-height: 48px; }
+dialog.welcome .linkish { margin-top: 12px; }
+.welcome-policy { display: block; margin-top: 10px; font-size: 13px; color: var(--sub); }
+body.locked > *:not(.lock-screen) { visibility: hidden; }
+.lock-screen { position: fixed; inset: 0; z-index: 3000; display: grid; place-items: center; padding: 16px; background: var(--bg); }
+.lock-box { width: min(340px, 100%); text-align: center; display: grid; gap: 10px; justify-items: center; }
+.lock-box img { border-radius: 16px; }
+.lock-box h2 { margin: 6px 0 0; }
+.lock-box p { margin: 0; color: var(--sub); }
+.lock-pin, .pin-dlg input { width: 100%; max-width: 240px; padding: 12px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--text); font-size: 26px; letter-spacing: .4em; text-align: center; }
+.lock-err { min-height: 1.4em; color: var(--warn, #d92d20) !important; font-weight: 700; }
+.lock-box .primary { width: 100%; max-width: 240px; min-height: 48px; }
+dialog.pin-dlg { border: 0; border-radius: 16px; padding: 18px; width: min(340px, calc(100vw - 32px)); background: var(--surface); color: var(--text); }
+dialog.pin-dlg::backdrop { background: rgba(0,0,0,.45); }
+.pin-dlg p { margin: 0 0 10px; line-height: 1.45; }
+.pin-dlg input { max-width: none; }
+.pin-acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px; }
+
+/* ---------- 계정 화면 (account.html) ---------- */
+.acct-page { min-height: 100dvh; background: var(--bg); color: var(--text); }
+.acct-top { display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top)) 16px 10px; background: var(--surface); border-bottom: 1px solid var(--line); position: sticky; top: 0; z-index: 2; }
+.acct-top h1 { margin: 0; font-size: 18px; }
+.acct { max-width: 520px; margin: 0 auto; padding: 16px 16px 40px; display: grid; gap: 12px; }
+.acct-card { padding: 18px; display: grid; gap: 12px; }
+.acct-card h2, .acct-card h3 { margin: 0; }
+.acct-card p { margin: 0; line-height: 1.5; }
+.acct-field { display: grid; gap: 5px; font-size: 14px; font-weight: 700; }
+.acct-input { display: flex; align-items: center; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.acct-input:focus-within { outline: 2px solid var(--brand); outline-offset: -1px; }
+.acct-input input { flex: 1; min-width: 0; padding: 12px; border: 0; background: transparent; color: var(--text); font: inherit; font-weight: 400; font-size: 16px; outline: none; }
+.acct-input .linkish { padding: 0 12px; white-space: nowrap; }
+.acct-check { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; line-height: 1.45; }
+.acct-check input { margin-top: 3px; width: 18px; height: 18px; flex: none; }
+.acct-err { min-height: 1.2em; color: var(--warn, #d92d20); font-weight: 700; font-size: 14px; }
+.acct-ok { color: var(--ok, #16a34a); font-weight: 700; }
+.acct-card .primary, .acct-card > .ghost { min-height: 48px; text-align: center; text-decoration: none; display: grid; place-items: center; }
+.acct-links { font-size: 14px; text-align: center; }
+.acct-row { display: flex; gap: 8px; flex-wrap: wrap; }
+.acct-row > * { flex: 1; min-height: 44px; display: grid; place-items: center; text-decoration: none; }
+.acct-code { font: 800 20px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; letter-spacing: .06em; text-align: center; padding: 14px; border: 2px dashed var(--brand); border-radius: 12px; background: var(--brand-soft); word-break: break-all; user-select: all; }
+.acct-email { font-size: 18px; font-weight: 800; word-break: break-all; }
+.acct-note { font-size: 13px; color: var(--sub); }
+.acct-box { padding: 14px 16px; border-radius: 14px; background: var(--brand-soft); font-size: 14px; line-height: 1.5; }
+.acct-box ul { margin: 6px 0 0; padding-left: 18px; }
+.danger-zone { border: 1px solid color-mix(in srgb, var(--warn, #d92d20) 40%, transparent); }
+.acct-card.busy { opacity: .7; }
+/* 링크처럼 보이는 버튼 (환영·잠금·계정 화면) */
+dialog.welcome .linkish, .lock-box .linkish, .acct .linkish { background: none; border: 0; padding: 6px 4px; color: var(--brand); font: inherit; font-size: 14px; font-weight: 700; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.acct-input .linkish { padding: 0 12px; text-decoration: none; font-size: 13px; }
+.acct > *, .acct-card, .acct-field, .acct-input { min-width: 0; }
+.acct-input input { width: 100%; }

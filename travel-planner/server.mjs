@@ -14,6 +14,7 @@ import { tourPhoto } from "./scripts/photo-sources.mjs";
 import { fetchWarnings } from "./scripts/kma-warnings.mjs";
 import { handleBusLive } from "./bus-live.mjs";
 import { aiRoutes } from "./claude.mjs";
+import { accountRoutes } from "./accounts.mjs";
 import { PLACES, FESTIVALS } from "./public/data.js";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -23,6 +24,8 @@ let pushSender=null;
 try {pushSender=await createPushSender({keyFile:path.join(path.dirname(process.env.APP_DB_PATH || path.join(here,'.local','app.sqlite')),'vapid.json'),appURL:process.env.PUBLIC_APP_URL});}catch{console.error('웹 푸시 키를 초기화하지 못했습니다.');}
 // Claude AI (선택): ANTHROPIC_API_KEY가 있을 때만 말한 조건 해석에 쓴다. 사용 금액은 데이터 폴더의 ai-usage.json에 센다
 const handleAI = aiRoutes({ dataDir: path.dirname(process.env.APP_DB_PATH || path.join(here, ".local", "app.sqlite")) });
+// 계정(선택): 종단간 암호화, 서버는 비밀번호·일정 내용을 모른다 (accounts.mjs)
+const handleAccount = accountRoutes({ file: process.env.APP_DB_PATH || path.join(here, ".local", "app.sqlite") });
 const services = serviceAPI({file:process.env.APP_DB_PATH || path.join(here,".local","app.sqlite"),adminToken:process.env.ADMIN_API_TOKEN,pushSender});
 if(pushSender)startPushWorker(services.store,pushSender);
 try { const legacy=JSON.parse(await readFile(path.join(here,"data","shops.json"),"utf8")); if(Array.isArray(legacy))services.store.importShops(legacy); } catch { /* 기존 파일 없음: 새 승인 목록을 사용 */ }
@@ -46,7 +49,22 @@ const json = (res, code, obj) => res.writeHead(code, { "content-type": MIME[".js
 
 // 요청 하나에서 오류가 나도 서버 전체가 꺼지지 않게 감싼다
 let warningsCache = null;
+// 보안 머리글: 다른 사이트가 앱을 틀 안에 넣지 못하게, 주소가 바깥 서비스로 새지 않게, 쓰지 않는 기기 기능은 막기
+// CSP: 스크립트는 이 사이트 것만(첫 화면 언어를 정하는 작은 인라인 스크립트 때문에 'unsafe-inline'), 지도·사진·날씨는 https로만
+const CSP = ["default-src 'self'", "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval' blob:", "worker-src 'self' blob:", "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https:", "font-src 'self' data: https://tiles.openfreemap.org", "connect-src 'self' https:", "media-src 'self' blob:",
+  "frame-ancestors 'none'", "base-uri 'self'", "form-action 'self'", "object-src 'none'"].join("; ");
+function securityHeaders(req, res) {
+  res.setHeader("x-content-type-options", "nosniff");
+  res.setHeader("referrer-policy", "strict-origin-when-cross-origin");
+  res.setHeader("x-frame-options", "DENY");
+  res.setHeader("permissions-policy", "camera=(), microphone=(self), geolocation=(self), payment=(), usb=(), interest-cohort=()");
+  res.setHeader("cross-origin-opener-policy", "same-origin");
+  res.setHeader("content-security-policy", CSP);
+  if (req.socket.encrypted || String(req.headers["x-forwarded-proto"] || "").split(",")[0] === "https") res.setHeader("strict-transport-security", "max-age=31536000");
+}
 const server = http.createServer((req, res) => {
+  securityHeaders(req, res);
   handle(req, res).catch((err) => {
     console.error("요청 처리 오류:", req.method, req.url, err.message);
     if (!res.headersSent) res.writeHead(500).end(); else res.end();
@@ -56,6 +74,7 @@ const server = http.createServer((req, res) => {
 async function handle(req, res) {
   const url = new URL(req.url, "http://localhost");
 
+  if (await handleAccount(req, res, url)) return;
   if (await services(req,res,url)) return;
   if (await handleAI(req, res, url, json)) return;
 

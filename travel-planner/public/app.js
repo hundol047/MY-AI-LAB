@@ -10,6 +10,8 @@ import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
 import { openView3D, closeView3D } from "./view3d.js";
+import { initPrivacy } from "./privacy-lock.js";
+import * as Acct from "./account-client.js";
 import { baseLayers, GLYPHS, OFM_URL, OFM_ATTR } from "./basemap.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
@@ -267,6 +269,8 @@ document.addEventListener("click", (e) => {
 });
 
 /* ---------- 일정 저장·비교 (이 기기에만, 최대 20개) ---------- */
+// 저장한 일정이 바뀌면: 로그인해 있으면 잠시 뒤 암호화해 동기화 (account-client.js, 서버가 있을 때만)
+function savedChanged() { if (document.body.classList.contains("has-server")) Acct.scheduleSync(() => renderSaved()); }
 const savedTrips = () => (store.get("savedTrips") || []).filter((x) => x?.snap?.input && x.meta);
 function tripSummary() {
   let cost = null;
@@ -278,6 +282,7 @@ $("#saveTripBtn").addEventListener("click", () => {
   const meta = { date: state.input.date, regions: state.input.route || [state.input.region], days: state.input.days, choice: state.choice || "best" };
   const entry = { id: Date.now().toString(36), meta, savedAt: Date.now(), snap: snapshot(), extra: { baseOpts: state.baseOpts, choice: state.choice, heard: state.heard, said: state.said }, sum: tripSummary() };
   if (!store.set("savedTrips", [entry, ...list].slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  savedChanged();
   track("trip_save");
   toast(t("이 기기에 저장했어요 · 첫 화면 '저장한 일정'에서 열 수 있어요"));
   renderSaved();
@@ -383,6 +388,7 @@ function importTrips(list) {
   const add = list.filter((x) => !ids.has(x.id));
   if (!add.length) return toast(list.length ? t("이미 있는 일정이에요") : t("옮긴 일정을 읽지 못했어요"));
   if (!store.set("savedTrips", [...add, ...have].sort((a, b) => b.savedAt - a.savedAt).slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  savedChanged();
   renderSaved(); show("setup");
   toast(t("일정 {n}개를 받았어요 · '저장한 일정'에서 열 수 있어요", { n: add.length }));
   track("transfer_in", String(add.length));
@@ -460,7 +466,7 @@ document.addEventListener("click", (e) => {
   const o = e.target.closest("[data-open-saved]");
   if (o) { const x = savedTrips().find((y) => y.id === o.dataset.openSaved); if (x) { openSnapshot(x.snap, x.extra || {}); track("trip_open_saved"); } return; }
   const d = e.target.closest("[data-del-saved]");
-  if (d) { store.set("savedTrips", savedTrips().filter((y) => y.id !== d.dataset.delSaved)); comparePick.delete(d.dataset.delSaved); renderSaved(); return; }
+  if (d) { store.set("savedTrips", savedTrips().filter((y) => y.id !== d.dataset.delSaved)); store.set("savedTomb", { ...(store.get("savedTomb") || {}), [d.dataset.delSaved]: Date.now() }); comparePick.delete(d.dataset.delSaved); renderSaved(); savedChanged(); return; }
   if (e.target.id === "compareBtn") {
     const rows = savedTrips().filter((x) => comparePick.has(x.id));
     const won = (n) => `${Math.round(n / 10000)}${t("만 원")}`;
@@ -2605,6 +2611,8 @@ applyDefaults();
 function renderSettings() {
   const cur = { theme: localStorage.getItem("theme") || "system", big: document.documentElement.classList.contains("big") ? "1" : "0", access: defaults().access ?? "", move: defaults().move || "car" };
   document.querySelectorAll("#settings [data-set]").forEach((g) => g.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === cur[g.dataset.set])));
+  $("#setLockBtn").textContent = privacy.lockOn() ? t("끄기") : t("켜기");
+  if (document.body.classList.contains("has-server")) Acct.status().then((st) => { $("#setAcct").textContent = st ? t("{email} · 저장한 일정을 암호화해 맞추는 중", { email: st.email }) : t("로그인하면 저장한 일정을 암호화해 다른 기기와 맞춰요"); $("#setAcctBtn").textContent = st ? t("내 계정") : t("로그인"); }).catch(() => {});
   $("#setSavedCount").textContent = t("{n}개", { n: (store.get("savedTrips") || []).length });
   // 버전: 오프라인 저장 이름(sw.js의 ohneul-gangwon-vNN)에서 번호만
   fetchT("sw.js", {}, 3000).then((r) => (r.ok ? r.text() : "")).then((x) => { const v = (x.match(/ohneul-gangwon-v(\d+)/) || [])[1]; $("#setVersion").textContent = v ? t("버전 {v}", { v: `1.${v}` }) : ""; }).catch(() => {});
@@ -2621,22 +2629,34 @@ $("#settings").addEventListener("click", async (e) => {
     if (k === "theme") { try { v === "system" ? localStorage.removeItem("theme") : localStorage.setItem("theme", v); } catch { /* 저장 공간 없음 */ } applyTheme(v); }
     if (k === "big") { store.set("bigText", v === "1"); applyBig(v === "1"); }
     if (k === "access" || k === "move") { store.set("defaults", { ...defaults(), [k]: v }); applyDefaults(); }
+    store.set("settingsAt", Date.now()); savedChanged();
     renderSettings(); return;
   }
+  if (e.target.closest("#setLockBtn")) { (privacy.lockOn() ? privacy.clearLock() : privacy.setLock()).then(() => renderSettings()); return; }
+  if (e.target.closest("#setExport")) return privacy.exportMine();
   const cb = e.target.closest("[data-clear]");
   if (cb) {
     const what = cb.dataset.clear;
     const ask = { saved: t("저장한 일정을 모두 지울까요?"), seen: t("최근 본 장소 기록을 지울까요?"), claim: t("반값여행 정산에 올린 영수증·사진을 모두 지울까요?"), all: t("이 기기에 저장된 일정·설정·기록을 모두 지울까요?") }[what];
     if (!confirm(ask)) return;
     const dropClaim = () => new Promise((r) => { try { const q = indexedDB.deleteDatabase("ohneul-claim"); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch { r(); } });
-    if (what === "saved") { localStorage.removeItem("savedTrips"); renderSaved(); }
+    if (what === "saved") { store.set("savedTomb", { ...(store.get("savedTomb") || {}), ...Object.fromEntries(savedTrips().map((x) => [x.id, Date.now()])) }); localStorage.removeItem("savedTrips"); renderSaved(); savedChanged(); }
     if (what === "seen") localStorage.removeItem("seenPlaces");
     if (what === "claim") { await dropClaim(); localStorage.removeItem("claim:settings"); }
-    if (what === "all") { await dropClaim(); try { localStorage.clear(); } catch { /* 무시 */ } location.reload(); return; }
+    if (what === "all") return wipeAll();
     toast(t("지웠어요")); renderSettings();
   }
 });
 window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener?.("change", () => applyTheme(localStorage.getItem("theme") || "system"));
+
+// 이 기기 기록 모두 지우기 (설정의 '모두 지우기', 앱 잠금의 'PIN을 잊었어요'): 정산 자료·계정 키·저장한 것 전부
+async function wipeAll() {
+  await new Promise((r) => { try { const q = indexedDB.deleteDatabase("ohneul-claim"); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch { r(); } });
+  await Acct.logout(false).catch(() => {});
+  try { localStorage.clear(); sessionStorage.clear(); } catch { /* 무시 */ }
+  location.reload();
+}
+const privacy = initPrivacy({ t, toast, wipeAll });
 
 /* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */
 // 큰 글씨: 지도는 빼고(터치 위치가 어긋나지 않게) 글과 카드만 키운다. 이 기기에 기억
@@ -2749,7 +2769,7 @@ renderStartRow();
 // 예약·후기·가게 등록은 앱 서버(server.mjs)가 있어야 동작한다. GitHub Pages·안드로이드 앱처럼 서버가 없으면 그 버튼들을 숨긴다
 // (needs-server 클래스: 기본은 숨김, 서버가 응답하면 body.has-server로 보인다)
 fetchT("api/shops?region=gangneung", {}, 3000)
-  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); } })
+  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); Acct.sync().then((x) => x && renderSaved()).catch(() => {}); } })
   .catch(() => {});
 
 // 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다
