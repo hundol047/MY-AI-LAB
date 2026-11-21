@@ -9,6 +9,7 @@ import { todayStatus, kstNow, reminderList } from "./today.js";
 import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
+import { openView3D } from "./view3d.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -838,7 +839,7 @@ function itemHTML(it, i, day) {
       </div>
       <div class="acts place-acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
+        <button class="ghost small" type="button" data-view3d="${i}" title="${esc(t("이 장소를 3D로 둘러보기 · 현장에서는 내 위치를 따라가요"))}">${t("🧊 3D로 보기")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
       </div>
     </article>
   </li>`;
@@ -2113,6 +2114,15 @@ $("#timeline").addEventListener("click", (e) => {
   applyRoad(dayIdx);
   const now = trip.days[dayIdx].items[i];
   toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
+});
+
+// 3D로 보기: 그 장소를 전체 화면 3D로 (view3d.js). WebGL이 없는 기기는 안내만 한다
+$("#timeline").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-view3d]"); if (!b) return;
+  const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
+  if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
+  track("view3d");
+  openView3D({ name: placeName(p), lat: p.lat, lng: p.lng }, { t, toast, loadMapLibre });
 });
 
 $("#quick").addEventListener("click", (e) => {
