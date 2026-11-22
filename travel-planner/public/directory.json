@@ -1,4 +1,5 @@
-{"fetchedAt":"2026-11-21T00:54:24.609Z","source":"한국관광공사 TourAPI KorService2","places":[
+{"fetchedAt":"2026-11-21T23:52:04.929Z","source":"한국관광공사 TourAPI KorService2","places":[
+{"id":"2711379","type":"12","name":"덕우리체험마을","address":"강원특별자치도 정선군 정선읍 백오담길 27","lat":37.3597056,"lng":128.7140595,"sourceModified":"20261121013000","hours":"09:00~18:00","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"2654759","type":"12","name":"펫힐링 달빛동물원","address":"강원특별자치도 영월군 남면 연당리","lat":37.1745681697,"lng":128.4017867178,"sourceModified":"20261120160452","hours":"09:00~18:00 (입장 마감 17:00)","closed":"일자별로 상이함※ 자세한 사항은 홈페이지 참조 또는 전화 문의 요망","source":"한국관광공사 TourAPI KorService2"},
 {"id":"129392","type":"12","name":"정선 가리왕산마을","address":"강원특별자치도 정선군 정선읍 벽탄길 9","lat":37.3925344167,"lng":128.6023820241,"sourceModified":"20261120135209","hours":"09:00~18:00","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"2002445","type":"12","name":"홍천 배바위카누마을","address":"강원특별자치도 홍천군 서면 마곡길 153-5","lat":37.7252831552,"lng":127.5852382545,"sourceModified":"20261120113558","hours":"※ 체험별 상이하므로 홈페이지 참고","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
@@ -1244,7 +1245,6 @@
 {"id":"125736","type":"12","name":"기미만세공원","address":"강원특별자치도 홍천군 내촌면 동창로 165","lat":37.7846587811,"lng":128.1463418503,"sourceModified":"20251105112918","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"127505","type":"12","name":"삼척공양왕릉","address":"강원특별자치도 삼척시 근덕면 궁촌리","lat":37.3262832875,"lng":129.2663494624,"sourceModified":"20251104150222","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"2048756","type":"12","name":"소이산 생태숲 녹색길","address":"강원특별자치도 철원군 철원읍 금강산로 265","lat":38.2552363123,"lng":127.2019389791,"sourceModified":"20251029152146","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
-{"id":"2711379","type":"12","name":"덕우리체험마을","address":"강원특별자치도 정선군 정선읍 백오담길 27","lat":37.3597576186,"lng":128.7140867688,"sourceModified":"20251027162220","hours":"09:00~18:00","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"125701","type":"12","name":"하조대해수욕장","address":"강원특별자치도 양양군 현북면 하조대해안길 35","lat":38.0229894402,"lng":128.7242655472,"sourceModified":"20251023143000","hours":"상시 개방","closed":"","source":"한국관광공사 TourAPI KorService2"},
 {"id":"127842","type":"12","name":"몰운대(정선)","address":"강원특별자치도 정선군 화암면 약수길 1330","lat":37.3181559522,"lng":128.8117487099,"sourceModified":"20251023143000","hours":"상시 개방","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"3532403","type":"12","name":"산계리3층석탑","address":"강원특별자치도 강릉시 옥계면 석화동굴길 238","lat":37.5749561892,"lng":128.9182230117,"sourceModified":"20251023143000","hours":"","closed":"","source":"한국관광공사 TourAPI KorService2"},
