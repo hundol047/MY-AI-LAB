@@ -2168,7 +2168,7 @@ function officialLines(p) {
   const out = [];
   if (openSites?.[p.id]) out.push(`<span class="acc-open">🏅 ${t("열린관광지")} <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}</span>`);
   const fc = facilities?.[p.id];
-  if (fc?.items?.length) out.push(`<span class="acc-open">🏢 ${t("건물 편의시설 {n}가지 등록", { n: fc.items.length })} <em class="ok">${t("공식")}</em> <span lang="ko">${esc(fc.items.slice(0, 4).join(", "))}${fc.items.length > 4 ? " …" : ""}</span></span>`);
+  if (fc?.items?.length) out.push(`<span class="acc-open">🏢 ${t("건물 편의시설 {n}가지 등록", { n: fc.items.length })} <em class="ok">${t("공식")}</em> <span lang="ko">${esc(fc.name)}: ${esc(fc.items.slice(0, 4).join(", "))}${fc.items.length > 4 ? " …" : ""}</span></span>`);
   const tn = toiletsNamed?.[p.id];
   if (tn?.length) { const a = tn.filter((x) => x.acc); out.push(`<span class="acc-open">🚻 ${t("이곳의 공중화장실 {n}곳", { n: tn.length })} <em class="ok">${t("공식")}</em> ${a.length ? t("장애인 화장실: {names}", { names: esc(a.slice(0, 3).map((x) => x.name).join(", ")) + (a.length > 3 ? " …" : "") }) : t("장애인용 변기가 등록된 곳은 없어요")}</span>`); }
   const tr = trailsNear(p)[0];

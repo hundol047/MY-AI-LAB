@@ -26,6 +26,14 @@ export function toFacility(r) {
 }
 export const core = (s) => String(s || "").replace(/\s*\([^)]*\)/g, "").replace(/[\s·・,.\-_'"]/g, "").replace(/^(강릉|동해|삼척|속초|양양|고성|인제|춘천|철원|화천|홍천|양구|평창|정선|영월|태백|원주|횡성)(시|군)?(?=.{3})/, "");
 const km = (a, b) => { const r = Math.PI / 180, x = (b.lng - a.lng) * r * Math.cos(((a.lat + b.lat) / 2) * r), y = (b.lat - a.lat) * r; return Math.hypot(x, y) * 6371; };
+// 이름은 겹치지만 다른 곳: 장소 이름을 딴 가게 지점("스타벅스 강릉강문해변점")·역, 그리고 직접 확인한 것
+const WRONG = /(손성목영화박물관)/;
+export function plausible(p, f) {
+  const pn = core(p.name), fn = core(f.name);
+  if (WRONG.test(fn)) return false;
+  if (fn !== pn && /(점|역)$/.test(fn) && !/(점|역)$/.test(pn)) return false;
+  return true;
+}
 /** 장소마다 이름이 서로 들어 있고(3글자 이상) 500m 안에 있는 시설 중 가장 가까운 것 */
 export function matchFacilities(places, facs, maxKm = MAX_KM) {
   const out = {};
@@ -37,6 +45,7 @@ export function matchFacilities(places, facs, maxKm = MAX_KM) {
       const d = km(p, f); if (d > maxKm) continue;
       const fn = core(f.name); if (fn.length < 3) continue;
       if (!names.some((n) => fn.includes(n) || n.includes(fn))) continue;
+      if (!plausible(p, f)) continue;
       if (!best || d < best.km) best = { f, km: d };
     }
     if (best) out[p.id] = best;
