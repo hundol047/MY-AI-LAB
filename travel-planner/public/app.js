@@ -1054,11 +1054,11 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${officialLines(p)}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
-  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${p.access.stepsWarn ? `<span class="acc-steps">⚠️ ${t("공식 조사: 계단 있음")} — ${esc(p.access.stepsWarn)}</span>` : ""}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
+  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${officialLines(p)}${p.access.stepsWarn ? `<span class="acc-steps">⚠️ ${t("공식 조사: 계단 있음")} — ${esc(p.access.stepsWarn)}</span>` : ""}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
     ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
 }
 
@@ -2152,6 +2152,26 @@ $("#timeline").addEventListener("click", (e) => {
   toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
 });
 
+// 내려받은 공공데이터 파일로 만든 자료 (scripts/bake-public-files.mjs): 열린관광지, 장소 이름이 들어간 공식 화장실, 무장애나눔길
+let openSites = null, toiletsNamed = null, bfTrails = null;
+const reAcc = () => { if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); };
+fetchT("open-sites.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { openSites = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("toilets-named.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { toiletsNamed = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("bf-trails.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { bfTrails = j?.trails || null; reAcc(); }).catch(() => {});
+const kmBetween = (a, b) => { const r = Math.PI / 180, x = (b.lng - a.lng) * r * Math.cos(((a.lat + b.lat) / 2) * r), y = (b.lat - a.lat) * r; return Math.hypot(x, y) * 6371; };
+// 장소 3km 안의 무장애나눔길 (선이 있으면 선에서 가장 가까운 점까지)
+function trailsNear(p, maxKm = 1.5) {
+  return (bfTrails || []).map((tr) => ({ tr, km: tr.line ? Math.min(...tr.line.flat().map(([lng, lat]) => kmBetween(p, { lat, lng }))) : kmBetween(p, tr) })).filter((x) => x.km <= maxKm).sort((a, b) => a.km - b.km);
+}
+function officialLines(p) {
+  const out = [];
+  if (openSites?.[p.id]) out.push(`<span class="acc-open">🏅 ${t("열린관광지")} <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}</span>`);
+  const tn = toiletsNamed?.[p.id];
+  if (tn?.length) { const a = tn.filter((x) => x.acc); out.push(`<span class="acc-open">🚻 ${t("이곳의 공중화장실 {n}곳", { n: tn.length })} <em class="ok">${t("공식")}</em> ${a.length ? t("장애인 화장실: {names}", { names: esc(a.slice(0, 3).map((x) => x.name).join(", ")) + (a.length > 3 ? " …" : "") }) : t("장애인용 변기가 등록된 곳은 없어요")}</span>`); }
+  const tr = trailsNear(p)[0];
+  if (tr) out.push(`<span class="acc-open">🌲 ${t("근처 무장애나눔길")} <em class="ok">${t("공식")}</em> ${esc(tr.tr.name)} · ${t("길이 {m}m", { m: tr.tr.len })} · ${tr.km < 0.15 ? t("바로 옆") : t("약 {d} 떨어짐", { d: tr.km < 1 ? Math.round(tr.km * 100) * 10 + "m" : tr.km.toFixed(1) + "km" })}</span>`);
+  return out.join("");
+}
 // 공식 누리집에서 찾은 무장애 안내 (access-web.json, scripts/build-access-web.mjs): 관광공사 조사가 없는 관광지용. 원문 인용 + 출처
 let accessWeb = null;
 fetchT("access-web.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { accessWeb = j?.places ? j : null; if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); }).catch(() => {});
@@ -2175,7 +2195,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
+  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {

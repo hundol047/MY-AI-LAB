@@ -47,7 +47,8 @@ export function closeView3D() {
 }
 
 /**
- * place: { name, koName?, lat, lng, access?, walk?, lang?, photos?: () => Promise<[{url, credit}]>, web?: [{k, text, url, src, date}], webAt? }
+ * place: { name, koName?, lat, lng, access?, walk?, lang?, photos?: () => Promise<[{url, credit}]>, web?: [{k, text, url, src, date}], webAt?, open?, toilets?: [{name, addr, acc, accM, accW, open, diaper, ref}], trails?: [{name, len, line}] }
+ *   open: 열린관광지 목록에 있는 곳 · toilets: 이름이 이 장소인 공식 공중화장실(좌표 없음) · trails: 근처 무장애나눔길(산림복지진흥원, 선 좌표)
  *   web: 공식 조사가 없는 곳을 공식 누리집에서 찾아 옮긴 안내(access-web.json) — access: 관광공사 무장애 조사 원문 { 항목: 글 }
  *   walk: 미리 조사한 주변 걷기 정보(walk-info.json의 그 장소 값). 있으면 요약 칸은 이 값을 쓴다(장소 카드와 같은 숫자, 화면을 돌려도 바뀌지 않음)
  * deps: { t(문구), toast(msg), loadMapLibre() → Promise, shared?: { voter } }
@@ -161,6 +162,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
           hill: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
           slope: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+          // 무장애나눔길 (공식, 산림복지진흥원 공간정보): 청록색 굵은 선
+          bft: { type: "geojson", data: { type: "FeatureCollection", features: (place.trails || []).filter((tr) => tr.line).map((tr) => ({ type: "Feature", properties: { name: tr.name }, geometry: { type: "MultiLineString", coordinates: tr.line } })) } },
         },
         layers: [
           { id: "bg", type: "background", paint: { "background-color": "#dfe8e2" } },
@@ -171,6 +174,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
           { id: "paths-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["match", ["get", "surface"], "unpaved", "#8b5a2b", "#ffffff"], "line-width": ["interpolate", ["linear"], ["zoom"], 14, 4, 18, 9], "line-opacity": 0.9 } }, // 흙·자갈길은 갈색 테두리
           { id: "paths", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, paint: { "line-color": "#6b7280", "line-width": 3, "line-dasharray": [1.5, 1.5] } },
           { id: "slope", type: "line", source: "slope", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-width": ["interpolate", ["linear"], ["zoom"], 14, 2.5, 18, 6], "line-color": ["match", ["get", "g"], 0, SLOPE_COLORS[0], 1, SLOPE_COLORS[1], 2, SLOPE_COLORS[2], "#6b7280"] } },
+          { id: "bft-case", type: "line", source: "bft", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#ffffff", "line-width": 10 } },
+          { id: "bft", type: "line", source: "bft", layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": "#0d9488", "line-width": 6 } },
           // 계단(오픈스트리트맵, 미확인): 굵은 빨간 줄무늬
           { id: "steps-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#ffffff", "line-width": 11 } },
           { id: "steps", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#d92d20", "line-width": 7, "line-dasharray": [0.35, 0.35] } },
@@ -347,6 +352,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         <li><i class="ln" style="background:${SLOPE_COLORS[1]}"></i>${t("조금 가파른 길 (1/12 이하 · 밀어 줄 사람 필요)")}</li>
         <li><i class="ln" style="background:${SLOPE_COLORS[2]}"></i>${t("가파른 길 (1/12 넘음 · 휠체어·보행기 어려움)")}</li>
         <li><i class="ln dash"></i>${t("경사를 모르는 길")}</li>
+        ${(place.trails || []).some((tr) => tr.line) ? `<li><i class="ln" style="background:#0d9488;height:8px"></i>${t("무장애나눔길")} <em class="ok">${t("공식")}</em></li>` : ""}
         <li><i class="ln unpaved"></i>${t("갈색 테두리: 흙·자갈길")} <em>${t("미확인")}</em></li>
         <li><i class="ln steps"></i>${t("계단")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
@@ -397,6 +403,13 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       ${(place.web || []).length ? `<h4>🔎 ${t("공식 누리집에서 찾은 안내")} <em class="b-info">${t("웹 조사")}</em></h4>
         <p class="v3d-note">${t("공식 누리집·공공기관 자료의 문장을 그대로 옮겼어요 ({d} 확인). 찾지 못한 것은 넣지 않았어요. 출처를 눌러 원문을 확인할 수 있어요.", { d: escH(place.webAt || "") })}</p>
         <ol class="v3d-route">${place.web.map((r) => { const stt = statusOf(r.text); return `<li class="v3d-stop s-${stt}"><span class="v3d-stop-ic" aria-hidden="true">${WEB_ICON[r.k] || "📄"}</span><div><b>${t(r.k)} <em class="b-${stt}">${ST[stt][0]} ${t(ST[stt][1])}</em></b><p lang="ko">${escH(r.text)}</p><a class="v3d-src" href="${escH(r.url)}" target="_blank" rel="noopener">${t("출처")}: ${escH(r.src || new URL(r.url).hostname)}${r.date ? ` · ${escH(r.date)}` : ""} ↗</a></div></li>`; }).join("")}</ol>` : ""}
+      ${place.open ? `<p class="v3d-badge">🏅 <b>${t("열린관광지")}</b> <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}${place.open.tel ? ` · ☎ ${escH(place.open.tel)}` : ""}</p>` : ""}
+      ${(place.toilets || []).length ? `<h4>🚻 ${t("이곳의 공중화장실")} <em class="ok">${t("공식")}</em></h4>
+        <p class="v3d-note">${t("행정안전부 공중화장실 자료예요. 이 자료에는 좌표가 없어 지도에는 찍지 못하고 이름과 주소로 보여 드려요.")}</p>
+        <ul class="v3d-wc">${place.toilets.map((x) => `<li><b>${escH(x.name)}</b> ${x.acc ? `<em class="b-ok">♿ ${t("장애인용 변기")} ${t("남 {m} · 여 {w}", { m: x.accM, w: x.accW })}</em>` : `<em class="b-info">${t("장애인용 변기 등록 없음")}</em>`}${x.diaper ? ` <em class="b-info">👶 ${t("기저귀 교환대")}</em>` : ""}<small>${escH(x.addr || "")}${x.open ? ` · ${escH(x.open)}` : ""}${x.ref ? ` · ${t("자료 기준 {d}", { d: escH(x.ref) })}` : ""}</small></li>`).join("")}</ul>` : ""}
+      ${(place.trails || []).length ? `<h4>🌲 ${t("근처 무장애나눔길")} <em class="ok">${t("공식")}</em></h4>
+        <p class="v3d-note">${t("휠체어·유모차도 다닐 수 있게 만든 숲길이에요 (한국산림복지진흥원). 지도에 청록색 굵은 선으로 표시했어요.")}</p>
+        <ul class="v3d-wc">${place.trails.map((tr, i) => `<li><b>${escH(tr.name)}</b> · ${t("길이 {m}m", { m: tr.len })} <button type="button" class="v3d-btn" data-trail="${i}">${t("지도에서 보기")}</button></li>`).join("")}</ul>` : ""}
       <h4>📷 ${t("사진으로 보기")}</h4>
       <div class="v3d-photos" id="v3dPhotos"><p class="v3d-note">${t("사진을 불러오는 중…")}</p></div>
       <div class="v3d-links">
@@ -413,6 +426,12 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       box.querySelectorAll("img").forEach((im) => im.addEventListener("error", () => { im.closest("figure").remove(); none(); }));
     });
   }
+  indoorEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-trail]"); if (!b) return;
+    const tr = place.trails[Number(b.dataset.trail)], pt = tr.line ? tr.line[0][Math.floor(tr.line[0].length / 2)] : [tr.lng, tr.lat];
+    showSheet(null); stopOrbit(); if (state.following) setFollow(false);
+    map.flyTo({ center: pt, zoom: 16.4, pitch: 55, duration: calm ? 0 : 1400, essential: true });
+  });
   q("indoor").addEventListener("click", () => { if (!indoorEl.hidden) return showSheet(null); stopOrbit(); drawIndoor(); showSheet("indoor"); });
 
   // 현장 확인 남기기: 따라가는 중이면 내 위치에, 아니면 화면 가운데(＋)에 표시를 남긴다. 이 기기에만 저장한다

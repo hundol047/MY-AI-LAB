@@ -1075,3 +1075,10 @@ h3.h4 { font-size: 14px; margin: 14px 0 8px; }
 .v3d-src { display: inline-block; margin-top: 4px; font-size: 12px; color: #1d4ed8; font-weight: 700; word-break: break-all; }
 .acc-web { display: block; margin: 4px 0; padding: 6px 9px; border-radius: 8px; background: var(--brand-soft); }
 .acc-web em { font-style: normal; font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: #475569; color: #fff; white-space: nowrap; }
+.acc-open { display: block; margin: 4px 0; padding: 6px 9px; border-radius: 8px; background: color-mix(in srgb, var(--ok, #16a34a) 10%, transparent); }
+.acc-open em.ok { font-style: normal; font-size: 11px; font-weight: 800; padding: 1px 6px; border-radius: 999px; background: #1d4ed8; color: #fff; white-space: nowrap; }
+.v3d-badge { margin: 4px 0 10px; padding: 9px 11px; border-radius: 12px; background: #ecfdf5; border: 1px solid #6ee7b7; font-size: 13.5px; }
+.v3d-wc { list-style: none; margin: 0 0 8px; padding: 0; display: grid; gap: 6px; }
+.v3d-wc li { padding: 8px 10px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 13.5px; }
+.v3d-wc small { display: block; margin-top: 2px; color: #4b5563; font-size: 12px; }
+.v3d-wc .v3d-btn { min-height: 36px; padding: 4px 10px; font-size: 12.5px; margin-left: 4px; }

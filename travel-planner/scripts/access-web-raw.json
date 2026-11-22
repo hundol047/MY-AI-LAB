@@ -1,6 +1,6 @@
 {
  "checkedAt": "2026-11-22",
- "source": "한국관광공사 열린관광 모두의 여행 (https://access.visitkorea.or.kr)",
+ "source": "한국관광공사 열린관광 모두의 여행 (https://access.visitkorea.or.kr) · 시군 문화관광 누리집",
  "official": {},
  "places": {
   "sutasa": [],
@@ -47,7 +47,24 @@
   "crane-center": [],
   "geonbongsa": [],
   "cheonggan": [],
-  "jujeongol": [],
+  "jujeongol": [
+   {
+    "k": "접근로",
+    "quote": "오색약수터에서 성국사까지 가는 길은 무장애탐방로로 장애인이나 노약자, 어린이, 임산부를 비롯해 누구든 편안하고 안전하게 이용할 수 있다.",
+    "url": "https://tour.yangyang.go.kr/pub/yy10view.do?mode=v&seq=175",
+    "src": "양양군 문화관광",
+    "date": "2026-11",
+    "title": "양양관광 - 양양10경"
+   },
+   {
+    "k": "접근로",
+    "quote": "용소폭포 쪽으로 가면 갑자기 돌길들이 나오지만 그 이전까지는 무난하게 걸을 수 있는 난이도다.",
+    "url": "https://tour.yangyang.go.kr/pub/yy10view.do?mode=v&seq=175",
+    "src": "양양군 문화관광",
+    "date": "2026-11",
+    "title": "양양관광 - 양양10경"
+   }
+  ],
   "biseondae": [],
   "ulsanbawi": [],
   "gwangchi-forest": [],
@@ -76,7 +93,16 @@
   "pc-bangadari": [],
   "pc-lavender": [],
   "pc-kensington": [],
-  "pc-skijump": [],
+  "pc-skijump": [
+   {
+    "k": "접근로",
+    "quote": "관람석과 운동장이 있는 메인 스타디움에서 모노레일을 타고 스키점프대까지 올라가 전망대를 둘러볼 수 있다.",
+    "url": "https://tour.pc.go.kr/Home/H50000/H51300/boardView?board_key=369",
+    "src": "평창군 문화관광 무장애관광정보",
+    "date": "2026-11",
+    "title": "평창문화관광 &gt; 여행가이드 &gt; 무장애관광정보"
+   }
+  ],
   "pc-seonjaryeong": [],
   "pc-doam": [],
   "pc-animal-farm": [],
@@ -276,6 +302,54 @@
   "wj-market": [],
   "hanwoo": [],
   "guryong-food": [],
-  "ganhyeon-food": []
+  "ganhyeon-food": [],
+  "hajodae": [
+   {
+    "k": "접근로",
+    "quote": "데크길을 따라 가보면 계단길이 나오는데",
+    "url": "https://tour.yangyang.go.kr/pub/yy10view.do?mode=v&seq=172",
+    "src": "양양군 문화관광",
+    "date": "2026-11",
+    "title": "양양관광 - 양양10경"
+   }
+  ],
+  "namae-port": [
+   {
+    "k": "접근로",
+    "quote": "남애항 스카이워크는 계단을 조금만 오르면 보인다.",
+    "url": "https://tour.yangyang.go.kr/pub/yy10view.do?mode=v&seq=168",
+    "src": "양양군 문화관광",
+    "date": "2026-11",
+    "title": "양양관광 - 양양10경"
+   }
+  ],
+  "naksansa": [
+   {
+    "k": "휠체어",
+    "quote": "휠체어대여",
+    "url": "https://tour.yangyang.go.kr/pub/yy10view.do?mode=v&seq=169",
+    "src": "양양군 문화관광",
+    "date": "2026-11",
+    "title": "양양관광 - 양양10경"
+   }
+  ],
+  "balwang": [
+   {
+    "k": "접근로",
+    "quote": "유모차, 휠체어 등의 보조기구가 완비되어 있으며, 경사도 8% 이하의 완만한 코스로 데크길을 설계하여 관광 약자인 장애인, 영유아, 임산부, 고령자도 편안하게 즐길 수 있다.",
+    "url": "https://tour.pc.go.kr/Home/H50000/H51300/boardView?board_key=371",
+    "src": "평창군 문화관광 무장애관광정보",
+    "date": "2026-11",
+    "title": "평창문화관광 &gt; 여행가이드 &gt; 무장애관광정보"
+   },
+   {
+    "k": "기타",
+    "quote": "발왕산 천년주목숲길은 \"2023 한국관광의 별 무장애 관광지\"부문 선정지로 발왕산 정상에 조성되어 있다.",
+    "url": "https://tour.pc.go.kr/Home/H50000/H51300/boardView?board_key=371",
+    "src": "평창군 문화관광 무장애관광정보",
+    "date": "2026-11",
+    "title": "평창문화관광 &gt; 여행가이드 &gt; 무장애관광정보"
+   }
+  ]
  }
 }
