@@ -2153,10 +2153,11 @@ $("#timeline").addEventListener("click", (e) => {
 });
 
 // 내려받은 공공데이터 파일로 만든 자료 (scripts/bake-public-files.mjs): 열린관광지, 장소 이름이 들어간 공식 화장실, 무장애나눔길
-let openSites = null, toiletsNamed = null, bfTrails = null;
+let openSites = null, toiletsNamed = null, bfTrails = null, facilities = null;
 const reAcc = () => { if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); };
 fetchT("open-sites.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { openSites = j?.places || null; reAcc(); }).catch(() => {});
 fetchT("toilets-named.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { toiletsNamed = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("facilities.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { facilities = j?.places || null; reAcc(); }).catch(() => {});
 fetchT("bf-trails.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { bfTrails = j?.trails || null; reAcc(); }).catch(() => {});
 const kmBetween = (a, b) => { const r = Math.PI / 180, x = (b.lng - a.lng) * r * Math.cos(((a.lat + b.lat) / 2) * r), y = (b.lat - a.lat) * r; return Math.hypot(x, y) * 6371; };
 // 장소 3km 안의 무장애나눔길 (선이 있으면 선에서 가장 가까운 점까지)
@@ -2166,6 +2167,8 @@ function trailsNear(p, maxKm = 1.5) {
 function officialLines(p) {
   const out = [];
   if (openSites?.[p.id]) out.push(`<span class="acc-open">🏅 ${t("열린관광지")} <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}</span>`);
+  const fc = facilities?.[p.id];
+  if (fc?.items?.length) out.push(`<span class="acc-open">🏢 ${t("건물 편의시설 {n}가지 등록", { n: fc.items.length })} <em class="ok">${t("공식")}</em> <span lang="ko">${esc(fc.items.slice(0, 4).join(", "))}${fc.items.length > 4 ? " …" : ""}</span></span>`);
   const tn = toiletsNamed?.[p.id];
   if (tn?.length) { const a = tn.filter((x) => x.acc); out.push(`<span class="acc-open">🚻 ${t("이곳의 공중화장실 {n}곳", { n: tn.length })} <em class="ok">${t("공식")}</em> ${a.length ? t("장애인 화장실: {names}", { names: esc(a.slice(0, 3).map((x) => x.name).join(", ")) + (a.length > 3 ? " …" : "") }) : t("장애인용 변기가 등록된 곳은 없어요")}</span>`); }
   const tr = trailsNear(p)[0];
@@ -2195,7 +2198,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
+  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], fac: facilities?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {

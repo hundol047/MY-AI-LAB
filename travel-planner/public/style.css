@@ -1082,3 +1082,6 @@ h3.h4 { font-size: 14px; margin: 14px 0 8px; }
 .v3d-wc li { padding: 8px 10px; border-radius: 12px; background: #f8fafc; border: 1px solid #e2e8f0; font-size: 13.5px; }
 .v3d-wc small { display: block; margin-top: 2px; color: #4b5563; font-size: 12px; }
 .v3d-wc .v3d-btn { min-height: 36px; padding: 4px 10px; font-size: 12.5px; margin-left: 4px; }
+
+.v3d-fac { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.v3d-fac span { padding: 4px 10px; border-radius: 999px; background: rgba(13,148,136,.16); font-size: .9rem; }

@@ -404,6 +404,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         <p class="v3d-note">${t("공식 누리집·공공기관 자료의 문장을 그대로 옮겼어요 ({d} 확인). 찾지 못한 것은 넣지 않았어요. 출처를 눌러 원문을 확인할 수 있어요.", { d: escH(place.webAt || "") })}</p>
         <ol class="v3d-route">${place.web.map((r) => { const stt = statusOf(r.text); return `<li class="v3d-stop s-${stt}"><span class="v3d-stop-ic" aria-hidden="true">${WEB_ICON[r.k] || "📄"}</span><div><b>${t(r.k)} <em class="b-${stt}">${ST[stt][0]} ${t(ST[stt][1])}</em></b><p lang="ko">${escH(r.text)}</p><a class="v3d-src" href="${escH(r.url)}" target="_blank" rel="noopener">${t("출처")}: ${escH(r.src || new URL(r.url).hostname)}${r.date ? ` · ${escH(r.date)}` : ""} ↗</a></div></li>`; }).join("")}</ol>` : ""}
       ${place.open ? `<p class="v3d-badge">🏅 <b>${t("열린관광지")}</b> <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}${place.open.tel ? ` · ☎ ${escH(place.open.tel)}` : ""}</p>` : ""}
+      ${place.fac?.items?.length ? `<h4>🏢 ${t("이 건물의 편의시설")} <em class="ok">${t("공식")}</em></h4>
+        <p class="v3d-note">${t("한국사회보장정보원 장애인편의시설 현황에 이 건물에 설치된 것으로 등록된 편의시설이에요. 목록에 없다고 없는 것은 아니에요.")}</p>
+        <p class="v3d-fac" lang="ko">${place.fac.items.map((x) => `<span>${escH(x)}</span>`).join("")}</p>
+        <p class="v3d-note"><small>${t("등록 시설: {name}", { name: escH(place.fac.name) })}${place.fac.addr ? ` · ${escH(place.fac.addr)}` : ""}</small></p>` : ""}
       ${(place.toilets || []).length ? `<h4>🚻 ${t("이곳의 공중화장실")} <em class="ok">${t("공식")}</em></h4>
         <p class="v3d-note">${t("행정안전부 공중화장실 자료예요. 이 자료에는 좌표가 없어 지도에는 찍지 못하고 이름과 주소로 보여 드려요.")}</p>
         <ul class="v3d-wc">${place.toilets.map((x) => `<li><b>${escH(x.name)}</b> ${x.acc ? `<em class="b-ok">♿ ${t("장애인용 변기")} ${t("남 {m} · 여 {w}", { m: x.accM, w: x.accW })}</em>` : `<em class="b-info">${t("장애인용 변기 등록 없음")}</em>`}${x.diaper ? ` <em class="b-info">👶 ${t("기저귀 교환대")}</em>` : ""}<small>${escH(x.addr || "")}${x.open ? ` · ${escH(x.open)}` : ""}${x.ref ? ` · ${t("자료 기준 {d}", { d: escH(x.ref) })}` : ""}</small></li>`).join("")}</ul>` : ""}
