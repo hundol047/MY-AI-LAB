@@ -24,7 +24,13 @@ import android.speech.tts.TextToSpeech;
 import android.speech.tts.UtteranceProgressListener;
 import java.util.Locale;
 import java.util.ArrayList;
+import android.view.View;
 import android.view.Window;
+import android.view.WindowInsets;
+import android.view.WindowInsetsController;
+import android.widget.FrameLayout;
+import android.window.OnBackInvokedCallback;
+import android.window.OnBackInvokedDispatcher;
 import android.webkit.GeolocationPermissions;
 import android.webkit.JavascriptInterface;
 import android.webkit.ServiceWorkerClient;
@@ -102,10 +108,35 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         Window w = getWindow();
-        w.setStatusBarColor(Color.parseColor("#0b5e6b"));
-
         web = new WebView(this);
-        setContentView(web);
+        // 화면 가장자리까지 그리기(안드로이드 15부터 기본, 16(targetSdk 36)부터는 끌 수 없음):
+        // 웹 화면을 상태바·내비게이션바·카메라 구멍만큼 안쪽으로 들이고, 그 띠는 앱 색으로 칠한다
+        FrameLayout root = new FrameLayout(this);
+        root.setBackgroundColor(Color.parseColor("#34479a"));
+        root.addView(web, new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT));
+        setContentView(root);
+        if (Build.VERSION.SDK_INT >= 30) {
+            w.setDecorFitsSystemWindows(false);
+            root.setOnApplyWindowInsetsListener(new View.OnApplyWindowInsetsListener() {
+                @Override
+                public WindowInsets onApplyWindowInsets(View v, WindowInsets insets) {
+                    android.graphics.Insets b = insets.getInsets(WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout() | WindowInsets.Type.ime());
+                    v.setPadding(b.left, b.top, b.right, b.bottom);
+                    return WindowInsets.CONSUMED;
+                }
+            });
+            WindowInsetsController c = w.getInsetsController();
+            if (c != null) c.setSystemBarsAppearance(0, WindowInsetsController.APPEARANCE_LIGHT_STATUS_BARS | WindowInsetsController.APPEARANCE_LIGHT_NAVIGATION_BARS); // 진한 띠 위 흰 아이콘
+        } else {
+            w.setStatusBarColor(Color.parseColor("#34479a"));
+        }
+        // 뒤로 가기 (안드로이드 13부터 OnBackInvokedCallback, 16(targetSdk 36)부터는 onBackPressed가 불리지 않는다)
+        if (Build.VERSION.SDK_INT >= 33) {
+            getOnBackInvokedDispatcher().registerOnBackInvokedCallback(OnBackInvokedDispatcher.PRIORITY_DEFAULT, new OnBackInvokedCallback() {
+                @Override
+                public void onBackInvoked() { handleBack(); }
+            });
+        }
 
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);
@@ -627,11 +658,23 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-    @Override
-    public void onBackPressed() {
-        if (web != null && web.canGoBack()) web.goBack();
-        else super.onBackPressed();
+    // 뒤로 가기: 먼저 웹 화면에 물어본다(3D 화면·크게 본 지도·설정 창이 열려 있으면 그것을 닫음 → window.__appBack()이 true).
+    // 닫을 것이 없으면 이전 페이지, 그것도 없으면 앱을 뒤로 보낸다(홈 화면으로, 앱 상태는 그대로)
+    private void handleBack() {
+        if (web == null) { moveTaskToBack(true); return; }
+        web.evaluateJavascript("(function(){try{return !!(window.__appBack&&window.__appBack());}catch(e){return false;}})()", new ValueCallback<String>() {
+            @Override
+            public void onReceiveValue(String handled) {
+                if ("true".equals(handled)) return;
+                if (web.canGoBack()) web.goBack();
+                else moveTaskToBack(true);
+            }
+        });
     }
+
+    @Override
+    @SuppressWarnings("deprecation")
+    public void onBackPressed() { handleBack(); } // 안드로이드 12 이하
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

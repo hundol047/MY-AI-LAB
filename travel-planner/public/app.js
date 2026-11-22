@@ -1,4 +1,4 @@
-import { recommendBooking, bookingPeople, bookingScope } from "./booking-links.js";
+import { recommendBooking, bookingPeople, bookingScope, AFFILIATE } from "./booking-links.js";
 import { planTrip, swapItem, replanFromNow, setBus, setAccessAvoid, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
@@ -9,6 +9,11 @@ import { todayStatus, kstNow, reminderList } from "./today.js";
 import { settle } from "./split.js";
 import { toPlannerPlace } from "./directory-place.js";
 import { bestArrival, hasRoute, returnTrips } from "./transit.js";
+import { openView3D, closeView3D } from "./view3d.js";
+import { initPrivacy } from "./privacy-lock.js";
+import * as Acct from "./account-client.js";
+import { baseLayers, GLYPHS, OFM_URL, OFM_ATTR } from "./basemap.js";
+import { statusOf } from "./access-steps.js";
 import { t, souvenirName, isEN, isForeign, getLang, namesEn, setLang, applyStatic, loadDataEn, loadLang, placeName, placeDesc, dateLabel, minutesLabel, monthsLabel, regionLabel, areaName, lodgingName, lodgingDesc, typeLabel, typeLabelFromKo, lodgingReason, benefitText, startName } from "./i18n.js";
 // 무료 간단 모드(가이드·한 줄 시작·숙소 체크)와 그 지식은 첫 화면 뒤에 받는다 (첫 화면을 가볍게)
 const localAI = () => import("./ai-local.js");
@@ -227,7 +232,7 @@ function renderOptions() {
   if (!state.baseOpts) { box.hidden = true; return; }
   const list = optionsFor(state.input, state.baseOpts);
   box.hidden = false;
-  box.innerHTML = `<h3>${t("일정 3개 중에서 고르세요")}</h3><p class="why">${esc(whyText())}</p>
+  box.innerHTML = `<h2 class="opt-title">${t("일정 3개 중에서 고르세요")}</h2><p class="why">${esc(whyText())}</p>
     <div class="opt-list">${list.map((o) => `<button type="button" class="opt${state.choice === o.key ? " on" : ""}" data-opt="${o.key}">
       <b>${t(OPT_NAME[o.key])}</b><span class="opt-sub">${t(OPT_SUB[o.key])}</span>
       <span class="opt-stats">${t("{n}곳 · 이동 {m} · 걷기 {km}km", { n: o.places, m: minutesLabel(o.totals.moveMin), km: o.totals.walkKm })}</span>
@@ -265,6 +270,8 @@ document.addEventListener("click", (e) => {
 });
 
 /* ---------- 일정 저장·비교 (이 기기에만, 최대 20개) ---------- */
+// 저장한 일정이 바뀌면: 로그인해 있으면 잠시 뒤 암호화해 동기화 (account-client.js, 서버가 있을 때만)
+function savedChanged() { if (document.body.classList.contains("has-server")) Acct.scheduleSync(() => renderSaved()); }
 const savedTrips = () => (store.get("savedTrips") || []).filter((x) => x?.snap?.input && x.meta);
 function tripSummary() {
   let cost = null;
@@ -276,6 +283,7 @@ $("#saveTripBtn").addEventListener("click", () => {
   const meta = { date: state.input.date, regions: state.input.route || [state.input.region], days: state.input.days, choice: state.choice || "best" };
   const entry = { id: Date.now().toString(36), meta, savedAt: Date.now(), snap: snapshot(), extra: { baseOpts: state.baseOpts, choice: state.choice, heard: state.heard, said: state.said }, sum: tripSummary() };
   if (!store.set("savedTrips", [entry, ...list].slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  savedChanged();
   track("trip_save");
   toast(t("이 기기에 저장했어요 · 첫 화면 '저장한 일정'에서 열 수 있어요"));
   renderSaved();
@@ -347,7 +355,7 @@ async function renderOptCourses() {
   const top = rankCourses(list, inp, acc, state.opts.course).slice(0, 3);
   const cur = state.opts.course && list.find((c) => c.id === state.opts.course);
   box.innerHTML = (cur ? `<p class="c-now">${t("추천 코스 \"{name}\"로 짰어요 · 여행 날짜의 운영시간에 맞춰 다시 확인했어요", { name: esc(courseTitle(cur)) })}</p>` : "")
-    + (top.length ? `<h4>${t("조건에 맞는 추천 코스 3개")}</h4><div class="course-list">${top.map(courseCard).join("")}</div>` : "");
+    + (top.length ? `<h3 class="h4">${t("조건에 맞는 추천 코스 3개")}</h3><div class="course-list">${top.map(courseCard).join("")}</div>` : "");
 }
 document.addEventListener("click", async (e) => {
   const b = e.target.closest("[data-course]"); if (!b) return;
@@ -381,6 +389,7 @@ function importTrips(list) {
   const add = list.filter((x) => !ids.has(x.id));
   if (!add.length) return toast(list.length ? t("이미 있는 일정이에요") : t("옮긴 일정을 읽지 못했어요"));
   if (!store.set("savedTrips", [...add, ...have].sort((a, b) => b.savedAt - a.savedAt).slice(0, 20))) return toast(t("저장 공간이 부족해요 · 저장한 일정을 지워 주세요"));
+  savedChanged();
   renderSaved(); show("setup");
   toast(t("일정 {n}개를 받았어요 · '저장한 일정'에서 열 수 있어요", { n: add.length }));
   track("transfer_in", String(add.length));
@@ -458,7 +467,7 @@ document.addEventListener("click", (e) => {
   const o = e.target.closest("[data-open-saved]");
   if (o) { const x = savedTrips().find((y) => y.id === o.dataset.openSaved); if (x) { openSnapshot(x.snap, x.extra || {}); track("trip_open_saved"); } return; }
   const d = e.target.closest("[data-del-saved]");
-  if (d) { store.set("savedTrips", savedTrips().filter((y) => y.id !== d.dataset.delSaved)); comparePick.delete(d.dataset.delSaved); renderSaved(); return; }
+  if (d) { store.set("savedTrips", savedTrips().filter((y) => y.id !== d.dataset.delSaved)); store.set("savedTomb", { ...(store.get("savedTomb") || {}), [d.dataset.delSaved]: Date.now() }); comparePick.delete(d.dataset.delSaved); renderSaved(); savedChanged(); return; }
   if (e.target.id === "compareBtn") {
     const rows = savedTrips().filter((x) => comparePick.has(x.id));
     const won = (n) => `${Math.round(n / 10000)}${t("만 원")}`;
@@ -834,11 +843,12 @@ function itemHTML(it, i, day) {
         ${crowdLine(p, trip.days[dayIdx].date)}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
+        ${p.noticeKnownUntil && trip.days[dayIdx].date > p.noticeKnownUntil ? `<div class="alert warn">${t("매달 휴장일을 따로 공지하는 곳이에요 · 앱에는 {d}까지의 공지만 있어요. 출발 전 공식 공지를 확인하세요", { d: p.noticeKnownUntil.slice(5).replace("-", ".") })}${p.noticeUrl ? ` <a href="${esc(p.noticeUrl)}" target="_blank" rel="noopener">${t("공식 홈페이지")}</a>` : ""}</div>` : ""}
         ${alertsFor(p, trip.days[dayIdx].date, weather[trip.days[dayIdx].date]).map((a) => `<div class="alert ${a.level}">${alertText(a)}</div>`).join("")}
       </div>
       <div class="acts place-acts">
         <a class="ghost small" href="${esc(routeLink(i === 0 ? { name: startName(day.start, lodgingForDay(trip, dayIdx - 1) || trip.lodging), lat: day.start.lat, lng: day.start.lng } : { name: placeName(day.items[i - 1].place), lat: day.items[i - 1].place.lat, lng: day.items[i - 1].place.lng }, { name: placeName(p), lat: p.lat, lng: p.lng }))}" target="_blank" rel="noopener" title="${esc(t("{from}에서 여기까지 길찾기", { from: i === 0 ? startName(day.start, trip.lodging) : placeName(day.items[i - 1].place) }))}">${t("길찾기")}</a>
-        <button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
+        <button class="ghost small" type="button" data-view3d="${i}" title="${esc(t("이 장소를 3D로 둘러보기 · 현장에서는 내 위치를 따라가요"))}">${t("🧊 3D로 보기")}</button><button class="ghost small" type="button" data-swap="${i}">${t("바꾸기")}</button><a class="ghost small needs-server" href="reviews.html?place=${encodeURIComponent(p.id)}">${t("후기")}</a><a class="ghost small no-server" href="https://map.naver.com/p/search/${encodeURIComponent(p.name)}" target="_blank" rel="noopener" title="${t("네이버 지도 방문자 후기")}">${t("후기")}</a>${voteHTML(p.id)}
       </div>
     </article>
   </li>`;
@@ -1020,6 +1030,22 @@ document.addEventListener("click", async (e) => {
 const ACCESS_LABEL = { room: "장애인 객실", wheel: "휠체어 대여", ramp: "경사로·턱 없음", elevator: "엘리베이터", toilet: "장애인 화장실", parking: "장애인 주차", stroller: "유모차 대여", nursing: "수유실" };
 // 걷는 양 (장소 안 동선 추정): 걷기 1 평지·짧게, 2 조금, 3 오래·오르막
 const WALK_LABEL = { 1: "평지 위주 · 짧게 (약 200m)", 2: "조금 걸어요 (약 800m)", 3: "많이 걸어요 (오르막·2km 이상)" };
+// 장소 주변 걷기 정보 조사(walk-info.json, scripts/bake-walk-info.mjs): 둘레 400m의 걷는 길 경사·계단·화장실. 오픈스트리트맵 자료라 '미확인'으로 적는다
+let walkInfo = null;
+fetchT("walk-info.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { walkInfo = j?.places ? j : null; if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); }).catch(() => {});
+function walkInfoLine(p) {
+  const w = walkInfo?.places?.[p.id]; if (!w) return "";
+  const r = walkInfo.radius || 400;
+  if (!w.n && !w.st && !w.wc) return `<div class="walk-info none">🗺 ${t("주변 {r}m: 걷는 길·계단·화장실 지도 자료가 없어요 · 현장 확인이 필요해요", { r })}</div>`;
+  const bits = [];
+  if (w.sh) bits.push(`<span class="wi-bar" aria-hidden="true">${w.sh.map((v, i) => (v ? `<i class="g${i}" style="flex:${v}"></i>` : "")).join("")}</span>${t("걷는 길: 완만 {a}% · 조금 가파름 {b}% · 가파름 {c}%", { a: w.sh[0], b: w.sh[1], c: w.sh[2] })}`);
+  else if (w.n) bits.push(t("걷는 길의 경사를 아직 모르겠어요"));
+  else bits.push(t("걷는 길 지도 자료 없음"));
+  if (w.unp) bits.push(t("흙·자갈길 {n}%", { n: w.unp }));
+  bits.push(w.st ? t("계단 {n}곳 (가장 가까운 곳 {m}m)", { n: w.st, m: w.stM }) : t("계단 표시 없음"));
+  bits.push(w.wc ? t("화장실 {n}곳 (가장 가까운 곳 {m}m)", { n: w.wc, m: w.wcM }) + (w.wcAcc ? ` · ${t("♿ 장애인 화장실 {m}m", { m: w.wcAccM })}` : "") : t("화장실 표시 없음"));
+  return `<div class="walk-info">🗺 <b>${t("주변 {r}m 지도 자료", { r })}</b> <em>${t("미확인")}</em> ${bits.join(" · ")}<small>${t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 3D로 보기에서 위치를 확인하세요")}</small></div>`;
+}
 function accessLine(p) {
   if (p.cat === "festival") return "";
   const food = ["food", "cafe"].includes(p.cat) && !p.multi;
@@ -1028,12 +1054,12 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}<span>${t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${fieldCheckHTML(p)}</div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${officialLines(p)}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
-  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
-    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${fieldCheckHTML(p)}</div>`;
+  return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${officialLines(p)}${p.access.stepsWarn ? `<span class="acc-steps">⚠️ ${t("공식 조사: 계단 있음")} — ${esc(p.access.stepsWarn)}</span>` : ""}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
+    ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
 }
 
 // 주차 (parking.json, 한국관광공사 소개정보의 주차 원문) — 자동차 일정 카드에만
@@ -1385,7 +1411,7 @@ function priceLinks(query, compact = false) {
   // 숙소 목록의 각 줄은 예약 버튼만 (다른 플랫폼·요금 비교는 아래 큰 버튼에서 한 번만)
   if (compact) return `<div class="booking-choice">${main}</div>`;
   return `<div class="booking-choice">
-    ${main}
+    ${main}${AFFILIATE.on() ? `<small class="affiliate-note">${t("제휴 링크예요 · 예약하면 운영자가 수수료를 받을 수 있지만 가격은 같아요")}</small>` : ""}
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
       `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
     <details><summary>${t("확인한 요금 비교")}</summary>
@@ -1935,6 +1961,7 @@ function drawMap3D(day) {
   if (!day.items.length) return;
   if (!ml) {
     ml = new maplibregl.Map({
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 3배 화면도 2배로 그려 배터리·발열을 줄인다
       container: "map", attributionControl: { compact: true }, pitch: 55, bearing: -12, maxPitch: 75,
       center: [model.line[0][1], model.line[0][0]], zoom: 11,
       // 화면 안에서는 두 손가락(컴퓨터는 Ctrl+휠)으로 움직이고, 한 손가락은 페이지 스크롤 · "크게 보기"에서는 한 손가락으로
@@ -1942,16 +1969,17 @@ function drawMap3D(day) {
       locale: { "CooperativeGesturesHandler.WindowsHelpText": t("Ctrl 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MacHelpText": t("⌘ 키를 누른 채 휠을 돌리면 지도가 커지고 작아져요"), "CooperativeGesturesHandler.MobileHelpText": t("두 손가락으로 지도를 움직여요 · 크게 보기를 누르면 한 손가락으로") },
       style: {
         version: 8,
+        glyphs: GLYPHS,
         sources: {
-          osm: { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" },
           dem: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN_TILES], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           // 3D 건물: OpenFreeMap(무료, 키 없음)의 OpenMapTiles 벡터 지도 building 층 (render_height·render_min_height, m)
-          ofm: { type: "vector", url: "https://tiles.openfreemap.org/planet", attribution: "© OpenFreeMap © OpenMapTiles" },
+          // 바탕 지도·3D 건물: OpenFreeMap(무료, 키 없음, 앱 배포 허용)의 OpenMapTiles 벡터 지도 (basemap.js)
+          ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
         },
         layers: [
-          { id: "osm", type: "raster", source: "osm" },
-          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.35, "hillshade-shadow-color": "#3a4a40" } },
+          ...baseLayers({ lang: getLang(), dark: document.documentElement.dataset.theme === "dark" || (document.documentElement.dataset.theme !== "light" && !!window.matchMedia?.("(prefers-color-scheme: dark)").matches) }),
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.3, "hillshade-shadow-color": "#3a4a40" } },
           // 시내를 가까이 볼 때(13~) 건물이 솟아오른다. 높이가 없는 건물은 2층(6m)으로 본다
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
@@ -1966,6 +1994,7 @@ function drawMap3D(day) {
       },
     });
     ml.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    setTimeout(() => document.querySelector("#map .maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"), 4000); // 출처는 잠깐 보이고 접힘 (ⓘ로 다시)
     ml.addControl({ onAdd: () => locateButton((ll) => { ml.flyTo({ center: [ll[1], ll[0]], zoom: 14 }); return new maplibregl.Marker({ color: "#2563eb" }).setLngLat([ll[1], ll[0]]).addTo(ml); }), onRemove() {} }, "bottom-right");
     // 건물 자료를 못 받아도(오프라인 등) 지형 지도는 그대로 보인다
     ml.on("error", (e) => console.warn("지도", e?.error?.message || e));
@@ -2074,6 +2103,14 @@ function setMapFull(on) {
   track(on ? "map_full" : "map_full_close");
 }
 $("#mapInteract").addEventListener("click", () => setMapFull(!mapFull));
+// 휴대폰 '뒤로 가기'(안드로이드 앱이 부름): 열린 것부터 닫는다. 닫았으면 true
+window.__appBack = () => {
+  if (document.querySelector(".v3d")) { closeView3D(); return true; }
+  const dlg = [...document.querySelectorAll("dialog[open]")].pop();
+  if (dlg) { dlg.close(); return true; }
+  if (mapFull) { setMapFull(false); return true; }
+  return false;
+};
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && mapFull) setMapFull(false); });
 // 내 위치 버튼 (3D·2D 공통). mark(ll): 지도에 표시하고 그 표시를 돌려준다
 let meMarker = null;
@@ -2113,6 +2150,55 @@ $("#timeline").addEventListener("click", (e) => {
   applyRoad(dayIdx);
   const now = trip.days[dayIdx].items[i];
   toast(now ? t("{name}(으)로 바꿨어요", { name: placeName(now.place) }) : t("대신 갈 수 있는 곳이 없어 뺐어요"));
+});
+
+// 내려받은 공공데이터 파일로 만든 자료 (scripts/bake-public-files.mjs): 열린관광지, 장소 이름이 들어간 공식 화장실, 무장애나눔길
+let openSites = null, toiletsNamed = null, bfTrails = null, facilities = null;
+const reAcc = () => { if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); };
+fetchT("open-sites.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { openSites = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("toilets-named.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { toiletsNamed = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("facilities.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { facilities = j?.places || null; reAcc(); }).catch(() => {});
+fetchT("bf-trails.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { bfTrails = j?.trails || null; reAcc(); }).catch(() => {});
+const kmBetween = (a, b) => { const r = Math.PI / 180, x = (b.lng - a.lng) * r * Math.cos(((a.lat + b.lat) / 2) * r), y = (b.lat - a.lat) * r; return Math.hypot(x, y) * 6371; };
+// 장소 3km 안의 무장애나눔길 (선이 있으면 선에서 가장 가까운 점까지)
+function trailsNear(p, maxKm = 1.5) {
+  return (bfTrails || []).map((tr) => ({ tr, km: tr.line ? Math.min(...tr.line.flat().map(([lng, lat]) => kmBetween(p, { lat, lng }))) : kmBetween(p, tr) })).filter((x) => x.km <= maxKm).sort((a, b) => a.km - b.km);
+}
+function officialLines(p) {
+  const out = [];
+  if (openSites?.[p.id]) out.push(`<span class="acc-open">🏅 ${t("열린관광지")} <em class="ok">${t("공식")}</em> ${t("정부가 무장애로 정비한 관광지예요 (2022년 목록)")}</span>`);
+  const fc = facilities?.[p.id];
+  if (fc?.items?.length) out.push(`<span class="acc-open">🏢 ${t("건물 편의시설 {n}가지 등록", { n: fc.items.length })} <em class="ok">${t("공식")}</em> <span lang="ko">${esc(fc.name)}: ${esc(fc.items.slice(0, 4).join(", "))}${fc.items.length > 4 ? " …" : ""}</span></span>`);
+  const tn = toiletsNamed?.[p.id];
+  if (tn?.length) { const a = tn.filter((x) => x.acc); out.push(`<span class="acc-open">🚻 ${t("이곳의 공중화장실 {n}곳", { n: tn.length })} <em class="ok">${t("공식")}</em> ${a.length ? t("장애인 화장실: {names}", { names: esc(a.slice(0, 3).map((x) => x.name).join(", ")) + (a.length > 3 ? " …" : "") }) : t("장애인용 변기가 등록된 곳은 없어요")}</span>`); }
+  const tr = trailsNear(p)[0];
+  if (tr) out.push(`<span class="acc-open">🌲 ${t("근처 무장애나눔길")} <em class="ok">${t("공식")}</em> ${esc(tr.tr.name)} · ${t("길이 {m}m", { m: tr.tr.len })} · ${tr.km < 0.15 ? t("바로 옆") : t("약 {d} 떨어짐", { d: tr.km < 1 ? Math.round(tr.km * 100) * 10 + "m" : tr.km.toFixed(1) + "km" })}</span>`);
+  return out.join("");
+}
+// 공식 누리집에서 찾은 무장애 안내 (access-web.json, scripts/build-access-web.mjs): 관광공사 조사가 없는 관광지용. 원문 인용 + 출처
+let accessWeb = null;
+fetchT("access-web.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { accessWeb = j?.places ? j : null; if (trip && !$("#result").hidden && ((state.opts.access || []).length || state.opts.lessWalk)) render(); }).catch(() => {});
+function accessWebLine(p) {
+  const w = accessWeb?.places?.[p.id]; if (!w?.length) return "";
+  const bad = w.filter((x) => ["no", "part"].includes(statusOf(x.text)));
+  return `<span class="acc-web">🔎 ${t("공식 누리집 안내 {n}건", { n: w.length })} <em>${t("웹 조사")}</em>${bad.length ? ` · ⚠️ ${esc(bad[0].text)}` : ""} · ${t("'3D로 보기 → 실내·사진'에서 출처와 함께 볼 수 있어요")}</span>`;
+}
+// 장소 사진 여러 장: 관광공사 추가 사진(gallery.json, scripts/bake-gallery.mjs)이 있으면 그것, 없으면 카드에 쓰는 대표 사진 한 장
+let galleryData;
+async function placePhotos(p) {
+  galleryData ??= await fetchT("gallery.json", {}, 5000).then((r) => (r.ok ? r.json() : null)).then((j) => j?.places || {}).catch(() => ({}));
+  const g = (galleryData[p.id] || []).map((url) => ({ url, credit: t("한국관광공사") }));
+  if (g.length) return g;
+  const one = await photoFor(p).catch(() => "");
+  return one ? [{ url: one, credit: /visitkorea/.test(one) ? t("한국관광공사") : p.photoAt ? t("주변 사진 · {place}", { place: p.photoAt }) : "" }] : [];
+}
+// 3D로 보기: 그 장소를 전체 화면 3D로 (view3d.js). WebGL이 없는 기기는 안내만 한다
+$("#timeline").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-view3d]"); if (!b) return;
+  const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
+  if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
+  track("view3d");
+  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], fac: facilities?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {
@@ -2167,7 +2253,7 @@ async function runGuide(question, shown) {
   const currentDay = dayIdx, requestLang = getLang();
   const history = guideHistory.map(({q,a})=>({q,a}));
   if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000));
-  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history};
+  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history, walkInfo};
   bubble("me", shown);
   const wait = bubble("ai pending", t("생각 중"));
   const module = await localAI();
@@ -2568,6 +2654,8 @@ applyDefaults();
 function renderSettings() {
   const cur = { theme: localStorage.getItem("theme") || "system", big: document.documentElement.classList.contains("big") ? "1" : "0", access: defaults().access ?? "", move: defaults().move || "car" };
   document.querySelectorAll("#settings [data-set]").forEach((g) => g.querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.v === cur[g.dataset.set])));
+  $("#setLockBtn").textContent = privacy.lockOn() ? t("끄기") : t("켜기");
+  if (document.body.classList.contains("has-server")) Acct.status().then((st) => { $("#setAcct").textContent = st ? t("{email} · 저장한 일정을 암호화해 맞추는 중", { email: st.email }) : t("로그인하면 저장한 일정을 암호화해 다른 기기와 맞춰요"); $("#setAcctBtn").textContent = st ? t("내 계정") : t("로그인"); }).catch(() => {});
   $("#setSavedCount").textContent = t("{n}개", { n: (store.get("savedTrips") || []).length });
   // 버전: 오프라인 저장 이름(sw.js의 ohneul-gangwon-vNN)에서 번호만
   fetchT("sw.js", {}, 3000).then((r) => (r.ok ? r.text() : "")).then((x) => { const v = (x.match(/ohneul-gangwon-v(\d+)/) || [])[1]; $("#setVersion").textContent = v ? t("버전 {v}", { v: `1.${v}` }) : ""; }).catch(() => {});
@@ -2584,22 +2672,34 @@ $("#settings").addEventListener("click", async (e) => {
     if (k === "theme") { try { v === "system" ? localStorage.removeItem("theme") : localStorage.setItem("theme", v); } catch { /* 저장 공간 없음 */ } applyTheme(v); }
     if (k === "big") { store.set("bigText", v === "1"); applyBig(v === "1"); }
     if (k === "access" || k === "move") { store.set("defaults", { ...defaults(), [k]: v }); applyDefaults(); }
+    store.set("settingsAt", Date.now()); savedChanged();
     renderSettings(); return;
   }
+  if (e.target.closest("#setLockBtn")) { (privacy.lockOn() ? privacy.clearLock() : privacy.setLock()).then(() => renderSettings()); return; }
+  if (e.target.closest("#setExport")) return privacy.exportMine();
   const cb = e.target.closest("[data-clear]");
   if (cb) {
     const what = cb.dataset.clear;
     const ask = { saved: t("저장한 일정을 모두 지울까요?"), seen: t("최근 본 장소 기록을 지울까요?"), claim: t("반값여행 정산에 올린 영수증·사진을 모두 지울까요?"), all: t("이 기기에 저장된 일정·설정·기록을 모두 지울까요?") }[what];
     if (!confirm(ask)) return;
     const dropClaim = () => new Promise((r) => { try { const q = indexedDB.deleteDatabase("ohneul-claim"); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch { r(); } });
-    if (what === "saved") { localStorage.removeItem("savedTrips"); renderSaved(); }
+    if (what === "saved") { store.set("savedTomb", { ...(store.get("savedTomb") || {}), ...Object.fromEntries(savedTrips().map((x) => [x.id, Date.now()])) }); localStorage.removeItem("savedTrips"); renderSaved(); savedChanged(); }
     if (what === "seen") localStorage.removeItem("seenPlaces");
     if (what === "claim") { await dropClaim(); localStorage.removeItem("claim:settings"); }
-    if (what === "all") { await dropClaim(); try { localStorage.clear(); } catch { /* 무시 */ } location.reload(); return; }
+    if (what === "all") return wipeAll();
     toast(t("지웠어요")); renderSettings();
   }
 });
 window.matchMedia?.("(prefers-color-scheme: dark)").addEventListener?.("change", () => applyTheme(localStorage.getItem("theme") || "system"));
+
+// 이 기기 기록 모두 지우기 (설정의 '모두 지우기', 앱 잠금의 'PIN을 잊었어요'): 정산 자료·계정 키·저장한 것 전부
+async function wipeAll() {
+  await new Promise((r) => { try { const q = indexedDB.deleteDatabase("ohneul-claim"); q.onsuccess = q.onerror = q.onblocked = () => r(); } catch { r(); } });
+  await Acct.logout(false).catch(() => {});
+  try { localStorage.clear(); sessionStorage.clear(); } catch { /* 무시 */ }
+  location.reload();
+}
+const privacy = initPrivacy({ t, toast, wipeAll });
 
 /* ---------- 보기 편하게: 큰 글씨 · 일정 읽어 주기 ---------- */
 // 큰 글씨: 지도는 빼고(터치 위치가 어긋나지 않게) 글과 카드만 키운다. 이 기기에 기억
@@ -2712,8 +2812,20 @@ renderStartRow();
 // 예약·후기·가게 등록은 앱 서버(server.mjs)가 있어야 동작한다. GitHub Pages·안드로이드 앱처럼 서버가 없으면 그 버튼들을 숨긴다
 // (needs-server 클래스: 기본은 숨김, 서버가 응답하면 body.has-server로 보인다)
 fetchT("api/shops?region=gangneung", {}, 3000)
-  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); } })
+  .then((r) => { if (r.ok) { document.body.classList.add("has-server"); loadVotes(); renderSaved(); Acct.sync().then((x) => x && renderSaved()).catch(() => {}); } })
   .catch(() => {});
+
+// 아이폰·아이패드(사파리)에서는 앱스토어 앱 대신 '홈 화면에 추가'로 설치한다 → 처음 한 번 방법을 알려 준다 (닫으면 다시 안 보임)
+(() => {
+  const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  const standalone = navigator.standalone || matchMedia?.("(display-mode: standalone)").matches;
+  if (!ios || standalone || window.OhneulApp || store.get("iosTipDone")) return;
+  const bar = document.createElement("div");
+  bar.className = "ios-tip"; bar.setAttribute("role", "note");
+  bar.innerHTML = `<img src="apple-touch-icon.png" alt="" width="40" height="40"><p><b>${t("아이폰에 앱처럼 설치하기")}</b><span>${t("사파리 아래쪽 공유 버튼(□↑) → '홈 화면에 추가'를 누르면 앱처럼 열리고, 인터넷이 약해도 볼 수 있어요.")}</span></p><button type="button" class="ghost small" aria-label="${t("닫기")}">✕</button>`;
+  bar.querySelector("button").addEventListener("click", () => { store.set("iosTipDone", true); bar.remove(); });
+  setTimeout(() => document.body.append(bar), 2500);
+})();
 
 // 오프라인용 파일 받기(지도 엔진 1MB 포함)는 첫 화면과 첫 일정이 다 뜬 뒤에 한다
 if ("serviceWorker" in navigator) {

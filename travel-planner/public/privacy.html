@@ -19,7 +19,7 @@
 <body>
 <main>
 <h1>보폭 개인정보처리방침</h1>
-<p class="sub">시행일: 2026년 11월 19일 · 앱: 보폭 (안드로이드 앱 kr.ohneul.gangwon 및 웹)</p>
+<p class="sub">시행일: 2026년 11월 21일 · 앱: 보폭 (안드로이드 앱 kr.ohneul.gangwon 및 웹)</p>
 
 <h2>1. 기본 원칙</h2>
 <p>보폭은 회원가입·로그인 없이 쓰는 무료 강원 여행 일정 앱입니다. 일정을 만드는 데에는 이름·전화번호·이메일 같은 개인정보가 필요하지 않으며, 일정 계산은 모두 이용자의 기기 안에서 이루어집니다.</p>
@@ -53,15 +53,32 @@
   <tr><td>정보 오류 제보</td><td>장소, 제보 종류, 메모 (개인정보 받지 않음)</td><td>정보 수정에 사용</td></tr>
   <tr><td>무장애 현장 확인</td><td>장소, 확인 종류(계단·턱 있음 / 휠체어로 다닐 만함 / 장애인 화장실 없음), 기기마다 만든 무작위 번호 (개인정보 아님)</td><td>장소별 숫자로만 보여 주고, 2년 지난 기록은 세지 않음</td></tr>
   <tr><td>말로 일정 만들기의 AI 해석 (Claude, 운영자가 켠 경우에만)</td><td>입력하거나 말한 문장 (보내기 전에 전화번호·카드번호·주민등록번호·이메일·승인번호를 가림). 영수증·사진·위치는 보내지 않음</td><td>운영자 서버에 저장하지 않음. 해석을 위해 Anthropic(미국)에 전달되며, Anthropic의 상업 서비스 정책에 따라 처리됨. 꺼져 있거나 인터넷이 없으면 기기 안에서만 해석</td></tr>
+  <tr><td>장소 3D 화면의 현장 확인 표시 (계단·경사로·화장실)</td><td>표시 위치(약 11m 칸으로 묶음), 종류, 기기마다 만든 무작위 번호 (개인정보 아님, 언제·어디서 찍었는지는 보관하지 않고 남긴 날짜만)</td><td>다른 이용자에게는 칸·종류별 개수만 보임(기기 번호는 보이지 않음). 2년 지난 표시는 세지 않음. 내 표시를 누르면 지워짐</td></tr>
   <tr><td>같이 고르기(👍👎)</td><td>일정 키, 장소, 기기마다 만든 무작위 번호 (개인정보 아님)</td><td>180일 뒤 삭제</td></tr>
+  <tr><td>계정 (로그인·가입, 선택)</td><td>이메일(데이터베이스에는 AES-256-GCM 암호문과 찾기용 HMAC 값으로만 저장), 비밀번호에서 기기 안에서 만든 확인값(비밀번호 자체는 보내지 않음, 서버는 이를 다시 scrypt로 감싸 저장), 저장한 일정·설정을 <b>기기 안에서 암호화한 것</b>(AES-256-GCM, 운영자는 열 수 없음), 가입·수정 시각, 로그인 세션(쿠키, 30일)</td><td>탈퇴하면 즉시 삭제. 위치·영수증·정산 서류는 계정에 올리지 않음. 비밀번호와 복구 코드를 모두 잃으면 운영자도 일정을 되찾을 수 없음</td></tr>
   <tr><td>다른 기기로 옮기기(6자리 코드)</td><td>저장한 일정</td><td>서버 메모리에 10분, 한 번 받으면 즉시 삭제 (디스크에 남기지 않음)</td></tr>
   <tr><td>사용 집계</td><td>"어떤 기능이 몇 번 쓰였나"의 날짜별 횟수만 (IP·기기·위치·입력 내용 저장 안 함, '추적 안 함' 설정 존중)</td><td>집계용</td></tr>
 </table>
 
+<h2>4-0. 서버에 저장하는 개인정보의 암호화</h2>
+<p>예약 신청의 이름·연락처, 계정 이메일, 신고 사유와 제보 메모는 서버 데이터베이스에 그대로 저장하지 않고 AES-256-GCM으로 암호화해 저장합니다. 암호화 키는 데이터베이스·백업과 다른 곳(서버 환경 설정)에 둬서, 데이터베이스 파일이나 백업만으로는 읽을 수 없습니다. 이메일로 계정을 찾을 때는 원래 값을 거꾸로 알 수 없는 HMAC 값만 씁니다.</p>
+<p><b>가입 이메일 확인</b>: 메일을 보낼 수 있는 서버에서는 가입할 때 이메일로 6자리 확인 코드(10분, 5번 틀리면 끝, 한 시간 3번까지)를 보내, 본인 이메일인지 확인한 뒤에만 가입됩니다. 코드는 원문 대신 해시값만 저장합니다. 이미 가입한 이메일로 요청하면 코드 대신 "이미 가입돼 있어요" 안내 메일이 가고, 화면에는 같은 안내가 나와 가입 여부를 알 수 없습니다.</p>
+<p><b>비밀번호 찾기 메일</b>: 메일로 비밀번호 찾기를 요청하면 가입한 이메일로 30분 동안 한 번만 쓸 수 있는 링크를 보냅니다(한 시간에 3번까지). 메일은 운영자가 설정한 메일 발송 서비스(SMTP)를 거칩니다. 가입하지 않은 이메일로 요청해도 같은 안내가 나와, 가입 여부를 알 수 없습니다.</p>
+<h2>4-1. 계정 삭제</h2>
+<p>앱의 설정 → 개인정보 보호 → 계정 → "계정 삭제", 또는 웹 주소 <code>account.html#delete</code>에서 비밀번호를 확인하면 계정과 서버에 있는 암호화된 일정이 바로 지워집니다. 비밀번호를 잊었고 복구 코드도 없다면 아래 문의처로 가입한 이메일 주소에서 삭제를 요청할 수 있습니다.</p>
+<h2>4-2. 이 기기의 보호</h2>
+<ul>
+  <li><b>앱 잠금(PIN)</b>: 설정 → 개인정보 보호에서 켜면, 앱을 열 때와 1분 넘게 다른 화면에 있다가 돌아올 때 PIN을 묻습니다. PIN은 PBKDF2로 감싼 값만 이 기기에 저장합니다. 5번 틀리면 30초부터 기다려야 하고, PIN을 잊으면 이 기기 기록을 모두 지워야 풀 수 있습니다.</li>
+  <li><b>내 기록 내려받기</b>: 이 기기에 저장된 보폭 기록을 파일(JSON)로 받을 수 있습니다.</li>
+  <li><b>모두 지우기</b>: 설정 → 내 기기에 저장된 것에서 저장한 일정·정산 자료·설정·계정 키를 지울 수 있습니다.</li>
+  <li>앱 서버는 다른 사이트가 앱을 틀 안에 넣거나, 다른 사이트에서 계정 요청을 보내는 것을 막고(보안 머리글·쿠키 SameSite=Strict), 바깥 서비스로 앱 주소 전체가 전달되지 않게 합니다.</li>
+</ul>
+
 <h2>5. 외부 서비스</h2>
 <p>지도·날씨·길찾기·사진을 보여 주기 위해 아래 서비스에 요청을 보냅니다. 이때 각 서비스는 일반적인 인터넷 요청처럼 IP 주소와 요청한 지역(지도 위치·여행 지역 좌표)을 알 수 있습니다. 각 서비스의 개인정보 정책을 따릅니다.</p>
 <ul>
-  <li>지도: OpenStreetMap 타일, OpenFreeMap(3D 건물), AWS 지형 타일</li>
+  <li>지도: OpenFreeMap 벡터 지도(오픈스트리트맵 자료, 바탕 지도·3D 건물), AWS 지형 타일, Esri World Imagery(장소 3D로 보기의 위성 사진). "내 위치 따라가기"의 위치는 기기 안에서 화면을 움직이는 데만 쓰고 보내지 않아요(보고 있는 곳의 지도 조각 요청은 위 서비스로 갑니다)</li>
+  <li>장소 3D 화면의 "현장 확인 남기기"(계단·턱, 경사로, 화장실 표시)는 이 기기에만 저장하고 보내지 않아요. 표시를 누르면 지울 수 있어요</li>
   <li>도로 경로: OSRM (일정의 장소 좌표)</li>
   <li>날씨: Open-Meteo (여행 지역 좌표)</li>
   <li>사진: 한국관광공사(tong.visitkorea.or.kr), 위키백과</li>
@@ -102,12 +119,18 @@
   <li>Place reports: place, report type and note (no personal data).</li>
   <li>Accessibility field reports: place, report type (steps/ledge, wheelchair-friendly, no accessible restroom) and a random per-device ID; shown only as counts, entries older than 2 years are not counted.</li>
   <li>AI understanding for "plan by voice" (Claude, only if the operator turns it on): the sentence you typed or said, with phone, card, resident registration numbers, emails and approval numbers masked first. Receipts, photos and location are never sent. Not stored on our server; passed to Anthropic (USA) for processing under its commercial terms. When off or offline, everything is understood on your device.</li>
+  <li>3D on-site notes (stairs, ramps, toilets): the spot rounded to about 11 m, the type and a random per-device ID; others only see counts per spot and type; notes older than 2 years are not counted; tap your note to delete it.</li>
   <li>Group voting (👍👎): plan key, place and a random per-device ID; deleted after 180 days.</li>
+  <li>Account (sign-in, optional): your email, a check value derived on your device from your password (the password itself is never sent; the server wraps it again with scrypt), your saved plans and settings <b>encrypted on your device</b> (AES-256-GCM — the operator cannot open them), sign-up/update times and a login session cookie (30 days). Deleted immediately when you delete the account (Settings → Privacy → Account, or <code>account.html#delete</code>). Location, receipts and claim documents are never uploaded. If you lose both your password and recovery code, nobody can recover your plans.</li>
+  <li>Encryption at rest: names and contacts in booking requests, account emails, report reasons and notes are stored encrypted with AES-256-GCM; the key is kept separately from the database and backups. Emails are looked up only by an HMAC value.</li>
+  <li>Email verification at sign-up: a 6-digit code (10 minutes, 5 tries, 3 per hour) is emailed and only its hash is stored; an email that already has an account receives a notice instead, and the screen shows the same message either way.</li>
+  <li>Password reset by email: a one-time link valid for 30 minutes (up to 3 per hour) is sent through the operator's mail service; the same message is shown whether or not the email has an account.</li>
+  <li>App lock (PIN): stored only on this device as a PBKDF2 hash; asks for the PIN on open and after a minute away.</li>
   <li>Move to another device (6-digit code): saved plans kept in server memory for 10 minutes and deleted once received.</li>
   <li>Usage counts: daily counts of feature use only (no IP, device, location or input stored; Do Not Track respected).</li>
 </ul>
 <h2>5. Third-party services</h2>
-<p>Map tiles (OpenStreetMap, OpenFreeMap, AWS terrain), routing (OSRM), weather (Open-Meteo), photos (Korea Tourism Organization, Wikipedia) and links to Kakao Map, Naver Map and booking sites. These services can see your IP address and the area requested, as with any web request.</p>
+<p>Map tiles (OpenFreeMap vector maps from OpenStreetMap data, AWS terrain, Esri World Imagery for the 3D place view), routing (OSRM), weather (Open-Meteo), photos (Korea Tourism Organization, Wikipedia) and links to Kakao Map, Naver Map and booking sites. These services can see your IP address and the area requested, as with any web request.</p>
 <h2>6. Sharing and ads</h2>
 <p>We do not sell personal information or share it for advertising. The app has no ads or ad trackers.</p>
 <h2>7. Children</h2>

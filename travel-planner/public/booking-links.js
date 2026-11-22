@@ -1,4 +1,8 @@
 // Only confirmed user-entered offers are ranked. No live availability is implied.
+// 제휴 번호: Booking.com 제휴 프로그램의 aid, Agoda 제휴의 cid를 받으면 여기에 넣는다 (예약 수수료가 운영자에게 돌아온다).
+// 비어 있으면 일반 검색 링크. 이용자가 내는 가격은 같다. 제휴 링크라는 사실은 숙소 카드에 표시한다(AFFILIATE.on)
+export const AFFILIATE = { booking: "", agoda: "" };
+AFFILIATE.on = () => !!(AFFILIATE.booking || AFFILIATE.agoda);
 export function bookingPeople(people={}) {
   const integer=(n,lo,hi,fallback)=>Number.isInteger(Number(n))?Math.max(lo,Math.min(hi,Number(n))):fallback;
   const adults=integer(people.adults,1,30,1),kids=integer(people.kids,0,10,0),rooms=integer(people.rooms,1,adults,1);
@@ -12,10 +16,10 @@ export function bookingLinks(query, input, people, lang = 'ko') {
   const end=dates?new Date(`${input.date}T00:00:00Z`):null;if(end)end.setUTCDate(end.getUTCDate()+input.days-1);
   const checkout=end?.toISOString().slice(0,10),p=bookingPeople(people);
   const booking=new URL('https://www.booking.com/searchresults.html');
-  booking.search=new URLSearchParams({ss:query,lang:({ko:'ko',en:'en-us',ja:'ja',zh:'zh-cn'})[lang]||'ko',group_adults:String(p.adults),group_children:String(p.kids),no_rooms:String(p.rooms),order:'price',...(dates?{checkin:input.date,checkout}:{})});
+  booking.search=new URLSearchParams({ss:query,lang:({ko:'ko',en:'en-us',ja:'ja',zh:'zh-cn'})[lang]||'ko',group_adults:String(p.adults),group_children:String(p.kids),no_rooms:String(p.rooms),order:'price',...(dates?{checkin:input.date,checkout}:{}),...(/^\d{3,10}$/.test(AFFILIATE.booking)?{aid:AFFILIATE.booking}:{})});
   if(p.ages.every(a=>a!==null))for(const age of p.ages)booking.searchParams.append('age',String(age));
   const agoda=new URL('https://www.agoda.com/search');
-  agoda.search=new URLSearchParams({textToSearch:query,adults:String(p.adults),children:String(p.kids),rooms:String(p.rooms),...(p.kids&&p.ages.every(a=>a!==null)?{childages:p.ages.join(',')} : {}),...(dates?{checkIn:input.date,checkOut:checkout}:{})});
+  agoda.search=new URLSearchParams({textToSearch:query,adults:String(p.adults),children:String(p.kids),rooms:String(p.rooms),...(p.kids&&p.ages.every(a=>a!==null)?{childages:p.ages.join(',')} : {}),...(dates?{checkIn:input.date,checkOut:checkout}:{}),...(/^\d{3,10}$/.test(AFFILIATE.agoda)?{cid:AFFILIATE.agoda}:{})});
   return [{name:'Booking.com',url:booking.href},{name:'Agoda',url:agoda.href}];
 }
 export function recommendBooking(query,input,people,lang='ko',evidence=null,now=Date.now()) {

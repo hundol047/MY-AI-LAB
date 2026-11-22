@@ -23,7 +23,7 @@ export function serviceAPI({file,adminToken,pushSender=null}) {
   const handler = async (req,res,url) => {
     const p=url.pathname;
     const offset=Math.max(0,parseInt(url.searchParams.get('offset'))||0),limit=50;
-    if (!/^\/api\/(bookings|admin|reviews|payments|shops|push-config|stats|place-reports|access-reports|votes|transfer)(\/|$)/.test(p)) return false;
+    if (!/^\/api\/(bookings|admin|reviews|payments|shops|push-config|stats|place-reports|access-reports|access-pins|votes|transfer)(\/|$)/.test(p)) return false;
     try {
       if (req.headers.origin && req.headers.origin !== `http://${req.headers.host}` && req.headers.origin !== `https://${req.headers.host}`) return reply(res,403,{error:'다른 사이트의 요청은 허용하지 않습니다.'}),true;
       if ((req.method !== 'GET' || p.startsWith('/api/admin') || p.startsWith('/api/transfer')) && p!=='/api/stats') { // 옮기기 코드 조회도 횟수 제한 (6자리 코드 맞히기 방지) // 집계는 예약 요청 한도를 쓰지 않게 따로 둔다
@@ -62,6 +62,8 @@ export function serviceAPI({file,adminToken,pushSender=null}) {
       else if (p==='/api/reviews' && req.method==='GET') reply(res,200,store.reviews(url.searchParams.get('place')||''));
       else if (p==='/api/reviews' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,201,store.addReview(b));}
       else if (p==='/api/place-reports' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,201,store.addPlaceReport(b));}
+      else if (p==='/api/access-pins' && req.method==='GET') reply(res,200,store.accessPins(url.searchParams.get('bbox')));
+      else if (p==='/api/access-pins' && req.method==='POST') reply(res,200,store.accessPin(await body(req)));
       else if (p==='/api/access-reports' && req.method==='GET') reply(res,200,store.accessReports(String(url.searchParams.get('places')||'').split(',')));
       else if (p==='/api/access-reports' && req.method==='POST') {const b=await body(req); if(!await validPlace(b.place)) reply(res,400,{error:'등록된 장소를 선택하세요.'}); else reply(res,200,store.accessReport(b));}
       else if (p==='/api/transfer' && req.method==='POST') {

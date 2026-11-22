@@ -29,7 +29,7 @@ const CASES = {
     ["바다부채길 얼마나 걸려?", { kind: "duration", place: "sea-trail" }],
     ["애들 데리고 가도 돼?", { kind: "kids" }],
     ["울엄마 무릎이 안 좋은데 괜찮을까", { kind: "parents" }],
-    ["계단 많은 곳 있어?", { kind: "walk" }],
+    ["계단 많은 곳 있어?", { kind: ["walk", "access"] }],
     ["내일 비 온다는데", { kind: "rain" }],
     ["해돋이 볼 만한 데", { kind: "sunrise" }],
     ["인생샷 찍을 곳 추천", { kind: "photo" }],
@@ -61,7 +61,7 @@ const CASES = {
     ["How long does the sea trail take?", { kind: "duration", place: "sea-trail" }],
     ["Can I bring my kids?", { kind: "kids" }],
     ["Is this ok for my elderly parents?", { kind: "parents" }],
-    ["Are there many stairs?", { kind: "walk" }],
+    ["Are there many stairs?", { kind: ["walk", "access"] }],
     ["What if it rains tomorrow?", { kind: "rain" }],
     ["Where can I watch the sunrise?", { kind: "sunrise" }],
     ["Best photo spots?", { kind: "photo" }],
@@ -93,7 +93,7 @@ const CASES = {
     ["パダブチェギルはどのくらいかかりますか", { kind: "duration", place: "sea-trail" }],
     ["子供連れでも大丈夫ですか？", { kind: "kids" }],
     ["高齢の両親と一緒でも大丈夫？", { kind: "parents" }],
-    ["階段は多いですか", { kind: "walk" }],
+    ["階段は多いですか", { kind: ["walk", "access"] }],
     ["明日雨が降ったらどうしよう", { kind: "rain" }],
     ["日の出が見られる場所は？", { kind: "sunrise" }],
     ["写真映えするスポットを教えて", { kind: "photo" }],
@@ -125,7 +125,7 @@ const CASES = {
     ["海浪步道要走多久？", { kind: "duration", place: "sea-trail" }],
     ["带孩子去可以吗？", { kind: "kids" }],
     ["带父母去会不会太累", { kind: "parents" }],
-    ["台阶多吗", { kind: "walk" }],
+    ["台阶多吗", { kind: ["walk", "access"] }],
     ["明天下雨怎么办", { kind: "rain" }],
     ["哪里可以看日出？", { kind: "sunrise" }],
     ["有什么拍照打卡的地方", { kind: "photo" }],
@@ -160,7 +160,7 @@ const HOLDOUT = {
     ["정동진 시간박물관 휴무일 있어?", { kind: "hours", place: "time-museum" }],
     ["하슬라아트월드 가격", { kind: "fee", place: "haslla" }],
     ["경포호 한 바퀴 몇 분 걸려", { kind: "duration", place: "gyeongpo-lake" }],
-    ["유모차 끌고 다닐 수 있나", { kind: "walk" }],
+    ["유모차 끌고 다닐 수 있나", { kind: ["walk", "access"] }],
     ["비 오면 일정 어떻게 돼?", { kind: "rain" }],
     ["저녁 먹을 데 추천해줘", { kind: "food" }],
     ["주문진수산시장 추가", { kind: "add", add: "jumunjin-market" }],
@@ -177,7 +177,7 @@ const HOLDOUT = {
     ["Is the Time Museum closed on Mondays?", { kind: "hours", place: "time-museum" }],
     ["How much is Haslla Art World?", { kind: "fee", place: "haslla" }],
     ["How long to walk around Gyeongpo Lake?", { kind: "duration", place: "gyeongpo-lake" }],
-    ["Can I use a stroller?", { kind: "walk" }],
+    ["Can I use a stroller?", { kind: ["walk", "access"] }],
     ["It might rain, any ideas?", { kind: "rain" }],
     ["Recommend a place for dinner", { kind: "food" }],
     ["Add Jumunjin fish market", { kind: "add", add: "jumunjin-market" }],
@@ -194,7 +194,7 @@ const HOLDOUT = {
     ["正東津時間博物館は定休日ある？", { kind: "hours", place: "time-museum" }],
     ["ハスラ・アートワールドの料金は？", { kind: "fee", place: "haslla" }],
     ["鏡浦湖を一周するのに何分？", { kind: "duration", place: "gyeongpo-lake" }],
-    ["ベビーカーでも回れる？", { kind: "walk" }],
+    ["ベビーカーでも回れる？", { kind: ["walk", "access"] }],
     ["雨の日はどうなる？", { kind: "rain" }],
     ["夕食におすすめの店", { kind: "food" }],
     ["注文津水産市場を追加", { kind: "add", add: "jumunjin-market" }],
@@ -211,7 +211,7 @@ const HOLDOUT = {
     ["正东津时间博物馆有休息日吗？", { kind: "hours", place: "time-museum" }],
     ["哈斯拉艺术世界票价", { kind: "fee", place: "haslla" }],
     ["绕镜浦湖一圈要多久？", { kind: "duration", place: "gyeongpo-lake" }],
-    ["可以推婴儿车吗？", { kind: "walk" }],
+    ["可以推婴儿车吗？", { kind: ["walk", "access"] }],
     ["下雨天怎么安排？", { kind: "rain" }],
     ["推荐吃晚餐的地方", { kind: "food" }],
     ["加上注文津水产市场", { kind: "add", add: "jumunjin-market" }],
@@ -237,16 +237,16 @@ const BLIND = {
 // 네 번째 묶음: 처음 잴 때 ko 93%·en 87%·ja 93%·zh 93% (전체 92%)였던 묶음 (아메리카노·나이·"grandmother"·歩きすぎ 등을 고친 뒤 넣어 둠)
 const FRESH = {
   ko: [["선교장 몇 시에 닫아요", { kind: "hours" }], ["하슬라 입장권 가격", { kind: "fee" }], ["오죽헌 둘러보는데 얼마나 걸림", { kind: "duration" }], ["7살 아이랑 가기 괜찮나요", { kind: "kids" }], ["할머니 모시고 가는데 무리일까", { kind: "parents" }],
-    ["휠체어로 다닐 수 있어?", { kind: "walk" }], ["소나기 오면 어디 가지", { kind: "rain" }], ["일출 명소 어디야", { kind: "sunrise" }], ["저녁 먹을 곳", { kind: "food" }], ["아메리카노 맛있는 데", { kind: "cafe" }],
+    ["휠체어로 다닐 수 있어?", { kind: ["walk", "access"] }], ["소나기 오면 어디 가지", { kind: "rain" }], ["일출 명소 어디야", { kind: "sunrise" }], ["저녁 먹을 곳", { kind: "food" }], ["아메리카노 맛있는 데", { kind: "cafe" }],
     ["주차장 있어요?", { kind: "faq:주차" }], ["테라로사 넣어줘", { kind: "add" }], ["경포호 둘레길은 빼자", { kind: "remove" }], ["첫날 너무 많이 걸어", { kind: "prefs" }], ["자작나무숲 어때", { kind: "place", region: "seorak" }]],
   en: [["When does Seongyojang close?", { kind: "hours" }], ["Ticket price for Haslla Art World", { kind: "fee" }], ["How long should I spend at Ojukheon?", { kind: "duration" }], ["We have a 7 year old, is this ok?", { kind: "kids" }], ["Is it too hard for my grandmother?", { kind: "parents" }],
-    ["Is it wheelchair accessible?", { kind: "walk" }], ["Plan B for rain?", { kind: "rain" }], ["Best place for sunrise?", { kind: "sunrise" }], ["Dinner recommendations?", { kind: "food" }], ["Good coffee nearby?", { kind: "cafe" }],
+    ["Is it wheelchair accessible?", { kind: ["walk", "access"] }], ["Plan B for rain?", { kind: "rain" }], ["Best place for sunrise?", { kind: "sunrise" }], ["Dinner recommendations?", { kind: "food" }], ["Good coffee nearby?", { kind: "cafe" }],
     ["Is there parking?", { kind: "faq:주차" }], ["Please add Terarosa", { kind: "add" }], ["Remove Gyeongpo Lake", { kind: "remove" }], ["Day 1 is too tiring", { kind: "prefs" }], ["What's the birch forest like?", { kind: "place", region: "seorak" }]],
   ja: [["船橋荘は何時に閉まる？", { kind: "hours" }], ["ハスラ・アートワールドの入場料は？", { kind: "fee" }], ["烏竹軒の見学時間はどれくらい？", { kind: "duration" }], ["7歳の子どもと一緒でも楽しめる？", { kind: "kids" }], ["祖母と行くのは大変？", { kind: "parents" }],
-    ["車椅子でも回れますか", { kind: "walk" }], ["雨の日の代わりのプランは？", { kind: "rain" }], ["日の出が見たい", { kind: "sunrise" }], ["晩ご飯のおすすめ", { kind: "food" }], ["おいしいコーヒーの店", { kind: "cafe" }],
+    ["車椅子でも回れますか", { kind: ["walk", "access"] }], ["雨の日の代わりのプランは？", { kind: "rain" }], ["日の出が見たい", { kind: "sunrise" }], ["晩ご飯のおすすめ", { kind: "food" }], ["おいしいコーヒーの店", { kind: "cafe" }],
     ["駐車場はある？", { kind: "faq:주차" }], ["テラロサを追加して", { kind: "add" }], ["鏡浦湖は外して", { kind: "remove" }], ["1日目は歩きすぎ", { kind: "prefs" }], ["白樺の森はどう？", { kind: "place", region: "seorak" }]],
   zh: [["船桥庄几点关门？", { kind: "hours" }], ["哈斯拉艺术世界门票多少？", { kind: "fee" }], ["乌竹轩要逛多久？", { kind: "duration" }], ["带7岁小孩去合适吗", { kind: "kids" }], ["带奶奶去会不会太辛苦", { kind: "parents" }],
-    ["坐轮椅能逛吗", { kind: "walk" }], ["下雨的话怎么办", { kind: "rain" }], ["想看日出", { kind: "sunrise" }], ["晚餐推荐", { kind: "food" }], ["哪里咖啡好喝", { kind: "cafe" }],
+    ["坐轮椅能逛吗", { kind: ["walk", "access"] }], ["下雨的话怎么办", { kind: "rain" }], ["想看日出", { kind: "sunrise" }], ["晚餐推荐", { kind: "food" }], ["哪里咖啡好喝", { kind: "cafe" }],
     ["有停车场吗？", { kind: "faq:주차" }], ["加上Terarosa", { kind: "add" }], ["把镜浦湖去掉", { kind: "remove" }], ["第一天走太多了", { kind: "prefs" }], ["白桦林怎么样？", { kind: "place", region: "seorak" }]],
 };
 
@@ -261,7 +261,7 @@ for (const [lang, cases] of Object.entries(SETS)) {
     const { input, opts, trip } = tripFor(want.region || "gangneung");
     const r = guideLocal(q, trip, 0, { input, opts, fees, lang: lang === "en" ? "en" : "ko", namesEn });
     const problems = [];
-    if (r.kind !== want.kind) problems.push(`종류 ${r.kind}≠${want.kind}`);
+    if (![].concat(want.kind).includes(r.kind)) problems.push(`종류 ${r.kind}≠${want.kind}`); // 여러 답 종류를 허용하는 질문(걷기·무장애)은 배열
     if (r.lang !== lang) problems.push(`언어 ${r.lang}≠${lang}`);
     const already = !r.changed && /이미 일정|already in your plan|もうプラン|已经在行程/.test(r.answer);
     if (want.add && !(r.add || []).includes(want.add) && !already) problems.push(`추가 ${r.add}`);

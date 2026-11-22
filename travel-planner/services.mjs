@@ -5,9 +5,11 @@ import { mkdirSync, chmodSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { REGIONS } from './public/data.js';
 import { validateBooking } from './bookings.mjs';
+import { createPII } from './pii.mjs';
 const digest = s => createHash('sha256').update(String(s)).digest('hex');
 export function equalSecret(a, b) { return !!a && !!b && timingSafeEqual(Buffer.from(digest(a)), Buffer.from(digest(b))); }
-export function createServices(file) {
+// 예약 신청(이름·연락처)·신고 사유·제보 메모는 암호화해 저장한다 (pii.mjs). 데이터베이스·백업 파일만으로는 읽을 수 없다
+export function createServices(file, { pii = createPII() } = {}) {
   mkdirSync(dirname(file), { recursive: true, mode: 0o700 });
   const db = new DatabaseSync(file);
   chmodSync(file, 0o600);
@@ -19,20 +21,31 @@ export function createServices(file) {
     CREATE TABLE IF NOT EXISTS access_reports(place TEXT NOT NULL, voter TEXT NOT NULL, kind TEXT NOT NULL, at TEXT NOT NULL, PRIMARY KEY(place,voter,kind));
     CREATE TABLE IF NOT EXISTS votes(trip TEXT NOT NULL, place TEXT NOT NULL, voter TEXT NOT NULL, vote INTEGER NOT NULL, at TEXT NOT NULL, PRIMARY KEY(trip,place,voter));
     CREATE TABLE IF NOT EXISTS recovery(id TEXT PRIMARY KEY, secret TEXT NOT NULL);
+    CREATE TABLE IF NOT EXISTS access_pins(cell TEXT NOT NULL, kind TEXT NOT NULL, voter TEXT NOT NULL, lat REAL NOT NULL, lng REAL NOT NULL, at TEXT NOT NULL, PRIMARY KEY(cell,kind,voter));
+    CREATE INDEX IF NOT EXISTS access_pins_pos ON access_pins(lat, lng);
     CREATE TABLE IF NOT EXISTS shops(id TEXT PRIMARY KEY, state TEXT NOT NULL, fingerprint TEXT UNIQUE NOT NULL, payload TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS push_subscriptions(booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, PRIMARY KEY(booking,endpoint));
     CREATE TABLE IF NOT EXISTS push_outbox(id TEXT PRIMARY KEY, booking TEXT NOT NULL, endpoint TEXT NOT NULL, subscription TEXT NOT NULL, lang TEXT NOT NULL, attempts INTEGER NOT NULL DEFAULT 0, nextAt INTEGER NOT NULL, status INTEGER NOT NULL DEFAULT 0);`);
   const fail = (status, message) => { throw Object.assign(new Error(message), {status}); };
+  // 예전에 그대로 저장된 개인정보를 한 번 암호화해 옮겨 담는다 (이미 암호화된 줄은 건너뜀)
+  {
+    const up = [['bookings','payload','id'],['reports','reason','id'],['place_reports','note','id']];
+    db.exec('BEGIN IMMEDIATE');
+    try {
+      for (const [t,col,key] of up) for (const r of db.prepare(`SELECT ${key} k, ${col} v FROM ${t}`).all()) if (r.v && !pii.isSealed(r.v)) db.prepare(`UPDATE ${t} SET ${col}=? WHERE ${key}=?`).run(pii.seal(r.v), r.k);
+      db.exec('COMMIT');
+    } catch (e) { db.exec('ROLLBACK'); throw e; }
+  }
   function booking(id) {
     const row = db.prepare('SELECT * FROM bookings WHERE id=?').get(id);
     if (!row) fail(404, '신청을 찾을 수 없습니다.');
-    return { row, data: JSON.parse(row.payload) };
+    return { row, data: pii.openJSON(row.payload) };
   }
   const forgetPush = id => {db.prepare('DELETE FROM push_subscriptions WHERE booking=?').run(id);db.prepare('DELETE FROM push_outbox WHERE booking=?').run(id);};
   const save = b => {
     db.exec('BEGIN IMMEDIATE');
     try {
-      db.prepare('UPDATE bookings SET payload=? WHERE id=?').run(JSON.stringify(b),b.id);
+      db.prepare('UPDATE bookings SET payload=? WHERE id=?').run(pii.sealJSON(b),b.id);
       for(const p of db.prepare('SELECT * FROM push_subscriptions WHERE booking=?').all(b.id)) {
         // One latest-state notification per booking/browser avoids obsolete queued alerts.
         db.prepare('DELETE FROM push_outbox WHERE booking=? AND endpoint=?').run(b.id,p.endpoint);
@@ -69,7 +82,7 @@ export function createServices(file) {
       // Only terminal bookings past their last update are eligible. Active cases stay available.
       let deleted=0;
       for(const {payload} of db.prepare('SELECT payload FROM bookings').all()) {
-        const b=JSON.parse(payload), last=b.history.at(-1)?.at || b.createdAt;
+        const b=pii.openJSON(payload), last=b.history.at(-1)?.at || b.createdAt;
         if(['cancelled','rejected'].includes(b.status) && new Date(last).getTime()<now-retentionDays*86400000) {
           db.prepare('DELETE FROM bookings WHERE id=?').run(b.id);db.prepare('DELETE FROM recovery WHERE id=?').run(b.id);forgetPush(b.id);deleted++;
         }
@@ -127,12 +140,12 @@ export function createServices(file) {
       const existing = db.prepare('SELECT * FROM bookings WHERE requestKey=?').get(key);
       if (existing) {
         authorize(existing, token);
-        const b = JSON.parse(existing.payload);
+        const b = pii.openJSON(existing.payload);
         if (JSON.stringify(b.request) !== JSON.stringify(valid)) fail(409, '기존 요청과 내용이 다릅니다. 새 신청으로 접수하세요.');
         return { id:b.id, status:b.status };
       }
       const b = {id:randomUUID(), request:valid, status:'received', createdAt:new Date().toISOString(), history:[{status:'received',at:new Date().toISOString(),message:'예약 검토 신청을 접수했습니다.'}], quote:null};
-      db.prepare('INSERT INTO bookings VALUES(?,?,?,?)').run(b.id,digest(token),key,JSON.stringify(b));
+      db.prepare('INSERT INTO bookings VALUES(?,?,?,?)').run(b.id,digest(token),key,pii.sealJSON(b));
       if(body.recoveryKey)db.prepare('INSERT INTO recovery VALUES(?,?)').run(b.id,digest(body.recoveryKey));
       return {id:b.id,status:b.status};
     },
@@ -144,7 +157,7 @@ export function createServices(file) {
       b.status = b.status === 'confirmed' ? 'cancel_requested' : 'cancelled';
       b.history.push({status:b.status,at:new Date().toISOString(),message:b.status === 'cancel_requested' ? '업체 취소 확인을 요청했습니다. 취소 확정 전입니다.' : '예약 검토 신청을 철회했습니다.'}); save(b); return b;
     },
-    listBookings(offset=0,limit=50) { return db.prepare('SELECT payload FROM bookings ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>JSON.parse(r.payload)); },
+    listBookings(offset=0,limit=50) { return db.prepare('SELECT payload FROM bookings ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>pii.openJSON(r.payload)); },
     update(id, body) {
       const {data:b}=booking(id);
       const next = {received:['reviewing','rejected','cancelled'],reviewing:['confirmed','rejected','cancelled'],confirmed:['cancel_requested'],cancel_requested:['cancelled','confirmed'],rejected:[],cancelled:[]};
@@ -173,14 +186,14 @@ export function createServices(file) {
     report(id,reason) {
       if (typeof reason !== 'string' || reason.trim().length < 3 || reason.length > 500) fail(400,'신고 사유를 3~500자로 입력하세요.');
       if (!db.prepare("SELECT id FROM reviews WHERE id=? AND state='published'").get(id)) fail(404,'후기가 없습니다.');
-      db.prepare('INSERT INTO reports VALUES(?,?,?,?)').run(randomUUID(),id,reason.trim(),new Date().toISOString()); return {received:true};
+      db.prepare('INSERT INTO reports VALUES(?,?,?,?)').run(randomUUID(),id,pii.seal(reason.trim()),new Date().toISOString()); return {received:true};
     },
-    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    reports(offset=0,limit=50) { return db.prepare('SELECT * FROM reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>({...r,reason:pii.open(r.reason)})); },
     // 장소 정보 오류 제보 (문 닫음·시간 다름·주차·위치 등). 개인정보는 받지 않는다
     addPlaceReport(body) {
       const KINDS = ['closed', 'hours', 'parking', 'location', 'other'];
       if (typeof body.place !== 'string' || !body.place || body.place.length > 100 || !KINDS.includes(body.kind) || (body.note != null && (typeof body.note !== 'string' || body.note.length > 500))) fail(400,'장소, 제보 종류, 500자 이내 설명을 확인하세요.');
-      db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,String(body.note||'').trim(),new Date().toISOString()); return {received:true};
+      db.prepare('INSERT INTO place_reports VALUES(?,?,?,?,?)').run(randomUUID(),body.place,body.kind,pii.seal(String(body.note||'').trim())||'',new Date().toISOString()); return {received:true};
     },
     // 현장 확인 (무장애): 기기마다 무작위 id(voter)로 장소·종류당 하나. 개인정보 없음. 2년 지난 것은 세지 않는다
     accessReport(body) {
@@ -192,6 +205,23 @@ export function createServices(file) {
       } else db.prepare('DELETE FROM access_reports WHERE place=? AND voter=? AND kind=?').run(body.place, body.voter, body.kind);
       return { ok: true };
     },
+    // 3D 화면 현장 확인 표시(계단·경사로·화장실): 위치는 약 11m 칸(소수 넷째 자리)으로 묶어 저장하고, 보여 줄 때는 칸·종류별 기기 수만 준다(기기 번호는 주지 않음)
+    accessPin(body) {
+      const KINDS = ['steps', 'ramp', 'toilet', 'atoilet'];
+      const lat = Number(body.lat), lng = Number(body.lng);
+      if (typeof body.voter !== 'string' || !/^[a-z0-9]{8,32}$/.test(body.voter) || !KINDS.includes(body.kind) || !(lat > 36.9 && lat < 38.7 && lng > 127 && lng < 129.5)) fail(400,'표시 내용을 확인하세요.');
+      const cell = `${lat.toFixed(4)},${lng.toFixed(4)}`;
+      if (body.on === false) { db.prepare('DELETE FROM access_pins WHERE cell=? AND kind=? AND voter=?').run(cell, body.kind, body.voter); return { ok: true }; }
+      if (db.prepare("SELECT COUNT(*) n FROM access_pins WHERE voter=? AND at>=?").get(body.voter, new Date(Date.now() - 864e5).toISOString()).n >= 30) fail(429,'오늘은 표시를 너무 많이 남겼어요.');
+      db.prepare('INSERT INTO access_pins VALUES(?,?,?,?,?,?) ON CONFLICT(cell,kind,voter) DO UPDATE SET at=excluded.at').run(cell, body.kind, body.voter, Number(lat.toFixed(4)), Number(lng.toFixed(4)), new Date().toISOString());
+      return { ok: true };
+    },
+    accessPins(bbox) {
+      const [w, so, e, n] = String(bbox || '').split(',').map(Number);
+      if (![w, so, e, n].every(Number.isFinite) || e - w > 0.05 || n - so > 0.05 || e <= w || n <= so) fail(400,'범위를 확인하세요.');
+      const since = new Date(Date.now() - 730 * 864e5).toISOString();
+      return db.prepare('SELECT lat, lng, kind, COUNT(*) n FROM access_pins WHERE at>=? AND lat BETWEEN ? AND ? AND lng BETWEEN ? AND ? GROUP BY cell, kind ORDER BY n DESC LIMIT 300').all(since, so, n, w, e);
+    },
     accessReports(places) {
       const ids = [...new Set(places)].filter((x) => typeof x === 'string' && x && x.length <= 100).slice(0, 200);
       const since = new Date(Date.now() - 730 * 86400000).toISOString(), out = {};
@@ -199,7 +229,7 @@ export function createServices(file) {
       for (const r of db.prepare(`SELECT place, kind, COUNT(*) n FROM access_reports WHERE at>=? AND place IN (${ids.map(() => '?').join(',')}) GROUP BY place, kind`).all(since, ...ids)) (out[r.place] ??= {})[r.kind] = r.n;
       return out;
     },
-    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)); },
+    placeReports(offset=0,limit=50) { return db.prepare('SELECT * FROM place_reports ORDER BY rowid DESC LIMIT ? OFFSET ?').all(...page(offset,limit)).map(r=>({...r,note:pii.open(r.note)})); },
     // 같이 고르기: 공유한 일정(trip, 일정을 만들 때 정한 무작위 키)의 장소마다 👍/👎. voter는 그 기기의 무작위 id (개인정보 없음)
     vote(body) {
       const ok = (s, n) => typeof s === 'string' && new RegExp(`^[a-z0-9]{8,${n}}$`).test(s);

@@ -131,7 +131,7 @@ function candidates(input, opts = {}) {
   // 휠체어·유모차: 오래 걷거나 산길인 곳(walk 3)은 빼고, 휠체어는 무장애 정보 없이 걷기가 있는 곳(walk 2)도 뺀다
   const acc = opts.access || [];
   // 걷기 힘듦(walker): 오래 걷는 곳(walk 3)을 빼고, 조금 걷는 곳(walk 2)은 실내이거나 경사로가 있을 때만
-  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp)
+  const okAccess = (p) => !acc.length || p.cat === "festival" || (p.walk < 3 && !(acc.includes("wheelchair") && p.access?.stepsBlock) && !(acc.includes("wheelchair") && p.walk === 2 && !p.access?.ramp)
     && !(acc.includes("walker") && p.walk === 2 && !p.indoor && !p.access?.ramp)
     && !(acc.includes("walker") && p.multi && p.cat === "food")); // 걷기 힘듦: 시장·먹거리 골목을 돌아다니는 끼니 대신 한 가게에서 앉아서
   // 현장 확인에서 "계단·턱 있었어요"가 나온 곳 (내가 남겼거나 여러 이용자가 남긴 곳, setAccessAvoid): 걷기·휠체어 모드에서 뺀다

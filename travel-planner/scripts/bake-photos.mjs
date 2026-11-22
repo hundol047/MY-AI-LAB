@@ -7,8 +7,8 @@ import { writeFile, mkdir, readFile } from "node:fs/promises";
 import { PLACES, FESTIVALS } from "../public/data.js";
 import { tourPhotoMatch, MAX_KM } from "./photo-sources.mjs";
 
-// 장소 id → 쓰면 안 되는 관광공사 contentid (리포트를 사람이 보고 판단한 것)
-export const REJECT = {};
+import { REJECT } from "./bake-photos-reject.mjs"; // 쓰면 안 되는 관광공사 contentid (리포트를 사람이 보고 판단한 것)
+export { REJECT };
 
 const key = process.env.TOUR_API_KEY;
 if (!key) { console.error("TOUR_API_KEY가 필요합니다 (data.go.kr 한국관광공사 국문 관광정보 서비스 Decoding 키)"); process.exit(1); }
