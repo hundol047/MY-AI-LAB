@@ -1,4 +1,4 @@
-{"fetchedAt":"2026-11-21T23:52:04.929Z","source":"한국관광공사 TourAPI KorService2","places":[
+{"fetchedAt":"2026-11-23T00:24:02.412Z","source":"한국관광공사 TourAPI KorService2","places":[
 {"id":"2711379","type":"12","name":"덕우리체험마을","address":"강원특별자치도 정선군 정선읍 백오담길 27","lat":37.3597056,"lng":128.7140595,"sourceModified":"20261121013000","hours":"09:00~18:00","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},
 {"id":"2654759","type":"12","name":"펫힐링 달빛동물원","address":"강원특별자치도 영월군 남면 연당리","lat":37.1745681697,"lng":128.4017867178,"sourceModified":"20261120160452","hours":"09:00~18:00 (입장 마감 17:00)","closed":"일자별로 상이함※ 자세한 사항은 홈페이지 참조 또는 전화 문의 요망","source":"한국관광공사 TourAPI KorService2"},
 {"id":"129392","type":"12","name":"정선 가리왕산마을","address":"강원특별자치도 정선군 정선읍 벽탄길 9","lat":37.3925344167,"lng":128.6023820241,"sourceModified":"20261120135209","hours":"09:00~18:00","closed":"연중무휴","source":"한국관광공사 TourAPI KorService2"},

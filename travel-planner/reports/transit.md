@@ -1,6 +1,6 @@
 # 오가는 길 시간표 (국토교통부 TAGO)
 
-생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261124·주말 20261128, 버스 기준일 20261123.
+생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261201·주말 20261128, 버스 기준일 20261124.
 
 - train 서울역 → 강릉역 weekday: 14편
 - train 강릉역 → 서울역 weekday: 14편
@@ -153,7 +153,7 @@
 - express 동서울종합터미널 → 원주 고속버스터미널 all: 0편
 - express 원주 고속버스터미널 → 동서울종합터미널 all: 0편
 - express 서울고속버스터미널 → 원주 고속버스터미널 all: 70편
-- express 원주 고속버스터미널 → 서울고속버스터미널 all: 75편
+- express 원주 고속버스터미널 → 서울고속버스터미널 all: 70편
 - intercity 동서울종합터미널 → 원주 시외버스터미널 all: 0편
 - intercity 원주 시외버스터미널 → 동서울종합터미널 all: 0편
 - intercity 서울고속버스터미널 → 원주 시외버스터미널 all: 0편
