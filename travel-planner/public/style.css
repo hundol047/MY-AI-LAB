@@ -1085,3 +1085,24 @@ h3.h4 { font-size: 14px; margin: 14px 0 8px; }
 
 .v3d-fac { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
 .v3d-fac span { padding: 4px 10px; border-radius: 999px; background: rgba(13,148,136,.16); font-size: .9rem; }
+
+/* 큰 글씨·작은 화면 점검 (2026-11-23): 제목이 한 글자씩 세로로 찌그러지던 것, 화면 밖으로 밀린 🔊, 작은 누름 버튼 */
+.result-head { flex-wrap: wrap; }
+.result-head > div:first-child { flex: 1 1 180px; min-width: 0; }
+.head-acts { flex-wrap: wrap; }
+.gear { width: 44px; height: 44px; }
+.top-actions .ghost { min-height: 44px; min-width: 44px; }
+.for .linkish { display: inline-block; padding: 8px 2px; min-height: 32px; }
+.acts .ghost { white-space: normal; text-align: center; }
+html.big .ghost.small, html.big .acts .ghost, html.big .head-acts .ghost { min-height: 44px; }
+html.big .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px; }
+/* 큰 글씨 + 작은 폰: 사진을 위로 올려 글이 카드 폭을 다 쓰게, 버튼 글자가 잘리지 않게 */
+@media (max-width: 420px) {
+  html.big .item { grid-template-columns: 40px 1fr; gap: 6px; }
+  html.big .place { grid-template-columns: 1fr; gap: 10px; }
+  html.big .place .side { grid-template-columns: minmax(0, 1fr) auto; align-items: start; }
+  html.big .place .thumb { width: 100%; height: 132px; aspect-ratio: auto; }
+  html.big .place .acts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html.big .place .acts > .ghost, html.big .place .acts .vote .ghost { white-space: normal; overflow: visible; }
+}
+.v3d-loading.v3d-offline { max-width: min(86vw, 340px); white-space: normal; text-align: center; line-height: 1.5; }
