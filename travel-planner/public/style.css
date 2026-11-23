@@ -1106,3 +1106,5 @@ html.big .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px;
   html.big .place .acts > .ghost, html.big .place .acts .vote .ghost { white-space: normal; overflow: visible; }
 }
 .v3d-loading.v3d-offline { max-width: min(86vw, 340px); white-space: normal; text-align: center; line-height: 1.5; }
+/* 보조 화면(계정·예약·후기·정산 등)도 설정의 '큰 글씨'를 따른다 */
+html.big main:not(#result):not(#setup) { zoom: 1.15; }

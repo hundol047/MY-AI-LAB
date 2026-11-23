@@ -2,7 +2,7 @@
 .claim h1 { font-size: 22px; margin: 8px 0 6px; }
 .claim h2 { font-size: 17px; margin: 0 0 8px; }
 .claim .sub { color: var(--sub, #666); font-size: 13.5px; line-height: 1.55; }
-.claim .card { background: var(--card, #fff); border: 1px solid var(--line, #e5e3dd); border-radius: 14px; }
+.claim .card { background: var(--surface, #fff); border: 1px solid var(--line, #e5e3dd); border-radius: 14px; }
 .claim .back { display: inline-block; margin-bottom: 4px; }
 .claim .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 12px; }
 .claim .grid2 label { margin: 8px 0; font-size: 13.5px; }
@@ -32,10 +32,10 @@
 .claim .sum-grid small { display: block; font-size: 11.5px; color: var(--sub, #666); }
 .claim .checklist { list-style: none; padding: 0; margin: 12px 0; font-size: 13.5px; }
 .claim .checklist li { padding: 6px 0; }
-.claim .checklist li.warn { color: #b3422f; }
+.claim .checklist li.warn { color: var(--warn, #b3422f); }
 .claim .acts { display: flex; flex-wrap: wrap; gap: 6px; }
 .claim .acts button { margin: 0 !important; }
-.claim .danger { color: #b3422f; }
+.claim .danger { color: var(--warn, #b3422f); }
 .claim .foot { margin-top: 18px; }
 @media (max-width: 520px) { .claim .grid2 { grid-template-columns: 1fr; } }
 
