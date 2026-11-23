@@ -73,6 +73,18 @@ function tomorrow() {
 $("#date").value = tomorrow();
 $("#date").min = addDays(tomorrow(), -1); // 오늘 (기기 시간대 기준)
 
+// 화면낭독기: 고르는 버튼(지역·기간·누구와·좋아하는 것·이동 편의·빠른 바꾸기)이 눌렸는지 aria-pressed로 알려 준다.
+// 'on'을 켜고 끄는 곳이 여러 군데라 class가 바뀔 때마다 한곳에서 맞춘다
+const PRESS_SEL = ".seg button, .chips button, #quick button";
+const syncPressed = (b) => { if (!b.hasAttribute("role")) b.setAttribute("aria-pressed", String(b.classList.contains("on"))); };
+document.querySelectorAll(PRESS_SEL).forEach(syncPressed);
+new MutationObserver((ms) => {
+  for (const m of ms) {
+    if (m.type === "attributes" && m.target.matches?.(PRESS_SEL)) syncPressed(m.target);
+    for (const n of m.addedNodes || []) if (n.nodeType === 1) { if (n.matches(PRESS_SEL)) syncPressed(n); n.querySelectorAll?.(PRESS_SEL).forEach(syncPressed); }
+  }
+}).observe(document.body, { subtree: true, childList: true, attributes: true, attributeFilter: ["class"] });
+
 document.querySelectorAll(".seg").forEach((seg) => {
   seg.addEventListener("click", (e) => {
     const b = e.target.closest("button"); if (!b) return;
@@ -946,7 +958,7 @@ function nearSpots(list, at, maxKm, n) {
 const spotTags = (x) => x.flags.filter((f) => ACCESS_LABEL[f]).map((f) => t(ACCESS_LABEL[f])).join(" · ");
 const distText = (km) => (km < 1 ? t("{m}m", { m: Math.round(km * 1000 / 10) * 10 }) : t("{km}km", { km: km.toFixed(1) }));
 function spotRaw(x) {
-  const raw = Object.entries(x.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
+  const raw = Object.entries(x.text || {}).map(([k, v]) => `<li><b>${esc(t(k))}</b> <span lang="ko">${esc(v)}</span></li>`).join("");
   return raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul></details>` : "";
 }
 // 무장애 정보가 없는 식당 카드: 1km 안 무장애가 확인된 식당 2곳
@@ -966,7 +978,7 @@ function accessStaysHTML(l) {
   if (!list.length) return `<div class="stays acc-stays"><b>${t("무장애가 확인된 숙소")}</b><p class="hint">${t("이 지역 10km 안에는 관광공사 무장애 정보가 등록된 숙소가 없어요. 예약 전에 전화로 객실·출입구를 확인하세요.")}</p></div>`;
   return `<div class="stays acc-stays"><b>${t("무장애가 확인된 숙소")}</b><ul>${list.map((x) => `<li>
       <div class="stay-img" style="background-image:${x.photo ? `url('${esc(x.photo)}'), ` : ""}${STAY_ART.business}"></div>
-      <div class="stay-info"><strong>${esc(x.name)}</strong><span>${distText(x.km)}</span><small>♿ ${esc(spotTags(x))}</small>${spotRaw(x)}</div>
+      <div class="stay-info"><strong lang="ko">${esc(x.name)}</strong><span>${distText(x.km)}</span><small>♿ ${esc(spotTags(x))}</small>${spotRaw(x)}</div>
       <div class="stay-acts">${priceLinks(x.name, true)}${x.tel ? `<a class="ghost small" href="tel:${esc(x.tel)}">${t("전화")}</a>` : ""}<a class="ghost small" href="https://map.naver.com/p/search/${encodeURIComponent(x.name)}" target="_blank" rel="noopener">${t("지도")}</a></div>
     </li>`).join("")}</ul><p class="hint">${t("한국관광공사 무장애 여행 정보 기준이에요. 장애인 객실은 수가 적으니 예약할 때 꼭 요청하세요.")}</p></div>`;
 }
@@ -1056,7 +1068,7 @@ function accessLine(p) {
   const tel = p.tel || menuData?.[p.id]?.tel;
   if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${officialLines(p)}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
-  const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(k)}</b> ${esc(v)}</li>`).join("");
+  const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(t(k))}</b> <span lang="ko">${esc(v)}</span></li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
   return `<div class="access yes">${walk}<span class="acc-tags">♿ ${tags.length ? tags.map(esc).join(" · ") : t("무장애 정보 있음")}</span>${officialLines(p)}${p.access.stepsWarn ? `<span class="acc-steps">⚠️ ${t("공식 조사: 계단 있음")} — ${esc(p.access.stepsWarn)}</span>` : ""}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}
     ${raw ? `<details><summary>${t("자세히 (관광공사 원문)")}</summary><ul>${raw}</ul><small>${t("한국관광공사 무장애 여행 정보")}</small></details>` : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;

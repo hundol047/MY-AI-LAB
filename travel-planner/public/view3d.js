@@ -44,6 +44,7 @@ export function closeView3D() {
   o.stop();
   o.el.remove();
   document.body.classList.remove("v3d-open");
+  o.restore?.();
 }
 
 /**
@@ -100,17 +101,22 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   const calm = !!window.matchMedia?.("(prefers-reduced-motion: reduce)").matches; // '동작 줄이기'를 켠 기기: 저절로 돌거나 날아가지 않는다
   el.querySelector(".v3d-loading").textContent = t("3D 화면을 불러오는 중…");
   el.querySelector(".v3d-warn").textContent = t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 지도에 빠진 곳이 있을 수 있어요");
+  // 화면낭독기·키보드: 뒤의 앱 화면은 잠깐 '없는 것'으로(inert) 두고 초점을 3D 안으로, 닫으면 연 버튼으로 돌려준다 (알림 칸은 그대로 둬서 읽어 준다)
+  const opener = document.activeElement;
+  const behind = [...document.body.children].filter((n) => !n.inert && !n.matches("script, [aria-live], [role=status], [role=alert], .toast"));
   document.body.append(el);
   document.body.classList.add("v3d-open");
+  behind.forEach((n) => { n.inert = true; });
   const q = (act) => el.querySelector(`[data-act="${act}"]`);
   const distEl = el.querySelector(".v3d-dist");
 
   const state = { view: 0, following: false, orbit: !calm, satellite: true, watch: null, me: null, meMarker: null, heading: null, compass: null, raf: 0, last: 0, wake: null, lastTurn: 0, closed: false };
   let walkTimer = 0, walkSig = "", walkPoll = 0;
   const padHoldRef = { id: 0 };
-  const me = { stop() {}, el };
+  const me = { stop() {}, el, restore() { behind.forEach((n) => { n.inert = false; }); if (opener?.isConnected) opener.focus({ preventScroll: true }); } };
   open = me;
   el.querySelector(".v3d-close").addEventListener("click", closeView3D);
+  requestAnimationFrame(() => el.querySelector(".v3d-close")?.focus({ preventScroll: true }));
   const onKey = (e) => { if (e.key === "Escape") closeView3D(); };
   document.addEventListener("keydown", onKey);
 
@@ -413,10 +419,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       ${place.fac?.items?.length ? `<h4>🏢 ${t("이 건물의 편의시설")} <em class="ok">${t("공식")}</em></h4>
         <p class="v3d-note">${t("한국사회보장정보원 장애인편의시설 현황에 이 건물에 설치된 것으로 등록된 편의시설이에요. 목록에 없다고 없는 것은 아니에요.")}</p>
         <p class="v3d-fac" lang="ko">${place.fac.items.map((x) => `<span>${escH(x)}</span>`).join("")}</p>
-        <p class="v3d-note"><small>${t("등록 시설: {name}", { name: escH(place.fac.name) })}${place.fac.addr ? ` · ${escH(place.fac.addr)}` : ""}</small></p>` : ""}
+        <p class="v3d-note"><small>${t("등록 시설: {name}", { name: `<span lang="ko">${escH(place.fac.name)}</span>` })}${place.fac.addr ? ` · ${escH(place.fac.addr)}` : ""}</small></p>` : ""}
       ${(place.toilets || []).length ? `<h4>🚻 ${t("이곳의 공중화장실")} <em class="ok">${t("공식")}</em></h4>
         <p class="v3d-note">${t("행정안전부 공중화장실 자료예요. 이 자료에는 좌표가 없어 지도에는 찍지 못하고 이름과 주소로 보여 드려요.")}</p>
-        <ul class="v3d-wc">${place.toilets.map((x) => `<li><b>${escH(x.name)}</b> ${x.acc ? `<em class="b-ok">♿ ${t("장애인용 변기")} ${t("남 {m} · 여 {w}", { m: x.accM, w: x.accW })}</em>` : `<em class="b-info">${t("장애인용 변기 등록 없음")}</em>`}${x.diaper ? ` <em class="b-info">👶 ${t("기저귀 교환대")}</em>` : ""}<small>${escH(x.addr || "")}${x.open ? ` · ${escH(x.open)}` : ""}${x.ref ? ` · ${t("자료 기준 {d}", { d: escH(x.ref) })}` : ""}</small></li>`).join("")}</ul>` : ""}
+        <ul class="v3d-wc">${place.toilets.map((x) => `<li><b lang="ko">${escH(x.name)}</b> ${x.acc ? `<em class="b-ok">♿ ${t("장애인용 변기")} ${t("남 {m} · 여 {w}", { m: x.accM, w: x.accW })}</em>` : `<em class="b-info">${t("장애인용 변기 등록 없음")}</em>`}${x.diaper ? ` <em class="b-info">👶 ${t("기저귀 교환대")}</em>` : ""}<small lang="ko">${escH(x.addr || "")}${x.open ? ` · ${escH(x.open)}` : ""}${x.ref ? ` · ${t("자료 기준 {d}", { d: escH(x.ref) })}` : ""}</small></li>`).join("")}</ul>` : ""}
       ${(place.trails || []).length ? `<h4>🌲 ${t("근처 무장애나눔길")} <em class="ok">${t("공식")}</em></h4>
         <p class="v3d-note">${t("휠체어·유모차도 다닐 수 있게 만든 숲길이에요 (한국산림복지진흥원). 지도에 청록색 굵은 선으로 표시했어요.")}</p>
         <ul class="v3d-wc">${place.trails.map((tr, i) => `<li><b>${escH(tr.name)}</b> · ${t("길이 {m}m", { m: tr.len })} <button type="button" class="v3d-btn" data-trail="${i}">${t("지도에서 보기")}</button></li>`).join("")}</ul>` : ""}
