@@ -242,7 +242,7 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
 
   // 걷기·무장애 질문 ("거기 계단 있어?", "화장실 어디야?", "휠체어로 갈 수 있어?"): 앱에 있는 자료로만 답하고, 출처와 확인 수준을 함께 말한다
   //  공식 = 한국관광공사 무장애 조사, 미확인 = 오픈스트리트맵(주변 400m 조사, walk-info.json). 없으면 없다고 말한다
-  if (/계단|화장실|경사|오르막|휠체어|엘리베이터|턱|장애인|stairs?|steps|toilet|restroom|slope|steep|wheelchair|elevator|階段|トイレ|坂|車いす|車椅子|エレベーター|台阶|楼梯|厕所|卫生间|坡|轮椅|电梯/i.test(question)) {
+  if (/계단|화장실|경사|오르막|휠체어|엘리베이터|턱|장애인|무장애|유모차|수유|stairs?|steps|toilet|restroom|slope|steep|wheelchair|elevator|accessib|stroller|階段|トイレ|坂|車いす|車椅子|エレベーター|バリアフリー|ベビーカー|台阶|楼梯|厕所|卫生间|坡|轮椅|电梯|无障碍|婴儿车/i.test(question)) {
     const W = ctx.walkInfo?.places || {}, R = ctx.walkInfo?.radius || 400;
     const ps = (mentioned.length ? mentioned : ctx.walkInfo ? dayPlaces.filter((p) => p.cat && p.cat !== "festival") : []).slice(0, mentioned.length ? 3 : 4);
     if (ps.length) {
@@ -255,6 +255,14 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
           if (a.stepsWarn) out.push("⚠️ " + (lang === "ko" ? a.stepsWarn : L("", "the survey notes stairs (in Korean): ", "調査に階段の記載(韓国語): ", "调查提到台阶(韩文): ") + a.stepsWarn));
           if (a.text?.["화장실"] && /화장실|toilet|トイレ|厕所|卫生间/i.test(question) && lang === "ko") out.push(`화장실 원문: ${a.text["화장실"]}`);
         } else out.push(L("공식 무장애 조사 없음", "No official accessibility survey", "公式のバリアフリー調査なし", "无官方无障碍调查"));
+        // 다른 공식 자료 (내려받은 공공데이터·공식 누리집, app.js가 ctx.official로 넘긴다)
+        const O = ctx.official || {};
+        const fac = O.fac?.[p.id], tn = O.toilets?.[p.id], web = O.web?.[p.id], tr = O.trailNear?.(p);
+        if (O.open?.[p.id]) out.push(L("🏅 열린관광지(정부가 무장애로 정비한 곳, 2022년 목록)", "🏅 Listed as an Open Tourism site (made barrier-free by the government, 2022 list)", "🏅 開かれた観光地(政府がバリアフリー整備、2022年一覧)", "🏅 无障碍开放景区(政府无障碍改造，2022年名单)"));
+        if (fac?.items?.length) out.push(lang === "ko" ? `건물 편의시설(사회보장정보원, ${fac.name}): ${fac.items.join(", ")}` : L("", `Building features registered (${fac.items.length}, Korean survey)`, `建物の設備 ${fac.items.length}件登録(韓国の調査)`, `已登记建筑设施 ${fac.items.length} 项(韩国调查)`));
+        if (tn?.length) { const acc = tn.filter((x) => x.acc); out.push(lang === "ko" ? `공중화장실 ${tn.length}곳(행정안전부)${acc.length ? ` · 장애인용 변기: ${acc.slice(0, 3).map((x) => x.name).join(", ")}` : " · 장애인용 변기 등록 없음"}` : L("", `Public toilets on file: ${tn.length} (${acc.length} with accessible stalls)`, `公衆トイレ${tn.length}か所、うち多機能${acc.length}か所`, `公共厕所${tn.length}处，其中无障碍${acc.length}处`)); }
+        if (web?.length && lang === "ko") out.push(`공식 누리집: ${web.slice(0, 2).map((x) => x.text).join(" / ")}`);
+        if (tr) out.push(L(`근처 무장애나눔길: ${tr.tr.name}(${tr.tr.len}m)`, `Barrier-free forest trail nearby (${tr.tr.len} m)`, `近くにバリアフリーの森の道(${tr.tr.len}m)`, `附近有无障碍森林步道(${tr.tr.len}米)`));
         if (w) {
           const bits = [];
           if (w.sh) bits.push(L(`걷는 길 완만 ${w.sh[0]}%·조금 가파름 ${w.sh[1]}%·가파름 ${w.sh[2]}%`, `paths ${w.sh[0]}% gentle, ${w.sh[1]}% fairly steep, ${w.sh[2]}% steep`, `歩道 緩やか${w.sh[0]}%・やや急${w.sh[1]}%・急${w.sh[2]}%`, `步道 平缓${w.sh[0]}%·稍陡${w.sh[1]}%·陡峭${w.sh[2]}%`));

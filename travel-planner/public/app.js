@@ -1007,6 +1007,11 @@ function refreshAccCounts(ids) {
     if (trip && !$("#result").hidden && Object.keys(j).length) render();
   }).catch(() => {});
 }
+// 공식 무장애 조사가 없는 곳: 전화할 때 물어볼 것 (걸음이 불편한 분이 실제로 막히는 순서대로)
+function callQuestionsHTML(tel) {
+  const qs = ["입구까지 계단이나 턱이 있나요? 있다면 몇 칸인가요?", "경사로나 엘리베이터가 있나요?", "장애인 화장실이 있나요? 건물 안인가요, 밖인가요?", "장애인 주차구역이 있나요? 주차장에서 입구까지 얼마나 걸어야 하나요?", "휠체어나 유모차를 빌릴 수 있나요?", "중간에 앉아서 쉴 곳이 있나요?"];
+  return `<details class="call-q"><summary>📞 ${t("전화할 때 물어볼 것")}</summary><ol>${qs.map((q) => `<li>${t(q)}</li>`).join("")}</ol>${tel ? `<a class="ghost small" href="tel:${esc(tel)}">${t("지금 전화하기")} · ${esc(tel)}</a>` : `<p class="hint">${t("전화번호는 장소 이름으로 지도 앱에서 찾을 수 있어요.")}</p>`}</details>`;
+}
 function fieldCheckHTML(p) {
   if (p.cat === "festival") return "";
   const mine = accMine()[p.id] || {}, c = accCounts[p.id] || {};
@@ -1066,7 +1071,7 @@ function accessLine(p) {
   const lot = own ? null : lotsData?.[p.id]?.[0];
   const park = lot ? t("주차장에서 약 {m}m", { m: lot.m }) + (lot.m > 300 ? t(" · 멀어요, 입구 앞 내려 주기 추천") : "") : ""; // 장애인 주차는 무장애 시설 줄에
   const tel = p.tel || menuData?.[p.id]?.tel;
-  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${officialLines(p)}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
+  if (!p.access) return `<div class="access none">${walk}${park ? `<span>🅿️ ${esc(park)}</span>` : ""}${officialLines(p)}${accessWebLine(p)}<span>${accessWeb?.places?.[p.id]?.length ? t("관광공사 무장애 조사는 없어요") : t("무장애 정보 없음 · 계단·경사를 미리 확인하세요")}${tel ? ` · <a href="tel:${esc(tel)}">${t("전화로 확인")}</a>` : ""}</span>${callQuestionsHTML(tel)}${food ? nearAccessFood(p) : ""}${walkInfoLine(p)}${fieldCheckHTML(p)}</div>`;
   const tags = Object.keys(ACCESS_LABEL).filter((k) => p.access[k]).map((k) => t(ACCESS_LABEL[k]));
   const raw = Object.entries(p.access.text || {}).map(([k, v]) => `<li><b>${esc(t(k))}</b> <span lang="ko">${esc(v)}</span></li>`).join("");
   // 시설은 접지 않고 바로 보이게, 원문만 펼쳐 본다
@@ -2327,7 +2332,8 @@ async function runGuide(question, shown) {
   const currentDay = dayIdx, requestLang = getLang();
   const history = guideHistory.map(({q,a})=>({q,a}));
   if (/[a-z]{3}/i.test(question)) await loadDataEn((u) => fetchT(u, {}, 4000));
-  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history, walkInfo};
+  const ctx = {input, opts:beforeOpts, fees:feesData, lang:requestLang, forceLang:requestLang, namesEn:namesEn(), history, walkInfo,
+    official: { fac: facilities, toilets: toiletsNamed, open: openSites, web: accessWeb?.places, trailNear: (p) => trailsNear(p, 1.5)[0] }};
   bubble("me", shown);
   const wait = bubble("ai pending", t("생각 중"));
   const module = await localAI();
