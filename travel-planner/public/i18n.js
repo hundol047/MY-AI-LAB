@@ -946,6 +946,7 @@ export const EN = {
   "유모차 대여·수유실·경사로가 확인된 곳을 먼저 넣었어요. 무장애 정보는 한국관광공사 자료예요.": "Places with confirmed stroller rental, nursing rooms or ramps come first. Accessibility info is from the Korea Tourism Organization.",
   "계단 주의": "Watch for stairs",
   "공식 조사나 누리집에 계단이 적혀 있어요. 장소 카드와 3D 화면에서 확인하세요": "Stairs are mentioned in the official survey or website. Check the place card and the 3D view.",
+  "인터넷이 연결되지 않아 지도를 불러오지 못했어요. 위의 걷기 요약과 '실내·사진'의 글 안내는 볼 수 있어요. 연결되면 닫았다가 다시 열어 주세요.": "No internet connection, so the map couldn't load. You can still read the walking summary above and the text in 'Indoor · photos'. Close and reopen once you're connected.",
   "내 위치": "My location",
   "최근 출발지": "Recent",
   "검색 결과가 없어요": "No matches",

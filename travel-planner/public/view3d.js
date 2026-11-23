@@ -246,8 +246,14 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     else { map.jumpTo({ center, zoom: 16.2, pitch: 62, bearing: -20 }); endIntro(); }
   };
   map.once("load", () => land(true));
-  map.once("idle", () => el.querySelector(".v3d-loading")?.remove());
-  setTimeout(() => el.querySelector(".v3d-loading")?.remove(), 12000);
+  // 인터넷이 끊겼으면 '불러오는 중'을 끝없이 띄우지 않고, 볼 수 있는 것을 알려 준다 (산·바닷가에서 흔함)
+  let gotTile = false;
+  map.on("data", (e) => { if (e.dataType === "source" && e.tile) gotTile = true; });
+  const offlineNote = () => { const l = el.querySelector(".v3d-loading"); if (!l) return; l.textContent = t("인터넷이 연결되지 않아 지도를 불러오지 못했어요. 위의 걷기 요약과 '실내·사진'의 글 안내는 볼 수 있어요. 연결되면 닫았다가 다시 열어 주세요."); l.classList.add("v3d-offline"); l.setAttribute("role", "status"); };
+  const doneLoading = () => { if (!gotTile && !navigator.onLine) offlineNote(); else el.querySelector(".v3d-loading")?.remove(); };
+  if (!navigator.onLine) offlineNote();
+  map.once("idle", doneLoading);
+  setTimeout(() => (gotTile ? el.querySelector(".v3d-loading")?.remove() : navigator.onLine ? el.querySelector(".v3d-loading")?.remove() : offlineNote()), 12000);
 
   // 관광지 표시: 이름표가 달린 핀
   const pin = document.createElement("div");
