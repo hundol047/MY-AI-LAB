@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "기울여서 산과 건물 보기": "Tilt to see mountains and buildings",
+  "일정 전체 보기": "Show the whole day",
   "🚧 계단·턱 있었어요": "🚧 There were steps or a ledge",
   "♿ 휠체어로 다닐 만했어요": "♿ Wheelchair-friendly enough",
   "🚻 장애인 화장실 없었어요": "🚻 No accessible restroom",

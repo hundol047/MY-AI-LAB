@@ -1920,7 +1920,7 @@ function mapModel(day) {
 
 // 번호가 서로 가리지 않게: 화면에서 32px 안에 겹치는 표시는 한데 모아 원 둘레로 펼치고, 원래 위치까지 선을 긋는다
 // pts: [{x, y}] (화면 좌표) → [{dx, dy}] (펼친 만큼의 이동)
-function declutter(pts, gap = 32) {
+function declutter(pts, gap = 38) {
   const out = pts.map(() => ({ dx: 0, dy: 0 }));
   const seen = new Array(pts.length).fill(false);
   for (let i = 0; i < pts.length; i++) {
@@ -1996,7 +1996,10 @@ function drawMap3D(day) {
   if (!ml) {
     ml = new maplibregl.Map({
       pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 3배 화면도 2배로 그려 배터리·발열을 줄인다
-      container: "map", attributionControl: { compact: true }, pitch: 55, bearing: -12, maxPitch: 75,
+      container: "map", attributionControl: { compact: true }, pitch: mapFlat ? 0 : 45, bearing: 0, maxPitch: 60,
+      // 조작을 쉽게: 돌리기·기울이기 손동작은 끄고(실수로 지도가 돌아가 헷갈림), 기울기는 "2D/3D" 버튼으로만 바꾼다
+      dragRotate: false, touchPitch: false, pitchWithRotate: false,
+      canvasContextAttributes: { antialias: true }, // 건물·경계선 계단 현상 줄이기
       center: [model.line[0][1], model.line[0][0]], zoom: 11,
       // 화면 안에서는 두 손가락(컴퓨터는 Ctrl+휠)으로 움직이고, 한 손가락은 페이지 스크롤 · "크게 보기"에서는 한 손가락으로
       cooperativeGestures: !mapFull, boxZoom: false,
@@ -2013,25 +2016,38 @@ function drawMap3D(day) {
         },
         layers: [
           ...baseLayers({ lang: getLang(), dark: document.documentElement.dataset.theme === "dark" || (document.documentElement.dataset.theme !== "light" && !!window.matchMedia?.("(prefers-color-scheme: dark)").matches) }),
-          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.3, "hillshade-shadow-color": "#3a4a40" } },
+          // 산 음영은 옅게(멀리서만), 가까이 보면 거의 없앤다 — 짙으면 지도 전체가 회색으로 탁해 보인다
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": ["interpolate", ["linear"], ["zoom"], 8, 0.22, 12, 0.14, 14, 0.04], "hillshade-shadow-color": "#5b6b62", "hillshade-highlight-color": "#ffffff", "hillshade-accent-color": "#7d8c84" } },
           // 시내를 가까이 볼 때(13~) 건물이 솟아오른다. 높이가 없는 건물은 2층(6m)으로 본다
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
-              "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#e6e0d4", 30, "#d4cbbb", 100, "#bfb4a1"],
+              "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#efe9df", 20, "#dcd3c4", 60, "#c7bba8", 150, "#a99d8b"],
+              "fill-extrusion-vertical-gradient": true,
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-              "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 14, 0.85],
+              "fill-extrusion-opacity": ["interpolate", ["linear"], ["zoom"], 13, 0, 14, 0.92],
             } },
         ],
-        terrain: { source: "dem", exaggeration: 1.4 },
+        terrain: { source: "dem", exaggeration: 1.15 }, // 너무 솟으면 산이 번호와 길을 가린다
         sky: { "sky-color": "#bfe3f0", "horizon-color": "#e9f4f7", "sky-horizon-blend": 0.6, "atmosphere-blend": 0.5 },
       },
     });
-    ml.addControl(new maplibregl.NavigationControl({ visualizePitch: true }), "bottom-right");
+    ml.touchZoomRotate.disableRotation(); // 두 손가락 확대는 그대로, 돌리기만 끔
+    ml.addControl(new maplibregl.NavigationControl({ showCompass: false }), "bottom-right");
+    ml.addControl({ onAdd: () => mapViewButtons(), onRemove() {} }, "top-right");
     setTimeout(() => document.querySelector("#map .maplibregl-ctrl-attrib")?.classList.remove("maplibregl-compact-show"), 4000); // 출처는 잠깐 보이고 접힘 (ⓘ로 다시)
     ml.addControl({ onAdd: () => locateButton((ll) => { ml.flyTo({ center: [ll[1], ll[0]], zoom: 14 }); return new maplibregl.Marker({ color: "#2563eb" }).setLngLat([ll[1], ll[0]]).addTo(ml); }), onRemove() {} }, "bottom-right");
     // 건물 자료를 못 받아도(오프라인 등) 지형 지도는 그대로 보인다
-    ml.on("error", (e) => console.warn("지도", e?.error?.message || e));
+    // 바탕 지도(OpenFreeMap)를 못 받으면 OpenStreetMap 그림 지도를 맨 아래에 깔아 회색 지형만 보이지 않게 한다
+    ml.on("error", (e) => {
+      console.warn("지도", e?.error?.message || e);
+      if (e?.sourceId === "ofm" && !ml.getSource("osm-raster")) {
+        try {
+          ml.addSource("osm-raster", { type: "raster", tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"], tileSize: 256, maxzoom: 19, attribution: "© OpenStreetMap" });
+          ml.addLayer({ id: "osm-raster", type: "raster", source: "osm-raster" }, ml.getStyle().layers[0]?.id);
+        } catch { /* 스타일 준비 전이면 다음 오류 때 다시 */ }
+      }
+    });
     ml.on("move", () => spread3D());
   }
   // 번호·시점은 바로, 경로선은 지도 스타일이 준비되면 (타일을 다 받을 때까지 기다리지 않는다)
@@ -2039,7 +2055,8 @@ function drawMap3D(day) {
   // 방문지 번호가 출발·숙소 표시보다 위에 오도록 나중에 넣는다
   mlMarkers = [...model.marks].sort((a, b) => Number(!a.base) - Number(!b.base)).map((m) => {
     const el = pinEl(m);
-    const mk = new maplibregl.Marker({ element: el, anchor: "center" }).setLngLat([m.lng, m.lat]).addTo(ml);
+    // 산에 가려져도 번호를 흐리게 하지 않는다 (기본값은 가려지면 20%로 흐려짐)
+    const mk = new maplibregl.Marker({ element: el, anchor: "center", opacityWhenCovered: "1" }).setLngLat([m.lng, m.lat]).addTo(ml);
     el.addEventListener("click", () => new maplibregl.Popup({ offset: 18, closeButton: false }).setLngLat([m.lng, m.lat]).setText(m.tip).addTo(ml));
     return mk;
   });
@@ -2049,7 +2066,7 @@ function drawMap3D(day) {
   if (lastMapViewKey !== viewKey) {
     const lats = model.bounds.map((p) => p[0]), lngs = model.bounds.map((p) => p[1]);
     // 오른쪽 아래 확대·방향 버튼, 위쪽 '지도 이동' 버튼에 번호가 가리지 않도록 여백을 둔다
-    ml.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 70, bottom: 50, left: 40, right: 70 }, maxZoom: 14, pitch: 55, bearing: -12, duration: 0 });
+    ml.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 70, bottom: 50, left: 40, right: 70 }, maxZoom: 14, pitch: mapFlat ? 0 : 45, bearing: 0, duration: 0 });
     fit3D();
     lastMapViewKey = viewKey;
   }
@@ -2069,13 +2086,36 @@ function drawMap3D(day) {
   const tryLine = () => { try { line(); return true; } catch { return false; } };
   if (!tryLine()) ml.once("style.load", () => { if (mlModel === model) tryLine(); });
 }
+// 지도 보기 버튼: 2D(위에서 내려다보기) ↔ 3D(기울여 산 보기), 전체 일정 다시 보기. 손가락에 맞게 크게
+let mapFlat = (() => { try { return localStorage.getItem("mapFlat") === "1"; } catch { return false; } })();
+function mapViewButtons() {
+  const wrap = document.createElement("div");
+  wrap.className = "maplibregl-ctrl map-view-btns";
+  const btn3d = document.createElement("button"), fit = document.createElement("button");
+  btn3d.type = fit.type = "button";
+  const label = () => { btn3d.textContent = mapFlat ? "3D" : "2D"; btn3d.title = btn3d.ariaLabel = t(mapFlat ? "기울여서 산과 건물 보기" : "위에서 내려다보기"); };
+  label();
+  btn3d.addEventListener("click", () => {
+    mapFlat = !mapFlat; label();
+    try { localStorage.setItem("mapFlat", mapFlat ? "1" : "0"); } catch { /* 저장 못 해도 이번엔 적용 */ }
+    ml.easeTo({ pitch: mapFlat ? 0 : 45, bearing: 0, duration: reduceMotion() ? 0 : 600 });
+  });
+  fit.textContent = "⤢"; fit.title = fit.ariaLabel = t("일정 전체 보기");
+  fit.addEventListener("click", () => {
+    if (!mlModel) return;
+    const lats = mlModel.bounds.map((p) => p[0]), lngs = mlModel.bounds.map((p) => p[1]);
+    ml.fitBounds([[Math.min(...lngs), Math.min(...lats)], [Math.max(...lngs), Math.max(...lats)]], { padding: { top: 70, bottom: 50, left: 40, right: 70 }, maxZoom: 14, pitch: mapFlat ? 0 : 45, bearing: 0, duration: reduceMotion() ? 0 : 600 });
+  });
+  wrap.append(btn3d, fit);
+  return wrap;
+}
 // 기울인 3D 시점은 화면 가장자리 계산이 어긋나 번호가 잘릴 수 있다 → 펼친 번호까지 모두 화면 안(여백 28px)에 들 때까지 조금씩 멀리 본다
 function fit3D() {
   const c = ml.getContainer(), w = c.clientWidth, h = c.clientHeight, m = 28;
   for (let k = 0; k < 6; k++) {
+    // 실제 위치만 본다: 겹친 번호를 둥글게 펼친 모양까지 넣으려 하면, 멀어질수록 더 겹쳐 끝없이 작아진다
     const pts = mlMarkers.map((mk) => ml.project(mk.getLngLat()));
-    const off = declutter(pts);
-    const out = pts.some((p, i) => { const x = p.x + off[i].dx, y = p.y + off[i].dy; return x < m || y < m + 40 || x > w - m - 50 || y > h - m; });
+    const out = pts.some((p) => p.x < m || p.y < m + 30 || p.x > w - m - 56 || p.y > h - m);
     if (!out) return;
     ml.jumpTo({ zoom: ml.getZoom() - 0.4 });
   }

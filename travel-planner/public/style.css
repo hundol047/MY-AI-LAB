@@ -178,12 +178,12 @@ html, body { overflow-x: clip; }
 .empty { padding: 40px; text-align: center; color: var(--sub); }
 
 .pin span {
-  display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%;
-  background: var(--c); color: #fff; font-weight: 800; font-size: 13px; border: 2px solid #fff;
-  box-shadow: 0 2px 6px rgba(0,0,0,.3);
+  display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--c); color: #fff; font-weight: 900; font-size: 16px; line-height: 1; border: 3px solid #fff;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,.35), 0 3px 10px rgba(0,0,0,.45); text-shadow: 0 1px 1px rgba(0,0,0,.35);
 }
 
-.pin.base span { --c: #191919; font-size: 11px; }
+.pin.base span { --c: #191919; font-size: 13px; }
 .locate {
   width: 34px; height: 34px; display: grid; place-items: center; margin-bottom: 6px;
   background: #fff; color: #222; border: 2px solid rgba(0,0,0,.2); border-radius: 4px; background-clip: padding-box;
@@ -546,13 +546,14 @@ body.has-server .no-server { display: none !important; }
 /* 지도 표시 (3D·2D 공통): 겹치면 원 둘레로 펼치고 원래 위치까지 선(stem)과 점을 남긴다 */
 .pin3d { position: relative; width: 0; height: 0; cursor: pointer; }
 .pin3d span {
-  position: absolute; left: -15px; top: -15px; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%;
-  background: var(--c, #34479a); color: #fff; font-weight: 800; font-size: 14px; border: 2px solid #fff;
-  box-shadow: 0 2px 8px rgba(0,0,0,.35); transition: transform .15s ease; z-index: 2;
+  position: absolute; left: -17px; top: -17px; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%;
+  background: var(--c, #34479a); color: #fff; font-weight: 900; font-size: 16px; line-height: 1; border: 3px solid #fff;
+  box-shadow: 0 0 0 1.5px rgba(0,0,0,.35), 0 3px 10px rgba(0,0,0,.45); text-shadow: 0 1px 1px rgba(0,0,0,.35);
+  transition: transform .15s ease; z-index: 2;
 }
-.pin3d.base span { --c: #191919; width: 26px; height: 26px; left: -13px; top: -13px; font-size: 11px; opacity: .92; }
-.pin3d .stem { position: absolute; left: 0; top: -1px; height: 2px; width: 0; background: #191919; opacity: .55; transform-origin: 0 50%; z-index: 1; }
-.pin3d.moved::before { content: ""; position: absolute; left: -4px; top: -4px; width: 8px; height: 8px; border-radius: 50%; background: #191919; border: 2px solid #fff; z-index: 1; }
+.pin3d.base span { --c: #191919; width: 30px; height: 30px; left: -15px; top: -15px; font-size: 13px; }
+.pin3d .stem { position: absolute; left: 0; top: -1.5px; height: 3px; width: 0; background: #191919; opacity: .8; transform-origin: 0 50%; z-index: 1; }
+.pin3d.moved::before { content: ""; position: absolute; left: -5px; top: -5px; width: 10px; height: 10px; border-radius: 50%; background: #191919; border: 2px solid #fff; z-index: 1; }
 .pin-holder { background: none; border: 0; }
 .maplibregl-marker:has(.pin3d:not(.base)) { z-index: 3; }
 .locate-wrap .locate { margin: 0; border: 0; border-radius: 4px; }
@@ -1108,3 +1109,9 @@ html.big .leaflet-control-zoom a { width: 44px; height: 44px; line-height: 44px;
 .v3d-loading.v3d-offline { max-width: min(86vw, 340px); white-space: normal; text-align: center; line-height: 1.5; }
 /* 보조 화면(계정·예약·후기·정산 등)도 설정의 '큰 글씨'를 따른다 */
 html.big main:not(#result):not(#setup) { zoom: 1.15; }
+
+/* 지도 보기 버튼 (2D/3D, 전체 보기): 손가락으로 누르기 쉽게 크게 */
+.map-view-btns { display: flex; gap: 6px; }
+.map-view-btns button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fff; color: #191919; font: 800 15px/1 inherit; box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer; }
+.map-view-btns button:active { background: #eaedf9; }
+#map .maplibregl-ctrl-group button { width: 40px; height: 40px; }
