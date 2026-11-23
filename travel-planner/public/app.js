@@ -1738,7 +1738,8 @@ function renderCosts() {
 function renderAccessInfo() {
   const box = $("#accessInfo"); if (!box) return;
   const acc = accessMode();
-  if (!trip || !acc.length) { box.hidden = true; return; }
+  const stroller = !acc.length && (state?.opts?.access || []).includes("stroller");
+  if (!trip || (!acc.length && !stroller)) { box.hidden = true; return; }
   box.hidden = false;
   const seen = new Map();
   for (const d of trip.days) for (const it of d.items) if (it.place.cat !== "festival" && !seen.has(it.place.id)) seen.set(it.place.id, it.place);
@@ -1749,14 +1750,33 @@ function renderAccessInfo() {
   // 시군 자료(pet.json의 장소별 시군)가 아직 없으면 받아서 다시 그린다 (장애인 콜택시는 시군마다 다르다)
   if (!sigMap && !renderAccessInfo.loading) { renderAccessInfo.loading = true; fetchT("pet.json", {}, 6000).then((r) => (r.ok ? r.json() : null)).then((j) => { if (j) { if (!petData) petData = j; placeSigun ||= j.sigun; renderAccessInfo(); } }).catch(() => {}); }
   const sig = [...new Set(ps.map((p) => sigMap?.[p.id]).filter(Boolean))].slice(0, 3);
-  const taxi = (sig.length ? sig : ["강원"]).map((g) => `<a href="https://search.naver.com/search.naver?query=${encodeURIComponent(g + " 장애인콜택시")}" target="_blank" rel="noopener">${esc(g)}</a>`).join(" · ");
+  const taxi = (sig.length ? sig : ["강원"]).map((g) => `<a href="https://search.naver.com/search.naver?query=${encodeURIComponent(g + " 장애인콜택시")}" target="_blank" rel="noopener">${esc(t(g))}</a>`).join(" · ");
   const unknown = names((p) => !p.access && !["food", "cafe"].includes(p.cat));
+  // 공식 조사(관광공사)나 공식 누리집에 계단이 적힌 곳: '경사로' 목록에서 빼고 따로 알린다 (accessWeb은 아래에서 선언되므로 try)
+  const webOf = (id) => { try { return accessWeb?.places?.[id] || []; } catch { return []; } };
+  const stairs = (p) => !!(p.access?.stepsWarn || p.access?.stepsBlock || webOf(p.id).some((x) => /계단/.test(x.text) && statusOf(x.text) === "no"));
+  const stairRow = names(stairs).length ? `<li class="warn"><b>⚠️ ${t("계단 주의")}</b> ${names(stairs).join(", ")} — ${t("공식 조사나 누리집에 계단이 적혀 있어요. 장소 카드와 3D 화면에서 확인하세요")}</li>` : "";
+  // 유모차만 고른 경우: 유모차 대여·수유실·엘리베이터 위주 (장애인 콜택시 안내는 빼고)
+  if (stroller) {
+    box.innerHTML = `<h3>${t("👶 유모차 여행 도움")}</h3>
+    <ul class="acc-list">
+      ${row("👶", t("유모차 대여"), names((p) => p.access?.stroller))}
+      ${row("🍼", t("수유실"), names((p) => p.access?.nursing))}
+      ${row("🛗", t("엘리베이터"), names((p) => p.access?.elevator))}
+      ${row("🛣️", t("경사로·턱 없음"), names((p) => p.access?.ramp && !stairs(p)))}
+      ${stairRow}
+      ${unknown.length ? `<li class="warn"><b>❔ ${t("무장애 정보 없음")}</b> ${unknown.join(", ")} — ${t("계단·경사로를 전화로 미리 확인하세요")}</li>` : ""}
+    </ul>
+    <p class="sub">${t("유모차 대여·수유실·경사로가 확인된 곳을 먼저 넣었어요. 무장애 정보는 한국관광공사 자료예요.")}</p>`;
+    return;
+  }
   box.innerHTML = `<h3>${acc.includes("wheelchair") ? t("♿ 휠체어 이동 도움") : t("🦯 걷기 편한 여행 도움")}</h3>
     <ul class="acc-list">
       ${row("♿", t("휠체어 대여"), names((p) => p.access?.wheel))}
       ${row("🚻", t("장애인 화장실"), names((p) => p.access?.toilet))}
       ${row("🅿️", t("장애인 주차"), names((p) => p.access?.parking))}
       ${row("🛗", t("엘리베이터"), names((p) => p.access?.elevator))}
+      ${stairRow}
       ${unknown.length ? `<li class="warn"><b>❔ ${t("무장애 정보 없음")}</b> ${unknown.join(", ")} — ${t("계단·경사로를 전화로 미리 확인하세요")}</li>` : ""}
     </ul>
     <p class="sub">${t("🚆 KTX·ITX는 코레일 예매 때 휠체어석을 고를 수 있고, 역에서 타고 내릴 때 도움을 신청할 수 있어요 (코레일 고객센터 1544-7788).")}</p>
