@@ -2277,7 +2277,7 @@ $("#timeline").addEventListener("click", (e) => {
   const p = trip.days[dayIdx].items[Number(b.dataset.view3d)]?.place; if (!p) return;
   if (!hasWebGL()) return toast(t("이 기기에서는 3D 화면을 볼 수 없어요"));
   track("view3d");
-  openView3D({ name: placeName(p), koName: p.name, photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], fac: facilities?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
+  openView3D({ name: placeName(p), koName: p.name, today: !!state.input?.date && addDays(state.input.date, dayIdx) === addDays(tomorrow(), -1), photos: () => placePhotos(p), web: accessWeb?.places?.[p.id], webAt: accessWeb?.checkedAt, open: openSites?.[p.id], toilets: toiletsNamed?.[p.id], fac: facilities?.[p.id], trails: trailsNear(p, 4).map((x) => x.tr), lat: p.lat, lng: p.lng, access: p.access?.text, walk: walkInfo?.places?.[p.id], lang: getLang() }, { t, toast, loadMapLibre, shared: document.body.classList.contains("has-server") ? { voter: voterId() } : null });
 });
 
 $("#quick").addEventListener("click", (e) => {

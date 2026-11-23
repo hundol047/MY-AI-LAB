@@ -114,12 +114,13 @@ export function walkSummary(segs) {
 // 경사 %를 "1/12" 꼴로 (경사로 기준과 견줘 보기 쉽게)
 export const ratioLabel = (pct) => (pct >= 0.5 ? `1/${Math.max(1, Math.round(100 / pct))}` : "0");
 
-// 계단 3D 모형: 지도 자료(오픈스트리트맵)의 계단 선을 따라 땅에 붙은 낮은 계단 턱 블록을 놓는다.
-//  - 블록은 지형 위에 서므로 오르막 자체는 지형이 나타낸다. 블록 높이는 30~50cm로 계단 턱 모양만(높이를 또 쌓으면 땅 위로 솟은 벽이 된다)
+// 계단 3D 모형: 지도 자료(오픈스트리트맵)의 계단 선을 따라 입체 계단 블록을 놓는다. 위치·방향은 지도 자료 그대로.
+//  - 블록은 지형 위에 서므로 오르막 자체는 지형이 나타낸다. 블록은 6칸씩 한 층계로 0.4m→2.4m 올라가는 계단 모양으로
+//    멀리서도 계단인 줄 알게 키운 것이다(실제 칸 높이가 아님 — 설명 칸과 누를 때 알린다)
 //  - 오르는 방향: 지형 고도로 두 끝의 높이 차를 읽을 수 있으면(0.5m 넘게) 높은 쪽으로 턱이 높아지게, rise(높이 차)를 알린다
 //  - 못 읽으면 heightKnown=false (높이 차 모름)
 // 반환: { features: GeoJSON Polygon[] (properties: h 블록 높이, base, odd), heightKnown, rise, lengthM }
-export function stairBlocks(line, { elevAt = () => null, tread = 0.9, width = 1.8, maxBlocks = 120 } = {}) {
+export function stairBlocks(line, { elevAt = () => null, tread = 1.0, width = 2.2, maxBlocks = 120 } = {}) {
   if (!Array.isArray(line) || line.length < 2) return { features: [], heightKnown: false, rise: 0, lengthM: 0 };
   const len = lineLengthM(line);
   if (!(len > 0.5)) return { features: [], heightKnown: false, rise: 0, lengthM: len };
@@ -137,7 +138,7 @@ export function stairBlocks(line, { elevAt = () => null, tread = 0.9, width = 1.
     if (!(d > 0)) continue;
     const px = (-dy / d) * half * mx, py = (dx / d) * half * my; // 계단 폭 방향(선에 수직)
     const ring = [[a[0] + px, a[1] + py], [b[0] + px, b[1] + py], [b[0] - px, b[1] - py], [a[0] - px, a[1] - py], [a[0] + px, a[1] + py]];
-    features.push({ type: "Feature", properties: { h: +(0.3 + 0.1 * (i % 3)).toFixed(2), base: 0, odd: i % 2 }, geometry: { type: "Polygon", coordinates: [ring] } });
+    features.push({ type: "Feature", properties: { h: +(0.4 * ((i % 6) + 1)).toFixed(2), base: 0, odd: i % 2 }, geometry: { type: "Polygon", coordinates: [ring] } });
   }
   return { features, heightKnown: known, rise: +total.toFixed(1), lengthM: Math.round(len) };
 }

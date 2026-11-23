@@ -247,6 +247,13 @@ public class MainActivity extends Activity {
     /** 웹 화면이 부르는 다리: 캘린더 넣기, 음성 인식. 일정: [{title, location, description, start(ms), end(ms)}] */
     public class CalendarBridge {
         @JavascriptInterface
+        public boolean hasLocation() {
+            // 3D 화면: 위치를 이미 허용했으면 열 때 묻지 않고 바로 내 위치를 확인한다 (웹뷰는 허용 여부를 웹에 알려 주지 않는다)
+            return checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED;
+        }
+
+        @JavascriptInterface
         public boolean hasVoice() {
             return new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).resolveActivity(getPackageManager()) != null;
         }
