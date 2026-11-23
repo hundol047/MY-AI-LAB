@@ -105,3 +105,25 @@ for (const [id, v] of Object.entries(W.places)) {
 }
 assert.ok(W.places.naksansa.st >= 1 && W.places.naksansa.wc >= 1);
 console.log(`ok - 걷기 정보 조사표 (${Object.keys(W.places).length}곳, 지도 기준일 ${W.mapDate})`);
+
+// 계단 3D 모형: 위치는 계단 선 그대로, 높이는 지형으로 읽은 만큼(높은 쪽으로) — 못 읽으면 낮은 모양만
+{
+  const { stairBlocks } = await import('../public/view3d-data.js');
+  const line = [[128.6, 37.8], [128.6001, 37.8]]; // 동쪽으로 약 8.8m
+  const up = stairBlocks(line, { elevAt: (lng) => (lng > 128.60005 ? 13 : 10) });
+  assert.ok(up.heightKnown); assert.equal(up.rise, 3); assert.ok(up.features.length >= 8);
+  // 블록은 6칸씩 한 층계로 올라가는 입체 계단 모양 (0.4m→2.4m, 오르막 자체는 지형이 나타낸다)
+  const hs = up.features.map((f) => f.properties.h); assert.deepEqual(hs.slice(0, 6), [0.4, 0.8, 1.2, 1.6, 2, 2.4]); assert.ok(hs.every((h) => h >= 0.4 && h <= 2.4));
+  // 높은 쪽(동쪽) 블록이 가장 높다
+  const lastRing = up.features.at(-1).geometry.coordinates[0]; assert.ok(Math.max(...lastRing.map((c) => c[0])) > 128.60009);
+  // 서쪽이 높으면 반대로 쌓는다
+  const down = stairBlocks(line, { elevAt: (lng) => (lng > 128.60005 ? 10 : 13) });
+  assert.ok(Math.min(...down.features.at(-1).geometry.coordinates[0].map((c) => c[0])) < 128.60001);
+  // 높이를 모르면 낮은 모양만, 그렇다고 알린다
+  const unk = stairBlocks(line); assert.equal(unk.heightKnown, false); assert.equal(unk.rise, 0); assert.ok(unk.features.length >= 8);
+  // 블록 폭은 약 2.2m
+  const r = up.features[0].geometry.coordinates[0]; const w = Math.hypot((r[0][0] - r[3][0]) * 111320 * Math.cos(37.8 * Math.PI / 180), (r[0][1] - r[3][1]) * 110540);
+  assert.ok(Math.abs(w - 2.2) < 0.05, String(w));
+  assert.equal(stairBlocks([[1, 1]]).features.length, 0);
+  console.log('ok - 계단 3D 모형: 위치·방향, 층계 모양, 높이 차는 아는 만큼만');
+}

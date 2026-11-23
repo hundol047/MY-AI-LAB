@@ -19,3 +19,25 @@ for(const q of ['주말에 부모님이랑 속초 1박','Sokcho with my parents 
  const r=startLocal(q,'2026-11-05');assert.equal(r.region,'seorak');assert.equal(r.days,2);assert.equal(r.who,'parents');assert.equal(r.date,'2026-11-07');
 }
 console.log('ok - 무료 지식 6개 주제 × 4개 언어·앞선 장소 참조·다국어 한 줄 시작');
+
+// 걷기·무장애 질문: 내려받은 공식 자료(건물 편의시설·공중화장실·열린관광지·공식 누리집·무장애나눔길)도 출처와 함께 답한다
+{
+  const { PLACES } = await import('../public/data.js');
+  const P = (id) => PLACES.find((p) => p.id === id);
+  const t2 = { days: [{ items: [{ place: P('gyeongpo-beach'), start: 600, end: 660 }, { place: P('hajodae'), start: 700, end: 760 }] }] };
+  const official = {
+    fac: { 'gyeongpo-beach': { name: '경포해변중앙통로 공중화장실', items: ['장애인사용가능화장실', '주출입구 접근로'] } },
+    toilets: { 'gyeongpo-beach': [{ name: '경포해변중앙통로', acc: true, addr: '강릉시 창해로 514' }] },
+    open: { 'gyeongpo-beach': { title: '강릉 경포해변' } },
+    web: { hajodae: [{ k: '접근로', text: '데크길을 따라 가보면 계단길이 나오는데', url: 'https://tour.yangyang.go.kr/' }] },
+    trailNear: (p) => (p.id === 'hajodae' ? { tr: { name: '시험 무장애나눔길', len: 500 } } : null),
+  };
+  const ko = guideLocal('경포해변 장애인 화장실 있어?', t2, 0, { input: { region: 'gangneung' }, opts: {}, forceLang: 'ko', official }).answer;
+  assert.match(ko, /열린관광지/); assert.match(ko, /건물 편의시설\(사회보장정보원, 경포해변중앙통로 공중화장실\)/); assert.match(ko, /장애인용 변기: 경포해변중앙통로/);
+  const hj = guideLocal('하조대 계단 있어?', t2, 0, { input: { region: 'gangneung' }, opts: {}, forceLang: 'ko', official }).answer;
+  assert.match(hj, /공식 누리집: 데크길을 따라 가보면 계단길이 나오는데/); assert.match(hj, /근처 무장애나눔길: 시험 무장애나눔길/);
+  // 자료가 없으면 지어내지 않는다
+  const none = guideLocal('하조대 계단 있어?', t2, 0, { input: { region: 'gangneung' }, opts: {}, forceLang: 'ko' }).answer;
+  assert.doesNotMatch(none, /공식 누리집|열린관광지|건물 편의시설|무장애나눔길/);
+  console.log('ok - 무장애 질문에 공식 공공데이터·누리집 자료를 출처와 함께 답함');
+}

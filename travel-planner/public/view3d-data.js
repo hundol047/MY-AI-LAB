@@ -113,3 +113,32 @@ export function walkSummary(segs) {
 }
 // 경사 %를 "1/12" 꼴로 (경사로 기준과 견줘 보기 쉽게)
 export const ratioLabel = (pct) => (pct >= 0.5 ? `1/${Math.max(1, Math.round(100 / pct))}` : "0");
+
+// 계단 3D 모형: 지도 자료(오픈스트리트맵)의 계단 선을 따라 입체 계단 블록을 놓는다. 위치·방향은 지도 자료 그대로.
+//  - 블록은 지형 위에 서므로 오르막 자체는 지형이 나타낸다. 블록은 6칸씩 한 층계로 0.4m→2.4m 올라가는 계단 모양으로
+//    멀리서도 계단인 줄 알게 키운 것이다(실제 칸 높이가 아님 — 설명 칸과 누를 때 알린다)
+//  - 오르는 방향: 지형 고도로 두 끝의 높이 차를 읽을 수 있으면(0.5m 넘게) 높은 쪽으로 턱이 높아지게, rise(높이 차)를 알린다
+//  - 못 읽으면 heightKnown=false (높이 차 모름)
+// 반환: { features: GeoJSON Polygon[] (properties: h 블록 높이, base, odd), heightKnown, rise, lengthM }
+export function stairBlocks(line, { elevAt = () => null, tread = 1.0, width = 2.2, maxBlocks = 120 } = {}) {
+  if (!Array.isArray(line) || line.length < 2) return { features: [], heightKnown: false, rise: 0, lengthM: 0 };
+  const len = lineLengthM(line);
+  if (!(len > 0.5)) return { features: [], heightKnown: false, rise: 0, lengthM: len };
+  const za = elevAt(line[0][0], line[0][1]), zb = elevAt(line.at(-1)[0], line.at(-1)[1]);
+  const known = za != null && zb != null && Math.abs(zb - za) > 0.5;
+  const pts = (known && za > zb) ? resample([...line].reverse(), Math.max(tread, len / maxBlocks)) : resample(line, Math.max(tread, len / maxBlocks));
+  if (pts.at(-1) !== (known && za > zb ? line[0] : line.at(-1))) pts.push(known && za > zb ? line[0] : line.at(-1));
+  const n = pts.length - 1;
+  const total = known ? Math.min(Math.abs(zb - za), len * 0.9) : 0;
+  const half = width / 2, features = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[i], b = pts[i + 1], lat = (a[1] + b[1]) / 2;
+    const mx = 1 / (111320 * Math.cos(lat * RAD)), my = 1 / 110540;
+    const dx = (b[0] - a[0]) / mx, dy = (b[1] - a[1]) / my, d = Math.hypot(dx, dy);
+    if (!(d > 0)) continue;
+    const px = (-dy / d) * half * mx, py = (dx / d) * half * my; // 계단 폭 방향(선에 수직)
+    const ring = [[a[0] + px, a[1] + py], [b[0] + px, b[1] + py], [b[0] - px, b[1] - py], [a[0] - px, a[1] - py], [a[0] + px, a[1] + py]];
+    features.push({ type: "Feature", properties: { h: +(0.4 * ((i % 6) + 1)).toFixed(2), base: 0, odd: i % 2 }, geometry: { type: "Polygon", coordinates: [ring] } });
+  }
+  return { features, heightKnown: known, rise: +total.toFixed(1), lengthM: Math.round(len) };
+}

@@ -1115,3 +1115,14 @@ html.big main:not(#result):not(#setup) { zoom: 1.15; }
 .map-view-btns button { width: 44px; height: 44px; border: 0; border-radius: 10px; background: #fff; color: #191919; font: 800 15px/1 inherit; box-shadow: 0 1px 4px rgba(0,0,0,.3); cursor: pointer; }
 .map-view-btns button:active { background: #eaedf9; }
 #map .maplibregl-ctrl-group button { width: 40px; height: 40px; }
+/* 전화할 때 물어볼 것 */
+.call-q { margin-top: 6px; font-size: 13px; }
+.call-q summary { cursor: pointer; font-weight: 700; color: var(--brand); padding: 8px 0; min-height: 32px; }
+.call-q ol { margin: 4px 0 8px; padding-left: 20px; display: grid; gap: 4px; color: var(--text); }
+.call-q .ghost { margin-top: 2px; }
+/* 3D 설명: 계단 모형·주변 시설 */
+.v3d-legend .stair3d { display: inline-block; width: 22px; height: 14px; margin-right: 8px; vertical-align: middle; background: linear-gradient(90deg, #dc2626 0 25%, #fca5a5 25% 50%, #dc2626 50% 75%, #fca5a5 75%); clip-path: polygon(0 100%, 0 75%, 25% 75%, 25% 50%, 50% 50%, 50% 25%, 75% 25%, 75% 0, 100% 0, 100% 100%); }
+.v3d-legend .v3d-care { display: flex; flex-wrap: wrap; gap: 6px 12px; align-items: center; }
+.v3d-legend .v3d-care .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); margin-right: 4px; vertical-align: -1px; }
+/* 3D: 지금 현장이세요? */
+.v3d-here { position: absolute; left: 50%; transform: translateX(-50%); bottom: 340px; z-index: 6; padding: 14px 18px; min-height: 48px; border: 0; border-radius: 999px; background: #1d4ed8; color: #fff; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 6px 20px rgba(0,0,0,.3); cursor: pointer; max-width: calc(100vw - 32px); }

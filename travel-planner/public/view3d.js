@@ -9,12 +9,16 @@ const SATELLITE = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Im
 import { indoorRoute, statusOf, INDOOR_ORDER } from "./access-steps.js";
 const WEB_ICON = { ...Object.fromEntries(INDOOR_ORDER), 기타: "📄" };
 import { baseLayers, baseLayerIds, OFM_URL, OFM_ATTR } from "./basemap.js";
-import { walkSummary, ratioLabel, slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear } from "./view3d-data.js";
+import { walkSummary, ratioLabel, slopeSegments, dedupe, lineMid, distM, PIN_KINDS, loadPins, savePins, toiletsNear, stairBlocks, lineLengthM } from "./view3d-data.js";
 const NEAR_KM = 2;       // 이 안에 있으면 "현장"으로 보고 바로 따라간다
 const ORBIT_DEG_S = 5;   // 둘러보기 속도 (초당 도)
-const EXAG = 1.3;        // 지형을 조금 과장해 보여 준다 (경사 계산에서는 다시 나눈다)
+const EXAG = 1.5;        // 지형을 과장해 입체로 보여 준다 (경사 계산에서는 다시 나눈다)
 const PATH_FILTER = ["all", ["==", ["get", "class"], "path"], ["!=", ["get", "subclass"], "steps"]];
 const STEPS_FILTER = ["all", ["==", ["get", "class"], "path"], ["==", ["get", "subclass"], "steps"]];
+// 걸음이 불편한 분께 필요한 주변 시설 (오픈스트리트맵, 미확인): 주차장·버스 정류장·쉼터·안내소·약국·병원
+const CARE_CLASSES = ["parking", "bus", "shelter", "information", "pharmacy", "hospital", "doctors"];
+const CARE_FILTER = ["match", ["get", "class"], CARE_CLASSES, true, false];
+const CARE_COLORS = { parking: "#2563eb", bus: "#16a34a", shelter: "#9333ea", information: "#0891b2", pharmacy: "#db2777", hospital: "#dc2626", doctors: "#dc2626" };
 export const SLOPE_COLORS = ["#16a34a", "#f59e0b", "#d92d20"];
 const SUM_M = 400;       // 요약(경사 비율)은 장소 카드와 같은 둘레 400m의 길만 센다
 const MARK_M = 700;      // 관광지에서 이 거리 안의 계단·화장실에만 표시를 붙인다
@@ -162,12 +166,16 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       style: {
         version: 8,
         glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
+        // 하늘·안개·빛: 멀리 갈수록 흐려지고 건물 옆면에 그늘이 져서 입체로 보인다
+        sky: { "sky-color": "#7fb5ea", "horizon-color": "#dcecf8", "fog-color": "#e6eef3", "sky-horizon-blend": 0.5, "horizon-fog-blend": 0.35, "fog-ground-blend": 0.93, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 15, 0.1] },
+        light: { anchor: "viewport", color: "#ffffff", intensity: 0.5, position: [1.4, 215, 35] },
         sources: {
           sat: { type: "raster", tiles: [SATELLITE], tileSize: 256, maxzoom: 18, attribution: "위성 사진: Esri, Maxar, Earthstar Geographics" },
           dem: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
           slope: { type: "geojson", data: { type: "FeatureCollection", features: [] } },
+          steps3d: { type: "geojson", data: { type: "FeatureCollection", features: [] } }, // 계단 3D 모형 (지도 자료의 계단 위치에 블록)
           // 무장애나눔길 (공식, 산림복지진흥원 공간정보): 청록색 굵은 선
           bft: { type: "geojson", data: { type: "FeatureCollection", features: (place.trails || []).filter((tr) => tr.line).map((tr) => ({ type: "Feature", properties: { name: tr.name }, geometry: { type: "MultiLineString", coordinates: tr.line } })) } },
         },
@@ -185,17 +193,25 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
           // 계단(오픈스트리트맵, 미확인): 굵은 빨간 줄무늬
           { id: "steps-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#ffffff", "line-width": 11 } },
           { id: "steps", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: STEPS_FILTER, paint: { "line-color": "#d92d20", "line-width": 7, "line-dasharray": [0.35, 0.35] } },
+          { id: "steps-3d", type: "fill-extrusion", source: "steps3d", minzoom: 15,
+            paint: { "fill-extrusion-color": ["match", ["get", "odd"], 1, "#fca5a5", "#dc2626"], "fill-extrusion-height": ["get", "h"], "fill-extrusion-base": 0, "fill-extrusion-opacity": 0.95, "fill-extrusion-vertical-gradient": true } },
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
               "fill-extrusion-color": ["interpolate", ["linear"], ["coalesce", ["get", "render_height"], 6], 0, "#efe9dc", 30, "#ddd3c0", 100, "#c6baa4"],
               "fill-extrusion-height": ["coalesce", ["get", "render_height"], 6],
               "fill-extrusion-base": ["coalesce", ["get", "render_min_height"], 0],
-              "fill-extrusion-opacity": 0.6, // 위성 사진 위에서는 지붕이 비쳐 보이게 옅게 (지도 모드에서는 0.85)
+              "fill-extrusion-opacity": 0.88, // 입체로 보이게 진하게 (옆면은 빛 때문에 그늘이 진다)
+              "fill-extrusion-vertical-gradient": true,
             } },
           // 이름표: 길 이름과 주변 시설 이름 (어디가 어디인지 알아보게). 글꼴을 못 받으면 이름표만 빠진다
           { id: "road-label", type: "symbol", source: "ofm", "source-layer": "transportation_name", minzoom: 15,
             layout: { "symbol-placement": "line", "text-field": ["coalesce", ["get", "name:ko"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 12 },
             paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,0,0,.75)", "text-halo-width": 1.4 } },
+          { id: "care-dot", type: "circle", source: "ofm", "source-layer": "poi", minzoom: 15, filter: CARE_FILTER,
+            paint: { "circle-radius": ["interpolate", ["linear"], ["zoom"], 15, 5, 18, 9], "circle-color": ["match", ["get", "class"], ...Object.entries(CARE_COLORS).flat(), "#6b7280"], "circle-stroke-color": "#ffffff", "circle-stroke-width": 2, "circle-pitch-alignment": "viewport" } },
+          { id: "care-label", type: "symbol", source: "ofm", "source-layer": "poi", minzoom: 16, filter: CARE_FILTER,
+            layout: { "text-field": ["match", ["get", "class"], "parking", t("주차장"), "bus", t("정류장"), "shelter", t("쉼터"), "information", t("안내소"), "pharmacy", t("약국"), t("병원")], "text-font": ["Noto Sans Regular"], "text-size": 11, "text-offset": [0, 1.1], "text-anchor": "top", "text-padding": 4 },
+            paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,0,0,.8)", "text-halo-width": 1.4 } },
           { id: "poi-label", type: "symbol", source: "ofm", "source-layer": "poi", minzoom: 15, filter: ["all", ["has", "name"], ["<=", ["coalesce", ["get", "rank"], 99], 25], ["!=", ["get", "class"], "toilets"]],
             layout: { "text-field": ["coalesce", ["get", "name:ko"], ["get", "name"]], "text-font": ["Noto Sans Regular"], "text-size": 12, "text-max-width": 8, "text-padding": 6 },
             paint: { "text-color": "#ffffff", "text-halo-color": "rgba(0,0,0,.8)", "text-halo-width": 1.5 } },
@@ -315,6 +331,17 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
       ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + dTxt(x), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
       ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?") + dTxt(x), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
+    // 계단 3D 모형: 표시를 붙인 계단(관광지 700m 안)마다 블록을 쌓는다
+    const stairFeats = [];
+    for (const f of tr) {
+      if (f.properties.subclass !== "steps") continue;
+      for (const c of lines(f)) {
+        if (stairFeats.length > 1500 || distM(lineMid(c), here) > MARK_M) continue;
+        const sb = stairBlocks(c, { elevAt });
+        for (const ft of sb.features) { ft.properties.known = sb.heightKnown ? 1 : 0; ft.properties.rise = sb.rise; ft.properties.len = sb.lengthM; stairFeats.push(ft); }
+      }
+    }
+    map.getSource("steps3d")?.setData({ type: "FeatureCollection", features: stairFeats });
     map.getSource("slope")?.setData({ type: "FeatureCollection", features: feats });
     found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, sumPaths: nSum, unpaved, sum };
     drawLegend(); drawSummary();
@@ -342,6 +369,10 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     new maplibregl.Popup({ closeButton: false, offset: 10, className: "v3d-pop" }).setLngLat(e.lngLat)
       .setHTML(`<b>${t(GRADE_NAME[f.properties.g])}</b> · ${f.properties.pct > 20 ? t("경사 20% 넘음 (1/5보다 가파름)") : t("경사 약 {p}% ({r})", { p: Math.round(f.properties.pct), r: ratioLabel(f.properties.pct) })}<br><small>${t("지형 자료로 어림한 값")}</small>`).addTo(map);
   });
+  map.on("click", "steps-3d", (e) => { const p = e.features?.[0]?.properties || {}; new maplibregl.Popup({ closeButton: false, offset: 10, className: "v3d-pop" }).setLngLat(e.lngLat).setHTML(`<b>${t("계단")}</b> · ${t("길이 약 {m}m", { m: p.len })}<br>${p.known ? t("높이 차 약 {h}m (지형 자료로 어림)", { h: p.rise }) : t("높이 차는 몰라요 · 블록은 계단 위치만 나타내요")}<br><small>${t("오픈스트리트맵 자료 · 미확인")}</small>`).addTo(map); });
+  const CARE_NAME = { parking: "주차장", bus: "정류장", shelter: "쉼터", information: "안내소", pharmacy: "약국", hospital: "병원", doctors: "병원" };
+  map.on("click", "care-dot", (e) => { const p = e.features?.[0]?.properties || {}; const nm = p["name:ko"] || p.name; new maplibregl.Popup({ closeButton: false, offset: 10, className: "v3d-pop" }).setLngLat(e.lngLat).setHTML(`<b>${t(CARE_NAME[p.class] || "시설")}</b>${nm ? `<br><span lang="ko">${escH(nm)}</span>` : ""}<br><small>${t("오픈스트리트맵 자료 · 미확인")}</small>`).addTo(map); });
+  for (const id of ["steps-3d", "care-dot"]) { map.on("mouseenter", id, () => { map.getCanvas().style.cursor = "pointer"; }); map.on("mouseleave", id, () => { map.getCanvas().style.cursor = ""; }); }
   map.on("click", "steps", (e) => new maplibregl.Popup({ closeButton: false, offset: 10, className: "v3d-pop" }).setLngLat(e.lngLat).setHTML(`<b>${t("계단")}</b><br><small>${t("오픈스트리트맵 자료 · 미확인")}</small>`).addTo(map));
   if (place.walk) drawSummary(); else sumEl.innerHTML = `<b>${t("걷기 정보를 살펴보는 중…")}</b>`;
   // 지도가 '그리기 끝'을 늦게 알려 오는 기기가 있어, 첫 결과가 나올 때까지는 4초마다 직접 살펴본다 (최대 2분)
@@ -367,6 +398,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         ${(place.trails || []).some((tr) => tr.line) ? `<li><i class="ln" style="background:#0d9488;height:8px"></i>${t("무장애나눔길")} <em class="ok">${t("공식")}</em></li>` : ""}
         <li><i class="ln unpaved"></i>${t("갈색 테두리: 흙·자갈길")} <em>${t("미확인")}</em></li>
         <li><i class="ln steps"></i>${t("계단")} <em>${t("미확인")}</em></li>
+        <li><i class="stair3d" aria-hidden="true"></i>${t("계단 모형 (빨강·분홍 블록) · 위치·방향은 지도 자료 그대로, 높이는 잘 보이게 키운 모양 · 누르면 실제 높이 차(지형 자료로 어림)")} <em>${t("미확인")}</em></li>
+        <li class="v3d-care">${Object.entries({ parking: "주차장", bus: "정류장", shelter: "쉼터", information: "안내소", pharmacy: "약국", hospital: "병원" }).map(([k, v]) => `<span><i class="dot" style="background:${CARE_COLORS[k]}"></i>${t(v)}</span>`).join("")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
         <li><span class="v3d-chip toilet">🚻?</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip mine">📌</span>${t("내가 현장에서 확인한 곳")}</li>
@@ -608,7 +641,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     map.setLayoutProperty("sat", "visibility", state.satellite ? "visible" : "none");
     for (const id of baseLayerIds()) map.setLayoutProperty(id, "visibility", state.satellite ? "none" : "visible");
     map.setPaintProperty("hillshade", "hillshade-exaggeration", state.satellite ? 0.18 : 0.4);
-    map.setPaintProperty("buildings-3d", "fill-extrusion-opacity", state.satellite ? 0.6 : 0.85);
+    map.setPaintProperty("buildings-3d", "fill-extrusion-opacity", state.satellite ? 0.88 : 0.92);
     for (const id of ["road-label", "poi-label"]) { map.setPaintProperty(id, "text-color", state.satellite ? "#ffffff" : "#1f2937"); map.setPaintProperty(id, "text-halo-color", state.satellite ? "rgba(0,0,0,.8)" : "rgba(255,255,255,.9)"); }
     paint();
   });
@@ -618,16 +651,27 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     map.flyTo({ center, zoom: 16.2, pitch: 62, duration: calm ? 0 : 1200, essential: true });
   });
 
-  // 위치 권한을 이미 준 경우에만 조용히 확인: 현장(2km 안)이면 바로 따라간다. 처음이면 버튼을 누를 때 묻는다
-  try {
-    const perm = await navigator.permissions?.query({ name: "geolocation" });
-    if (perm?.state === "granted" && !state.closed) {
-      navigator.geolocation.getCurrentPosition((pos) => {
-        if (state.closed || state.following) return;
-        const here = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-        if (distKm(here, place) <= NEAR_KM) { setFollow(true); toast(t("현장에 계시네요 · 내 위치를 따라가요")); }
-        else { state.me = here; drawMe(); }
-      }, () => {}, { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 });
-    }
-  } catch { /* 권한 조회를 지원하지 않는 브라우저: 버튼으로 켠다 */ }
+  // 현장 확인: 위치를 이미 허용했거나(웹 권한 또는 안드로이드 앱 권한) 오늘이 이 장소에 가는 날이면 열자마자 내 위치를 본다.
+  //  현장(2km 안)이면 바로 따라가고, 멀면 내 위치 점과 거리만 보여 준다. 그 밖에는 "지금 현장이세요?" 버튼으로 묻는다
+  let perm = null;
+  try { perm = (await navigator.permissions?.query({ name: "geolocation" }))?.state || null; } catch { /* 권한 조회 미지원 */ }
+  let appLoc = false;
+  try { appLoc = !!window.OhneulApp?.hasLocation?.(); } catch { /* 앱 밖 */ }
+  const locateNow = () => navigator.geolocation?.getCurrentPosition((pos) => {
+    if (state.closed || state.following) return;
+    const me = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+    const km = distKm(me, place);
+    if (km <= NEAR_KM) { setFollow(true); onFix(pos); toast(t("현장에 계시네요 · 내 위치를 따라가요")); } // 받은 위치로 바로 점을 찍고 화면을 옮긴다
+    else { state.me = me; drawMe(); toast(t("지금은 이곳에서 {d} 떨어져 있어요 · 가까이 가면 내 위치를 따라가요", { d: distLabel(km) })); }
+  }, (err) => { if (err?.code === 1) toast(t("위치 권한을 허용해 주세요")); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 30000 });
+  if (state.closed) return;
+  if (perm === "granted" || appLoc || (place.today && perm !== "denied")) locateNow();
+  else if (perm !== "denied" && navigator.geolocation) {
+    const ask = document.createElement("button");
+    ask.type = "button"; ask.className = "v3d-here";
+    ask.textContent = t("📍 지금 현장이세요? 눌러서 내 위치 보기");
+    ask.addEventListener("click", () => { ask.remove(); setFollow(true); });
+    el.append(ask);
+    setTimeout(() => ask.remove(), 20000);
+  }
 }
