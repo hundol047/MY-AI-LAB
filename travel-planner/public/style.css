@@ -1126,3 +1126,6 @@ html.big main:not(#result):not(#setup) { zoom: 1.15; }
 .v3d-legend .v3d-care .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.25); margin-right: 4px; vertical-align: -1px; }
 /* 3D: 지금 현장이세요? */
 .v3d-here { position: absolute; left: 50%; transform: translateX(-50%); bottom: 340px; z-index: 6; padding: 14px 18px; min-height: 48px; border: 0; border-radius: 999px; background: #1d4ed8; color: #fff; font: inherit; font-size: 16px; font-weight: 800; box-shadow: 0 6px 20px rgba(0,0,0,.3); cursor: pointer; max-width: calc(100vw - 32px); }
+/* 제휴 링크 안내: 버튼 사이에 끼지 않게 맨 아래 한 줄 */
+.booking-choice .affiliate-note { flex-basis: 100%; width: 100%; order: 9; font-size: 12px; color: var(--sub); line-height: 1.4; margin-top: 2px; }
+.stay-main .booking-choice > .affiliate-note { grid-column: 1 / -1; order: 9; }

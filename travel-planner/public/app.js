@@ -1424,13 +1424,13 @@ function staysFor(l) {
 }
 function priceLinks(query, compact = false) {
   const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
-  const main = `<a class="ghost small price" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>`;
+  const main = `<a class="ghost small price" data-book="${esc(choice.primary.name)}" href="${esc(choice.primary.url)}" target="_blank" rel="noopener">${t(choice.compared ? "추천 · {platform}에서 예약 찾기" : "{platform}에서 숙소 검색", {platform:esc(choice.primary.name)})}</a>`;
   // 숙소 목록의 각 줄은 예약 버튼만 (다른 플랫폼·요금 비교는 아래 큰 버튼에서 한 번만)
   if (compact) return `<div class="booking-choice">${main}</div>`;
   return `<div class="booking-choice">
     ${main}${AFFILIATE.on() ? `<small class="affiliate-note">${t("제휴 링크예요 · 예약하면 운영자가 수수료를 받을 수 있지만 가격은 같아요")}</small>` : ""}
     <details class="booking-alternatives"><summary>${t("다른 플랫폼 보기")}</summary>${choice.alternatives.map(link =>
-      `<a class="ghost small" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
+      `<a class="ghost small" data-book="${esc(link.name)}" href="${esc(link.url)}" target="_blank" rel="noopener">${esc(link.name)} · ${t("가격·예약")}</a>`).join("")}</details>
     <details><summary>${t("확인한 요금 비교")}</summary>
     <form class="offer-form" data-query="${esc(query)}">
       <label>${t("같은 객실 유형")}<input name="roomType" required maxlength="100"></label>
@@ -1442,6 +1442,8 @@ function priceLinks(query, compact = false) {
     </form></details>
   </div>`;
 }
+// 예약 링크를 누른 횟수 (어느 사이트인지만, 숙소 이름·날짜는 세지 않는다) — 제휴 효과를 보려고
+document.addEventListener("click", (e) => { const a = e.target.closest("a[data-book]"); if (a) track("booking_click", a.dataset.book === "Agoda" ? "agoda" : "booking"); });
 function bookingReason(query) {
   const choice = recommendBooking(query, stayInput(), peopleNow(), getLang(), store.get("offers:"+query));
   // 날짜·인원을 한 줄로 짧게 (11.21–11.22 · 어른 2 · 객실 1)
