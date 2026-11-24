@@ -19,12 +19,23 @@
 > 두 회사 모두 조건(수수료, 쿠키 기간, 허용 국가, 앱·소셜 허용 여부)이 바뀔 수 있다. 가입할 때 약관에서 확인한다.
 > 정산을 받으려면 세금 정보(개인 또는 사업자)와 계좌가 필요하다.
 
-## 2. 앱에 넣기 (받은 값을 알려 주면 대신 넣어 준다)
+## 2. 앱에 넣기 — `public/affiliate-config.js` 한 파일만
 
-`public/booking-links.js` 맨 위:
+받은 값을 따옴표 안에 넣고 저장하면 끝이다. 다른 코드는 고치지 않는다.
+
+**GitHub 웹에서 고치는 법**
+1. 저장소에서 `travel-planner/public/affiliate-config.js`를 연다
+2. 오른쪽 위 연필(✏️)을 누른다
+3. 받은 값을 따옴표 안에 넣는다 (예: `agoda: "1891234",`)
+4. "Commit changes"를 누른다 → 몇 분 뒤 웹이 새로 배포되고 안드로이드 APK도 새로 만들어진다
 
 ```js
-export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "" };
+export const AFFILIATE_CONFIG = {
+  agoda: "",        // 아고다 cid
+  booking: "",      // 부킹닷컴 aid
+  bookingWrap: "",  // 대행사 딥링크 ({url} 포함)
+  agodaWrap: "",
+};
 ```
 
 | 받은 것 | 넣는 곳 | 예 |

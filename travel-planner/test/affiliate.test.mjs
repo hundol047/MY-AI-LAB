@@ -38,3 +38,9 @@ console.log("ok - 제휴 링크 (번호 붙이기·이상한 값 무시·비어 
   Object.assign(AFFILIATE, saved);
 }
 console.log("ok - 제휴 대행사 딥링크 (주소 감싸기·날짜 유지·이상한 값 무시)");
+// 설정 파일은 비어 있는 상태로 둔다 (실수로 시험용 번호가 올라가지 않게)
+{
+  const { AFFILIATE_CONFIG } = await import("../public/affiliate-config.js");
+  for (const k of ["agoda", "booking", "bookingWrap", "agodaWrap"]) assert.equal(typeof AFFILIATE_CONFIG[k], "string", k);
+}
+console.log("ok - 제휴 설정 파일 형식");

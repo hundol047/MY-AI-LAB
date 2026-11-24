@@ -4,7 +4,9 @@
 //  - 번호: Booking.com 직접 제휴의 aid, Agoda Partners의 cid (숫자) → 예약 주소 뒤에 붙인다
 //  - 감싸는 링크: CJ·Awin·Travelpayouts 같은 제휴 대행사가 주는 딥링크 주소. 예약 주소가 들어갈 자리를 {url}로 둔다
 //    예) "https://www.awin1.com/cread.php?awinmid=XXXX&awinaffid=YYYY&ued={url}"
-export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "" };
+import { AFFILIATE_CONFIG } from "./affiliate-config.js";
+// 값은 affiliate-config.js에서 넣는다 (이 파일은 고치지 않아도 된다)
+export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "", ...AFFILIATE_CONFIG };
 const okWrap = (w) => typeof w === "string" && /^https:\/\/[^\s"'<>]+$/.test(w) && w.split("{url}").length === 2;
 const wrap = (w, url) => (okWrap(w) ? w.replace("{url}", encodeURIComponent(url)) : url);
 AFFILIATE.on = () => !!(/^\d{3,10}$/.test(AFFILIATE.booking) || /^\d{3,10}$/.test(AFFILIATE.agoda) || okWrap(AFFILIATE.bookingWrap) || okWrap(AFFILIATE.agodaWrap));
