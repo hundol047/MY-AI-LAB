@@ -47,8 +47,15 @@ export function parseWarnings(text) {
     const zones = [];
     const gw = m[3].match(/강원도\(([^)]*)\)/);
     if (gw) zones.push(...gw[1].split(",").map((s) => s.trim()).filter(Boolean));
-    for (const sea of m[3].matchAll(/강원(북부|중부|남부)(앞바다|안쪽먼바다|바깥먼바다|먼바다)/g)) zones.push(sea[0]);
-    if (zones.length) items.push({ kind: m[1], level: m[2], zones });
+    // "(… 제외)" 괄호 안의 구역 이름은 걸린 구역이 아니므로 빼고 찾는다
+    for (const sea of m[3].replace(/\([^)]*제외\)/g, "").matchAll(/강원(북부|중부|남부)(앞바다|안쪽먼바다|바깥먼바다|먼바다)/g)) zones.push(sea[0]);
+    // 기상청은 강원 앞바다 세 구역에 한꺼번에 내릴 때 "동해중부앞바다"처럼 묶어 쓴다 → 강원북부·중부·남부로 펼친다.
+    // "동해중부앞바다(강원북부앞바다 제외)"처럼 뺀 구역이 있으면 뺀다. (동해남부…는 경상북도 바다라 넣지 않는다)
+    for (const grp of m[3].matchAll(/동해중부(앞바다|안쪽먼바다|바깥먼바다|먼바다)(?:\s*\(([^)]*)\))?/g)) {
+      const excluded = /제외/.test(grp[2] || "") ? [...grp[2].matchAll(/강원(북부|중부|남부)/g)].map((x) => x[1]) : [];
+      for (const part of ["북부", "중부", "남부"]) if (!excluded.includes(part)) zones.push(`강원${part}${grp[1]}`);
+    }
+    if (zones.length) items.push({ kind: m[1], level: m[2], zones: [...new Set(zones)] });
   }
   return items;
 }
