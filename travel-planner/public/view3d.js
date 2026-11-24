@@ -326,12 +326,11 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     // 가까운 화장실: 따라가는 중이면 내 위치에서, 아니면 관광지에서 가까운 순 (공식 자료 먼저 믿는다)
     lastToilets = [...off, ...osm];
     marks.forEach((m) => m.remove());
-    const dTxt = (x) => ` ${distLabel(distM(x.at, here) / 1000)}`;
     const near = (list) => list.sort((a, b) => distM(a.at, here) - distM(b.at, here)).slice(0, MAX_MARKS);
     marks = [
       ...near(steps).map((x) => new maplibregl.Marker({ element: chip("steps", t("계단"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + dTxt(x), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실 (확인 필요)") + dTxt(x), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
     // 계단 3D 모형: 표시를 붙인 계단(관광지 700m 안)마다 블록을 쌓는다
     const stairFeats = [];
@@ -430,7 +429,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     if (state.following) setFollow(false);
     stopOrbit();
     map.flyTo({ center: x.at, zoom: 17.6, pitch: 55, duration: 1200, essential: true });
-    toast(`${x.official ? (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + " · " + t("공식") : t("🚻 화장실 (확인 필요)")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
+    toast(`${x.official && x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
   });
   q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
 
