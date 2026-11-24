@@ -6,9 +6,18 @@
 //    예) "https://www.awin1.com/cread.php?awinmid=XXXX&awinaffid=YYYY&ued={url}"
 import { AFFILIATE_CONFIG } from "./affiliate-config.js";
 // 값은 affiliate-config.js에서 넣는다 (이 파일은 고치지 않아도 된다)
-export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "", ...AFFILIATE_CONFIG };
+export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "", tickets: [], ...AFFILIATE_CONFIG };
 const okWrap = (w) => typeof w === "string" && /^https:\/\/[^\s"'<>]+$/.test(w) && w.split("{url}").length === 2;
 const wrap = (w, url) => (okWrap(w) ? w.replace("{url}", encodeURIComponent(url)) : url);
+// 할인 입장권 링크: 설정에 넣은 사이트(제휴)들. https이고 {q}가 한 번 있는 것만 쓴다
+const okTicket = (x) => x && typeof x.name === "string" && x.name.trim() && x.name.length <= 20 && typeof x.url === "string" && /^https:\/\/[^\s"'<>]+$/.test(x.url) && x.url.split("{q}").length === 2;
+AFFILIATE.ticketsOn = () => Array.isArray(AFFILIATE.tickets) && AFFILIATE.tickets.some(okTicket);
+// 비어 있으면 네이버 검색 한 곳 (여러 판매처의 할인가가 함께 나온다)
+export function ticketLinks(placeName) {
+  const q = `${placeName} 할인 입장권`;
+  const list = (Array.isArray(AFFILIATE.tickets) ? AFFILIATE.tickets : []).filter(okTicket).map((x) => ({ name: x.name.trim(), url: x.url.replace("{q}", encodeURIComponent(placeName)), affiliate: true }));
+  return list.length ? list : [{ name: "네이버", url: `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`, affiliate: false }];
+}
 AFFILIATE.on = () => !!(/^\d{3,10}$/.test(AFFILIATE.booking) || /^\d{3,10}$/.test(AFFILIATE.agoda) || okWrap(AFFILIATE.bookingWrap) || okWrap(AFFILIATE.agodaWrap));
 export function bookingPeople(people={}) {
   const integer=(n,lo,hi,fallback)=>Number.isInteger(Number(n))?Math.max(lo,Math.min(hi,Number(n))):fallback;

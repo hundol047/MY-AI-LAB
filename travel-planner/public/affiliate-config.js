@@ -13,4 +13,11 @@ export const AFFILIATE_CONFIG = {
   // 예: "https://www.awin1.com/cread.php?awinmid=1234&awinaffid=5678&ued={url}"
   bookingWrap: "",
   agodaWrap: "",
+
+  // ── 관광지 할인 입장권 (클룩·KKday·마이리얼트립·야놀자 등) ──
+  // 제휴 가입 후 각 사이트에서 받은 "검색 링크"를 넣으세요. 장소 이름이 들어갈 자리는 {q} 로 바꿔 넣습니다.
+  // 비어 있으면 "할인 입장권 찾기"가 네이버 검색으로 열립니다.
+  // 예: { name: "클룩", url: "https://(받은 주소)?query={q}&aid=1234" },
+  tickets: [
+  ],
 };

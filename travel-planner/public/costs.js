@@ -3,6 +3,7 @@
 
 // 강원 중형택시 요금 (2024년 8월 조정, 시·군마다 다를 수 있음): 기본 2km 4,600원, 이후 131m당 100원.
 // 15km/h 이하 시간요금(31초당 100원)과 시계외 할증은 구간마다 달라 높은 값에 15%를 더해 반영한다. 심야(23~04시) 할증 20%는 일정이 그 시간에 없으므로 넣지 않는다.
+import { partyFee, freeAdults } from "./concessions.js";
 export const TAXI = { base: 4600, baseKm: 2, stepM: 131, step: 100, highFactor: 1.15, seats: 4, source: "강원 중형택시 요금(2024년 8월 조정)" };
 export function taxiFare(km) {
   if (!(km > 0)) return 0;
@@ -78,7 +79,7 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = [], long
   }
 
   // 2) 입장료: 관광공사 요금(fees.json). 요금 정보가 없는 곳은 따로 알린다
-  let feeLow = 0;
+  let feeLow = 0, feeSaved = 0;
   const unknownFees = [];
   const seen = new Set();
   for (const d of trip.days) for (const it of d.items) {
@@ -86,11 +87,12 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = [], long
     if (seen.has(p.id) || ["food", "cafe"].includes(p.cat) || p.multi) continue;
     seen.add(p.id);
     const f = fees[p.id];
-    if (f) feeLow += f.adult * people.adults + f.child * people.kids;
+    // 65세 이상·장애인(보호자)은 관광공사 원문에 적힌 감면을 적용한다 (concessions.js)
+    if (f) { const full = f.adult * people.adults + f.child * people.kids, paid = partyFee(f, people); feeLow += paid; feeSaved += full - paid; }
     // 해변·늘 열린 거리·산책로(24시간 개방)는 입장료가 없는 곳이라 "요금 정보 없음"으로 알리지 않는다
     else if (!(p.cat === "sea" || (p.hours?.[0] === "00:00" && p.hours?.[1] >= "23:59"))) unknownFees.push(p);
   }
-  rows.push({ key: "fees", low: feeLow, high: feeLow, detail: { known: seen.size - unknownFees.length } });
+  rows.push({ key: "fees", low: feeLow, high: feeLow, detail: { known: seen.size - unknownFees.length, saved: feeSaved } });
 
   // 3) 식사·카페 (가정값)
   const meals = { lunch: 0, dinner: 0, cafe: 0 };
@@ -117,7 +119,8 @@ export function estimateTrip(trip, input, people, fees = {}, benefits = [], long
   const total = { low: rows.reduce((s, r) => s + r.low, 0), high: rows.reduce((s, r) => s + r.high, 0) };
   // 5) 돌려받는 돈: 입장권만 내면 바로 주는 장소 환급(지역 상품권)은 확실한 몫으로 빼고,
   //    신청·심사가 필요한 지원 사업은 "조건이 맞으면 최대"로 따로 보여 준다 (합계에서 빼지 않음)
-  const sure = benefits.filter((b) => b.kind === "place" && b.status === "auto").map((b) => ({ id: b.id, title: b.title, amount: b.amount * n }));
+  // 감면으로 무료 입장한 사람은 환급 상품권도 받지 않는다
+  const sure = benefits.filter((b) => b.kind === "place" && b.status === "auto").map((b) => ({ id: b.id, title: b.title, amount: b.amount * Math.max(0, n - freeAdults(fees[b.place], people)) })).filter((b) => b.amount > 0);
   const maybe = benefits.filter((b) => b.kind === "program" && b.status !== "closed").map((b) => ({ id: b.id, title: b.title, amount: b.amount, unconfirmed: !!b.unconfirmed }));
   const back = sure.reduce((s, b) => s + b.amount, 0);
   const net = { low: Math.max(0, total.low - back), high: Math.max(0, total.high - back) };

@@ -1,4 +1,5 @@
-import { recommendBooking, bookingPeople, bookingScope, AFFILIATE } from "./booking-links.js";
+import { recommendBooking, bookingPeople, bookingScope, AFFILIATE, ticketLinks } from "./booking-links.js";
+import { parseConcession } from "./concessions.js";
 import { planTrip, swapItem, replanFromNow, setBus, setAccessAvoid, dayWalkMeters, walkMeters, addPlacesToDay, drives, fmt, addDays, parseRequestLocally, hoursFor, retimeDay, summarize, festivalsDuring, baseOf, benefitsFor, overnightCompare, souvenirsFor, lodgingForDay, routeOf, regionForDay, setCrowd, crowdOn, crowdedOn, planOptions, planStats, halfPackage } from "./planner.js";
 import { PLACES, REGIONS, AREAS, SHOP_MALL, LODGING, BENEFITS } from "./data.js";
 import { estimateTrip, taxiFare, defaultPeople, TAXI, FUEL, BUS, ASSUME } from "./costs.js";
@@ -853,6 +854,7 @@ function itemHTML(it, i, day) {
         ${(state.opts.access || []).length || state.opts.lessWalk ? accessLine(p) : ""}
         ${state.input.move === "transit" ? busLine(p, it) : ""}
         ${crowdLine(p, trip.days[dayIdx].date)}
+        ${ticketLine(p)}
         ${p.petOnly ? `<div class="check soft">${p.hoursGuessed ? t("영업시간 정보가 없어 {h}로 가정했어요 · 방문 전 확인하세요", { h: p.hours.join("–") }) : t("영업시간(관광공사 원문): {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.tel ? ` · <a href="tel:${esc(p.tel)}">${t("전화로 영업·동반 확인")} ${esc(p.tel)}</a>` : ""}</div>` : ""}
         ${p.petOnly ? "" : p.unverified ? `<div class="check soft">${t("앱이 검토하지 않은 장소 · 관광공사 원문: {text}", { text: esc(p.hoursText || t("운영 정보 없음")) })}${p.hoursGuessed ? t(" · 시간은 09:00–18:00로 가정") : ""}</div>` : `<div class="check${p.multi ? " soft" : ""}">${p.multi ? "" : "✓ "}${hours}</div>`}
         ${p.noticeKnownUntil && trip.days[dayIdx].date > p.noticeKnownUntil ? `<div class="alert warn">${t("매달 휴장일을 따로 공지하는 곳이에요 · 앱에는 {d}까지의 공지만 있어요. 출발 전 공식 공지를 확인하세요", { d: p.noticeKnownUntil.slice(5).replace("-", ".") })}${p.noticeUrl ? ` <a href="${esc(p.noticeUrl)}" target="_blank" rel="noopener">${t("공식 홈페이지")}</a>` : ""}</div>` : ""}
@@ -865,6 +867,27 @@ function itemHTML(it, i, day) {
     </article>
   </li>`;
 }
+
+/* 입장료 줄: 관광공사 요금 + 65세 이상·장애인(보호자) 감면(원문에 적힌 것만) + 할인 입장권 찾기
+   할인 입장권은 유료 체험 시설(케이블카·레일바이크·목장·아쿠아리움 등, 또는 어른 5천 원 이상)에만 보여 준다 */
+const TICKET_WORDS = /케이블카|레일바이크|아쿠아|스키|루지|워터|짚라인|집라인|곤돌라|목장|테마파크|랜드|월드|썰매|모노레일|해상|스카이|알파카|동물원|요트|유람선|패러|서핑|체험/;
+function ticketLine(p) {
+  if (["food", "cafe", "festival"].includes(p.cat) || p.multi || p.petOnly) return "";
+  const f = feesData?.[p.id], c = f ? parseConcession(f.text) : {};
+  const chips = [];
+  const one = (who, x) => x.free ? t("{who} 무료", { who }) : Number.isFinite(x.price) ? t("{who} {won}", { who, won: won(x.price) }) : t("{who} {n}% 할인", { who, n: x.pct });
+  if (c.senior) chips.push(one(t("65세 이상"), c.senior));
+  if (c.disabled) chips.push("♿ " + one(c.disabled.free && c.disabled.companion ? t("장애인·보호자 1인") : t("장애인"), c.disabled) + (c.disabled.cond ? t(" (장애 정도에 따라)") : ""));
+  const paid = f?.adult > 0;
+  const showTicket = paid && (f.adult >= 5000 || (f.adult >= 3000 && TICKET_WORDS.test(p.name))); // 몇천 원짜리 공공시설은 할인 입장권이 없다
+  if (!chips.length && !showTicket) return "";
+  const links = showTicket ? ticketLinks(p.name) : [];
+  const aff = links.some((l) => l.affiliate);
+  return `<div class="ticket-line">${paid ? `<span class="fee">🎟 ${t("입장료 {won}", { won: won(f.adult) })}</span>` : ""}${chips.map((x) => `<span class="conc">${esc(x)}</span>`).join("")}
+    ${chips.length ? `<small>${c.proof ? t("신분증·장애인등록증을 꼭 챙기세요 (증빙 필요)") : t("신분증·장애인등록증을 챙기세요")}</small>` : ""}
+    ${links.length ? `<div class="ticket-links">${links.map((l) => `<a class="ghost small" data-ticket="${esc(l.name)}" href="${esc(l.url)}" target="_blank" rel="noopener">${l.affiliate ? t("{site}에서 할인 입장권", { site: esc(l.name) }) : t("🎟 할인 입장권 찾기")}</a>`).join("")}</div>${aff ? `<small class="affiliate-note">${t("제휴 링크예요 · 예매하면 운영자가 수수료를 받을 수 있지만 가격은 같아요")}</small>` : ""}` : ""}</div>`;
+}
+document.addEventListener("click", (e) => { if (e.target.closest("a[data-ticket]")) track("ticket_click"); });
 
 // 기상특보(기상청 특보 현황): GitHub Actions가 2시간마다 받아 live-data 브랜치에 올린 warnings.json을 읽는다 (인증키를 앱에 넣지 않음).
 // 장소의 시군은 pet.json의 sigun 표(관광공사 주소 기준)를 함께 쓴다. 오늘·내일 일정에만 붙인다
@@ -1704,7 +1727,7 @@ async function renderShops() {
 /* ---------- 예상 비용 (일정 맨 마지막) ----------
    교통(택시 요금·연료·버스)과 입장료는 근거 있는 값, 식사·숙박은 앱이 정한 평균 범위 (costs.js) */
 let feesData = {};
-fetchT("fees.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { feesData = j; if (trip && !$("#result").hidden) renderCosts(); });
+fetchT("fees.json", {}, 4000).then((r) => (r.ok ? r.json() : {})).catch(() => ({})).then((j) => { feesData = j; if (trip && !$("#result").hidden) render(); }); // 카드의 입장료·감면 줄도 다시
 const won = (n) => (isForeign() ? `₩${Math.round(n).toLocaleString("en-US")}` : `${Math.round(n).toLocaleString("ko-KR")}원`);
 const wonShort = (n) => {
   if (isForeign()) return `₩${n >= 10000 ? `${Math.round(n / 1000).toLocaleString("en-US")}k` : Math.round(n).toLocaleString("en-US")}`;
@@ -1734,7 +1757,7 @@ function renderCosts() {
     if (r.key === "fuel") return t("약 {km}km · 연비 {eff}km/L · {src}", { km: d.km, eff: FUEL.kmPerL, src: t(FUEL.source) });
     if (r.key === "bus") return t("{n}번 탑승 · 1회 {fare}", { n: d.rides, fare: won(BUS.fare) }) + (d.far ? t(" · 먼 구간 {n}번은 시외버스라 요금 확인 필요", { n: d.far }) : "");
     if (r.key === "longway") return t("가는 편 {go} · 돌아오는 편 {back} (어린이는 할인될 수 있어요)", { go: won(r.detail.go), back: won(r.detail.back) });
-    if (r.key === "fees") return t("요금 확인된 {n}곳 (한국관광공사)", { n: d.known }) + (e.unknownFees.length ? t(" · 요금 정보 없음: {names}", { names: e.unknownFees.map((p) => esc(placeName(p))).join(", ") }) : "");
+    if (r.key === "fees") return t("요금 확인된 {n}곳 (한국관광공사)", { n: d.known }) + (d.saved ? t(" · 65세 이상·장애인 감면 {won} 반영", { won: won(d.saved) }) : "") + (e.unknownFees.length ? t(" · 요금 정보 없음: {names}", { names: e.unknownFees.map((p) => esc(placeName(p))).join(", ") }) : "");
     if (r.key === "meals") return t("점심 {l} · 저녁 {d} · 카페 {c} (앱 가정: 1인 점심 {a}, 저녁 {b})", { l: d.lunch, d: d.dinner, c: d.cafe, a: range(...ASSUME.lunch), b: range(...ASSUME.dinner) });
     if (r.key === "stay") return t("{n}박 · {units}{unit} · {type} (앱 가정: 평균 범위, 주말·성수기엔 더 비쌈)", { n: d.nights, units: d.units, unit: d.type === "guesthouse" ? t("명") : t("실"), type: typeLabel(d.type, trip.lodging.typeLabel) });
     return "";
@@ -1747,6 +1770,8 @@ function renderCosts() {
     <div class="cost-people">
       <span>${t("어른")}</span><button type="button" class="ghost small" data-ppl="adults:-1" aria-label="-">−</button><b>${people.adults}</b><button type="button" class="ghost small" data-ppl="adults:1" aria-label="+">+</button>
       <span>${t("어린이")}</span><button type="button" class="ghost small" data-ppl="kids:-1" aria-label="-">−</button><b>${people.kids}</b><button type="button" class="ghost small" data-ppl="kids:1" aria-label="+">+</button>
+      <span>${t("65세 이상")}</span><button type="button" class="ghost small" data-ppl="seniors:-1" aria-label="-">−</button><b>${people.seniors || 0}</b><button type="button" class="ghost small" data-ppl="seniors:1" aria-label="+">+</button>
+      <span>${t("장애인")}</span><button type="button" class="ghost small" data-ppl="disabled:-1" aria-label="-">−</button><b>${people.disabled || 0}</b><button type="button" class="ghost small" data-ppl="disabled:1" aria-label="+">+</button>
     </div>
     <ul class="cost-rows">${e.rows.map((r) => `<li><div><b>${label[r.key]}</b><span>${detail(r)}</span></div><strong>${range(r.low, r.high)}</strong></li>`).join("")}</ul>
     <p class="cost-note">${t("집에서 강원까지 오가는 교통비, 주차·통행료, 쇼핑은 빠져 있어요. 식사·숙박은 앱이 정한 평균 범위라 실제와 다를 수 있어요.")}</p>
@@ -1857,7 +1882,9 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-ppl]"); if (!b || !state) return;
   const [k, d] = b.dataset.ppl.split(":");
   const p = { ...peopleNow() };
-  p[k] = Math.max(k === "adults" ? 1 : 0, Math.min(10, p[k] + Number(d)));
+  p[k] = Math.max(k === "adults" ? 1 : 0, Math.min(10, (p[k] || 0) + Number(d)));
+  // 65세 이상·장애인은 어른 중 몇 명인지 (어른 수를 넘지 않게)
+  p.seniors = Math.min(p.seniors || 0, p.adults); p.disabled = Math.min(p.disabled || 0, p.adults);
   state.opts.people = p;
   renderCosts(); renderLodging(); persist();
 });
