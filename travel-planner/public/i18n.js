@@ -33,6 +33,8 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "🚻 화장실 (확인 필요)": "🚻 Toilet (unconfirmed)",
+  "길·계단·'확인 필요' 화장실은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.": "Paths, stairs and 'unconfirmed' toilets come from a volunteer-drawn map (OpenStreetMap), so some may be missing or wrong. Slopes are estimated from terrain data at about 30 m spacing, so short kerbs and steep bits don't show. For an important visit, call the venue to confirm.",
   "기울여서 산과 건물 보기": "Tilt to see mountains and buildings",
   "일정 전체 보기": "Show the whole day",
   "🚧 계단·턱 있었어요": "🚧 There were steps or a ledge",

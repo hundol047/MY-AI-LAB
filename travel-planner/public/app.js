@@ -2022,7 +2022,7 @@ function drawMap3D(day) {
         layers: [
           ...baseLayers({ lang: getLang(), dark: document.documentElement.dataset.theme === "dark" || (document.documentElement.dataset.theme !== "light" && !!window.matchMedia?.("(prefers-color-scheme: dark)").matches) }),
           // 산 음영은 옅게(멀리서만), 가까이 보면 거의 없앤다 — 짙으면 지도 전체가 회색으로 탁해 보인다
-          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": ["interpolate", ["linear"], ["zoom"], 8, 0.22, 12, 0.14, 14, 0.04], "hillshade-shadow-color": "#5b6b62", "hillshade-highlight-color": "#ffffff", "hillshade-accent-color": "#7d8c84" } },
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": ["interpolate", ["linear"], ["zoom"], 8, 0.22, 12, 0.14, 14, 0.04, 15.5, 0], "hillshade-shadow-color": "#5b6b62", "hillshade-highlight-color": "#ffffff", "hillshade-accent-color": "#7d8c84" } },
           // 시내를 가까이 볼 때(13~) 건물이 솟아오른다. 높이가 없는 건물은 2층(6m)으로 본다
           { id: "buildings-3d", type: "fill-extrusion", source: "ofm", "source-layer": "building", minzoom: 13, filter: ["!=", ["get", "hide_3d"], true],
             paint: {
