@@ -1135,3 +1135,6 @@ html.big main:not(#result):not(#setup) { zoom: 1.15; }
 .ticket-line .conc { background: var(--brand-soft); color: var(--brand); border-radius: 999px; padding: 2px 9px; font-weight: 700; font-size: 13px; }
 .ticket-line small { flex-basis: 100%; color: var(--sub); font-size: 12px; }
 .ticket-line .ticket-links { flex-basis: 100%; display: flex; flex-wrap: wrap; gap: 6px; margin-top: 2px; }
+/* 어두운 화면: 이 지역 확정 축제 이름(분홍) 대비 */
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .festivals li.in b, :root:not([data-theme="light"]) .festivals li em { color: #f9a8d4; } }
+:root[data-theme="dark"] .festivals li.in b, :root[data-theme="dark"] .festivals li em { color: #f9a8d4; }
