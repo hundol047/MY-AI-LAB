@@ -33,6 +33,22 @@ export function setLang(l) {
 
 /* ---------- 고정 문구 ---------- */
 export const EN = {
+  "{who} 무료": "{who}: free",
+  "{who} {won}": "{who}: {won}",
+  "{who} {n}% 할인": "{who}: {n}% off",
+  "65세 이상": "65+",
+  "장애인·보호자 1인": "Disabled + 1 companion",
+  "장애인": "Disabled",
+  " (장애 정도에 따라)": " (depends on disability grade)",
+  "입장료 {won}": "Admission {won}",
+  "신분증·장애인등록증을 꼭 챙기세요 (증빙 필요)": "Bring ID or disability card (proof required)",
+  "신분증·장애인등록증을 챙기세요": "Bring ID or disability card",
+  "{site}에서 할인 입장권": "Discount tickets on {site}",
+  "🎟 할인 입장권 찾기": "🎟 Find discount tickets",
+  "제휴 링크예요 · 예매하면 운영자가 수수료를 받을 수 있지만 가격은 같아요": "Affiliate link · we may earn a commission at no extra cost to you",
+  " · 65세 이상·장애인 감면 {won} 반영": " · includes {won} off for 65+ and disabled",
+  "🚻 화장실 (확인 필요)": "🚻 Toilet (unconfirmed)",
+  "길·계단·'확인 필요' 화장실은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.": "Paths, stairs and 'unconfirmed' toilets come from a volunteer-drawn map (OpenStreetMap), so some may be missing or wrong. Slopes are estimated from terrain data at about 30 m spacing, so short kerbs and steep bits don't show. For an important visit, call the venue to confirm.",
   "기울여서 산과 건물 보기": "Tilt to see mountains and buildings",
   "일정 전체 보기": "Show the whole day",
   "🚧 계단·턱 있었어요": "🚧 There were steps or a ledge",

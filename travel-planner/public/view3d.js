@@ -160,8 +160,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   const center = [place.lng, place.lat];
   try {
     map = new maplibregl.Map({
-      pixelRatio: Math.min(window.devicePixelRatio || 1, 2), // 고해상도 폰에서 3배로 그리면 느려지고 뜨거워진다 → 2배까지만
-      container: el.querySelector(".v3d-map"), center, zoom: 13.6, pitch: 25, bearing: -50, maxPitch: 80, minZoom: 8, maxZoom: 19.5,
+      pixelRatio: Math.min(window.devicePixelRatio || 1, 2.5), // 3배 화면은 2.5배로 (선명함과 발열 사이)
+      container: el.querySelector(".v3d-map"), center, zoom: 13.6, pitch: 25, bearing: -50, maxPitch: 80, minZoom: 8, maxZoom: 18.5, // 위성 사진이 있는 깊이(18)를 크게 넘겨 늘려 보이지 않게
       attributionControl: false, boxZoom: false, canvasContextAttributes: { antialias: true }, // 건물·길 가장자리를 매끄럽게
       style: {
         version: 8,
@@ -170,7 +170,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         sky: { "sky-color": "#7fb5ea", "horizon-color": "#dcecf8", "fog-color": "#e6eef3", "sky-horizon-blend": 0.5, "horizon-fog-blend": 0.35, "fog-ground-blend": 0.93, "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 10, 0.6, 15, 0.1] },
         light: { anchor: "viewport", color: "#ffffff", intensity: 0.5, position: [1.4, 215, 35] },
         sources: {
-          sat: { type: "raster", tiles: [SATELLITE], tileSize: 256, maxzoom: 18, attribution: "위성 사진: Esri, Maxar, Earthstar Geographics" },
+          // 고해상도 화면(2배 이상)에서는 한 단계 더 자세한 사진 조각을 받아 화면 픽셀에 맞춘다 (256px 조각을 늘려 그리면 흐려 보임)
+          sat: { type: "raster", tiles: [SATELLITE], tileSize: (window.devicePixelRatio || 1) >= 1.5 ? 128 : 256, maxzoom: 18, attribution: "위성 사진: Esri, Maxar, Earthstar Geographics" },
           dem: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium", attribution: "지형: Mapzen/AWS Terrain Tiles" },
           hill: { type: "raster-dem", tiles: [TERRAIN], tileSize: 256, maxzoom: 14, encoding: "terrarium" },
           ofm: { type: "vector", url: OFM_URL, attribution: OFM_ATTR },
@@ -183,7 +184,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
           { id: "bg", type: "background", paint: { "background-color": "#dfe8e2" } },
           ...baseLayers({ lang: place.lang || "ko", visible: false }), // '지도' 모드 바탕 (위성 사진일 때는 숨김)
           { id: "sat", type: "raster", source: "sat", paint: { "raster-contrast": 0.08, "raster-saturation": 0.12, "raster-fade-duration": 200 } }, // 위성 사진을 조금 또렷하게
-          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": 0.18, "hillshade-shadow-color": "#1f2a24" } }, // 위성 사진 위에서는 옅게(굴곡만 살린다), 지도에서는 진하게
+          // 지형 자료는 14단계(약 10m 칸)까지라 가까이 보면 음영이 계단처럼 깨진다 → 가까이 갈수록 음영을 없앤다
+          { id: "hillshade", type: "hillshade", source: "hill", paint: { "hillshade-exaggeration": ["interpolate", ["linear"], ["zoom"], 13, 0.18, 15.5, 0.06, 16.5, 0], "hillshade-shadow-color": "#1f2a24" } }, // 위성 사진 위에서는 옅게(굴곡만 살린다), 지도에서는 진하게
           // 걷는 길(오픈스트리트맵, 미확인): 흰 테두리 + 회색 점선. 경사를 계산한 구간은 그 위에 색으로 덮는다
           { id: "paths-case", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, layout: { "line-cap": "round", "line-join": "round" }, paint: { "line-color": ["match", ["get", "surface"], "unpaved", "#8b5a2b", "#ffffff"], "line-width": ["interpolate", ["linear"], ["zoom"], 14, 4, 18, 9], "line-opacity": 0.9 } }, // 흙·자갈길은 갈색 테두리
           { id: "paths", type: "line", source: "ofm", "source-layer": "transportation", minzoom: 14, filter: PATH_FILTER, paint: { "line-color": "#6b7280", "line-width": 3, "line-dasharray": [1.5, 1.5] } },
@@ -324,12 +326,11 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     // 가까운 화장실: 따라가는 중이면 내 위치에서, 아니면 관광지에서 가까운 순 (공식 자료 먼저 믿는다)
     lastToilets = [...off, ...osm];
     marks.forEach((m) => m.remove());
-    const dTxt = (x) => ` ${distLabel(distM(x.at, here) / 1000)}`;
     const near = (list) => list.sort((a, b) => distM(a.at, here) - distM(b.at, here)).slice(0, MAX_MARKS);
     marks = [
       ...near(steps).map((x) => new maplibregl.Marker({ element: chip("steps", t("계단"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + dTxt(x), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실?") + dTxt(x), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
     // 계단 3D 모형: 표시를 붙인 계단(관광지 700m 안)마다 블록을 쌓는다
     const stairFeats = [];
@@ -401,12 +402,12 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         <li><i class="stair3d" aria-hidden="true"></i>${t("계단 모형 (빨강·분홍 블록) · 위치·방향은 지도 자료 그대로, 높이는 잘 보이게 키운 모양 · 누르면 실제 높이 차(지형 자료로 어림)")} <em>${t("미확인")}</em></li>
         <li class="v3d-care">${Object.entries({ parking: "주차장", bus: "정류장", shelter: "쉼터", information: "안내소", pharmacy: "약국", hospital: "병원" }).map(([k, v]) => `<span><i class="dot" style="background:${CARE_COLORS[k]}"></i>${t(v)}</span>`).join("")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
-        <li><span class="v3d-chip toilet">🚻?</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
+        <li><span class="v3d-chip toilet">🚻</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip mine">📌</span>${t("내가 현장에서 확인한 곳")}</li>
         ${shared ? `<li><span class="v3d-chip crowd">👥</span>${t("다른 이용자들이 현장에서 남긴 확인 (미확인)")}</li>` : ""}
       </ul>
       <p class="v3d-count">${t("이 주변 지도 자료: 계단 {s}곳 · 화장실 {w}곳 · 걷는 길 {p}개", { s: found.steps, w: found.toilets, p: found.paths })}${official ? "" : ` · ${t("공식 화장실 자료는 아직 없어요")}`}</p>
-      <p class="v3d-note">${t("길·계단·'화장실?'은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
+      <p class="v3d-note">${t("길·계단·'확인 필요' 화장실은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
       ${acc ? `<h4>${t("한국관광공사 무장애 조사")} <em class="ok">${t("공식")}</em></h4><ul class="v3d-acc">${acc}</ul>` : `<p class="v3d-note">${t("이 장소는 한국관광공사 무장애 조사 자료가 없어요.")}</p>`}`;
   }
   drawLegend();
@@ -428,7 +429,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     if (state.following) setFollow(false);
     stopOrbit();
     map.flyTo({ center: x.at, zoom: 17.6, pitch: 55, duration: 1200, essential: true });
-    toast(`${x.official ? (x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")) + " · " + t("공식") : t("🚻 화장실?") + " · " + t("미확인")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
+    toast(`${x.official && x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
   });
   q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
 
@@ -640,7 +641,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     state.satellite = !state.satellite;
     map.setLayoutProperty("sat", "visibility", state.satellite ? "visible" : "none");
     for (const id of baseLayerIds()) map.setLayoutProperty(id, "visibility", state.satellite ? "none" : "visible");
-    map.setPaintProperty("hillshade", "hillshade-exaggeration", state.satellite ? 0.18 : 0.4);
+    const hs = state.satellite ? 0.18 : 0.4; // 가까이 볼수록 없앤다 (14단계 지형 자료라 확대하면 깨져 보임)
+    map.setPaintProperty("hillshade", "hillshade-exaggeration", ["interpolate", ["linear"], ["zoom"], 13, hs, 15.5, hs / 3, 16.5, 0]);
     map.setPaintProperty("buildings-3d", "fill-extrusion-opacity", state.satellite ? 0.88 : 0.92);
     for (const id of ["road-label", "poi-label"]) { map.setPaintProperty(id, "text-color", state.satellite ? "#ffffff" : "#1f2937"); map.setPaintProperty(id, "text-halo-color", state.satellite ? "rgba(0,0,0,.8)" : "rgba(255,255,255,.9)"); }
     paint();

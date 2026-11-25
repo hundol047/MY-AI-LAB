@@ -1,8 +1,24 @@
 // Only confirmed user-entered offers are ranked. No live availability is implied.
-// 제휴 번호: Booking.com 제휴 프로그램의 aid, Agoda 제휴의 cid를 받으면 여기에 넣는다 (예약 수수료가 운영자에게 돌아온다).
-// 비어 있으면 일반 검색 링크. 이용자가 내는 가격은 같다. 제휴 링크라는 사실은 숙소 카드에 표시한다(AFFILIATE.on)
-export const AFFILIATE = { booking: "", agoda: "" };
-AFFILIATE.on = () => !!(AFFILIATE.booking || AFFILIATE.agoda);
+// 제휴: 예약 수수료가 운영자에게 돌아온다. 비어 있으면 일반 검색 링크. 이용자가 내는 가격은 같다. 제휴 링크라는 사실은 숙소 칸에 표시한다(AFFILIATE.on)
+// 두 가지 방식 중 받은 것을 넣는다 (docs/affiliate.md)
+//  - 번호: Booking.com 직접 제휴의 aid, Agoda Partners의 cid (숫자) → 예약 주소 뒤에 붙인다
+//  - 감싸는 링크: CJ·Awin·Travelpayouts 같은 제휴 대행사가 주는 딥링크 주소. 예약 주소가 들어갈 자리를 {url}로 둔다
+//    예) "https://www.awin1.com/cread.php?awinmid=XXXX&awinaffid=YYYY&ued={url}"
+import { AFFILIATE_CONFIG } from "./affiliate-config.js";
+// 값은 affiliate-config.js에서 넣는다 (이 파일은 고치지 않아도 된다)
+export const AFFILIATE = { booking: "", agoda: "", bookingWrap: "", agodaWrap: "", tickets: [], ...AFFILIATE_CONFIG };
+const okWrap = (w) => typeof w === "string" && /^https:\/\/[^\s"'<>]+$/.test(w) && w.split("{url}").length === 2;
+const wrap = (w, url) => (okWrap(w) ? w.replace("{url}", encodeURIComponent(url)) : url);
+// 할인 입장권 링크: 설정에 넣은 사이트(제휴)들. https이고 {q}가 한 번 있는 것만 쓴다
+const okTicket = (x) => x && typeof x.name === "string" && x.name.trim() && x.name.length <= 20 && typeof x.url === "string" && /^https:\/\/[^\s"'<>]+$/.test(x.url) && x.url.split("{q}").length === 2;
+AFFILIATE.ticketsOn = () => Array.isArray(AFFILIATE.tickets) && AFFILIATE.tickets.some(okTicket);
+// 비어 있으면 네이버 검색 한 곳 (여러 판매처의 할인가가 함께 나온다)
+export function ticketLinks(placeName) {
+  const q = `${placeName} 할인 입장권`;
+  const list = (Array.isArray(AFFILIATE.tickets) ? AFFILIATE.tickets : []).filter(okTicket).map((x) => ({ name: x.name.trim(), url: x.url.replace("{q}", encodeURIComponent(placeName)), affiliate: true }));
+  return list.length ? list : [{ name: "네이버", url: `https://search.naver.com/search.naver?query=${encodeURIComponent(q)}`, affiliate: false }];
+}
+AFFILIATE.on = () => !!(/^\d{3,10}$/.test(AFFILIATE.booking) || /^\d{3,10}$/.test(AFFILIATE.agoda) || okWrap(AFFILIATE.bookingWrap) || okWrap(AFFILIATE.agodaWrap));
 export function bookingPeople(people={}) {
   const integer=(n,lo,hi,fallback)=>Number.isInteger(Number(n))?Math.max(lo,Math.min(hi,Number(n))):fallback;
   const adults=integer(people.adults,1,30,1),kids=integer(people.kids,0,10,0),rooms=integer(people.rooms,1,adults,1);
@@ -20,7 +36,7 @@ export function bookingLinks(query, input, people, lang = 'ko') {
   if(p.ages.every(a=>a!==null))for(const age of p.ages)booking.searchParams.append('age',String(age));
   const agoda=new URL('https://www.agoda.com/search');
   agoda.search=new URLSearchParams({textToSearch:query,adults:String(p.adults),children:String(p.kids),rooms:String(p.rooms),...(p.kids&&p.ages.every(a=>a!==null)?{childages:p.ages.join(',')} : {}),...(dates?{checkIn:input.date,checkOut:checkout}:{}),...(/^\d{3,10}$/.test(AFFILIATE.agoda)?{cid:AFFILIATE.agoda}:{})});
-  return [{name:'Booking.com',url:booking.href},{name:'Agoda',url:agoda.href}];
+  return [{name:'Booking.com',url:wrap(AFFILIATE.bookingWrap,booking.href),raw:booking.href},{name:'Agoda',url:wrap(AFFILIATE.agodaWrap,agoda.href),raw:agoda.href}];
 }
 export function recommendBooking(query,input,people,lang='ko',evidence=null,now=Date.now()) {
   const links=bookingLinks(query,input,people,lang),p=bookingPeople(people);
@@ -32,5 +48,5 @@ export function recommendBooking(query,input,people,lang='ko',evidence=null,now=
   const primary=links.find(l=>comparable&&offers[0]?.platform===l.name)||links[0];
   return {primary,alternatives:links.filter(l=>l!==primary),compared:!!(comparable&&offers.length),
     reason:comparable&&offers.length?'동일 조건으로 입력한 총액과 취소 조건을 비교해 선택했어요.':comparable&&!offers.length?'입력한 요금 중 무료 취소 조건에 맞는 상품이 없습니다.':'실시간 요금 자료가 없어 플랫폼 우열을 판단하지 않았어요.',
-    dates:{checkin:new URL(primary.url).searchParams.get('checkin'),checkout:new URL(primary.url).searchParams.get('checkout')},...p};
+    dates:(()=>{const q=new URL(primary.raw||primary.url).searchParams;return {checkin:q.get('checkin')||q.get('checkIn'),checkout:q.get('checkout')||q.get('checkOut')};})(),...p};
 }

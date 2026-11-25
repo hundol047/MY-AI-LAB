@@ -1,6 +1,6 @@
 # 오가는 길 시간표 (국토교통부 TAGO)
 
-생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261201·주말 20261128, 버스 기준일 20261124.
+생성: node scripts/bake-transit.mjs. 열차 기준일 평일 20261201·주말 20261128, 버스 기준일 20261126.
 
 - train 서울역 → 강릉역 weekday: 14편
 - train 강릉역 → 서울역 weekday: 14편
