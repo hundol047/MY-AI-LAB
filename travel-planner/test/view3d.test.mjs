@@ -103,7 +103,10 @@ for (const [id, v] of Object.entries(W.places)) {
   if (v.st) assert.ok(v.stM <= W.radius && v.stLen > 0, `${id} 계단`); else assert.equal(v.stM, undefined);
   if (v.wc) assert.ok(v.wcM <= W.radius, `${id} 화장실`);
 }
-assert.ok(W.places.naksansa.st >= 1 && W.places.naksansa.wc >= 1);
+// 낙산사: 계단은 지도 자료에 있고, 화장실은 오픈스트리트맵에만 있어(정부 자료·카카오맵에 없음) 확인된 화장실로 세지 않는다
+assert.ok(W.places.naksansa.st >= 1 && (W.places.naksansa.wcU || 0) >= 1);
+// 경포해변: 행정안전부 공중화장실이 있어 확인된 화장실로 센다
+assert.ok(W.places["gyeongpo-beach"].wc >= 1 && W.places["gyeongpo-beach"].wcOff >= 1);
 console.log(`ok - 걷기 정보 조사표 (${Object.keys(W.places).length}곳, 지도 기준일 ${W.mapDate})`);
 
 // 계단 3D 모형: 위치는 계단 선 그대로, 높이는 지형으로 읽은 만큼(높은 쪽으로) — 못 읽으면 낮은 모양만

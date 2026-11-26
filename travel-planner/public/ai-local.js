@@ -267,7 +267,8 @@ export function guideLocal(question, trip, dayIdx, ctx = {}) {
           const bits = [];
           if (w.sh) bits.push(L(`걷는 길 완만 ${w.sh[0]}%·조금 가파름 ${w.sh[1]}%·가파름 ${w.sh[2]}%`, `paths ${w.sh[0]}% gentle, ${w.sh[1]}% fairly steep, ${w.sh[2]}% steep`, `歩道 緩やか${w.sh[0]}%・やや急${w.sh[1]}%・急${w.sh[2]}%`, `步道 平缓${w.sh[0]}%·稍陡${w.sh[1]}%·陡峭${w.sh[2]}%`));
           bits.push(w.st ? L(`계단 ${w.st}곳(가장 가까운 곳 ${w.stM}m)`, `${w.st} stairs (nearest ${w.stM} m)`, `階段${w.st}か所(最寄り${w.stM}m)`, `台阶${w.st}处(最近${w.stM}米)`) : L("지도에 계단 표시 없음", "no stairs on the map", "地図に階段の表示なし", "地图上无台阶标记"));
-          bits.push(w.wc ? L(`화장실 ${w.wc}곳(가장 가까운 곳 ${w.wcM}m)`, `${w.wc} toilets (nearest ${w.wcM} m)`, `トイレ${w.wc}か所(最寄り${w.wcM}m)`, `卫生间${w.wc}处(最近${w.wcM}米)`) : L("지도에 화장실 표시 없음", "no toilets on the map", "地図にトイレの表示なし", "地图上无卫生间标记"));
+          // 화장실은 확인된 것만 (정부 자료, 또는 오픈스트리트맵·카카오맵 일치)
+          bits.push(w.wc ? L(`확인된 화장실 ${w.wc}곳(가장 가까운 곳 ${w.wcM}m)`, `${w.wc} confirmed toilets (nearest ${w.wcM} m)`, `確認済みトイレ${w.wc}か所(最寄り${w.wcM}m)`, `已确认卫生间${w.wc}处(最近${w.wcM}米)`) : L("확인된 화장실 자료 없음", "no confirmed toilets on file", "確認済みトイレの情報なし", "没有已确认的卫生间信息"));
           out.push(L(`주변 ${R}m 지도(미확인)`, `Map within ${R} m (unverified)`, `周辺${R}mの地図(未確認)`, `周边${R}米地图(未核实)`) + ": " + bits.join(sep));
         }
         return `• ${nmK(p)} — ${out.join(" / ")}`;

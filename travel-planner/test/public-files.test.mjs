@@ -40,3 +40,17 @@ test("무장애나눔길: 좌표와 선이 강원 안에 있다", () => {
   }
   assert.ok(b.trails.filter((x) => x.line).length >= 8);
 });
+
+test("화장실은 확인된 것만: 카카오맵 대조 결과 모양, 화장실 아닌 가게는 빼기", async () => {
+  const { isToilet } = await import("../scripts/bake-kakao-toilets.mjs");
+  assert.ok(isToilet({ place_name: "경포해변 공중화장실", category_name: "사회,공공기관 > 공중화장실" }));
+  assert.ok(isToilet({ place_name: "낙산사 화장실", category_name: "편의시설 > 화장실" }));
+  assert.ok(!isToilet({ place_name: "강릉 화장실 리모델링", category_name: "서비스,산업 > 인테리어" }));
+  assert.ok(!isToilet({ place_name: "욕실·화장실용품", category_name: "가정,생활 > 생활용품" }));
+  assert.ok(!isToilet({ place_name: "경포호수광장", category_name: "여행 > 관광,명소" }));
+  const c = load("toilets-confirmed.json");
+  for (const x of c.items) { assert.deepEqual(x.src, ["osm", "kakao"]); assert.ok(inGangwon(x.lat, x.lng), x.name); }
+  // 걷기 정보의 화장실 수는 확인된 것(정부 자료 + 두 지도 일치)만: 카카오 대조 전이면 정부 자료 수를 넘지 않는다
+  const w = load("walk-info.json").places, off = load("toilets.json").items;
+  if (!c.kakao) for (const [id, v] of Object.entries(w)) assert.ok((v.wc || 0) <= off.length, id);
+});
