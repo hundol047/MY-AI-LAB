@@ -23,4 +23,20 @@ import("../public/alerts.js").then(({ parseWarnings, kmaAlertsFor }) => {
   assert.deepEqual(kmaAlertsFor(cable, "2026-11-07", { ...ctx("속초"), warnings: { ...w, fetchedAt: "2026-01-01T00:00:00Z" } }), [], "6시간 넘은 특보는 쓰지 않음");
   console.log("ok - 기상특보 (강원 구역·시군·앞바다·오늘·내일·오래된 자료)");
 });
+// 기상청이 강원 앞바다 세 구역을 묶어 "동해중부앞바다"로 발표한 날 (2026-11-24 낙산해변 풍랑주의보가 빠졌던 문제)
+import("../public/alerts.js").then(({ parseWarnings, kmaAlertsFor }) => {
+  const g = parseWarnings("o 풍랑주의보 : 동해중부앞바다, 동해남부북부앞바다\r\no 강풍주의보 : 강원도(양양평지)");
+  assert.deepEqual(g[0].zones, ["강원북부앞바다", "강원중부앞바다", "강원남부앞바다"], "동해중부앞바다 = 강원 세 구역, 동해남부(경북)는 넣지 않음");
+  const naksan = { id: "naksan-beach", name: "낙산해변", cat: "sea", risk: [] };
+  const w = { now: g, upcoming: [], fetchedAt: new Date().toISOString() };
+  const hit = kmaAlertsFor(naksan, "2026-11-24", { warnings: w, sigun: "양양", today: "2026-11-24", tomorrow: "2026-11-25" });
+  assert.ok(hit.some((x) => /풍랑/.test(JSON.stringify(x)) && x.level === "warn"), "낙산해변(양양)에 풍랑주의보: " + JSON.stringify(hit));
+  // 뺀 구역, 먼바다 묶음, 중복
+  assert.deepEqual(parseWarnings("o 풍랑경보 : 동해중부앞바다(강원북부앞바다 제외)")[0].zones, ["강원중부앞바다", "강원남부앞바다"]);
+  assert.deepEqual(parseWarnings("o 풍랑주의보 : 동해중부먼바다")[0].zones, ["강원북부먼바다", "강원중부먼바다", "강원남부먼바다"]);
+  assert.deepEqual(parseWarnings("o 풍랑주의보 : 강원중부앞바다, 동해중부앞바다")[0].zones, ["강원중부앞바다", "강원북부앞바다", "강원남부앞바다"]);
+  // 경북 바다만이면 강원 특보 없음
+  assert.equal(parseWarnings("o 풍랑주의보 : 동해남부북부앞바다").length, 0);
+  console.log("ok - 묶음 해상 구역(동해중부앞바다)을 강원 세 구역으로 펼쳐 풍랑주의보를 붙임");
+});
 console.log("ok - 통제·운휴 경고 (돌풍·풍랑·적설·산불조심기간·스키 시즌)");
