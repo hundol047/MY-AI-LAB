@@ -24,7 +24,12 @@ async function call(op, params) {
     if (!res) { await new Promise((r) => setTimeout(r, 1500 * (i + 1))); continue; }
     const j = await res.json().catch(() => null);
     const code = j?.response?.header?.resultCode;
-    if (code !== "00") throw new Error(`${op}: HTTP ${res.status}, 결과 코드 ${String(code || j?.OpenAPI_ServiceResponse?.cmmMsgHeader?.returnReasonCode || "?").replace(/[^\w]/g, "")}`);
+    if (code !== "00") {
+      const c = String(code || j?.OpenAPI_ServiceResponse?.cmmMsgHeader?.returnReasonCode || "?").replace(/[^\w]/g, "");
+      // 01·04·05(서버 일시 오류)와 응답이 깨진 경우는 잠깐 쉬었다 다시 받는다 (2026-11-23 결과 코드 04로 주간 갱신 실패). 키·한도 오류는 바로 멈춘다
+      if (["01", "04", "05", "?"].includes(c) && i < 3) { await new Promise((r) => setTimeout(r, 3000 * (i + 1))); continue; }
+      throw new Error(`${op}: HTTP ${res.status}, 결과 코드 ${c}`);
+    }
     const it = j.response.body?.items?.item || [];
     const items = Array.isArray(it) ? it : [it];
     await writeFile(file, JSON.stringify({ at: Date.now(), items }));
