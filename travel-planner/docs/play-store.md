@@ -31,7 +31,7 @@
 > "다음 주 토요일 부모님이랑 강릉 1박, 차로" 처럼 말하거나 쓰면 날짜·동행·이동수단에 맞는 일정을 만들어요. 성격이 다른 일정 3개(추천·여유롭게·색다른 코스)를 비교해 고를 수 있어요.
 >
 > ■ 운영시간·휴무까지 확인
-> 한국관광공사 정보를 바탕으로 쉬는 날, 브레이크타임, 입장 마감, 계절별 운영시간을 맞춰 일정을 짜요. 문 닫은 곳에 가는 일이 없도록 했어요.
+> 한국관광공사 정보를 바탕으로 쉬는 날, 브레이크타임, 입장 마감, 계절별 운영시간을 맞춰 일정을 짜요. 정기 휴무일에 가지 않도록 피해서 짜요.
 >
 > ■ 강원 여행에 필요한 정보를 한곳에
 > · 주차 정보와 근처 공영주차장
@@ -47,7 +47,7 @@
 > 아이·부모님과의 여행, 반려동물 동반(공식 동반 가능 시설 목록 기준), 휠체어·유모차 이동까지 고려해요.
 >
 > ■ 가기 전에 3D로 미리 보기
-> 장소마다 "3D로 보기"를 누르면 위성 사진과 지형으로 그곳을 둘러볼 수 있어요. 걷는 길을 경사(완만·조금 가파름·가파름)로 색칠하고, 지도에 표시된 계단과 화장실 위치를 보여 줘요. 현장에서는 내 위치를 따라 화면이 움직여요. (계단·화장실은 오픈스트리트맵 자료라 빠진 곳이 있을 수 있어요)
+> 장소마다 "3D로 보기"를 누르면 위성 사진과 지형으로 그곳을 둘러볼 수 있어요. 걷는 길을 경사(완만·조금 가파름·가파름)로 색칠하고, 계단 위치와 확인된 화장실(행정안전부 공중화장실 자료, 또는 두 지도에 모두 있는 곳)을 보여 줘요. 현장에서는 내 위치를 따라 화면이 움직여요. (계단·길은 오픈스트리트맵 자료라 빠진 곳이 있을 수 있어요)
 >
 > ■ 지도와 길찾기
 > 3D 지도에 번호로 동선을 보여 주고, 앞 장소에서 다음 장소까지 카카오맵 길찾기로 이어 줘요.
@@ -60,7 +60,7 @@
 **영어 (선택)**
 - Name: Bopok - Easy-walking Gangwon trips
 - Short: Gangwon trip plans for limited walking and wheelchairs, matched to real opening hours.
-- Full: Free trip planner for all 18 counties of Gangwon, Korea, built for travelers who can't walk far or use a wheelchair: it skips long walks and stairs, keeps a daily walking budget, adds rest breaks, and shows ramps, accessible restrooms, wheelchair rental and parking for each stop. Large text and read-aloud included. Speak or type your trip and get a plan that respects closing days, break times, last entry and seasonal hours, with parking, crowd forecasts, weather alerts, train and bus times, pet- and wheelchair-friendly options, a 3D map, and Korean/English/Japanese/Chinese. No sign-up needed.
+- Full: Free trip planner for all 18 counties of Gangwon, Korea, built for travelers who can't walk far or use a wheelchair: it leaves out long walks and places where official surveys note stairs, keeps a daily walking budget, adds rest breaks, and shows ramps, accessible restrooms, wheelchair rental and parking for each stop. Large text and read-aloud included. Speak or type your trip and get a plan that respects closing days, break times, last entry and seasonal hours, with parking, crowd forecasts, weather alerts, train and bus times, pet- and wheelchair-friendly options, a 3D map, and Korean/English/Japanese/Chinese. No sign-up needed.
 
 **분류**: 앱 · 여행 및 지역정보 · 태그: 여행 플래너, 무장애 여행, 지도, 국내 여행
 **연락처 이메일**: (Play 개발자 계정의 이메일 — 직접 입력)
@@ -72,7 +72,7 @@
 |---|---|
 | 개인정보처리방침 | 위 URL |
 | 광고 | 광고 없음 |
-| 앱 액세스 | 모든 기능을 제한 없이 이용 가능 (로그인 없음) |
+| 앱 액세스 | 모든 기능을 제한 없이 이용 가능 (출시 버전은 앱 서버에 연결하지 않아 로그인 기능이 보이지 않음) |
 | 콘텐츠 등급(IARC) | 카테고리 "기타(참고·여행 등)" — 폭력·성적 내용·도박·약물 없음, 사용자 간 소통 없음 → 전체 이용가 예상 |
 | 타깃층 | 만 18세 이상 (아동 대상 아님) |
 | 뉴스 앱 / 정부 앱 / 금융 기능 / 건강 | 아니요 |
@@ -81,7 +81,7 @@
 **데이터 보안 (지금 APK·AAB 기준)**
 - 앱은 일정을 기기 안에서 계산하고, 저장한 일정·출발지·영수증 사진은 기기에만 저장합니다. 앱 안에서는 운영자 서버로 보내는 기능이 켜지지 않습니다(앱 서버 미연결).
 - 따라서 "사용자 데이터를 수집하거나 공유하지 않음"으로 답합니다.
-  - 위치: 출발지 설정, 여행 중 모드, 장소 3D 화면의 "내 위치 따라가기"(앱을 보고 있을 때만, 백그라운드 위치 없음)에 기기 안에서만 사용, 외부로 보내지 않음 → 수집 아님
+  - 위치: 출발지 설정, 여행 중 모드, 장소 3D 화면의 "내 위치 따라가기"와 현장 확인(3D를 열 때 위치를 이미 허용했거나 오늘 가는 장소면 현장인지 확인) — 앱을 보고 있을 때만, 백그라운드 위치 없음, 기기 안에서만 사용, 외부로 보내지 않음 → 수집 아님
   - 3D 화면 "현장 확인 남기기"(계단·화장실 표시): 기기에만 저장 → 수집 아님
   - 참고: 지도 조각·지형·위성 사진·날씨를 받을 때 그 서비스(OpenFreeMap, AWS, Esri, Open-Meteo)가 IP 주소와 보고 있는 지역을 알 수 있음 — 일반 웹 요청과 같고, 개인정보처리방침에 적어 둠
   - 음성: 기기 음성 인식이 글자로 바꿔 주고 앱은 음성을 받지 않음 → 수집 아님

@@ -812,7 +812,7 @@ export const EN = {
   "내 걸음에 맞춘 강원 여행 일정": "Gangwon trips at your own pace",
   "로그인 없이 모든 기능을 쓸 수 있어요": "Every feature works without logging in",
   "일정은 이 기기 안에서 계산하고 이 기기에만 저장해요": "Plans are made and stored only on this device",
-  "위치는 내가 누를 때만 쓰고 어디에도 보내지 않아요": "Location is used only when you tap, and never sent anywhere",
+  "위치는 내가 쓰는 기능에서만 쓰고 어디에도 보내지 않아요": "Location is used only in features you use, and never sent anywhere",
   "광고도, 추적도 없어요": "No ads, no tracking",
   "로그인 없이 시작하기": "Start without logging in",
   "로그인 · 가입 (다른 기기와 일정 맞추기)": "Log in · sign up (sync plans across devices)",
