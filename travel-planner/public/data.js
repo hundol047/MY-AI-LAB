@@ -1,6 +1,7 @@
 import { EXTRA_PLACES } from "./extra-places.js";
 import { MORE_PLACES } from "./places-more.js";
 import { PET_OK, PET_PLACES } from "./pet-places.js";
+import { HOURS_FIXES } from "./hours-fixes.js";
 import { ACCESS } from "./access-data.js";
 import { stepsOf } from "./access-steps.js";
 // 강릉 장소 데이터 (운영정보 확인: 2026년 11월)
@@ -278,6 +279,8 @@ export const PLACES = [
   ...WONJU.map((p) => ({ region: "wonju", ...p })),
   ...PET_PLACES.map((p) => ({ ...p, pet: true })),
 ];
+// 사람이 관광공사 원문과 대조해 고친 운영시간 (hours-fixes.js) — 자동 생성 파일보다 먼저
+for (const p of PLACES) if (HOURS_FIXES[p.id]) Object.assign(p, HOURS_FIXES[p.id]);
 // 강원 반려동물 동반 시설 목록에 있는 장소 (scripts/bake-pet.mjs)
 for (const p of PLACES) if (PET_OK.includes(p.id)) p.pet = true;
 // 무장애 편의시설 (scripts/bake-access.mjs, 한국관광공사 무장애 여행 정보)

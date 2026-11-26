@@ -35,4 +35,10 @@ for (const days of [1, 2]) {
   for (const d of trip.days) for (const it of d.items) assert.ok(!hoursFor(it.place, d.date).closedToday, `${d.date} ${it.place.id}`);
   assert.ok(!trip.days[0].items.some((it) => it.place.id === "wj-hanji"));
 }
+// 사람이 원문과 대조해 고친 운영시간(hours-fixes.js): 앱에 있는 장소에만, 실제로 반영됨
+{
+  const { HOURS_FIXES } = await import("../public/hours-fixes.js");
+  for (const [id, fix] of Object.entries(HOURS_FIXES)) { const p = P(id); assert.ok(p, id); for (const k of Object.keys(fix)) assert.deepEqual(p[k], fix[k], `${id}.${k}`); }
+  assert.ok(closed("pet-465", "2027-01-11") && !closed("pet-465", "2027-02-08"), "강아지숲: 월요일 휴무, 공휴일 월요일은 운영");
+}
 console.log("ok - 명절·공휴일 휴무 (설·추석 당일/오전/연휴, 1월 1일, 공휴일 월요일 개관·다음 평일 휴관)");
