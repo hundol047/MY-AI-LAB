@@ -5,6 +5,14 @@
 # - GITHUB_TOKEN으로 푸시하면 다른 워크플로가 저절로 돌지 않아서, APK 빌드는 직접 부른다
 set -euo pipefail
 msg="$1"; shift
+# 이번에 만들어지지 않은 파일(그 단계가 실패했거나 키가 없어 건너뜀)은 빼고 나머지만 올린다.
+# 없는 파일 하나 때문에 git add가 멈추면 그날 받은 다른 자료가 모두 버려진다 (2026-11-23 주간 갱신 실패)
+files=()
+for f in "$@"; do
+  if [ -e "$f" ]; then files+=("$f"); else echo "::notice::이번에 만들어지지 않아 건너뜀: $f"; fi
+done
+[ ${#files[@]} -eq 0 ] && { echo "올릴 파일 없음" >> "$GITHUB_STEP_SUMMARY"; exit 0; }
+set -- "${files[@]}"
 git config user.name "github-actions[bot]"
 git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 # 받은 자료가 크게 줄었으면(API 한도·장애) 그 파일은 지난 버전으로 되돌린다

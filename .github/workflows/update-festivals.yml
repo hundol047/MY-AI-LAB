@@ -124,12 +124,8 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/bake-parking-lots.mjs
-      - name: 장소 근처 공중화장실 (전국공중화장실표준데이터 · 장소 3D 화면의 공식 화장실)
-        if: steps.key.outputs.ok == 'true'
-        continue-on-error: true
-        env:
-          TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
-        run: node scripts/bake-toilets.mjs
+      # 공중화장실은 공공데이터포털 파일(data/public-files, scripts/bake-public-files.mjs)로만 쓴다 — 오픈API는 활용신청하지 않음.
+      # (예전 bake-toilets.mjs 단계는 매주 실패해 다른 자료까지 못 올리게 만들어 뺐다)
       - name: 건물별 장애인 편의시설 (한국사회보장정보원 장애인편의시설 현황 · 활용신청 필요)
         if: steps.key.outputs.ok == 'true'
         continue-on-error: true
@@ -166,4 +162,4 @@ jobs:
         working-directory: ${{ github.workspace }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md travel-planner/public/parking-lots.json travel-planner/reports/parking-lots.md travel-planner/public/toilets.json travel-planner/reports/toilets.md travel-planner/public/walk-info.json travel-planner/reports/walk-info.md travel-planner/public/toilets-confirmed.json travel-planner/data/kakao-toilets.json travel-planner/public/gallery.json travel-planner/reports/gallery.md travel-planner/public/facilities.json travel-planner/reports/facilities.md
+        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md travel-planner/public/parking-lots.json travel-planner/reports/parking-lots.md travel-planner/public/walk-info.json travel-planner/reports/walk-info.md travel-planner/public/toilets-confirmed.json travel-planner/data/kakao-toilets.json travel-planner/public/gallery.json travel-planner/reports/gallery.md travel-planner/public/facilities.json travel-planner/reports/facilities.md
