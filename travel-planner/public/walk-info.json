@@ -1,4 +1,4 @@
-{"builtAt":"2026-11-26T05:16:57.012Z","mapDate":"2026-11-22","radius":400,"source":"OpenFreeMap(오픈스트리트맵) 걷는 길·계단·화장실, AWS 지형 고도, 행정안전부 공중화장실","places":{"sutasa":{"n":27,"km":8.56,"sh":[33,11,56],"unp":77,"st":0,"wc":0,"wcU":1},
+{"builtAt":"2026-11-26T06:05:04.879Z","mapDate":"2026-11-22","radius":400,"source":"OpenFreeMap(오픈스트리트맵) 걷는 길·계단·화장실, AWS 지형 고도, 행정안전부 공중화장실","places":{"sutasa":{"n":27,"km":8.56,"sh":[33,11,56],"unp":77,"st":0,"wc":0,"wcU":1},
 "alpaca-world":{"n":7,"km":1.21,"sh":[18,12,70],"unp":13,"st":1,"stM":47,"stLen":20,"wc":0,"wcU":2},
 "palbongsan":{"n":4,"km":3.52,"sh":[14,5,81],"unp":68,"st":0,"wc":2,"wcM":10,"wcOff":2,"wcAcc":1,"wcAccM":10},
 "hc-mugunghwa":{"n":0,"km":0,"st":0,"wc":1,"wcM":5,"wcOff":1},
