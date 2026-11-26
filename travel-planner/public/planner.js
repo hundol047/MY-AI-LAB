@@ -1,5 +1,6 @@
 // 일정 생성 엔진: 검증된 장소 데이터 + 영업시간/휴무/이동시간 제약을 모두 지키는 일정만 만든다.
 import { PLACES, AREAS, REGIONS, FESTIVALS, LODGING, LODGING_TYPES, BENEFITS } from "./data.js";
+import { sunTimes } from "./sun.js";
 
 var TO_MIN = new Map(); // toMin이 아래 상수 계산에 먼저 쓰여서 var로 끌어올린다
 
@@ -8,6 +9,13 @@ const DINNER = [toMin("17:30"), toMin("19:30")];
 const PACE_LIMIT = { relaxed: 3, normal: 4, packed: 6 };
 const MAX_WAIT = 30;
 
+// 그 날 그 장소의 일몰(분). 계산할 수 없으면 하루 끝으로 둔다
+const SUNSET_CACHE = new Map();
+function sunsetMin(dateStr, p) {
+  const k = `${dateStr}|${p.lat.toFixed(1)}|${p.lng.toFixed(1)}`;
+  if (!SUNSET_CACHE.has(k)) { const st = sunTimes(dateStr, p.lat, p.lng); SUNSET_CACHE.set(k, st ? toMin(st.set) : 24 * 60); }
+  return SUNSET_CACHE.get(k);
+}
 export function toMin(hhmm) {
   TO_MIN ||= new Map();
   let v = TO_MIN.get(hhmm);
@@ -606,6 +614,8 @@ function buildDay(input, opts, dayIdx, used, anchorKey, keep, exclude, keepOnly,
       if (!r) continue;
       // 점심을 건너뛰게 만드는 긴 방문은 점심 뒤로
       if (kind === "visit" && !hasLunch && r.start < LUNCH[1] && r.finish > LUNCH[1]) continue;
+      // 해 진 뒤에 걷는 야외 장소는 넣지 않는다 (겨울 17시면 어두운 숲길·절 — 걸음이 불편한 분께 위험). 야경 장소(night)는 예외
+      if (kind === "visit" && !p.indoor && !p.tags.includes("night") && (p.walk || 0) >= 2 && r.finish > sunsetMin(dateStr, p) + 15) continue;
       if (filler && (r.tr.min > 30 || r.finish > DINNER[0] - 5)) continue; // 빈 시간 채우기는 가깝고(30분 안) 저녁 전에 끝나는 곳만
       if (walkBudget && kind === "visit" && walked + walkMeters(p) + (r.tr.mode === "walk" ? r.tr.km * 1000 : 0) + (hasLunch ? 0 : 100) + (hasDinner ? 0 : 100) > walkBudget) continue; // 오늘 걷는 양 한도 (남은 끼니 몫은 남겨 둠)
       if ((nightOnly || (hasDinner && kind === "visit")) && r.tr.min > 30) continue; // 저녁 먹은 뒤는 가까운 곳만 (밤에 먼 길을 갔다 숙소로 되돌아오지 않게)
