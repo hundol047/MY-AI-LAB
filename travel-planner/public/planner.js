@@ -1,6 +1,7 @@
 // 일정 생성 엔진: 검증된 장소 데이터 + 영업시간/휴무/이동시간 제약을 모두 지키는 일정만 만든다.
 import { PLACES, AREAS, REGIONS, FESTIVALS, LODGING, LODGING_TYPES, BENEFITS } from "./data.js";
 import { sunTimes } from "./sun.js";
+import { HOLIDAY_RULES } from "./holiday-rules.js";
 
 var TO_MIN = new Map(); // toMin이 아래 상수 계산에 먼저 쓰여서 var로 끌어올린다
 
@@ -72,9 +73,36 @@ export function addDays(dateStr, n) {
 }
 
 // 정기 휴무 + 매월 특정일 + n번째 요일 + 기간 휴장
+// 설날·추석 (음력, 해마다 달라 표로 둔다 — 한국천문연구원 월력요항). 연휴는 전날·당일·다음날
+const LUNAR = { seollal: ["2026-02-17", "2027-02-07", "2028-01-27", "2029-02-13"], chuseok: ["2026-09-25", "2027-09-15", "2028-10-03", "2029-09-22"] };
+// 그 날이 설·추석의 어느 날인지: "day"(당일) | "eve"(연휴 전날·다음날) | null
+export function lunarDay(name, dateStr) {
+  for (const d of LUNAR[name]) { if (dateStr === d) return "day"; if (dateStr === addDays(d, -1) || dateStr === addDays(d, 1)) return "eve"; }
+  return null;
+}
+// 명절·공휴일 휴무 (관광공사 '쉬는 날' 원문 → holiday-rules.js). "오전 휴무"는 닫지 않고 hoursFor에서 13시부터 연다
+function holidayClosed(p, dateStr, wd) {
+  const r = HOLIDAY_RULES[p.id]; if (!r) return null; // null = 규칙 없음(정기 휴일 규칙대로)
+  if (r.newYear && dateStr.slice(5) === "01-01") return true;
+  for (const k of ["seollal", "chuseok"]) { const ld = lunarDay(k, dateStr); if (ld && (r[k] === "holiday" || (r[k] === "day" && ld === "day"))) return true; }
+  if (r.holidayClosed && HOLIDAYS.has(dateStr)) return true;
+  const regular = (p.closed || []).includes(wd);
+  if (regular && r.holidayOpen && HOLIDAYS.has(dateStr)) return false; // 정기 휴일이 공휴일이면 연다
+  // 정기 휴일이 공휴일이라 열었으면, 그 연휴가 끝난 다음 첫 평일에 쉰다
+  if (r.shiftNext && !HOLIDAYS.has(dateStr) && ![0, 6].includes(wd)) {
+    for (let back = 1; back <= 5; back++) {
+      const d = addDays(dateStr, -back);
+      if (!HOLIDAYS.has(d)) { if ([0, 6].includes(weekdayOf(d))) continue; break; }
+      if ((p.closed || []).includes(weekdayOf(d))) return true;
+    }
+  }
+  return null;
+}
 function closedOn(p, dateStr) {
   const wd = weekdayOf(dateStr);
   const day = Number(dateStr.split("-")[2]);
+  const hol = holidayClosed(p, dateStr, wd);
+  if (hol !== null) return hol;
   if ((p.closed || []).includes(wd)) return true;
   if ((p.closedMonthDays || []).includes(day)) return true;
   if ((p.closedNth || []).some(([w, n]) => w === wd && Math.ceil(day / 7) === n)) return true;
@@ -180,6 +208,9 @@ function computeHours(p, dateStr) {
   let [open, close] = season ? season.hours : p.hours;
   if (p.byDay && p.byDay[wd]) [open, close] = p.byDay[wd];
   const lastEntry = season ? season.lastEntry : p.lastEntry;
+  // 설·추석 당일 오전 휴무(관광공사 원문)인 곳은 13시부터
+  const hr = HOLIDAY_RULES[p.id];
+  if (hr && ["seollal", "chuseok"].some((k) => hr[k] === "am" && lunarDay(k, dateStr) === "day") && toMin(open) < toMin("13:00")) open = "13:00";
   return {
     closedToday: closedOn(p, dateStr),
     open: toMin(open), close: toMin(close),
