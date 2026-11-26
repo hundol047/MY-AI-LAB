@@ -1083,7 +1083,8 @@ function walkInfoLine(p) {
   else bits.push(t("걷는 길 지도 자료 없음"));
   if (w.unp) bits.push(t("흙·자갈길 {n}%", { n: w.unp }));
   bits.push(w.st ? t("계단 {n}곳 (가장 가까운 곳 {m}m)", { n: w.st, m: w.stM }) : t("계단 표시 없음"));
-  bits.push(w.wc ? t("화장실 {n}곳 (가장 가까운 곳 {m}m)", { n: w.wc, m: w.wcM }) + (w.wcAcc ? ` · ${t("♿ 장애인 화장실 {m}m", { m: w.wcAccM })}` : "") : t("화장실 표시 없음"));
+  // 화장실은 확인된 것만 센다 (정부 자료, 또는 오픈스트리트맵·카카오맵 일치 — scripts/bake-walk-info.mjs)
+  bits.push(w.wc ? t("확인된 화장실 {n}곳 (가장 가까운 곳 {m}m)", { n: w.wc, m: w.wcM }) + (w.wcAcc ? ` · ${t("♿ 장애인 화장실 {m}m", { m: w.wcAccM })}` : "") : t("확인된 화장실 자료 없음"));
   return `<div class="walk-info">🗺 <b>${t("주변 {r}m 지도 자료", { r })}</b> <em>${t("미확인")}</em> ${bits.join(" · ")}<small>${t("표시가 없다고 계단·턱이 없는 것은 아니에요 · 3D로 보기에서 위치를 확인하세요")}</small></div>`;
 }
 function accessLine(p) {

@@ -1138,3 +1138,5 @@ html.big main:not(#result):not(#setup) { zoom: 1.15; }
 /* 어두운 화면: 이 지역 확정 축제 이름(분홍) 대비 */
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .festivals li.in b, :root:not([data-theme="light"]) .festivals li em { color: #f9a8d4; } }
 :root[data-theme="dark"] .festivals li.in b, :root[data-theme="dark"] .festivals li em { color: #f9a8d4; }
+/* 3D: 오픈스트리트맵·카카오맵 두 지도에 모두 있는 화장실 (공식 자료와 같은 파란색, 테두리만 흰색) */
+.v3d-chip.toilet.confirmed { border: 2px solid #ffffff; background: #1d4ed8; color: #fff; }

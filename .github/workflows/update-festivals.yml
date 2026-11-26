@@ -12,7 +12,7 @@ on:
   workflow_dispatch:
     inputs:
       only:
-        description: "facilities 라고 적으면 장애인편의시설 자료만 받아 이 브랜치에 올린다 (시험용)"
+        description: "facilities: 장애인편의시설만, toilets: 카카오맵 화장실 대조+걷기 정보만 받아 이 브랜치에 올린다"
         required: false
         default: ""
 
@@ -46,8 +46,38 @@ jobs:
           git commit -q -m "Update building accessibility facilities"
           git push -q origin "HEAD:${GITHUB_REF_NAME}"
 
+  # 카카오맵 화장실 대조 + 걷기 정보 다시 조사 (실행한 브랜치에 그대로 올린다)
+  toilets-only:
+    if: inputs.only == 'toilets'
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: travel-planner
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: travel-planner/package-lock.json
+      - run: npm ci
+      - name: 카카오맵 화장실 받기
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: node scripts/bake-kakao-toilets.mjs
+      - name: 걷기 정보 다시 조사 (확인된 화장실만 센다)
+        run: node scripts/bake-walk-info.mjs
+      - name: 실행한 브랜치에 올리기
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/kakao-toilets.json public/toilets-confirmed.json public/walk-info.json reports/walk-info.md
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Cross-check toilets with Kakao Map"
+          git push -q origin "HEAD:${GITHUB_REF_NAME}"
+
   update:
-    if: inputs.only != 'facilities'
+    if: inputs.only != 'facilities' && inputs.only != 'toilets'
     runs-on: ubuntu-latest
     defaults:
       run:
@@ -106,6 +136,12 @@ jobs:
         env:
           TOUR_API_KEY: ${{ secrets.TOUR_API_KEY }}
         run: node scripts/bake-facilities.mjs
+      - name: 카카오맵 화장실 받기 (오픈스트리트맵 화장실 대조용 · Secrets의 KAKAO_REST_KEY가 있을 때만)
+        if: steps.key.outputs.ok == 'true'
+        continue-on-error: true
+        env:
+          KAKAO_REST_KEY: ${{ secrets.KAKAO_REST_KEY }}
+        run: if [ -n "$KAKAO_REST_KEY" ]; then node scripts/bake-kakao-toilets.mjs; else echo "::notice::KAKAO_REST_KEY가 없어 카카오맵 대조를 건너뜁니다 (정부 자료 화장실만 표시)"; fi
       - name: 장소 주변 걷기 정보 조사 (계단·화장실·걷는 길 경사 · 인증키 필요 없음)
         if: steps.key.outputs.ok == 'true'
         continue-on-error: true
@@ -121,7 +157,7 @@ jobs:
         if: steps.key.outputs.ok == 'true'
         run: |
           # 리포트 날짜만 바뀐 경우에는 반영하지 않는다
-          if git diff --quiet -- public/data.js public/bus.json public/parking.json public/parking-lots.json public/toilets.json public/walk-info.json public/gallery.json public/facilities.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제·버스 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
+          if git diff --quiet -- public/data.js public/bus.json public/parking.json public/parking-lots.json public/toilets.json public/walk-info.json public/toilets-confirmed.json data/kakao-toilets.json public/gallery.json public/facilities.json; then echo "changed=false" >> "$GITHUB_OUTPUT"; echo "바뀐 축제·버스 없음" >> "$GITHUB_STEP_SUMMARY"; else echo "changed=true" >> "$GITHUB_OUTPUT"; fi
       - name: 일정 엔진 테스트 (바뀐 데이터로)
         if: steps.diff.outputs.changed == 'true'
         run: npm test
@@ -130,4 +166,4 @@ jobs:
         working-directory: ${{ github.workspace }}
         env:
           GH_TOKEN: ${{ github.token }}
-        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md travel-planner/public/parking-lots.json travel-planner/reports/parking-lots.md travel-planner/public/toilets.json travel-planner/reports/toilets.md travel-planner/public/walk-info.json travel-planner/reports/walk-info.md travel-planner/public/gallery.json travel-planner/reports/gallery.md travel-planner/public/facilities.json travel-planner/reports/facilities.md
+        run: bash .github/scripts/commit-data.sh "Update festival dates and nearby bus routes" travel-planner/public/data.js travel-planner/reports/festivals.md travel-planner/public/bus.json travel-planner/reports/bus.md travel-planner/public/parking.json travel-planner/reports/parking.md travel-planner/public/parking-lots.json travel-planner/reports/parking-lots.md travel-planner/public/toilets.json travel-planner/reports/toilets.md travel-planner/public/walk-info.json travel-planner/reports/walk-info.md travel-planner/public/toilets-confirmed.json travel-planner/data/kakao-toilets.json travel-planner/public/gallery.json travel-planner/reports/gallery.md travel-planner/public/facilities.json travel-planner/reports/facilities.md

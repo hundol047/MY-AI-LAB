@@ -23,8 +23,14 @@ export const SLOPE_COLORS = ["#16a34a", "#f59e0b", "#d92d20"];
 const SUM_M = 400;       // 요약(경사 비율)은 장소 카드와 같은 둘레 400m의 길만 센다
 const MARK_M = 700;      // 관광지에서 이 거리 안의 계단·화장실에만 표시를 붙인다
 const MAX_MARKS = 40;
-let toiletsData; // 공식 화장실 자료 (toilets.json). 없으면 null
-const loadToilets = () => (toiletsData !== undefined ? Promise.resolve(toiletsData) : fetch("toilets.json").then((r) => (r.ok ? r.json() : null)).catch(() => null).then((j) => (toiletsData = j?.items?.length ? j : null)));
+// 확인된 화장실만: 행정안전부 공중화장실(toilets.json, 공식) + 오픈스트리트맵·카카오맵이 같은 자리를 가리키는 곳(toilets-confirmed.json).
+// 오픈스트리트맵에만 있는 화장실은 실제로 없을 수 있어 보여 주지 않는다
+let toiletsData;
+const getJSON = (f) => fetch(f).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+const loadToilets = () => (toiletsData !== undefined ? Promise.resolve(toiletsData) : Promise.all([getJSON("toilets.json"), getJSON("toilets-confirmed.json")]).then(([o, c]) => {
+  const items = [...(o?.items || []).map((x) => ({ ...x, official: true })), ...(c?.items || []).map((x) => ({ ...x, official: false, confirmed: true }))];
+  return (toiletsData = items.length ? { items } : null);
+}));
 
 export function distKm(a, b) {
   const R = 6371, rad = Math.PI / 180;
@@ -300,9 +306,8 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     const lines = (f) => (f.geometry.type === "MultiLineString" ? f.geometry.coordinates : f.geometry.type === "LineString" ? [f.geometry.coordinates] : []);
     // 계단: 가운데 점에 "계단" 표시
     const steps = dedupe(tr.filter((f) => f.properties.subclass === "steps").flatMap((f) => lines(f).map((c) => ({ at: lineMid(c) }))).filter((x) => distM(x.at, here) <= MARK_M), 12);
-    // 화장실: 공식 자료가 있으면 먼저, 그 30m 안의 오픈스트리트맵 화장실은 같은 곳으로 본다
-    const off = toiletsNear(official, here, MARK_M).map((x) => ({ at: [x.lng, x.lat], official: true, acc: !!x.acc, name: x.name, open: x.open }));
-    const osm = dedupe(poi.map((f) => ({ at: f.geometry.coordinates, name: f.properties.name })).filter((x) => distM(x.at, here) <= MARK_M), 20).filter((x) => !off.some((o) => distM(o.at, x.at) < 30));
+    // 화장실: 확인된 것만 (정부 자료, 또는 오픈스트리트맵·카카오맵 일치)
+    const off = toiletsNear(official, here, MARK_M).map((x) => ({ at: [x.lng, x.lat], official: !!x.official, confirmed: !!x.confirmed, acc: !!x.acc, name: x.name, open: x.open }));
     // 산책로 경사: 지형 고도(약 30m 간격)로 어림. 높이를 못 읽은 구간은 회색 점선 그대로 둔다
     const feats = [], segs = [];
     let nPaths = 0, nSum = 0, unpaved = 0;
@@ -320,17 +325,16 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     }
     // 바뀐 것이 없으면 다시 그리지 않는다 (다시 그리면 지도가 또 '그리기 끝'을 알려 와 되풀이된다)
     const sum = walkSummary(segs);
-    const sig = [steps.length, off.length, osm.length, nPaths, feats.length, sum.share?.join("/")].join("|");
+    const sig = [steps.length, off.length, nPaths, feats.length, sum.share?.join("/")].join("|");
     if (sig === walkSig) return;
     walkSig = sig;
     // 가까운 화장실: 따라가는 중이면 내 위치에서, 아니면 관광지에서 가까운 순 (공식 자료 먼저 믿는다)
-    lastToilets = [...off, ...osm];
+    lastToilets = [...off];
     marks.forEach((m) => m.remove());
     const near = (list) => list.sort((a, b) => distM(a.at, here) - distM(b.at, here)).slice(0, MAX_MARKS);
     marks = [
       ...near(steps).map((x) => new maplibregl.Marker({ element: chip("steps", t("계단"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(off).map((x) => new maplibregl.Marker({ element: chip("toilet official", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, t("행정안전부 공중화장실 자료")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
-      ...near(osm).map((x) => new maplibregl.Marker({ element: chip("toilet", t("🚻 화장실"), t("오픈스트리트맵 자료 · 미확인")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
+      ...near(off).map((x) => new maplibregl.Marker({ element: chip(x.official ? "toilet official" : "toilet confirmed", x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실"), [x.name, x.open, x.official ? t("행정안전부 공중화장실 자료") : t("오픈스트리트맵·카카오맵 모두에 있는 화장실")].filter(Boolean).join(" · ")), anchor: "bottom" }).setLngLat(x.at).addTo(map)),
     ];
     // 계단 3D 모형: 표시를 붙인 계단(관광지 700m 안)마다 블록을 쌓는다
     const stairFeats = [];
@@ -344,7 +348,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     }
     map.getSource("steps3d")?.setData({ type: "FeatureCollection", features: stairFeats });
     map.getSource("slope")?.setData({ type: "FeatureCollection", features: feats });
-    found = { steps: steps.length, toilets: off.length + osm.length, officialToilets: off.length, paths: nPaths, sumPaths: nSum, unpaved, sum };
+    found = { steps: steps.length, toilets: off.length, officialToilets: off.filter((x) => x.official).length, paths: nPaths, sumPaths: nSum, unpaved, sum };
     drawLegend(); drawSummary();
   }
   // 한눈에 보는 요약 (화면 위): 경사 비율 막대 + 계단·화장실·흙길 개수. 자료가 없으면 없다고 말한다
@@ -355,7 +359,7 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
     const nSteps = w ? w.st : found.steps, nWc = w ? w.wc : found.toilets;
     const bits = [
       nSteps ? t("계단 {n}곳", { n: nSteps }) : t("계단 표시 없음"),
-      nWc ? t("화장실 {n}곳", { n: nWc }) : t("화장실 표시 없음"),
+      nWc ? t("확인된 화장실 {n}곳", { n: nWc }) : t("확인된 화장실 자료 없음"),
       ...((w ? w.unp : found.unpaved) ? [t("흙·자갈길 있음")] : []),
     ];
     sumEl.innerHTML = (!(w ? w.n : found.sumPaths) ? `<b>${t("주변 {r}m에 걷는 길 지도 자료가 없어요 · 현장 확인이 필요해요", { r: SUM_M })}</b>`
@@ -402,12 +406,13 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
         <li><i class="stair3d" aria-hidden="true"></i>${t("계단 모형 (빨강·분홍 블록) · 위치·방향은 지도 자료 그대로, 높이는 잘 보이게 키운 모양 · 누르면 실제 높이 차(지형 자료로 어림)")} <em>${t("미확인")}</em></li>
         <li class="v3d-care">${Object.entries({ parking: "주차장", bus: "정류장", shelter: "쉼터", information: "안내소", pharmacy: "약국", hospital: "병원" }).map(([k, v]) => `<span><i class="dot" style="background:${CARE_COLORS[k]}"></i>${t(v)}</span>`).join("")} <em>${t("미확인")}</em></li>
         <li><span class="v3d-chip toilet official">🚻</span>${t("화장실 (행정안전부 자료)")} <em class="ok">${t("공식")}</em></li>
-        <li><span class="v3d-chip toilet">🚻</span>${t("화장실 (오픈스트리트맵)")} <em>${t("미확인")}</em></li>
+        <li><span class="v3d-chip toilet confirmed">🚻</span>${t("화장실 (오픈스트리트맵·카카오맵 모두에 있음)")} <em class="ok">${t("확인")}</em></li>
+        <li class="v3d-note">${t("한 지도에만 있는 화장실은 실제로 없을 수 있어 표시하지 않아요.")}</li>
         <li><span class="v3d-chip mine">📌</span>${t("내가 현장에서 확인한 곳")}</li>
         ${shared ? `<li><span class="v3d-chip crowd">👥</span>${t("다른 이용자들이 현장에서 남긴 확인 (미확인)")}</li>` : ""}
       </ul>
       <p class="v3d-count">${t("이 주변 지도 자료: 계단 {s}곳 · 화장실 {w}곳 · 걷는 길 {p}개", { s: found.steps, w: found.toilets, p: found.paths })}${official ? "" : ` · ${t("공식 화장실 자료는 아직 없어요")}`}</p>
-      <p class="v3d-note">${t("길·계단·'확인 필요' 화장실은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
+      <p class="v3d-note">${t("길·계단은 자원봉사자가 그린 지도(오픈스트리트맵)라 빠지거나 틀린 곳이 있을 수 있어요. 경사는 약 30m 간격 지형 자료로 어림한 값이라 짧은 턱·급경사는 보이지 않아요. 중요한 방문은 시설에 전화로 확인하세요.")}</p>
       ${acc ? `<h4>${t("한국관광공사 무장애 조사")} <em class="ok">${t("공식")}</em></h4><ul class="v3d-acc">${acc}</ul>` : `<p class="v3d-note">${t("이 장소는 한국관광공사 무장애 조사 자료가 없어요.")}</p>`}`;
   }
   drawLegend();
@@ -423,13 +428,13 @@ export async function openView3D(place, { t, toast, loadMapLibre, shared = null 
   q("wc").addEventListener("click", () => {
     const from = state.me ? [state.me.lng, state.me.lat] : here;
     const list = [...lastToilets].sort((a, b) => distM(a.at, from) - distM(b.at, from));
-    if (!list.length) return toast(t("이 주변 지도에는 화장실 표시가 없어요 · 시설에 물어보세요"));
+    if (!list.length) return toast(t("이 주변에는 확인된 화장실 자료가 없어요 · 시설에 물어보세요"));
     wcIdx = (wcIdx + 1) % list.length;
     const x = list[wcIdx];
     if (state.following) setFollow(false);
     stopOrbit();
     map.flyTo({ center: x.at, zoom: 17.6, pitch: 55, duration: 1200, essential: true });
-    toast(`${x.official && x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
+    toast(`${x.acc ? t("♿🚻 장애인 화장실") : t("🚻 화장실")} · ${x.official ? t("공식") : t("두 지도 확인")} · ${state.me ? t("여기서 {dist}", { dist: distLabel(distM(x.at, from) / 1000) }) : distLabel(distM(x.at, from) / 1000)}`);
   });
   q("legend").addEventListener("click", () => showSheet(legendEl.hidden ? "legend" : null));
 

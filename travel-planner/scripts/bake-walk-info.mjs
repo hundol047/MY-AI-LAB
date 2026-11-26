@@ -2,7 +2,9 @@
 // - 계단·걷는 길·화장실: OpenFreeMap 벡터 지도 조각(오픈스트리트맵 자료, 14단계). 자원봉사자가 그린 지도라 "미확인"이다.
 // - 경사: AWS 공개 지형 고도(terrarium, 약 30m 간격)로 어림. 3D 화면(view3d.js)과 같은 계산(view3d-data.js)을 쓴다.
 //   높이 0.5m 이하(바다·물가)는 "모름"으로 둔다.
-// - 공식 화장실: public/toilets.json(행정안전부, bake-toilets.mjs)이 있으면 함께 센다.
+// - 화장실은 확인된 것만 센다: 행정안전부 공중화장실(public/toilets.json) + 오픈스트리트맵과 카카오맵이 같은 자리(40m 안)를
+//   가리키는 화장실(data/kakao-toilets.json, bake-kakao-toilets.mjs). 오픈스트리트맵에만 있는 화장실은 세지 않고 조사표에만 적는다.
+//   확인된 화장실 중 정부 자료가 아닌 것은 public/toilets-confirmed.json으로 내보내 3D 화면이 쓴다.
 // 출력: public/walk-info.json ({builtAt, mapDate, radius, places: {id: {...}}}), reports/walk-info.md (계단·화장실 위치를 하나씩 적은 조사표)
 // 실행: node scripts/bake-walk-info.mjs   (인증키 필요 없음. 프록시를 거치는 곳에서는 NODE_USE_ENV_PROXY=1)
 import { writeFile, readFile, mkdir } from "node:fs/promises";
@@ -110,6 +112,9 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   const tpl = meta.tiles[0];
   const mapDate = (tpl.match(/\/(\d{4})(\d{2})(\d{2})_/) || []).slice(1).join("-") || null;
   const official = await readFile(new URL("../public/toilets.json", import.meta.url), "utf8").then(JSON.parse).catch(() => null);
+  const kakaoData = await readFile(new URL("../data/kakao-toilets.json", import.meta.url), "utf8").then(JSON.parse).catch(() => null);
+  const kakaoAt = (kakaoData?.items || []).map((k) => ({ at: [k.lng, k.lat], name: k.name }));
+  const confirmed = new Map(); // 오픈스트리트맵 + 카카오맵이 같은 자리인 화장실 (정부 자료 아님)
   const vt = new Map(), dem = new Map();
   const vtile = async (x, y) => { const k = `${x}/${y}`; if (!vt.has(k)) { const b = await get(tpl.replace("{z}", Z).replace("{x}", x).replace("{y}", y)); vt.set(k, b ? new VectorTile(new PbfReader(b)) : null); } return vt.get(k); };
   const dtile = async (x, y) => { const k = `${x}/${y}`; if (!dem.has(k)) { const b = await get(TERRAIN(Z, x, y)); dem.set(k, b ? decodePng(b) : null); } return dem.get(k); };
@@ -153,7 +158,13 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
     const steps = mergeTouching(stepPieces).map((g) => { const longest = g.reduce((a, b) => (lineLengthM(b) > lineLengthM(a) ? b : a)); const at = lineMid(longest); return { at, len: Math.round(g.reduce((s, l) => s + lineLengthM(l), 0)), m: Math.round(Math.min(...g.flat().map((q) => distM(q, here)))) }; })
       .filter((s) => s.m <= RADIUS).sort((a, b) => a.m - b.m);
     const offAll = (official?.items || []).map((t) => ({ at: [t.lng, t.lat], name: t.name, acc: t.acc, open: t.open, official: true }));
-    const toilets = [...offAll, ...wcs.filter((w) => !offAll.some((o) => distM(o.at, w.at) < 30))].map((w) => ({ ...w, m: Math.round(distM(w.at, here)) })).filter((w) => w.m <= RADIUS).sort((a, b) => a.m - b.m);
+    // 화장실: 정부 자료 + (오픈스트리트맵 ∩ 카카오맵 40m 안). 오픈스트리트맵에만 있는 것은 unconfirmed(조사표에만)
+    const osmOnlyOff = wcs.filter((w) => !offAll.some((o) => distM(o.at, w.at) < 30));
+    const both = osmOnlyOff.map((w) => ({ w, k: kakaoAt.find((k) => distM(k.at, w.at) <= 40) })).filter((x) => x.k).map(({ w, k }) => ({ ...w, name: w.name || k.name, kakaoName: k.name, confirmed: true }));
+    for (const c of both) confirmed.set(`${c.at[0].toFixed(5)},${c.at[1].toFixed(5)}`, { lat: +c.at[1].toFixed(6), lng: +c.at[0].toFixed(6), name: c.kakaoName || c.name, src: ["osm", "kakao"] });
+    const withM = (list) => list.map((w) => ({ ...w, m: Math.round(distM(w.at, here)) })).filter((w) => w.m <= RADIUS).sort((a, b) => a.m - b.m);
+    const toilets = withM([...offAll, ...both]);
+    const unconfirmed = withM(osmOnlyOff.filter((w) => !both.some((b) => b.at === w.at)));
     // 걷는 길: 장소 둘레 안에 한 점이라도 든 길만
     const nearPaths = paths.filter((q) => q.line.some((c) => distM(c, here) <= RADIUS));
     const segs = nearPaths.flatMap((q) => slopeSegments(q.line, elevAt));
@@ -167,25 +178,29 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
       wc: toilets.length, ...(toilets.length ? { wcM: toilets[0].m } : {}),
       ...(toilets.some((t) => t.official) ? { wcOff: toilets.filter((t) => t.official).length } : {}),
       ...(toilets.some((t) => t.acc) ? { wcAcc: toilets.filter((t) => t.acc).length, wcAccM: toilets.find((t) => t.acc).m } : {}),
+      ...(unconfirmed.length ? { wcU: unconfirmed.length } : {}), // 확인 안 된(오픈스트리트맵에만 있는) 화장실 수 — 앱에는 보이지 않는다
     };
     report.push(`### ${p.name}`, "",
       `- 걷는 길: ${nearPaths.length}개 · 약 ${(total / 1000).toFixed(1)}km${sum.share ? ` · 완만 ${sum.share[0]}% / 조금 가파름 ${sum.share[1]}% / 가파름 ${sum.share[2]}%` : " · 경사 모름"}${unp > 0 ? ` · 흙·자갈길 ${Math.round((unp / total) * 100)}%` : ""}${nearPaths.length ? "" : " (지도에 걷는 길이 그려져 있지 않음 — 현장 확인 필요)"}`,
       `- 계단 ${steps.length}곳${steps.length ? ":" : " (지도에 표시된 계단 없음 — 계단이 없다는 뜻은 아님)"}`,
       ...steps.map((s, i) => `  - 계단 ${i + 1}: 장소에서 ${s.m}m · 길이 약 ${s.len}m · [지도](${kakao(`${p.name} 계단${i + 1}`, s.at[1], s.at[0])})`),
       `- 화장실 ${toilets.length}곳${toilets.length ? ":" : " (지도·공식 자료에 없음)"}`,
-      ...toilets.map((w, i) => `  - 화장실 ${i + 1}: 장소에서 ${w.m}m · ${w.official ? `공식${w.acc ? " · 장애인 화장실 있음" : w.acc === false ? " · 장애인 화장실 없음" : ""}${w.open ? ` · ${w.open}` : ""}` : "미확인(오픈스트리트맵)"}${w.name ? ` · ${w.name}` : ""} · [지도](${kakao(`${p.name} 화장실${i + 1}`, w.at[1], w.at[0])})`),
+      ...toilets.map((w, i) => `  - 화장실 ${i + 1}: 장소에서 ${w.m}m · ${w.official ? `공식${w.acc ? " · 장애인 화장실 있음" : w.acc === false ? " · 장애인 화장실 없음" : ""}${w.open ? ` · ${w.open}` : ""}` : `확인(오픈스트리트맵·카카오맵 일치${w.kakaoName ? ` · 카카오맵 "${w.kakaoName}"` : ""})`}${w.name && w.name !== w.kakaoName ? ` · ${w.name}` : ""} · [지도](${kakao(`${p.name} 화장실${i + 1}`, w.at[1], w.at[0])})`),
+      ...(unconfirmed.length ? [`- 확인 안 된 화장실 ${unconfirmed.length}곳 (오픈스트리트맵에만 있고 정부 자료·카카오맵에 없음 → 앱에 표시하지 않음):`, ...unconfirmed.map((w, i) => `  - ${i + 1}: 장소에서 ${w.m}m${w.name ? ` · ${w.name}` : ""} · [지도](${kakao(`${p.name} 확인 안 된 화장실${i + 1}`, w.at[1], w.at[0])})`)] : []),
       ...(p.access?.text ? ["- 한국관광공사 무장애 조사(공식):", ...Object.entries(p.access.text).map(([k, v]) => `  - ${k}: ${v}`)] : ["- 한국관광공사 무장애 조사: 없음"]), "");
     if (++done % 25 === 0) process.stdout.write(`${done} `);
   }
   if (only.length) { console.log(JSON.stringify(out, null, 1)); console.log(report.join("\n")); process.exit(0); }
   const ids = Object.keys(out), withPaths = ids.filter((k) => out[k].n).length;
   if (withPaths < places.length * 0.5) throw new Error(`걷는 길 자료가 있는 장소가 ${withPaths}/${places.length}곳뿐이라 이상합니다 — 저장하지 않습니다`);
+  await writeFile(new URL("../public/toilets-confirmed.json", import.meta.url), JSON.stringify({ builtAt: new Date().toISOString(), source: "오픈스트리트맵과 카카오맵이 같은 자리(40m 안)를 가리키는 화장실 (정부 자료에 없는 것)", kakao: !!kakaoData, items: [...confirmed.values()] }).replace(/\},\{/g, "},\n{") + "\n");
   await writeFile(new URL("../public/walk-info.json", import.meta.url), JSON.stringify({ builtAt: new Date().toISOString(), mapDate, radius: RADIUS, source: "OpenFreeMap(오픈스트리트맵) 걷는 길·계단·화장실, AWS 지형 고도, 행정안전부 공중화장실", places: out }).replace(/\},"/g, '},\n"') + "\n");
   await mkdir(new URL("../reports/", import.meta.url), { recursive: true });
   const sum = (f) => ids.reduce((s, k) => s + (f(out[k]) || 0), 0);
   await writeFile(new URL("../reports/walk-info.md", import.meta.url), ["# 장소 주변 걷기 정보 조사표 (계단·화장실·걷는 길 경사)", "",
     `생성: node scripts/bake-walk-info.mjs · 지도 자료 기준일 ${mapDate || "모름"} · 장소 둘레 ${RADIUS}m.`, "",
-    "- **계단·걷는 길·'미확인' 화장실**은 오픈스트리트맵(자원봉사자가 그린 지도) 자료다. 빠진 계단·화장실이 있을 수 있고, \"계단 0곳\"은 계단이 없다는 뜻이 아니다.",
+    "- **계단·걷는 길**은 오픈스트리트맵(자원봉사자가 그린 지도) 자료다. 빠진 계단이 있을 수 있고, \"계단 0곳\"은 계단이 없다는 뜻이 아니다.",
+    "- **화장실은 확인된 것만 센다**: 행정안전부 공중화장실(공식), 또는 오픈스트리트맵과 카카오맵이 같은 자리(40m 안)를 가리키는 곳. 오픈스트리트맵에만 있는 화장실은 '확인 안 된 화장실'로 아래에 적고 앱에는 보이지 않는다.",
     "- **경사**는 약 30m 간격 지형 고도로 어림한 값이다(완만 1/18 이하 · 조금 가파름 1/12 이하 · 가파름 1/12 넘음). 짧은 턱·급경사는 보이지 않고, 바다 높이로 읽힌 구간은 뺐다.",
     "- **공식** 화장실은 행정안전부 전국공중화장실표준데이터, 무장애 조사는 한국관광공사 자료다.",
     "- 각 위치의 [지도] 링크로 카카오맵에서 위치를 확인할 수 있다. 현장에서 다르면 앱 3D 화면의 \"현장 확인 남기기\"로 표시한다.", "",
