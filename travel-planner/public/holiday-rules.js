@@ -3,7 +3,6 @@
 // holidayOpen 정기 휴일이 공휴일이면 연다 · shiftNext 그때는 다음 첫 평일에 쉰다
 export const HOLIDAY_RULES = {"eulji-observatory":{"newYear":true,"seollal":"am","chuseok":"am","shiftNext":true,"holidayOpen":true},
 "baegamsan-cable":{"shiftNext":true,"holidayOpen":true},
-"pet-465":{"seollal":"day","chuseok":"day","holidayOpen":true},
 "alpaca-world":{"seollal":"day","chuseok":"day"},
 "hc-hwaro":{"seollal":"day","chuseok":"day"},
 "yanggu-observatory":{"newYear":true,"holidayOpen":true},
@@ -46,10 +45,10 @@ export const HOLIDAY_RULES = {"eulji-observatory":{"newYear":true,"seollal":"am"
 "samtan":{"newYear":true,"seollal":"day","chuseok":"day"},
 "cheongnyeongpo":{"seollal":"day","chuseok":"day","shiftNext":true,"holidayOpen":true},
 "sogeumsan":{"shiftNext":true,"holidayOpen":true},
-"ganhyeon-park":{"shiftNext":true,"holidayOpen":true}};
+"ganhyeon-park":{"shiftNext":true,"holidayOpen":true},
+"pet-465":{"seollal":"day","chuseok":"day","holidayOpen":true}};
 // eulji-observatory: 매주 월요일 (월요일이 공휴일인 경우 그 다음날) / 1월 1일 / 설날·추석 오전 / 동절기 (12월~2월)
 // baegamsan-cable: 매주 월요일 (단, 월요일이 공휴일인 경우 그 다음 평일 휴무) / 정기점검일
-// pet-465: 매주 월요일, 화요일 (단, 공휴일 및 대체 휴무일인 경우 정상 운영) / 설·추석 당일
 // alpaca-world: 설/추석 당일
 // hc-hwaro: 매월 마지막 화요일 / 설·추석
 // yanggu-observatory: 매주 월요일 (단, 월요일이 공휴일인 경우 정상운영) / 1월 1일
@@ -93,3 +92,4 @@ export const HOLIDAY_RULES = {"eulji-observatory":{"newYear":true,"seollal":"am"
 // cheongnyeongpo: 매주 월요일 (단, 월요일이 공휴일인 경우 그 다음 날 휴무) / 설·추석 당일
 // sogeumsan: 매주 월요일 (단, 월요일이 공휴일인 경우 그 다음날 휴장)
 // ganhyeon-park: 매주 월요일 (단, 월요일이 공휴일인 경우 그 다음날 평일)
+// pet-465: 매주 월요일, 화요일 (단, 공휴일 및 대체 휴무일인 경우 정상 운영) / 설·추석 당일
